@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">YTApp</string>
+    <string name="tandt">Terms and conditions? <a href="google.com">Read more</a></string>
+</resources>

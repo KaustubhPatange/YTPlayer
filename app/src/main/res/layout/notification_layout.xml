@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="115dp"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+    <RelativeLayout
+        android:padding="10dp"
+        android:gravity="center_vertical"
+        android:background="@color/white"
+        android:orientation="horizontal"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_marginStart="5dp"
+            android:orientation="vertical"
+            android:layout_width="235dp"
+            android:layout_height="wrap_content">
+            <TextView
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:id="@+id/nTitle"
+                android:layout_width="wrap_content"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:text="..."
+                android:fontFamily="@font/dmsans"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/nAuthor"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:layout_width="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/grey"
+                android:text="..."
+                android:fontFamily="@font/dmsans"
+                android:layout_height="wrap_content" />
+            <LinearLayout
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:id="@+id/nAdd"
+                    android:layout_marginEnd="10dp"
+                    android:scaleType="fitCenter"
+                    android:tint="@color/black"
+                    android:layout_width="22dp"
+                    android:background="@drawable/ripple"
+                    android:src="@drawable/ic_add_notify"
+                    android:layout_height="22dp" />
+                <ImageView
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:id="@+id/nPrevious"
+                    android:layout_marginEnd="7dp"
+                    android:scaleType="fitCenter"
+                    android:tint="@color/black"
+                    android:background="@drawable/ripple"
+                    android:layout_width="27dp"
+                    android:src="@drawable/ic_previous_notify"
+                    android:layout_height="35dp" />
+                <ImageView
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:id="@+id/nPlay"
+                    android:layout_marginEnd="7dp"
+                    android:tint="@color/black"
+                    android:layout_width="55dp"
+                    android:background="@drawable/ripple"
+                    android:src="@drawable/ic_play_notify"
+                    android:layout_height="55dp" />
+                <ImageView
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:id="@+id/nForward"
+                    android:scaleType="fitCenter"
+                    android:tint="@color/black"
+                    android:background="@drawable/ripple"
+                    android:layout_width="27dp"
+                    android:src="@drawable/ic_next_notify"
+                    android:layout_height="35dp" />
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:weightSum="10"
+            android:layout_marginTop="3dp"
+            android:layout_width="100dp"
+            android:gravity="center"
+            android:layout_alignParentEnd="true"
+            android:layout_height="85dp" >
+            <ImageView
+                android:id="@+id/nImage"
+                android:layout_marginEnd="5dp"
+                android:scaleType="fitXY"
+                android:layout_width="wrap_content"
+                android:src="@mipmap/ic_launcher"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </RelativeLayout>
+</LinearLayout>
