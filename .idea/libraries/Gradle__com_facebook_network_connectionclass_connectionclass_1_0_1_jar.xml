@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.facebook.network.connectionclass:connectionclass:1.0.1@jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.facebook.network.connectionclass/connectionclass/1.0.1/8d5e86c680119bfa1d7e1a365510b56764cb61b0/connectionclass-1.0.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.facebook.network.connectionclass/connectionclass/1.0.1/2f5294a78f3f5a713c57a235cbf84280a572f54c/connectionclass-1.0.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

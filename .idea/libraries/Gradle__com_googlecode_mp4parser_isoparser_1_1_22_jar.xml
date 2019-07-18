@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.googlecode.mp4parser:isoparser:1.1.22@jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.googlecode.mp4parser/isoparser/1.1.22/70b5c26b52c120d2e94643717a764c4a67640fd6/isoparser-1.1.22.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.googlecode.mp4parser/isoparser/1.1.22/20cce1f0ec52229f0a0ee3a24cb67ba09a775128/isoparser-1.1.22-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

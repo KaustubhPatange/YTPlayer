@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">YTApp</string>
     <string name="tandt">Terms and conditions? <a href="google.com">Read more</a></string>
+    <string name="title_activity_demo">demo</string>
+    <string name="title_home">History</string>
+    <string name="title_dashboard">Search</string>
+    <string name="title_notifications">Playlist</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

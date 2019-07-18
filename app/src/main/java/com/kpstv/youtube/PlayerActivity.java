@@ -36,6 +36,7 @@ import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -54,12 +55,10 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.facebook.network.connectionclass.ConnectionClassManager;
 import com.facebook.network.connectionclass.ConnectionQuality;
-import com.github.jorgecastilloprz.FABProgressCircle;
 import com.jgabrielfreitas.core.BlurImageView;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTutils;
-import com.shashank.sony.fancytoastlib.FancyToast;
 import com.warkiz.widget.IndicatorSeekBar;
 import com.warkiz.widget.OnSeekChangeListener;
 import com.warkiz.widget.SeekParams;
@@ -69,11 +68,15 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -83,7 +86,6 @@ import at.huber.youtubeExtractor.Format;
 import at.huber.youtubeExtractor.VideoMeta;
 import at.huber.youtubeExtractor.YouTubeExtractor;
 import at.huber.youtubeExtractor.YtFile;
-import es.dmoral.toasty.Toasty;
 
 
 public class PlayerActivity extends AppCompatActivity {
@@ -124,14 +126,24 @@ public class PlayerActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        // Get the links loaded using schemes
+        Intent appLinkIntent = getIntent();
+        Uri appLinkData = appLinkIntent.getData();
+
+        if (appLinkData!=null) {
+            String url_link = appLinkData.toString();
+            yturls = new ArrayList<>();
+            yturls.add(url_link);
+        }else {
+            Intent intent = getIntent();
+            yturls = Arrays.asList(intent.getStringArrayExtra("youtubelink"));
+        }
+
         TextView tms = findViewById(R.id.termsText);
 
         preferences = getSharedPreferences("settings",MODE_PRIVATE);
 
         setTitle("");
-
-        Intent intent = getIntent();
-        yturls = Arrays.asList(intent.getStringArrayExtra("youtubelink"));
 
         if (yturls.size()>0) {
             YouTubeUrl = yturls.get(ytIndex);
@@ -218,8 +230,8 @@ public class PlayerActivity extends AppCompatActivity {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     showListDialog();
                 } else {
-                    FancyToast.makeText(PlayerActivity.this,"Permission denied!",
-                            FancyToast.LENGTH_SHORT,FancyToast.ERROR,false).show();
+                    Toast.makeText(PlayerActivity.this,"Permission denied!",
+                            Toast.LENGTH_SHORT).show();
                 }
                 return;
             }
@@ -248,6 +260,16 @@ public class PlayerActivity extends AppCompatActivity {
         YouTubeUrl = yturls.get(ytIndex+1);
         ytIndex++;
         new setData().execute(YTutils.getVideoID(YouTubeUrl));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == 200) {
+            onClear();
+            yturls = Arrays.asList(getIntent().getStringArrayExtra("youtubelink"));
+            YouTubeUrl = yturls.get(0);
+            new setData().execute(YTutils.getVideoID(YouTubeUrl));
+        }
     }
 
     @Override
@@ -346,7 +368,7 @@ public class PlayerActivity extends AppCompatActivity {
                 @Override
                 protected void onExtractionComplete(SparseArray<YtFile> ytFiles, VideoMeta videoMeta) {
                     if (ytFiles == null) {
-                        showAlert("Failed!","Couldn't get the required audio stream",true);
+                        showAlert("Failed!","Couldn't get the required audio stream. Try again!",true);
                         return;
                     }
                     YtFile ytaudioFile = getBestStream(ytFiles);
@@ -411,7 +433,7 @@ public class PlayerActivity extends AppCompatActivity {
                                             Log.e("Duration","dur: "+mMediaPlayer.getDuration());
                                             total_duration = mMediaPlayer.getDuration();
                                             total_seconds = total_duration/1000;
-                                            totalDuration.setText(YTutils.getDuration(total_duration));
+                                            totalDuration.setText(YTutils.milliSecondsToTimer(total_duration));
 
                                             makePause();
                                             isplaying=true;
@@ -435,9 +457,14 @@ public class PlayerActivity extends AppCompatActivity {
                                         io.printStackTrace();
                                     }
                                     mainlayout.setVisibility(View.VISIBLE);
+
                                     if (!preferences.getBoolean("isShownSeeek",false)) {
                                         showSeekBarDialog();
                                     }
+
+                                    // Store video into history
+                                    new saveToHistory().execute(YouTubeUrl);
+
                                     return true;
                                 }
                             })
@@ -447,6 +474,45 @@ public class PlayerActivity extends AppCompatActivity {
 
 
             super.onPostExecute(aVoid);
+        }
+    }
+
+    private class saveToHistory extends AsyncTask<String,Void,Void> {
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            String url_link = strings[0];
+            SharedPreferences pref = getSharedPreferences("history",MODE_PRIVATE);
+            String set = pref.getString("urls","");
+
+            // Get playlist
+            ArrayList<String> urls = new ArrayList<>();
+            if (!Objects.requireNonNull(set).isEmpty()) {
+                urls.addAll(Arrays.asList(set.split(",")));
+            }
+
+            // Add to playlist by removing it first
+            for (int i=0;i<urls.size();i++) {
+                if (urls.get(i).contains(url_link)) {
+                    urls.remove(i);
+                }
+            }
+            Date c = Calendar.getInstance().getTime();
+            @SuppressLint("SimpleDateFormat")
+            SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+            String formattedDate = df.format(c);
+            Log.e("StringtoAdd",url_link+"|"+formattedDate);
+            urls.add(0,url_link+"|"+formattedDate);
+
+            // Save playlist
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < urls.size(); i++) {
+                sb.append(urls.get(i)).append(",");
+            }
+            SharedPreferences.Editor prefsEditor = pref.edit();
+            prefsEditor.putString("urls", sb.toString());
+            prefsEditor.apply();
+            return null;
         }
     }
 
@@ -552,7 +618,7 @@ public class PlayerActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        finish();
+        callFinish();
         return true;
     }
 
@@ -632,7 +698,7 @@ public class PlayerActivity extends AppCompatActivity {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        finish();
+                        callFinish();
                     }
                 })
                 .setIcon(icon)
@@ -680,6 +746,12 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
         mainLayout.addView(btn);*/
+    }
+
+    void callFinish() {
+        Intent i = new Intent(PlayerActivity.this, MainActivity.class);
+        startActivity(i);
+        finish();
     }
 
     void showListDialog() {

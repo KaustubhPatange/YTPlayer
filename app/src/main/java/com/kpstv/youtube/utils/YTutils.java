@@ -52,6 +52,10 @@ public class YTutils {
         return currentDuration * 1000;
     }
 
+    public static boolean isValidID(String url) {
+        return (url.contains("youtube.com")||url.contains("youtu.be"));
+    }
+
     public static String getVideoID(String youtube_url) {
         if (youtube_url.contains("youtube.com")) {
             return youtube_url.split("=")[1];
