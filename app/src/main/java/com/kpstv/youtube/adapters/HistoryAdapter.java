@@ -26,9 +26,12 @@ import com.bumptech.glide.request.target.Target;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
+import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.utils.HttpHandler;
+import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
@@ -92,6 +95,57 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
 
         new getContents(holder,urlset).execute();
 
+        new getData(holder).execute(urlset.split("\\|")[0]);
+    }
+
+    class getData extends AsyncTask<String,Void,Void> {
+
+        MyViewHolder viewHolder;
+
+        MetaModel model;
+
+        public getData(MyViewHolder holder) {
+            viewHolder = holder;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Glide.with(con).load(model.getImgUrl()).addListener(new RequestListener<Drawable>() {
+                @Override
+                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                    return false;
+                }
+
+                @Override
+                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                    viewHolder.imageView.setImageDrawable(resource);
+                    return true;
+                }
+            }).into(viewHolder.imageView);
+            viewHolder.titleText.setText(model.getTitle());
+            viewHolder.authorText.setText(model.getAuthor());
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+
+            String id = YTutils.getVideoID(strings[0]);
+            HttpHandler handler = new HttpHandler();
+            String json = handler.makeServiceCall("https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v="+id+"&format=json");
+
+            try {
+                JSONObject object = new JSONObject(json);
+                model = new MetaModel(
+                        object.getString("title"),
+                        object.getString("author_name"),
+                        "https://i.ytimg.com/vi/"+id+"/mqdefault.jpg"
+                );
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 
     class getContents extends AsyncTask<Void,Void,Void> {
@@ -110,8 +164,6 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
         protected void onPostExecute(Void aVoid) {
             if (json!=null) {
                 try {
-                    JSONObject snippets = new JSONObject(json).getJSONArray("items")
-                            .getJSONObject(0).getJSONObject("snippet");
                     JSONObject statistics = new JSONObject(json).getJSONArray("items")
                             .getJSONObject(0).getJSONObject("statistics");
 
@@ -123,27 +175,13 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
                     @SuppressLint("SimpleDateFormat") String monthOnly = new SimpleDateFormat("MM").format(c);
                     @SuppressLint("SimpleDateFormat") String yearOnly = new SimpleDateFormat("yyyy").format(c);
 
-                    String imgurl = snippets.getJSONObject("thumbnails").getJSONObject("medium").getString("url");
-                    String videoTitle = snippets.getString("title");
-                    String channelTitle = snippets.getString("channelTitle");
-                    int likeCounts = Integer.parseInt(statistics.getString("likeCount"));
-                    int dislikeCounts = Integer.parseInt(statistics.getString("dislikeCount"));
-
-                    Glide.with(con).load(imgurl).addListener(new RequestListener<Drawable>() {
-                        @Override
-                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            viewHolder.imageView.setImageDrawable(resource);
-                            return true;
-                        }
-                    }).into(viewHolder.imageView);
-                    viewHolder.titleText.setText(videoTitle);
-                    viewHolder.authorText.setText(channelTitle);
-                    viewHolder.rate_percent.setText((likeCounts*100/(likeCounts+dislikeCounts))+"%");
+                    try {
+                        int likeCounts = Integer.parseInt(statistics.getString("likeCount"));
+                        int dislikeCounts = Integer.parseInt(statistics.getString("dislikeCount"));
+                        viewHolder.rate_percent.setText((likeCounts*100/(likeCounts+dislikeCounts))+"%");
+                    }catch (Exception e){
+                        viewHolder.rate_percent.setText("--");
+                    }
 
                     String toput = DateString;
                     String yesterday = String.format("%s-%s-%s",dateOnly-1,monthOnly,yearOnly);
@@ -168,12 +206,10 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
 
                     viewHolder.dateText.setText(toput);
 
-                    if (!Dateset.contains(formattedDate)) {
+                    if (!containsDateItem(DateString)) {
                         viewHolder.dateLayout.setVisibility(View.VISIBLE);
-                        Dateset.add(formattedDate);
+                        Dateset.add(DateString);
                     }
-
-                    //TODO: Add visibility changes for date layout
 
                     viewHolder.addPlaylist.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -181,8 +217,8 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
                             //TODO: Implement add to playlist
                         }
                     });
-
                 }catch (Exception e) { e.printStackTrace(); Log.e("HistoryException",e.getMessage());}
+
             }else Log.e("HistoryAdapter","Null json for "+ ytUrl);
         }
 
@@ -190,10 +226,18 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
         protected Void doInBackground(Void... strings) {
             HttpHandler httpHandler = new HttpHandler();
             String videoID = YTutils.getVideoID(ytUrl);
-            String link = "https://www.googleapis.com/youtube/v3/videos?id="+videoID+"&key=AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw&part=snippet,contentDetails,statistics,status";
+            String link = "https://www.googleapis.com/youtube/v3/videos?id="+videoID+"&key=AIzaSyBMqerRAATEnrsfPnWYfeqDdqX0TbR0bEo&part=statistics";
             json = httpHandler.makeServiceCall(link);
             return null;
         }
+    }
+
+    boolean containsDateItem(String item) {
+        for (int i=0;i<Dateset.size();i++) {
+            if (Dateset.get(i).contains(item))
+                return true;
+        }
+        return false;
     }
 
     @Override

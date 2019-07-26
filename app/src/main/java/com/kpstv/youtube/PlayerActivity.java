@@ -335,19 +335,17 @@ public class PlayerActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(String... arg0) {
-            String url = "https://www.googleapis.com/youtube/v3/videos?id="+arg0[0]+"&key=AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw&part=snippet,contentDetails,statistics,status";
+            String url = "https://www.googleapis.com/youtube/v3/videos?id="+arg0[0]+"&key=AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw&part=statistics";
             HttpHandler sh = new HttpHandler();
             String json = sh.makeServiceCall(url);
             try {
-                JSONObject snippets = new JSONObject(json).getJSONArray("items")
-                        .getJSONObject(0).getJSONObject("snippet");
                 JSONObject statistics = new JSONObject(json).getJSONArray("items")
                         .getJSONObject(0).getJSONObject("statistics");
 
-                videoTitle = snippets.getString("title");
-                channelTitle = snippets.getString("channelTitle");
+               // videoTitle = snippets.getString("title");
+             //   channelTitle = snippets.getString("channelTitle");
                 viewCounts = YTutils.getViewCount(Integer.parseInt(statistics.getString("viewCount")));
-                imgUrl = snippets.getJSONObject("thumbnails").getJSONObject("medium").getString("url");
+           //     imgUrl = snippets.getJSONObject("thumbnails").getJSONObject("medium").getString("url");
 
 
             } catch (JSONException e) {
@@ -371,8 +369,13 @@ public class PlayerActivity extends AppCompatActivity {
                         showAlert("Failed!","Couldn't get the required audio stream. Try again!",true);
                         return;
                     }
+
                     YtFile ytaudioFile = getBestStream(ytFiles);
                     link = ytaudioFile.getUrl();
+
+                    videoTitle = videoMeta.getTitle();
+                    channelTitle = videoMeta.getAuthor();
+                    imgUrl = videoMeta.getMqImageUrl();
 
                     for (int i = 0, itag; i < ytFiles.size(); i++) {
                         itag = ytFiles.keyAt(i);
@@ -497,10 +500,7 @@ public class PlayerActivity extends AppCompatActivity {
                     urls.remove(i);
                 }
             }
-            Date c = Calendar.getInstance().getTime();
-            @SuppressLint("SimpleDateFormat")
-            SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
-            String formattedDate = df.format(c);
+            String formattedDate = YTutils.getTodayDate();
             Log.e("StringtoAdd",url_link+"|"+formattedDate);
             urls.add(0,url_link+"|"+formattedDate);
 
@@ -751,7 +751,6 @@ public class PlayerActivity extends AppCompatActivity {
     void callFinish() {
         Intent i = new Intent(PlayerActivity.this, MainActivity.class);
         startActivity(i);
-        finish();
     }
 
     void showListDialog() {

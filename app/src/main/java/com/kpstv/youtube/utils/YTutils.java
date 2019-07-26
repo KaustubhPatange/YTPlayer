@@ -1,5 +1,6 @@
 package com.kpstv.youtube.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -25,6 +26,9 @@ import org.w3c.dom.NodeList;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -54,6 +58,13 @@ public class YTutils {
 
     public static boolean isValidID(String url) {
         return (url.contains("youtube.com")||url.contains("youtu.be"));
+    }
+
+    public static String getTodayDate() {
+        Date c = Calendar.getInstance().getTime();
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+        return df.format(c);
     }
 
     public static String getVideoID(String youtube_url) {
@@ -195,7 +206,7 @@ public class YTutils {
 
 
     public static String getImageUri(String videoID) {
-        String url = "https://www.googleapis.com/youtube/v3/videos?id="+videoID+"&key=AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw&part=snippet,contentDetails,statistics,status";
+        String url = "https://www.googleapis.com/youtube/v3/videos?id="+videoID+"&key=AIzaSyBMqerRAATEnrsfPnWYfeqDdqX0TbR0bEo&part=snippet,contentDetails,statistics,status";
         HttpHandler sh = new HttpHandler();
         String json = sh.makeServiceCall(url);
         String imageuri=null;

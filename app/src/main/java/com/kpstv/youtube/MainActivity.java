@@ -14,6 +14,7 @@ import android.view.MenuItem;
 
 
 import com.kpstv.youtube.fragments.HistoryFragment;
+import com.kpstv.youtube.fragments.SearchFragment;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -22,11 +23,12 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
-    // https://www.googleapis.com/youtube/v3/videos?id=BDocp-VpCwY&key=AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw&part=snippet,contentDetails,statistics,status
+    // https://www.googleapis.com/youtube/v3/videos?id=BDocp-VpCwY&key=AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw&part=snippet,statistics
 
-    // API KEY= AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw
+    // API KEY= AIzaSyBMqerRAATEnrsfPnWYfeqDdqX0TbR0bEo
 
-    /*
+    /* https://www.googleapis.com/youtube/v3/search?part=snippet,id&q=tuto&type=video&key=AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw
+
     * Code to launch player
     *
     *           Intent intent = new Intent(MainActivity.this,PlayerActivity.class);
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     * */
 
     Fragment HistoryFrag;
+    Fragment SearchFrag;
     SharedPreferences preferences;
 
     @Override
@@ -51,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
             urls.addAll(Arrays.asList(list.split(",")));
         }
 
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                .permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
         // Disabling URI exposure for lame android 8.0+ who can't do by themselves.
         if(Build.VERSION.SDK_INT>=24){
             try{
@@ -62,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         HistoryFrag = new HistoryFragment();
+        SearchFrag = new SearchFragment();
 
         loadFragment(HistoryFrag);
 
@@ -80,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
                     loadFragment(HistoryFrag);
                     return true;
                 case R.id.navigation_search:
+                    loadFragment(SearchFrag);
                     return true;
                 case R.id.navigation_playlist:
                     return true;

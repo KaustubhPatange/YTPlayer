@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="@color/background"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragments.SearchFragment"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/cardView_search"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="@drawable/history_background"
+            app:cardUseCompatPadding="true"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <ImageView
+                    android:layout_marginStart="10dp"
+                    android:layout_width="wrap_content"
+                    android:tint="@color/darkest_white"
+                    android:src="@drawable/ic_search"
+                    android:layout_height="match_parent" />
+                <TextView
+                    android:textSize="18dp"
+                    android:layout_marginStart="5dp"
+                    android:gravity="center_vertical"
+                    android:layout_width="wrap_content"
+                    android:text="Search"
+                    android:fontFamily="@font/dmsans_font"
+                    android:textColor="@color/darkest_white"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
+        <RelativeLayout
+            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_alignParentStart="true"
+                android:textSize="17sp"
+                android:textColor="@color/light_white"
+                android:fontFamily="@font/dmsans_font"
+                android:textStyle="bold"
+                android:layout_marginStart="15dp"
+                android:layout_width="wrap_content"
+                android:text="Trending"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="15dp"
+                android:padding="4dp"
+                android:background="@drawable/trending_shape"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:textColor="@color/colorAccent"
+                android:fontFamily="@font/dmsans_font"
+                android:layout_alignParentEnd="true"
+                android:layout_width="wrap_content"
+                android:text="SEE ALL"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/progressLayout"
+            android:layout_width="match_parent"
+            android:layout_height="120dp">
+            <ProgressBar
+                android:layout_centerInParent="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:visibility="gone"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:id="@+id/my_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <View
+            android:layout_marginTop="15dp"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorScreen"/>
+<!--  android:tint="#6F000000" -->
+        <android.support.v7.widget.CardView
+            android:layout_marginTop="20dp"
+            app:cardCornerRadius="5dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="@drawable/discover_shape_click"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            app:cardUseCompatPadding="true"
+            android:layout_width="match_parent"
+            android:layout_height="170dp">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <RelativeLayout
+                    android:layout_above="@+id/discover_banner"
+                    android:layout_width="match_parent"
+                    android:orientation="horizontal"
+                    android:layout_height="match_parent">
+                    <ImageView
+                        android:id="@+id/dImage1"
+                        android:tint="#6Ff47600"
+                        android:scaleType="fitXY"
+                        android:layout_width="140dp"
+                        android:layout_height="match_parent" />
+                    <ImageView
+                        android:layout_marginStart="85dp"
+                        android:id="@+id/dImage2"
+                        android:tint="#6Ff47600"
+                        android:scaleType="fitXY"
+                        android:layout_width="140dp"
+                        android:layout_height="match_parent" />
+                    <ImageView
+                        android:id="@+id/dImage3"
+                        android:tint="#6Ff47600"
+                        android:layout_marginStart="170dp"
+                        android:scaleType="fitXY"
+                        android:layout_width="140dp"
+                        android:layout_height="match_parent" />
+                    <ImageView
+                        android:id="@+id/dImage4"
+                        android:tint="#6Ff47600"
+                        android:layout_marginStart="255dp"
+                        android:scaleType="fitXY"
+                        android:layout_width="140dp"
+                        android:layout_marginEnd="-35dp"
+                        android:layout_height="match_parent" />
+                </RelativeLayout>
+                <LinearLayout
+                    android:id="@+id/discover_banner"
+                    android:layout_alignParentBottom="true"
+                    android:padding="13dp"
+                    android:orientation="vertical"
+                    android:background="@drawable/discover_shape"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:textStyle="bold"
+                        android:textSize="22sp"
+                        android:fontFamily="@font/dmsans_font"
+                        android:text="Discover more"
+                        android:textColor="@color/black"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                    <TextView
+                        android:textSize="14sp"
+                        android:fontFamily="@font/dmsans_font"
+                        android:text="Top, Viral songs on Spotify"
+                        android:textColor="@color/black"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+            </RelativeLayout>
+        </android.support.v7.widget.CardView>
+    </LinearLayout>
+</android.support.v4.widget.NestedScrollView>

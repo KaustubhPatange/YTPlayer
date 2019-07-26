@@ -5,6 +5,7 @@
     <color name="colorAccent">#f47600</color>
     <color name="colorAccentDark">#d46700</color>
     <color name="background">#1E1E1E</color>
+    <color name="colorScreen">#313131</color>
     <color name="white">#ffffff</color>
     <color name="light_white">#d1cece</color>
     <color name="dark_white">#999898</color>

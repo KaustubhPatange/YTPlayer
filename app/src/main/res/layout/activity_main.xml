@@ -21,6 +21,6 @@
         app:itemBackground="@color/black"
         android:layout_height="wrap_content"
         android:theme="@style/BottomNavigationTheme"
-        app:menu="@menu/navigation" />
+        app:menu="@menu/bottom_navigation" />
 
 </RelativeLayout>
