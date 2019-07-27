@@ -99,7 +99,6 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/colorScreen"/>
-<!--  android:tint="#6F000000" -->
         <android.support.v7.widget.CardView
             android:layout_marginTop="20dp"
             app:cardCornerRadius="5dp"
@@ -173,6 +172,92 @@
                         android:layout_height="wrap_content" />
                 </LinearLayout>
             </RelativeLayout>
+        </android.support.v7.widget.CardView>
+        <View
+            android:layout_marginTop="15dp"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorScreen"/>
+        <TextView
+            android:layout_marginTop="20dp"
+            android:layout_alignParentStart="true"
+            android:textSize="17sp"
+            android:textColor="@color/light_white"
+            android:fontFamily="@font/dmsans_font"
+            android:textStyle="bold"
+            android:layout_marginStart="15dp"
+            android:layout_width="wrap_content"
+            android:text="About"
+            android:layout_height="wrap_content" />
+
+        <android.support.v7.widget.CardView
+            android:layout_marginTop="10dp"
+            app:cardCornerRadius="5dp"
+            android:layout_marginBottom="20dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            app:cardUseCompatPadding="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:orientation="vertical"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:id="@+id/SOW_layout"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="@drawable/history_background"
+                    android:padding="10dp"
+                    android:layout_width="match_parent"
+                    android:orientation="horizontal"
+                    android:layout_height="wrap_content">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:src="@drawable/ic_whatsapp"
+                        android:layout_height="40dp" />
+                    <TextView
+                        android:gravity="center_vertical"
+                        android:layout_alignParentStart="true"
+                        android:textSize="16sp"
+                        android:textColor="@color/light_white"
+                        android:fontFamily="@font/dmsans_font"
+                        android:layout_marginStart="15dp"
+                        android:layout_width="wrap_content"
+                        android:text="Share on Whatsapp"
+                        android:layout_height="match_parent" />
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/colorScreen1"/>
+                <LinearLayout
+                    android:id="@+id/SOF_layout"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="@drawable/history_background"
+                    android:padding="10dp"
+                    android:layout_width="match_parent"
+                    android:orientation="horizontal"
+                    android:layout_height="wrap_content">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:src="@drawable/ic_facebook"
+                        android:layout_height="40dp" />
+                    <TextView
+                        android:gravity="center_vertical"
+                        android:layout_alignParentStart="true"
+                        android:textSize="16sp"
+                        android:textColor="@color/light_white"
+                        android:fontFamily="@font/dmsans_font"
+                        android:layout_marginStart="15dp"
+                        android:layout_width="wrap_content"
+                        android:text="Share on Facebook"
+                        android:layout_height="match_parent" />
+                </LinearLayout>
+            </LinearLayout>
+
+
         </android.support.v7.widget.CardView>
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

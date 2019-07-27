@@ -44,6 +44,14 @@ public class SearchFragment extends Fragment {
     static RecyclerView.LayoutManager layoutManager;
     SearchAdapter adapter; boolean networkCreated; ArrayList<String> images;
     ArrayList<SearchModel> models; RelativeLayout progresslayout;
+    ArrayList<Drawable> drawables; Activity activity;
+
+    private static String SpotifyTrendsCSV, SpotifyViralCSV;
+
+    ImageView imageView1;
+    ImageView imageView2;
+    ImageView imageView3;
+    ImageView imageView4;
 
     public SearchFragment() {}
 
@@ -59,8 +67,17 @@ public class SearchFragment extends Fragment {
         if (!networkCreated) {
             v = inflater.inflate(R.layout.fragment_search, container, false);
 
+            activity = getActivity();
+
             models = new ArrayList<>();
+            drawables = new ArrayList<>();
             images = new ArrayList<>();
+
+            imageView1 = v.findViewById(R.id.dImage1);
+            imageView2 = v.findViewById(R.id.dImage2);
+            imageView3 = v.findViewById(R.id.dImage3);
+            imageView4 = v.findViewById(R.id.dImage4);
+
             recyclerView = v.findViewById(R.id.my_recycler_view);
             progresslayout = v.findViewById(R.id.progressLayout);
             layoutManager = new LinearLayoutManager(getContext(),
@@ -75,13 +92,25 @@ public class SearchFragment extends Fragment {
         return v;
     }
 
-    class getTrending extends AsyncTask<Void,Void,Void> {
+    @Override
+    public void onResume() {
+        if (drawables.size()>3) {
+            imageView1.setImageDrawable(drawables.get(0));
+            imageView2.setImageDrawable(drawables.get(1));
+            imageView3.setImageDrawable(drawables.get(2));
+            imageView4.setImageDrawable(drawables.get(3));
+        }
+        super.onResume();
+    }
 
-        String csvoutput;
+    class getTrending extends AsyncTask<Void,Void,Void> {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            String[] csvlines = csvoutput.split("\n|\r");
+
+            new loadDiscoverImages().execute();
+
+            String[] csvlines = SpotifyTrendsCSV.split("\n|\r");
             for (int i=2;i<12;i++) {
                 String line = csvlines[i];
                 String title = line.split(",")[1].replace("\"","");
@@ -99,14 +128,10 @@ public class SearchFragment extends Fragment {
                 models.add(0,new SearchModel(
                         title, imgurl, "https://www.youtube.com/watch?v="+videoId
                 ));
-
-                images.add(imgurl);
             }
 
-            loadDiscoverImages(true);
-
             recyclerView.setItemAnimator(new DefaultItemAnimator());
-            adapter = new SearchAdapter(models,getActivity());
+            adapter = new SearchAdapter(models,activity);
             recyclerView.setAdapter(adapter);
             recyclerView.getLayoutManager().scrollToPosition(models.size()-1);
             progresslayout.setVisibility(View.GONE);
@@ -118,31 +143,77 @@ public class SearchFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... voids) {
             HttpHandler handler = new HttpHandler();
-            csvoutput = handler.makeServiceCall(
+            SpotifyTrendsCSV = handler.makeServiceCall(
                     "https://spotifycharts.com/regional/global/daily/latest/download");
+            SpotifyViralCSV = handler.makeServiceCall(
+                    "https://spotifycharts.com/viral/global/daily/latest/download"
+            );
             return null;
         }
     }
 
-    void loadDiscoverImages(boolean last4) {
+    class loadDiscoverImages extends AsyncTask<Void,Void,Void> {
 
-        final ImageView imageView1 = v.findViewById(R.id.dImage1);
-        final ImageView imageView2 = v.findViewById(R.id.dImage2);
-        final ImageView imageView3 = v.findViewById(R.id.dImage3);
-        final ImageView imageView4 = v.findViewById(R.id.dImage4);
-
-        if (!last4) {
-            Glide.with(v).load(images.get(0)).into(imageView1);
-            Glide.with(v).load(images.get(1)).into(imageView2);
-            Glide.with(v).load(images.get(2)).into(imageView3);
-            Glide.with(v).load(images.get(3)).into(imageView4);
-        }else {
-            Glide.with(v).load(images.get(9)).into(imageView1);
-            Glide.with(v).load(images.get(8)).into(imageView2);
-            Glide.with(v).load(images.get(7)).into(imageView3);
-            Glide.with(v).load(images.get(6)).into(imageView4);
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            loadImageGlide(images.get(0),imageView1);
+            loadImageGlide(images.get(1),imageView2);
+            loadImageGlide(images.get(2),imageView3);
+            loadImageGlide(images.get(3),imageView4);
+            super.onPostExecute(aVoid);
         }
 
+        @Override
+        protected Void doInBackground(Void... voids) {
+            String[] csvlines = SpotifyViralCSV.split("\n|\r");
+            for (int i=1;i<5;i++) {
+                String line = csvlines[i];
+                String title = line.split(",")[1].replace("\"","");
+                String author = line.split(",")[2].replace("\"","");
+
+                String search_text = title.replace(" ","+")
+                        + "+by+" + author.replace(" ","+");
+
+                YTSearch ytSearch = new YTSearch(search_text);
+
+                final String videoId = ytSearch.getVideoIDs().get(0);
+                String imgurl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
+
+                images.add(imgurl);
+            }
+            return null;
+        }
+    }
+
+    /*void loadDiscoverImages(boolean last4) {
+
+        if (!last4) {
+            loadImageGlide(images.get(0),imageView1);
+            loadImageGlide(images.get(1),imageView2);
+            loadImageGlide(images.get(2),imageView3);
+            loadImageGlide(images.get(3),imageView4);
+        }else {
+            loadImageGlide(images.get(9),imageView1);
+            loadImageGlide(images.get(8),imageView2);
+            loadImageGlide(images.get(7),imageView3);
+            loadImageGlide(images.get(6),imageView4);
+        }
+    }*/
+
+    void loadImageGlide(String url,final ImageView imageView) {
+        Glide.with(v).load(url).addListener(new RequestListener<Drawable>() {
+            @Override
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                drawables.add(resource);
+                imageView.setImageDrawable(resource);
+                return true;
+            }
+        }).into(imageView);
     }
 
 }

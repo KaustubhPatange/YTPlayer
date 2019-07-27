@@ -38,7 +38,7 @@ import java.util.Date;
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHolder> {
 
     private ArrayList<SearchModel> dataSet;
-
+    private ArrayList<String> yturls;
     Context con;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
@@ -58,6 +58,9 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
     public SearchAdapter(ArrayList<SearchModel> data, Context context) {
         this.dataSet = data;
         this.con = context;
+        yturls = new ArrayList<>();
+        for (SearchModel model: data)
+            yturls.add(0,model.getYturl());
     }
 
     @Override
@@ -74,6 +77,11 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
     public void onBindViewHolder(final MyViewHolder holder, final int listPosition) {
 
         final SearchModel searchModel = dataSet.get(listPosition);
+
+        final ArrayList<String> urls = yturls;
+        urls.remove(searchModel.getYturl());
+        urls.add(0,searchModel.getYturl());
+        final String[] stringarray = YTutils.ConvertToStringArray(urls);
 
         holder.titleText.setText(searchModel.getTitle());
 
@@ -95,9 +103,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
             public void onClick(View v) {
                 Activity activity = (Activity) con;
                 Intent intent = new Intent(con,PlayerActivity.class);
-                intent.putExtra("youtubelink",new String[]{
-                        searchModel.getYturl()
-                });
+                intent.putExtra("youtubelink",stringarray);
                 con.startActivity(intent);
                 activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
             }

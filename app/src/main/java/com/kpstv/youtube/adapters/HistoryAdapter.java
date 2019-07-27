@@ -29,6 +29,7 @@ import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTMeta;
+import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
 
 import org.json.JSONException;
@@ -43,7 +44,7 @@ import java.util.Date;
 public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewHolder> {
 
     private ArrayList<String> dataSet;
-
+    String[] apiKeys = new String[]{"AIzaSyBMqerRAATEnrsfPnWYfeqDdqX0TbR0bEo","AIzaSyCA2Py9snHNdp4Y4Dkyq-z7gUfxLqdPhtQ"};
     private ArrayList<String> Dateset;
 
     Context con;
@@ -95,21 +96,32 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
 
         new getContents(holder,urlset).execute();
 
-        new getData(holder).execute(urlset.split("\\|")[0]);
+        new getData(holder,urlset).execute();
     }
 
     class getData extends AsyncTask<String,Void,Void> {
 
-        MyViewHolder viewHolder;
-
+        MyViewHolder viewHolder; String DateString,ytUrl;
         MetaModel model;
 
-        public getData(MyViewHolder holder) {
+        public getData(MyViewHolder holder, String url) {
             viewHolder = holder;
+            ytUrl = url.split("\\|")[0];
+            DateString = url.split("\\|")[1];
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
+
+            Date c = Calendar.getInstance().getTime();
+            @SuppressLint("SimpleDateFormat")
+            SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+            String formattedDate = df.format(c);
+            @SuppressLint("SimpleDateFormat") int dateOnly = Integer.parseInt(new SimpleDateFormat("dd").format(c));
+            @SuppressLint("SimpleDateFormat") String monthOnly = new SimpleDateFormat("MM").format(c);
+            @SuppressLint("SimpleDateFormat") String yearOnly = new SimpleDateFormat("yyyy").format(c);
+
+
             Glide.with(con).load(model.getImgUrl()).addListener(new RequestListener<Drawable>() {
                 @Override
                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -124,13 +136,48 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
             }).into(viewHolder.imageView);
             viewHolder.titleText.setText(model.getTitle());
             viewHolder.authorText.setText(model.getAuthor());
+
+            String toput = DateString;
+            String yesterday = String.format("%s-%s-%s",dateOnly-1,monthOnly,yearOnly);
+            if (DateString.contains(formattedDate)) {
+                toput="Today";
+            } else if (DateString.contains(yesterday)) {
+                toput = "Yesterday";
+            }
+
+            viewHolder.mainCard.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    Activity activity = (Activity) con;
+
+                    Intent intent = new Intent(con,PlayerActivity.class);
+                    intent.putExtra("youtubelink",new String[]{ ytUrl });
+                    con.startActivity(intent);
+                    activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                }
+            });
+
+            viewHolder.dateText.setText(toput);
+
+            if (!containsDateItem(DateString)) {
+                viewHolder.dateLayout.setVisibility(View.VISIBLE);
+                Dateset.add(DateString);
+            }
+
+            viewHolder.addPlaylist.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //TODO: Implement add to playlist
+                }
+            });
             super.onPostExecute(aVoid);
         }
 
         @Override
         protected Void doInBackground(String... strings) {
 
-            String id = YTutils.getVideoID(strings[0]);
+            String id = YTutils.getVideoID(ytUrl);
             HttpHandler handler = new HttpHandler();
             String json = handler.makeServiceCall("https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v="+id+"&format=json");
 
@@ -150,86 +197,61 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
 
     class getContents extends AsyncTask<Void,Void,Void> {
 
-        String json; String ytUrl; String DateString;
-        MyViewHolder viewHolder;
+        String json;
+        String ytUrl;
+        MyViewHolder viewHolder; YTStatistics ytStatistics;
 
         public getContents(MyViewHolder holder, String url) {
             viewHolder = holder;
             ytUrl = url.split("\\|")[0];
-            DateString = url.split("\\|")[1];
         }
 
-        @SuppressLint("SetTextI18n")
         @Override
         protected void onPostExecute(Void aVoid) {
-            if (json!=null) {
-                try {
-                    JSONObject statistics = new JSONObject(json).getJSONArray("items")
-                            .getJSONObject(0).getJSONObject("statistics");
+          if (json!=null){
+              try {
 
-                    Date c = Calendar.getInstance().getTime();
-                    @SuppressLint("SimpleDateFormat")
-                    SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
-                    String formattedDate = df.format(c);
-                    @SuppressLint("SimpleDateFormat") int dateOnly = Integer.parseInt(new SimpleDateFormat("dd").format(c));
-                    @SuppressLint("SimpleDateFormat") String monthOnly = new SimpleDateFormat("MM").format(c);
-                    @SuppressLint("SimpleDateFormat") String yearOnly = new SimpleDateFormat("yyyy").format(c);
+                  JSONObject statistics = new JSONObject(json).getJSONArray("items")
+                          .getJSONObject(0).getJSONObject("statistics");
+                  int likeCounts = Integer.parseInt(statistics.getString("likeCount"));
+                  int dislikeCounts = Integer.parseInt(statistics.getString("dislikeCount"));
+                  viewHolder.rate_percent.setText((likeCounts*100/(likeCounts+dislikeCounts))+"%");
 
-                    try {
-                        int likeCounts = Integer.parseInt(statistics.getString("likeCount"));
-                        int dislikeCounts = Integer.parseInt(statistics.getString("dislikeCount"));
-                        viewHolder.rate_percent.setText((likeCounts*100/(likeCounts+dislikeCounts))+"%");
-                    }catch (Exception e){
-                        viewHolder.rate_percent.setText("--");
-                    }
-
-                    String toput = DateString;
-                    String yesterday = String.format("%s-%s-%s",dateOnly-1,monthOnly,yearOnly);
-                    if (DateString.contains(formattedDate)) {
-                        toput="Today";
-                    } else if (DateString.contains(yesterday)) {
-                        toput = "Yesterday";
-                    }
-
-                    viewHolder.mainCard.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-
-                            Activity activity = (Activity) con;
-
-                            Intent intent = new Intent(con,PlayerActivity.class);
-                            intent.putExtra("youtubelink",new String[]{ ytUrl });
-                            con.startActivity(intent);
-                            activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
-                        }
-                    });
-
-                    viewHolder.dateText.setText(toput);
-
-                    if (!containsDateItem(DateString)) {
-                        viewHolder.dateLayout.setVisibility(View.VISIBLE);
-                        Dateset.add(DateString);
-                    }
-
-                    viewHolder.addPlaylist.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            //TODO: Implement add to playlist
-                        }
-                    });
-                }catch (Exception e) { e.printStackTrace(); Log.e("HistoryException",e.getMessage());}
-
-            }else Log.e("HistoryAdapter","Null json for "+ ytUrl);
+              }catch (Exception e) {
+                  viewHolder.rate_percent.setText("100%");
+                  e.printStackTrace();
+              }
+          }else {
+              try {
+                  int likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
+                  int dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
+                  viewHolder.rate_percent.setText((likeCounts*100/(likeCounts+dislikeCounts))+"%");
+              }catch (Exception e){
+                  viewHolder.rate_percent.setText("100%");
+              }
+          }
         }
 
         @Override
-        protected Void doInBackground(Void... strings) {
-            HttpHandler httpHandler = new HttpHandler();
+        protected Void doInBackground(Void... voids) {
             String videoID = YTutils.getVideoID(ytUrl);
-            String link = "https://www.googleapis.com/youtube/v3/videos?id="+videoID+"&key=AIzaSyBMqerRAATEnrsfPnWYfeqDdqX0TbR0bEo&part=statistics";
-            json = httpHandler.makeServiceCall(link);
+            json = jsonResponse(videoID,0);
+            if (json!=null && json.contains("\"error\":")) {
+                json = jsonResponse(videoID,1);
+                if (json.contains("\"error\":"))
+                {
+                    ytStatistics = new YTStatistics(videoID);
+                    json = null;
+                }
+            }
             return null;
         }
+    }
+
+    String jsonResponse(String videoID,int apinumber) {
+        HttpHandler httpHandler = new HttpHandler();
+        String link = "https://www.googleapis.com/youtube/v3/videos?id="+videoID+"&key="+apiKeys[apinumber]+"&part=statistics";
+        return httpHandler.makeServiceCall(link);
     }
 
     boolean containsDateItem(String item) {

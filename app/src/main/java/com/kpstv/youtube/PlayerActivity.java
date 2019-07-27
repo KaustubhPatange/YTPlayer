@@ -58,6 +58,7 @@ import com.facebook.network.connectionclass.ConnectionQuality;
 import com.jgabrielfreitas.core.BlurImageView;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.utils.HttpHandler;
+import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
 import com.warkiz.widget.IndicatorSeekBar;
 import com.warkiz.widget.OnSeekChangeListener;
@@ -94,9 +95,11 @@ public class PlayerActivity extends AppCompatActivity {
     NotificationManagerCompat notificationManager;
     RemoteViews collpaseView, expandedView;
 
+    String[] apikeys = new String[] {"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw","AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
+
     LinearLayout downloadButton; LinearLayout mainlayout;
 
-    TextView mainTitle,viewCount,currentDuration,totalDuration;
+    TextView mainTitle,viewCount,currentDuration,totalDuration, warningText;
 
     ImageView mainImageView; public  boolean isplaying=false, isfirst=true;
 
@@ -335,32 +338,45 @@ public class PlayerActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(String... arg0) {
-            String url = "https://www.googleapis.com/youtube/v3/videos?id="+arg0[0]+"&key=AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw&part=statistics";
-            HttpHandler sh = new HttpHandler();
-            String json = sh.makeServiceCall(url);
-            try {
-                JSONObject statistics = new JSONObject(json).getJSONArray("items")
-                        .getJSONObject(0).getJSONObject("statistics");
+            String videoID = arg0[0];
+            String json = jsonResponse(videoID,0);
+            if (json!=null && json.contains("\"error\":")) {
+                json = jsonResponse(videoID,1);
+                if (json.contains("\"error\":"))
+                {
+                    YTStatistics ytStatistics = new YTStatistics(videoID);
+                    viewCounts = YTutils.getViewCount(Integer.parseInt(ytStatistics.getViewCount()));
+                    json = null;
+                }
+            }
+            if (json!=null) {
+                try {
+                    JSONObject statistics = new JSONObject(json).getJSONArray("items")
+                            .getJSONObject(0).getJSONObject("statistics");
+                    viewCounts = YTutils.getViewCount(Integer.parseInt(statistics.getString("viewCount")));
 
-               // videoTitle = snippets.getString("title");
-             //   channelTitle = snippets.getString("channelTitle");
-                viewCounts = YTutils.getViewCount(Integer.parseInt(statistics.getString("viewCount")));
-           //     imgUrl = snippets.getJSONObject("thumbnails").getJSONObject("medium").getString("url");
 
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-                Log.e("PlayerActivity_JSON",e.getMessage());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.e("PlayerActivity_JSON",e.getMessage());
+                }
             }
             return null;
         }
+
+        String jsonResponse(String videoID,int apinumber) {
+            HttpHandler httpHandler = new HttpHandler();
+            String link = "https://www.googleapis.com/youtube/v3/videos?id="+videoID+"&key="+apikeys[apinumber]+"&part=statistics";
+            return httpHandler.makeServiceCall(link);
+        }
+
+
 
         @SuppressLint("StaticFieldLeak")
         @Override
         protected void onPostExecute(Void aVoid) {
 
             new YouTubeExtractor(PlayerActivity.this) {
-
 
                 String link;
                 @Override
@@ -385,6 +401,8 @@ public class PlayerActivity extends AppCompatActivity {
                              addFormatToList(videoMeta.getTitle(), ytFile);
                         }
                     }
+
+                    Log.e("YTSTREAM_URL",link);
                 }
 
                 @Override
@@ -418,7 +436,6 @@ public class PlayerActivity extends AppCompatActivity {
                                     notificationManager.notify(1,builder.build());
 
                                     Log.e("ImageUrl",imgUrl+"");
-                                    Log.e("RTSP_URL",YTutils.getUrlVideoRTSP(YouTubeUrl)+"");
 
                                     playFab.setEnabled(true);
                                     try {
@@ -460,6 +477,10 @@ public class PlayerActivity extends AppCompatActivity {
                                         io.printStackTrace();
                                     }
                                     mainlayout.setVisibility(View.VISIBLE);
+
+                                    if (yturls.size()>1) {
+                                        warningText.setText(Html.fromHtml("Saving video offline is illegal  &#8226;  "+(ytIndex+1)+"/"+yturls.size()));
+                                    }
 
                                     if (!preferences.getBoolean("isShownSeeek",false)) {
                                         showSeekBarDialog();
@@ -590,8 +611,10 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     void onClear() {
+        backImage.setImageDrawable(null);
         mainlayout.setVisibility(View.GONE);
         mMediaPlayer.stop();
+        mMediaPlayer.release();
         mHandler.removeCallbacks(mUpdateTimeTask);
         isplaying=false;
         total_duration=0;total_seconds=0;
@@ -655,6 +678,7 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void getAllViews() {
+        warningText = findViewById(R.id.warningText);
         downloadButton = findViewById(R.id.downloadlayout);
         mprogressBar = findViewById(R.id.mainprogress);
         mainTitle = findViewById(R.id.maintitle);

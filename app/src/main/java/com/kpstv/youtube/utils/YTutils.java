@@ -27,6 +27,7 @@ import org.w3c.dom.NodeList;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,6 +36,13 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 public class YTutils {
+
+    public static String[] ConvertToStringArray(ArrayList<String> list) {
+        final String[] arrays = new String[list.size()];
+        for(int i=0;i<list.size();i++)
+            arrays[i]=list.get(i);
+        return arrays;
+    }
 
     public static String getViewCount(int number) {
         if (number > 1000000000) { // billion
