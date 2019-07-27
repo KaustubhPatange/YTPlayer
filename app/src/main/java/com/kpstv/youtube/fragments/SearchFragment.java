@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -26,6 +28,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
+import com.kpstv.youtube.TrendActivity;
 import com.kpstv.youtube.adapters.HistoryAdapter;
 import com.kpstv.youtube.adapters.SearchAdapter;
 import com.kpstv.youtube.models.SearchModel;
@@ -44,7 +47,8 @@ public class SearchFragment extends Fragment {
     static RecyclerView.LayoutManager layoutManager;
     SearchAdapter adapter; boolean networkCreated; ArrayList<String> images;
     ArrayList<SearchModel> models; RelativeLayout progresslayout;
-    ArrayList<Drawable> drawables; Activity activity;
+    ArrayList<Drawable> drawables; Activity activity; TextView moreTrend;
+    CardView discoverViral;
 
     private static String SpotifyTrendsCSV, SpotifyViralCSV;
 
@@ -74,11 +78,13 @@ public class SearchFragment extends Fragment {
             images = new ArrayList<>();
 
             imageView1 = v.findViewById(R.id.dImage1);
+            moreTrend = v.findViewById(R.id.moreTrending);
             imageView2 = v.findViewById(R.id.dImage2);
             imageView3 = v.findViewById(R.id.dImage3);
             imageView4 = v.findViewById(R.id.dImage4);
 
             recyclerView = v.findViewById(R.id.my_recycler_view);
+            discoverViral = v.findViewById(R.id.discoverViral);
             progresslayout = v.findViewById(R.id.progressLayout);
             layoutManager = new LinearLayoutManager(getContext(),
                     LinearLayoutManager.HORIZONTAL,true);
@@ -87,6 +93,8 @@ public class SearchFragment extends Fragment {
             networkCreated = true;
 
             new getTrending().execute();
+
+            new loadDiscoverImages().execute();
         }
 
         return v;
@@ -108,7 +116,32 @@ public class SearchFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
 
-            new loadDiscoverImages().execute();
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            adapter = new SearchAdapter(models,activity);
+            recyclerView.setAdapter(adapter);
+            recyclerView.getLayoutManager().scrollToPosition(models.size()-1);
+            progresslayout.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+
+            moreTrend.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(activity,TrendActivity.class);
+                    intent.putExtra("data_csv",SpotifyTrendsCSV);
+                    intent.putExtra("title","Discover Trends");
+                    activity.startActivity(intent);
+                    activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                }
+            });
+
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            HttpHandler handler = new HttpHandler();
+            SpotifyTrendsCSV = handler.makeServiceCall(
+                    "https://spotifycharts.com/regional/global/daily/latest/download");
 
             String[] csvlines = SpotifyTrendsCSV.split("\n|\r");
             for (int i=2;i<12;i++) {
@@ -129,25 +162,6 @@ public class SearchFragment extends Fragment {
                         title, imgurl, "https://www.youtube.com/watch?v="+videoId
                 ));
             }
-
-            recyclerView.setItemAnimator(new DefaultItemAnimator());
-            adapter = new SearchAdapter(models,activity);
-            recyclerView.setAdapter(adapter);
-            recyclerView.getLayoutManager().scrollToPosition(models.size()-1);
-            progresslayout.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
-
-            super.onPostExecute(aVoid);
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            HttpHandler handler = new HttpHandler();
-            SpotifyTrendsCSV = handler.makeServiceCall(
-                    "https://spotifycharts.com/regional/global/daily/latest/download");
-            SpotifyViralCSV = handler.makeServiceCall(
-                    "https://spotifycharts.com/viral/global/daily/latest/download"
-            );
             return null;
         }
     }
@@ -160,11 +174,27 @@ public class SearchFragment extends Fragment {
             loadImageGlide(images.get(1),imageView2);
             loadImageGlide(images.get(2),imageView3);
             loadImageGlide(images.get(3),imageView4);
+
+            discoverViral.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(activity,TrendActivity.class);
+                    intent.putExtra("data_csv",SpotifyViralCSV);
+                    intent.putExtra("title","Discover Viral");
+                    activity.startActivity(intent);
+                    activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                }
+            });
+
             super.onPostExecute(aVoid);
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
+            HttpHandler handler = new HttpHandler();
+            SpotifyViralCSV = handler.makeServiceCall(
+                    "https://spotifycharts.com/viral/global/daily/latest/download"
+            );
             String[] csvlines = SpotifyViralCSV.split("\n|\r");
             for (int i=1;i<5;i++) {
                 String line = csvlines[i];

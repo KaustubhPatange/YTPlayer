@@ -62,7 +62,7 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
-        <activity android:name=".DiscoverTrend"></activity>
+        <activity android:name=".TrendActivity"></activity>
     </application>
 
 </manifest>
