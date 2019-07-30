@@ -35,7 +35,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-public class TrendAdapter extends RecyclerView.Adapter {
+public class DiscoverAdapter extends RecyclerView.Adapter {
     private final int VIEW_ITEM = 1;
     private final int VIEW_PROG = 0;
 
@@ -46,7 +46,7 @@ public class TrendAdapter extends RecyclerView.Adapter {
     private boolean loading;
     private OnLoadMoreListener onLoadMoreListener;
 
-    public TrendAdapter(Context context,List<DiscoverModel> students, RecyclerView recyclerView) {
+    public DiscoverAdapter(Context context, List<DiscoverModel> students, RecyclerView recyclerView) {
         discoverModels = students;
         this.con = context;
         if (recyclerView.getLayoutManager() instanceof LinearLayoutManager) {

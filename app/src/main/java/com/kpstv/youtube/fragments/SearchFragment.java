@@ -17,7 +17,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -26,17 +25,13 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
-import com.kpstv.youtube.TrendActivity;
-import com.kpstv.youtube.adapters.HistoryAdapter;
+import com.kpstv.youtube.DiscoverActivity;
+import com.kpstv.youtube.SearchActivity;
 import com.kpstv.youtube.adapters.SearchAdapter;
 import com.kpstv.youtube.models.SearchModel;
 import com.kpstv.youtube.utils.HttpHandler;
-import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTSearch;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -48,7 +43,9 @@ public class SearchFragment extends Fragment {
     SearchAdapter adapter; boolean networkCreated; ArrayList<String> images;
     ArrayList<SearchModel> models; RelativeLayout progresslayout;
     ArrayList<Drawable> drawables; Activity activity; TextView moreTrend;
-    CardView discoverViral;
+    CardView discoverViral, searchCard; boolean istrendloaded,isdiscoverloaded;
+
+    AsyncTask<Void,Void,Void> trendTask, discoverTask;
 
     private static String SpotifyTrendsCSV, SpotifyViralCSV;
 
@@ -77,6 +74,7 @@ public class SearchFragment extends Fragment {
             drawables = new ArrayList<>();
             images = new ArrayList<>();
 
+            searchCard = v.findViewById(R.id.cardView_search);
             imageView1 = v.findViewById(R.id.dImage1);
             moreTrend = v.findViewById(R.id.moreTrending);
             imageView2 = v.findViewById(R.id.dImage2);
@@ -90,11 +88,45 @@ public class SearchFragment extends Fragment {
                     LinearLayoutManager.HORIZONTAL,true);
             recyclerView.setLayoutManager(layoutManager);
 
+            searchCard.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(activity,SearchActivity.class);
+                    intent.putExtra("data_csv",SpotifyViralCSV);
+                    activity.startActivity(intent);
+                    activity.overridePendingTransition(R.anim.right_enter,R.anim.left_exit);
+                }
+            });
+
+            moreTrend.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(activity,DiscoverActivity.class);
+                    intent.putExtra("data_csv",SpotifyTrendsCSV);
+                    intent.putExtra("title","Discover Trends");
+                    activity.startActivity(intent);
+                    activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                }
+            });
+
+            discoverViral.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(activity,DiscoverActivity.class);
+                    intent.putExtra("data_csv",SpotifyViralCSV);
+                    intent.putExtra("title","Discover Viral");
+                    activity.startActivity(intent);
+                    activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                }
+            });
+
             networkCreated = true;
 
-            new getTrending().execute();
+            trendTask = new getTrending();
+            trendTask.execute();
 
-            new loadDiscoverImages().execute();
+            discoverTask = new loadDiscoverImages();
+            discoverTask.execute();
         }
 
         return v;
@@ -102,6 +134,16 @@ public class SearchFragment extends Fragment {
 
     @Override
     public void onResume() {
+        if (!istrendloaded && trendTask.getStatus() != AsyncTask.Status.RUNNING)
+        {
+            trendTask = new getTrending();
+            trendTask.execute();
+        }
+        if (!isdiscoverloaded && discoverTask.getStatus() != AsyncTask.Status.RUNNING)
+        {
+            discoverTask = new loadDiscoverImages();
+            discoverTask.execute();
+        }
         if (drawables.size()>3) {
             imageView1.setImageDrawable(drawables.get(0));
             imageView2.setImageDrawable(drawables.get(1));
@@ -109,6 +151,13 @@ public class SearchFragment extends Fragment {
             imageView4.setImageDrawable(drawables.get(3));
         }
         super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        trendTask.cancel(true);
+        discoverTask.cancel(true);
+        super.onPause();
     }
 
     class getTrending extends AsyncTask<Void,Void,Void> {
@@ -123,44 +172,38 @@ public class SearchFragment extends Fragment {
             progresslayout.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
 
-            moreTrend.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(activity,TrendActivity.class);
-                    intent.putExtra("data_csv",SpotifyTrendsCSV);
-                    intent.putExtra("title","Discover Trends");
-                    activity.startActivity(intent);
-                    activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
-                }
-            });
-
+            istrendloaded = true;
             super.onPostExecute(aVoid);
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            HttpHandler handler = new HttpHandler();
-            SpotifyTrendsCSV = handler.makeServiceCall(
-                    "https://spotifycharts.com/regional/global/daily/latest/download");
+            if (SpotifyTrendsCSV==null) {
+                HttpHandler handler = new HttpHandler();
+                SpotifyTrendsCSV = handler.makeServiceCall(
+                        "https://spotifycharts.com/regional/global/daily/latest/download");
+            }
+            if (models.size()<10) {
+                models.clear();
+                String[] csvlines = SpotifyTrendsCSV.split("\n|\r");
+                for (int i=2;i<12;i++) {
+                    String line = csvlines[i];
+                    String title = line.split(",")[1].replace("\"","");
+                    String author = line.split(",")[2].replace("\"","");
 
-            String[] csvlines = SpotifyTrendsCSV.split("\n|\r");
-            for (int i=2;i<12;i++) {
-                String line = csvlines[i];
-                String title = line.split(",")[1].replace("\"","");
-                String author = line.split(",")[2].replace("\"","");
+                    String search_text = title.replace(" ","+")
+                            + "+by+" + author.replace(" ","+");
 
-                String search_text = title.replace(" ","+")
-                        + "+by+" + author.replace(" ","+");
+                    YTSearch ytSearch = new YTSearch(search_text);
 
-                YTSearch ytSearch = new YTSearch(search_text);
+                    final String videoId = ytSearch.getVideoIDs().get(0);
+                    String imgurl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
 
-                final String videoId = ytSearch.getVideoIDs().get(0);
-                String imgurl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
-
-                Log.e("TrendingLines",line.split(",")[1].replace("\"",""));
-                models.add(0,new SearchModel(
-                        title, imgurl, "https://www.youtube.com/watch?v="+videoId
-                ));
+                    Log.e("TrendingLines",line.split(",")[1].replace("\"",""));
+                    models.add(0,new SearchModel(
+                            title, imgurl, "https://www.youtube.com/watch?v="+videoId
+                    ));
+                }
             }
             return null;
         }
@@ -175,60 +218,40 @@ public class SearchFragment extends Fragment {
             loadImageGlide(images.get(2),imageView3);
             loadImageGlide(images.get(3),imageView4);
 
-            discoverViral.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(activity,TrendActivity.class);
-                    intent.putExtra("data_csv",SpotifyViralCSV);
-                    intent.putExtra("title","Discover Viral");
-                    activity.startActivity(intent);
-                    activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
-                }
-            });
-
+            isdiscoverloaded=true;
             super.onPostExecute(aVoid);
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            HttpHandler handler = new HttpHandler();
-            SpotifyViralCSV = handler.makeServiceCall(
-                    "https://spotifycharts.com/viral/global/daily/latest/download"
-            );
-            String[] csvlines = SpotifyViralCSV.split("\n|\r");
-            for (int i=1;i<5;i++) {
-                String line = csvlines[i];
-                String title = line.split(",")[1].replace("\"","");
-                String author = line.split(",")[2].replace("\"","");
+            if (SpotifyViralCSV==null) {
+                HttpHandler handler = new HttpHandler();
+                SpotifyViralCSV = handler.makeServiceCall(
+                        "https://spotifycharts.com/viral/global/daily/latest/download"
+                );
+            }
+            if (images.size()<4) {
+                images.clear();
+                String[] csvlines = SpotifyViralCSV.split("\n|\r");
+                for (int i=1;i<5;i++) {
+                    String line = csvlines[i];
+                    String title = line.split(",")[1].replace("\"","");
+                    String author = line.split(",")[2].replace("\"","");
 
-                String search_text = title.replace(" ","+")
-                        + "+by+" + author.replace(" ","+");
+                    String search_text = title.replace(" ","+")
+                            + "+by+" + author.replace(" ","+");
 
-                YTSearch ytSearch = new YTSearch(search_text);
+                    YTSearch ytSearch = new YTSearch(search_text);
 
-                final String videoId = ytSearch.getVideoIDs().get(0);
-                String imgurl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
+                    final String videoId = ytSearch.getVideoIDs().get(0);
+                    String imgurl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
 
-                images.add(imgurl);
+                    images.add(imgurl);
+                }
             }
             return null;
         }
     }
-
-    /*void loadDiscoverImages(boolean last4) {
-
-        if (!last4) {
-            loadImageGlide(images.get(0),imageView1);
-            loadImageGlide(images.get(1),imageView2);
-            loadImageGlide(images.get(2),imageView3);
-            loadImageGlide(images.get(3),imageView4);
-        }else {
-            loadImageGlide(images.get(9),imageView1);
-            loadImageGlide(images.get(8),imageView2);
-            loadImageGlide(images.get(7),imageView3);
-            loadImageGlide(images.get(6),imageView4);
-        }
-    }*/
 
     void loadImageGlide(String url,final ImageView imageView) {
         Glide.with(v).load(url).addListener(new RequestListener<Drawable>() {

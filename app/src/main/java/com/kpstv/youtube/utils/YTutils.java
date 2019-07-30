@@ -24,6 +24,10 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -42,6 +46,40 @@ public class YTutils {
         for(int i=0;i<list.size();i++)
             arrays[i]=list.get(i);
         return arrays;
+    }
+
+    public static String convertStreamToString(InputStream is) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+
+        String line = null;
+        try {
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append('\n');
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return sb.toString();
+    }
+
+
+    public static String getSpotifyID(String spotifyurl) {
+        // https://open.spotify.com/track/4hPpVbbakQNv8YTHYaOJP4
+        String url;
+        if (spotifyurl.contains("open.spotify")){
+            url = spotifyurl.replace("https://open.spotify.com/track/","");
+            if (url.contains("?"))
+                return url.split("\\?")[0];
+            else return url;
+        }
+        return null;
     }
 
     public static String getViewCount(int number) {

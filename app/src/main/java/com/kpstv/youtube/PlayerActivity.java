@@ -312,8 +312,7 @@ public class PlayerActivity extends AppCompatActivity {
                 .setSmallIcon(R.drawable.ic_music)
                 .setContentTitle("YTApp")
                 .setContent(collpaseView)
-                .setCustomBigContentView(expandedView)
-                .setOngoing(true);
+                .setCustomBigContentView(expandedView);
 
         notification = builder.build();
 
@@ -340,6 +339,17 @@ public class PlayerActivity extends AppCompatActivity {
         protected Void doInBackground(String... arg0) {
             String videoID = arg0[0];
             String json = jsonResponse(videoID,0);
+
+            HttpHandler handler = new HttpHandler();
+            String responseJson = handler.makeServiceCall("https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v="+videoID+"&format=json");
+
+            try {
+                JSONObject jsonObject = new JSONObject(responseJson);
+                videoTitle = jsonObject.getString("title");
+                channelTitle = jsonObject.getString("author_name");
+
+            }catch (Exception e){e.printStackTrace();}
+
             if (json!=null && json.contains("\"error\":")) {
                 json = jsonResponse(videoID,1);
                 if (json.contains("\"error\":"))
@@ -389,9 +399,11 @@ public class PlayerActivity extends AppCompatActivity {
                     YtFile ytaudioFile = getBestStream(ytFiles);
                     link = ytaudioFile.getUrl();
 
-                    videoTitle = videoMeta.getTitle();
-                    channelTitle = videoMeta.getAuthor();
+                    /*videoTitle = videoMeta.getTitle();
+                    channelTitle = videoMeta.getAuthor();*/
                     imgUrl = videoMeta.getMqImageUrl();
+
+                    Log.e("PlayerActivity","videoTitle: "+videoTitle+", channelTitle: "+channelTitle);
 
                     for (int i = 0, itag; i < ytFiles.size(); i++) {
                         itag = ytFiles.keyAt(i);
@@ -442,13 +454,13 @@ public class PlayerActivity extends AppCompatActivity {
                                         if (mMediaPlayer != null) {
                                             try {
                                                 Log.e("DataSrcLink",link+"");
-                                                mMediaPlayer = new MediaPlayer();
+                                                mMediaPlayer.reset();
                                                 mMediaPlayer.setDataSource(link);
                                                 mMediaPlayer.prepare();
                                                 mMediaPlayer.start();
                                             }catch (Exception ex) {
                                                 Log.e("DataSourceNull",ex.getMessage());
-                                                showAlert("Failed!","Couldn't get the required audio stream",true);
+                                                showAlert("Failed!","Couldn't set media player events. Try again!",true);
                                             }
                                             Log.e("Duration","dur: "+mMediaPlayer.getDuration());
                                             total_duration = mMediaPlayer.getDuration();
@@ -462,7 +474,6 @@ public class PlayerActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onPrepared(MediaPlayer mp) {
                                                     updateProgressBar();
-                                                   // updateDuration();
                                                 }
                                             });
                                             mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -730,8 +741,6 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void addFormatToList(final String videoTitle, final YtFile ytfile) {
-        // Display some buttons and let the user choose the format
-
         Format ytFrVideo = ytfile.getFormat();
 
         String ytText;
@@ -746,35 +755,11 @@ public class PlayerActivity extends AppCompatActivity {
             }
         }
 
-       /* Log.e(ytText,"BitRate: "+ytfile.getFormat().getAudioBitrate()+", Height: "+ytfile.getFormat().getHeight()*//*+", Video codec: "+
-                ytfile.getFormat().getVideoCodec()+", isdash: "+ytfile.getFormat().isDashContainer()+", ishls: "+
-                ytfile.getFormat().isHlsContent()*//*+", url: "+ytfile.getUrl());*/
-
         ytConfigs.add(new YTConfig(ytText,ytfile.getUrl(),ytfile.getFormat().getExt(),videoTitle));
-
-       /* Button btn = new Button(this);
-        btn.setText(btnText);
-        btn.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                String filename;
-                if (videoTitle.length() > 55) {
-                    filename = videoTitle.substring(0, 55) + "." + ytfile.getFormat().getExt();
-                } else {
-                    filename = videoTitle + "." + ytfile.getFormat().getExt();
-                }
-                filename = filename.replaceAll("[\\\\><\"|*?%:#/]", "");
-                downloadFromUrl(ytfile.getUrl(), videoTitle, filename);
-                finish();
-            }
-        });
-        mainLayout.addView(btn);*/
     }
 
     void callFinish() {
-        Intent i = new Intent(PlayerActivity.this, MainActivity.class);
-        startActivity(i);
+        finish();
     }
 
     void showListDialog() {

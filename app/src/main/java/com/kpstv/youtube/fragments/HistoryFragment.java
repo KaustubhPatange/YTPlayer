@@ -137,7 +137,11 @@ public class HistoryFragment extends Fragment {
         final ArrayList<String> urls = new ArrayList<>();
         String items = sharedPreferences.getString("urls","");
         if (!items.isEmpty()) {
-            urls.addAll(Arrays.asList(items.split(",")));
+            String[] urlarray = items.split(",");
+            if (urlarray.length>25) {
+                // TODO: If so try to implement after events when history length is more than 25
+            }
+            urls.addAll(Arrays.asList(urlarray));
         }
         if (urls.size()>0) {
             swipeRefreshLayout.setRefreshing(true);

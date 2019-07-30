@@ -4,12 +4,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="64dp">
-    <LinearLayout
+    <RelativeLayout
         android:padding="10dp"
         android:gravity="center_vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <LinearLayout
+            android:id="@+id/layoutParent"
+            android:layout_alignParentStart="true"
             android:layout_width="120dp"
             android:orientation="vertical"
             android:layout_height="wrap_content">
@@ -34,7 +36,8 @@
                 android:fontFamily="@font/dmsans"/>
         </LinearLayout>
         <LinearLayout
-            android:layout_marginStart="10dp"
+            android:layout_toRightOf="@id/layoutParent"
+            android:layout_marginStart="20dp"
             android:gravity="center_vertical"
             android:layout_width="wrap_content"
             android:orientation="horizontal"
@@ -73,12 +76,14 @@
                 android:layout_height="35dp" />
         </LinearLayout>
         <ImageView
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
             android:layout_marginStart="20dp"
             android:id="@+id/nImage"
             android:layout_marginEnd="5dp"
             android:scaleType="fitXY"
             android:layout_width="60dp"
             android:src="@mipmap/ic_launcher"
-            android:layout_height="50dp" />
-    </LinearLayout>
+            android:layout_height="35dp" />
+    </RelativeLayout>
 </LinearLayout>

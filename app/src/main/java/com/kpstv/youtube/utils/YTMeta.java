@@ -19,6 +19,10 @@ public class YTMeta {
             HttpHandler handler = new HttpHandler();
             String json = handler.makeServiceCall(
                     "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v="+videoID+"&format=json");
+            if (json==null) {
+                Log.e("YTMetaResponse","Null response on: "+videoID);
+                return;
+            }
 
             try {
                 JSONObject object = new JSONObject(json);

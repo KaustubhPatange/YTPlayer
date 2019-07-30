@@ -10,21 +10,21 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import com.kpstv.youtube.adapters.TrendAdapter;
+import com.kpstv.youtube.adapters.DiscoverAdapter;
 import com.kpstv.youtube.models.DiscoverModel;
-import com.kpstv.youtube.models.SearchModel;
+import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.OnLoadMoreListener;
 import com.kpstv.youtube.utils.YTSearch;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TrendActivity extends AppCompatActivity {
+public class DiscoverActivity extends AppCompatActivity {
 
     private String[] apikeys = new String[] {"AIzaSyCA2Py9snHNdp4Y4Dkyq-z7gUfxLqdPhtQ","AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
 
     private RecyclerView mRecyclerView;
-    private TrendAdapter mAdapter;
+    private DiscoverAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
 
     private List<DiscoverModel> discoverModels;
@@ -33,7 +33,9 @@ public class TrendActivity extends AppCompatActivity {
 
     ProgressBar progressBar;
 
-    protected Handler handler;
+    AsyncTask<Void,Void,Void> loadTask;
+
+    protected Handler handler; String intentTitle,csvString;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,24 +47,30 @@ public class TrendActivity extends AppCompatActivity {
         csvlines = new ArrayList<>();
 
         Intent intent = getIntent();
-        String csv = intent.getStringExtra("data_csv");
-        String title = intent.getStringExtra("title");
-        String[] lines = csv.split("\n|\r");
-        int startnumber = 2;
-        if (title.contains("Viral")) startnumber = 1;
-        for(int i=startnumber;i<lines.length;i++) {
-         csvlines.add(lines[i]);
-        }
+        csvString = intent.getStringExtra("data_csv");
+        intentTitle = intent.getStringExtra("title");
 
-        setTitle(title+" ("+ csvlines.size() +")");
-
+        setTitle(intentTitle+" ("+ csvlines.size() +")");
         discoverModels = new ArrayList<>();
         handler = new Handler();
         mRecyclerView = findViewById(R.id.my_recycler_view);
         progressBar = findViewById(R.id.progressBar);
 
+        if (csvString!=null) {
+            setInitial();
+        }
         new loadInitialData().execute();
     }
+
+    void setInitial() {
+        String[] lines = csvString.split("\n|\r");
+        int startnumber = 2;
+        if (intentTitle.contains("Viral")) startnumber = 1;
+        for(int i=startnumber;i<lines.length;i++) {
+            csvlines.add(lines[i]);
+        }
+    }
+
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -75,12 +83,15 @@ public class TrendActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
+
+            setTitle(intentTitle+" ("+ (csvlines.size()+10) +")");
+
             progressBar.setVisibility(View.GONE);
             mRecyclerView.setHasFixedSize(true);
 
-            mLayoutManager = new LinearLayoutManager(TrendActivity.this);
+            mLayoutManager = new LinearLayoutManager(DiscoverActivity.this);
             mRecyclerView.setLayoutManager(mLayoutManager);
-            mAdapter = new TrendAdapter(TrendActivity.this, discoverModels, mRecyclerView);
+            mAdapter = new DiscoverAdapter(DiscoverActivity.this, discoverModels, mRecyclerView);
             mRecyclerView.setAdapter(mAdapter);
 
             
@@ -90,17 +101,19 @@ public class TrendActivity extends AppCompatActivity {
                 public void onLoadMore() {
                     if (csvlines.isEmpty())
                         return;
-                    //add null , so the adapter will check view_type and show progress bar at bottom
-                    discoverModels.add(null);
-                    mAdapter.notifyItemInserted(discoverModels.size() - 1);
+                    if (loadTask!=null&&loadTask.getStatus() != Status.RUNNING) {
+                        //add null , so the adapter will check view_type and show progress bar at bottom
+                        discoverModels.add(null);
+                        mAdapter.notifyItemInserted(discoverModels.size() - 1);
 
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            new loadFurtherData().execute();
-                        }
-                    }, 2000);
-
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                loadTask = new loadFurtherData();
+                                loadTask.execute();
+                            }
+                        }, 2000);
+                    }
                 }
             });
             super.onPostExecute(aVoid);
@@ -108,6 +121,12 @@ public class TrendActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            HttpHandler handler = new HttpHandler();
+            if (intentTitle.contains("Viral")) {
+                csvString = handler.makeServiceCall("https://spotifycharts.com/viral/global/daily/latest/download");
+            }else
+                csvString = handler.makeServiceCall("https://spotifycharts.com/regional/global/daily/latest/download");
+            setInitial();
             CommonLoad();
             return null;
         }
