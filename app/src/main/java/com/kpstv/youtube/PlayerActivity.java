@@ -11,43 +11,47 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.andexert.library.RippleView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -67,21 +71,13 @@ import com.warkiz.widget.SeekParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.text.SimpleDateFormat;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import javax.security.auth.login.LoginException;
 
 import at.huber.youtubeExtractor.Format;
 import at.huber.youtubeExtractor.VideoMeta;
@@ -103,10 +99,10 @@ public class PlayerActivity extends AppCompatActivity {
 
     ImageView mainImageView; public  boolean isplaying=false, isfirst=true;
 
-    ProgressBar mprogressBar;
+    ProgressBar mprogressBar,progressBar;
     FloatingActionButton previousFab,playFab, nextFab;
 
-    IndicatorSeekBar indicatorSeekBar; MediaPlayer mMediaPlayer;
+    IndicatorSeekBar indicatorSeekBar;
 
     Notification notification;  NotificationCompat.Builder builder;
 
@@ -116,9 +112,23 @@ public class PlayerActivity extends AppCompatActivity {
 
     SharedPreferences preferences;
 
-    int total_duration=0; int total_seconds; List<String> yturls; int ytIndex=0;
+    long total_duration=0; int total_seconds; List<String> yturls; int ytIndex=0;
 
     ArrayList<YTConfig> ytConfigs;
+
+    ExoPlayer player;
+    MediaSource mediaSource;
+    DefaultDataSourceFactory dataSourceFactory;
+    DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
+    TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory();
+    TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
+
+    private static final CookieManager DEFAULT_COOKIE_MANAGER;
+    static
+    {
+        DEFAULT_COOKIE_MANAGER = new CookieManager();
+        DEFAULT_COOKIE_MANAGER.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,7 +166,14 @@ public class PlayerActivity extends AppCompatActivity {
 
         getAllViews();
 
-        mMediaPlayer = new MediaPlayer();
+        if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER)
+        {
+            CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
+        }
+        dataSourceFactory = new DefaultDataSourceFactory(PlayerActivity.this,
+                Util.getUserAgent(PlayerActivity.this,
+                        getResources().getString(R.string.app_name)), BANDWIDTH_METER);
+        player = ExoPlayerFactory.newSimpleInstance(PlayerActivity.this, trackSelector);
         ytConfigs = new ArrayList<>();
 
         playFab.setOnClickListener(new View.OnClickListener() {
@@ -200,10 +217,10 @@ public class PlayerActivity extends AppCompatActivity {
             public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
                 mHandler.removeCallbacks(mUpdateTimeTask);
 
-                // forward or backward to certain seconds
-                mMediaPlayer.seekTo(10000);
+                long progresstoSeek = YTutils.progressToTimer(seekBar.getProgress(),total_duration);
+                Log.e("ProgresstoSeek",progresstoSeek+"");
+                player.seekTo(progresstoSeek);
 
-                // update timer progress again
                 updateProgressBar();
             }
         });
@@ -238,9 +255,6 @@ public class PlayerActivity extends AppCompatActivity {
                 }
                 return;
             }
-
-            // other 'switch' lines to check for other
-            // permissions this app might request
         }
     }
 
@@ -398,9 +412,7 @@ public class PlayerActivity extends AppCompatActivity {
 
                     YtFile ytaudioFile = getBestStream(ytFiles);
                     link = ytaudioFile.getUrl();
-
-                    /*videoTitle = videoMeta.getTitle();
-                    channelTitle = videoMeta.getAuthor();*/
+                    link = link.replace("\\","");
                     imgUrl = videoMeta.getMqImageUrl();
 
                     Log.e("PlayerActivity","videoTitle: "+videoTitle+", channelTitle: "+channelTitle);
@@ -413,8 +425,6 @@ public class PlayerActivity extends AppCompatActivity {
                              addFormatToList(videoMeta.getTitle(), ytFile);
                         }
                     }
-
-                    Log.e("YTSTREAM_URL",link);
                 }
 
                 @Override
@@ -451,50 +461,54 @@ public class PlayerActivity extends AppCompatActivity {
 
                                     playFab.setEnabled(true);
                                     try {
-                                        if (mMediaPlayer != null) {
+                                        if (player != null) {
                                             try {
                                                 Log.e("DataSrcLink",link+"");
-                                                mMediaPlayer.reset();
-                                                mMediaPlayer.setDataSource(link);
-                                                mMediaPlayer.prepare();
-                                                mMediaPlayer.start();
+                                                player.stop();
+                                                player.release();
+                                                mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(link));
+                                                player = ExoPlayerFactory.newSimpleInstance(PlayerActivity.this, trackSelector);
+                                                player.prepare(mediaSource);
+                                                player.setPlayWhenReady(true);
                                             }catch (Exception ex) {
                                                 Log.e("DataSourceNull",ex.getMessage());
                                                 showAlert("Failed!","Couldn't set media player events. Try again!",true);
                                             }
-                                            Log.e("Duration","dur: "+mMediaPlayer.getDuration());
-                                            total_duration = mMediaPlayer.getDuration();
-                                            total_seconds = total_duration/1000;
-                                            totalDuration.setText(YTutils.milliSecondsToTimer(total_duration));
 
                                             makePause();
                                             isplaying=true;
 
-                                            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                                            player.addListener(new Player.EventListener() {
+                                                @SuppressLint("RestrictedApi")
                                                 @Override
-                                                public void onPrepared(MediaPlayer mp) {
-                                                    updateProgressBar();
+                                                public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                                                    switch (playbackState) {
+                                                        case ExoPlayer.STATE_BUFFERING:
+                                                            playFab.setVisibility(View.INVISIBLE);
+                                                            break;
+                                                        case ExoPlayer.STATE_ENDED:
+                                                            makePlay();
+                                                            isplaying=false;
+                                                            break;
+                                                        case ExoPlayer.STATE_READY:
+                                                            playFab.setVisibility(View.VISIBLE);
+                                                            total_duration = player.getDuration();
+                                                            total_seconds = (int)total_duration/1000;
+                                                            totalDuration.setText(YTutils.milliSecondsToTimer(total_duration));
+                                                            updateProgressBar();
+                                                            break;
+                                                    }
                                                 }
                                             });
-                                            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                                @Override
-                                                public void onCompletion(MediaPlayer mp) {
-                                                    makePlay();
-                                                    isplaying=false;
-                                                }
-                                            });
+
+                                            mainlayout.setVisibility(View.VISIBLE);
                                         }
                                     } catch (Exception io) {
                                         io.printStackTrace();
                                     }
-                                    mainlayout.setVisibility(View.VISIBLE);
 
                                     if (yturls.size()>1) {
                                         warningText.setText(Html.fromHtml("Saving video offline is illegal  &#8226;  "+(ytIndex+1)+"/"+yturls.size()));
-                                    }
-
-                                    if (!preferences.getBoolean("isShownSeeek",false)) {
-                                        showSeekBarDialog();
                                     }
 
                                     // Store video into history
@@ -615,8 +629,8 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         notificationManager.cancel(1);
-        mMediaPlayer.stop();
-        mMediaPlayer.release();
+        player.stop();
+        player.release();
         mHandler.removeCallbacks(mUpdateTimeTask);
         super.onDestroy();
     }
@@ -624,8 +638,8 @@ public class PlayerActivity extends AppCompatActivity {
     void onClear() {
         backImage.setImageDrawable(null);
         mainlayout.setVisibility(View.GONE);
-        mMediaPlayer.stop();
-        mMediaPlayer.release();
+        player.stop();
+        player.release();
         mHandler.removeCallbacks(mUpdateTimeTask);
         isplaying=false;
         total_duration=0;total_seconds=0;
@@ -662,16 +676,16 @@ public class PlayerActivity extends AppCompatActivity {
 
             makePause();
             notificationManager.notify(1,builder.build());
-            mMediaPlayer.start();
+            player.setPlayWhenReady(true);
          //   updateDuration();
         } else {
 
             makePlay();
             notificationManager.notify(1,builder.build());
-            mMediaPlayer.pause();
+            player.setPlayWhenReady(false);
            // mTimer.cancel();
         }
-        Log.e("CurrentDur",mMediaPlayer.getCurrentPosition()+"");
+        Log.e("CurrentDur",player.getCurrentPosition()+"");
         isplaying = isplay;
     }
 
@@ -689,6 +703,7 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void getAllViews() {
+        progressBar = findViewById(R.id.progress_circular);
         warningText = findViewById(R.id.warningText);
         downloadButton = findViewById(R.id.downloadlayout);
         mprogressBar = findViewById(R.id.mainprogress);
@@ -705,25 +720,6 @@ public class PlayerActivity extends AppCompatActivity {
         backImage = findViewById(R.id.background_image);
     }
 
-    void showSeekBarDialog() {
-        new AlertDialog.Builder(PlayerActivity.this)
-                .setTitle("Audio Channel")
-                .setMessage("Due to recent changes in YouTube api, audio seeking is not possible since it's a real-time " +
-                        "stream.\n\nIt means you cannot change playback from seek bar control.")
-
-                .setPositiveButton("Agree", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        SharedPreferences.Editor editor = preferences.edit();
-                        editor.putBoolean("isShownSeeek",true);
-                        editor.apply();
-                    }
-                })
-
-                .setNegativeButton("Cancel", null)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
-    }
-
     void showAlert(String title, String message, boolean isalert) {
         int icon = android.R.drawable.ic_dialog_info;
         if (isalert) icon = android.R.drawable.ic_dialog_alert;
@@ -738,6 +734,7 @@ public class PlayerActivity extends AppCompatActivity {
                 })
                 .setIcon(icon)
                 .show();
+
     }
 
     private void addFormatToList(final String videoTitle, final YtFile ytfile) {
@@ -807,42 +804,6 @@ public class PlayerActivity extends AppCompatActivity {
         });
         AlertDialog dialog = builder.create();
         dialog.show();
-       /* AlertDialog.Builder builderSingle = new AlertDialog.Builder(PlayerActivity.this);
-        builderSingle.setTitle("Select Media Codec");
-
-        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(PlayerActivity.this,
-                android.R.layout.select_dialog_singlechoice);
-
-        for(YTConfig config : ytConfigs) {
-            arrayAdapter.add(config.getText());
-        }
-
-        builderSingle.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                YTConfig config = ytConfigs.get(which);
-                String filename;
-                if (config.getText().length() > 55) {
-                    filename = config.getText().substring(0, 55) + "." + config.getExt();
-                } else {
-                    filename = config.getText() + "." + config.getExt();
-                }
-                filename = filename.replaceAll("[\\\\><\"|*?%:#/]", "");
-                downloadFromUrl(config.getUrl(),config.getText(),filename);
-
-                FancyToast.makeText(PlayerActivity.this,"Download started",
-                        FancyToast.LENGTH_SHORT,FancyToast.INFO,false).show();
-
-            }
-        });
-        builderSingle.show();*/
     }
 
     private void downloadFromUrl(String youtubeDlUrl, String downloadTitle, String fileName) {
@@ -858,16 +819,14 @@ public class PlayerActivity extends AppCompatActivity {
         manager.enqueue(request);
     }
 
-    // New methods...
-
     public void updateProgressBar() {
         mHandler.postDelayed(mUpdateTimeTask, 100);
     }
 
     private Runnable mUpdateTimeTask = new Runnable() {
         public void run() {
-            long totalDuration = mMediaPlayer.getDuration();
-            long currentDur = mMediaPlayer.getCurrentPosition();
+            long totalDuration = player.getDuration();
+            long currentDur = player.getCurrentPosition();
 
             // Displaying time completed playing
             currentDuration.setText(""+YTutils.milliSecondsToTimer(currentDur));

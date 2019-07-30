@@ -93,7 +93,7 @@ public class YTutils {
         return number+"";
     }
 
-    public static int progressToTimer(int progress, int totalDuration) {
+    public static int progressToTimer(int progress, long totalDuration) {
         int currentDuration = 0;
         totalDuration = (int) (totalDuration / 1000);
         currentDuration = (int) ((((double)progress) / 100) * totalDuration);
@@ -182,6 +182,25 @@ public class YTutils {
         }
         return urlYoutube;
 
+    }
+
+    public static long TimertoMilliseconds(String timer) {
+        String[] idls = timer.split(":");
+        Log.e("IDLS_Count",idls.length+"");
+        if (idls.length>2) {
+            // It contains hour...
+            // 3:02:11
+            long hour = Long.parseLong(idls[0])*60*60*1000;
+            long min = Long.parseLong(idls[1])*60*1000;
+            long sec =  Long.parseLong(idls[2])*1000;
+            return hour+min+sec;
+        }else {
+            // It is only minutes...
+            //3:04
+            long min = Long.parseLong(idls[0])*60*1000;
+            long sec =  Long.parseLong(idls[1])*1000;
+            return min+sec;
+        }
     }
 
     public static String milliSecondsToTimer(long milliseconds){

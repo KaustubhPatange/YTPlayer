@@ -165,15 +165,25 @@
                     android:src="@drawable/ic_skip_previous"
                     app:fabSize="mini" />
 
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/play_pause_button"
 
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:scaleType="center"
-                    android:layout_margin="8dp"
-                    android:src="@drawable/ic_play"
-                    app:fabSize="normal" />
+                   <RelativeLayout
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content">
+                       <ProgressBar
+                           android:id="@+id/progress_circular"
+                           android:layout_centerInParent="true"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content" />
+                       <android.support.design.widget.FloatingActionButton
+                           android:id="@+id/play_pause_button"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:scaleType="center"
+                           android:layout_margin="8dp"
+                           android:src="@drawable/ic_play"
+                           app:fabSize="normal" />
+                   </RelativeLayout>
+
 
                 <android.support.design.widget.FloatingActionButton
                     android:id="@+id/forwardButton"
