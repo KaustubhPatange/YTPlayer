@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -57,9 +58,9 @@ public class DiscoverActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
 
         if (csvString!=null) {
-            setInitial();
+            setTitle(intentTitle+" ("+ csvlines.size() +")");
         }
-        new loadInitialData().execute();
+        new loadInitialData().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     void setInitial() {
@@ -99,21 +100,22 @@ public class DiscoverActivity extends AppCompatActivity {
             mAdapter.setOnLoadMoreListener(new OnLoadMoreListener() {
                 @Override
                 public void onLoadMore() {
-                    if (csvlines.isEmpty())
-                        return;
-                    if (loadTask!=null&&loadTask.getStatus() != Status.RUNNING) {
-                        //add null , so the adapter will check view_type and show progress bar at bottom
-                        discoverModels.add(null);
-                        mAdapter.notifyItemInserted(discoverModels.size() - 1);
+                   try {
+                       Log.e("SizeofArray",csvlines.size()+"");
+                       if (csvlines.isEmpty())
+                           return;
+                       //add null , so the adapter will check view_type and show progress bar at bottom
+                       discoverModels.add(null);
+                       mAdapter.notifyItemInserted(discoverModels.size() - 1);
 
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                loadTask = new loadFurtherData();
-                                loadTask.execute();
-                            }
-                        }, 2000);
-                    }
+                       handler.postDelayed(new Runnable() {
+                           @Override
+                           public void run() {
+                               loadTask = new loadFurtherData();
+                               loadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                           }
+                       }, 2000);
+                   }catch (Exception ignored){}
                 }
             });
             super.onPostExecute(aVoid);

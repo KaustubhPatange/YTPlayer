@@ -79,6 +79,11 @@ public class SearchActivity extends AppCompatActivity {
                     String textToSearch = searchEdit.getText().toString();
                     if (textToSearch.isEmpty())
                         return false;
+                    searchEdit.setEnabled(false);
+                    if (task.getStatus()== AsyncTask.Status.RUNNING)
+                        task.cancel(true);
+                    trendingText.setText("SEARCHING...");
+                    trendingText.setVisibility(View.VISIBLE);
                     discoverModels.clear();
                     if (textToSearch.contains("open.spotify.com")) {
                         // Spotify url here
@@ -86,7 +91,7 @@ public class SearchActivity extends AppCompatActivity {
                         { 
                             String id = YTutils.getSpotifyID(textToSearch);
                             if (id!=null)
-                                new spotifySearch(textToSearch).execute(); 
+                                new spotifySearch(textToSearch).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                             else Toast.makeText(SearchActivity.this, "Could not extract track ID!", Toast.LENGTH_SHORT).show();
                         }
                         else if (textToSearch.contains("/playlists/")) {
@@ -97,7 +102,7 @@ public class SearchActivity extends AppCompatActivity {
                         }
                     }else {
                         // Normal searching goes here
-                        new normalSearch(textToSearch).execute();
+                        new normalSearch(textToSearch).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     }
                     return true;
                 }
@@ -106,7 +111,7 @@ public class SearchActivity extends AppCompatActivity {
         });
 
         task = new getVirals();
-        task.execute();
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     class spotifySearch extends AsyncTask<Void,Void,Void> {
@@ -127,6 +132,7 @@ public class SearchActivity extends AppCompatActivity {
             recyclerView.setAdapter(adapter);
             progressBar.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
+            searchEdit.setEnabled(true);
             super.onPostExecute(aVoid);
         }
 
@@ -172,6 +178,7 @@ public class SearchActivity extends AppCompatActivity {
             recyclerView.setAdapter(adapter);
             progressBar.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
+            searchEdit.setEnabled(true);
             super.onPostExecute(aVoid);
         }
 
@@ -181,12 +188,14 @@ public class SearchActivity extends AppCompatActivity {
             if (ytSearch.getVideoIDs().size()<=0) return null;
             for (String videoID: ytSearch.getVideoIDs()) {
                 YTMeta ytMeta = new YTMeta(videoID);
-                discoverModels.add(new DiscoverModel(
-                        ytMeta.getVideMeta().getTitle(),
-                        ytMeta.getVideMeta().getAuthor(),
-                        ytMeta.getVideMeta().getImgUrl(),
-                        "https://www.youtube.com/watch?v="+videoID
-                ));
+                if (ytMeta.getVideMeta()!=null) {
+                    discoverModels.add(new DiscoverModel(
+                            ytMeta.getVideMeta().getTitle(),
+                            ytMeta.getVideMeta().getAuthor(),
+                            ytMeta.getVideMeta().getImgUrl(),
+                            "https://www.youtube.com/watch?v="+videoID
+                    ));
+                }
             }
             return null;
         }

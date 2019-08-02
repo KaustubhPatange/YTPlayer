@@ -32,8 +32,12 @@ import com.kpstv.youtube.adapters.SearchAdapter;
 import com.kpstv.youtube.models.SearchModel;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTSearch;
+import com.kpstv.youtube.utils.YTutils;
 
+import java.io.File;
 import java.util.ArrayList;
+
+import at.huber.youtubeExtractor.YouTubeUriExtractor;
 
 public class SearchFragment extends Fragment {
 
@@ -123,10 +127,10 @@ public class SearchFragment extends Fragment {
             networkCreated = true;
 
             trendTask = new getTrending();
-            trendTask.execute();
+            trendTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
             discoverTask = new loadDiscoverImages();
-            discoverTask.execute();
+            discoverTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
 
         return v;
@@ -137,12 +141,12 @@ public class SearchFragment extends Fragment {
         if (!istrendloaded && trendTask.getStatus() != AsyncTask.Status.RUNNING)
         {
             trendTask = new getTrending();
-            trendTask.execute();
+            trendTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
         if (!isdiscoverloaded && discoverTask.getStatus() != AsyncTask.Status.RUNNING)
         {
             discoverTask = new loadDiscoverImages();
-            discoverTask.execute();
+            discoverTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
         if (drawables.size()>3) {
             imageView1.setImageDrawable(drawables.get(0));
@@ -183,6 +187,24 @@ public class SearchFragment extends Fragment {
                 SpotifyTrendsCSV = handler.makeServiceCall(
                         "https://spotifycharts.com/regional/global/daily/latest/download");
             }
+
+            String trendRead = YTutils.ReadFile(YTutils.getFile("/YTPlayer/trend.csv"));
+            if (trendRead!=null && !trendRead.isEmpty()) {
+                String[] lines = trendRead.split("\n|\r");
+                if (lines[0].contains(YTutils.getTodayDate())&&lines.length==11) {
+                    for (int i=1;i<11;i++) {
+                        String id = lines[i].split(",")[1];
+                        models.add(new SearchModel(
+                                lines[i].split(",")[0],
+                                YTutils.getImageUri(id),
+                                YTutils.getYtUrl(id)
+
+                        ));
+                    }
+                    return null;
+                }
+            }
+
             if (models.size()<10) {
                 models.clear();
                 String[] csvlines = SpotifyTrendsCSV.split("\n|\r");
@@ -205,8 +227,32 @@ public class SearchFragment extends Fragment {
                     ));
                 }
             }
+            // Save data to internal storage
+            saveTrendToInternal();
             return null;
         }
+    }
+
+    void saveTrendToInternal() {
+        if (!YTutils.getFile("/YTPlayer").exists())
+            YTutils.CreateDir("/YTPlayer");
+        StringBuilder builder = new StringBuilder();
+        builder.append(YTutils.getTodayDate()+"\n");
+        for(SearchModel model : models) {
+            builder.append(model.getTitle()+","+YTutils.getVideoID(model.getYturl())+"\n");
+        }
+        YTutils.Write(builder.toString(),YTutils.getFile("/YTPlayer/trend.csv"));
+    }
+
+    void saveDiscoverToInternal() {
+        if (!YTutils.getFile("/YTPlayer").exists())
+            YTutils.CreateDir("/YTPlayer");
+        StringBuilder builder = new StringBuilder();
+        builder.append(YTutils.getTodayDate()+"\n");
+        for (String image : images) {
+            builder.append(image+"\n");
+        }
+        YTutils.Write(builder.toString(),YTutils.getFile("/YTPlayer/discover.csv"));
     }
 
     class loadDiscoverImages extends AsyncTask<Void,Void,Void> {
@@ -230,6 +276,18 @@ public class SearchFragment extends Fragment {
                         "https://spotifycharts.com/viral/global/daily/latest/download"
                 );
             }
+
+            String discoverRead = YTutils.ReadFile(YTutils.getFile("/YTPlayer/discover.csv"));
+            if (discoverRead!=null && !discoverRead.isEmpty()) {
+                String[] lines = discoverRead.split("\n|\r");
+                if (lines[0].contains(YTutils.getTodayDate())&&lines.length==5) {
+                    for (int i=1;i<5;i++) {
+                        images.add(lines[i]);
+                    }
+                    return null;
+                }
+            }
+
             if (images.size()<4) {
                 images.clear();
                 String[] csvlines = SpotifyViralCSV.split("\n|\r");
@@ -249,6 +307,7 @@ public class SearchFragment extends Fragment {
                     images.add(imgurl);
                 }
             }
+            saveDiscoverToInternal();
             return null;
         }
     }

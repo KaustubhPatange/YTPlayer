@@ -94,9 +94,9 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
 
         String urlset = dataSet.get(listPosition);
 
-        new getContents(holder,urlset).execute();
+        new getContents(holder,urlset).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        new getData(holder,urlset).execute();
+        new getData(holder,urlset).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     class getData extends AsyncTask<String,Void,Void> {

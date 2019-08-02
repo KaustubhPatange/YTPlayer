@@ -34,7 +34,10 @@ public class YTSearch {
             while((line = reader.readLine()) != null)
             {
                 if (line.contains("src=\"https://i.ytimg.com"))
+                {
                     videoIDs.add(line.split("/")[4]);
+                //    Log.e("YT_searchTAG","query: "+tosearch+", id:"+line.split("/")[4]);
+                }
             }
             in.close();
 

@@ -25,9 +25,14 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -46,6 +51,14 @@ public class YTutils {
         for(int i=0;i<list.size();i++)
             arrays[i]=list.get(i);
         return arrays;
+    }
+
+    public static String getImageUrl(String YtUrl) {
+        return "https://i.ytimg.com/vi/"+getVideoID(YtUrl)+"/mqdefault.jpg";
+    }
+
+    public static String getYtUrl(String videoID) {
+        return "https://www.youtube.com/watch?v="+videoID;
     }
 
     public static String convertStreamToString(InputStream is) {
@@ -67,6 +80,56 @@ public class YTutils {
             }
         }
         return sb.toString();
+    }
+
+    public static void Write(String string,File file) {
+        try {
+            FileOutputStream f = new FileOutputStream(file);
+            PrintWriter pw = new PrintWriter(f);
+            pw.write(string);
+            pw.flush();
+            pw.close();
+            f.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Log.i("writeToSDFile2", "******* File not found. Did you" +
+                    " add a WRITE_EXTERNAL_STORAGE permission to the   manifest?");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Log.e("writeToSDFile3","\n\nFile written to "+file);
+    }
+
+    public static File getFile(String targetfolder) {
+        File root = android.os.Environment.getExternalStorageDirectory();
+        File dir = new File (root.getAbsolutePath() + "/" + targetfolder);
+        return dir;
+    }
+
+    public static void CreateDir(String targetfolder) {
+        File root = android.os.Environment.getExternalStorageDirectory();
+        Log.e("CreateDir",targetfolder);
+        File dir = new File (root.getAbsolutePath() + "/" + targetfolder);
+        dir.mkdirs();
+    }
+
+    public static String ReadFile(File file) {
+        String texttoreturn="";
+        try {
+            StringBuilder text = new StringBuilder();
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = br.readLine()) != null) {
+                text.append(line);
+                text.append('\n');
+            }
+            br.close();
+            texttoreturn = text.toString();
+        }
+        catch (IOException e) {
+            Log.e("ReadFile",e.getMessage());
+        }
+        return texttoreturn;
     }
 
 

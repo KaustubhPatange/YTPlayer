@@ -239,7 +239,7 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
-        new setData().execute(YTutils.getVideoID(YouTubeUrl));
+        new setData().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,YTutils.getVideoID(YouTubeUrl));
     }
 
     @Override
@@ -343,6 +343,7 @@ public class PlayerActivity extends AppCompatActivity {
         protected void onPreExecute() {
             if (isfirst) {
                 mainlayout.setVisibility(View.GONE);
+                backImage.setVisibility(View.GONE);
             }
             playFab.setEnabled(false);
             mprogressBar.setVisibility(View.VISIBLE);
@@ -491,6 +492,8 @@ public class PlayerActivity extends AppCompatActivity {
                                                             isplaying=false;
                                                             break;
                                                         case ExoPlayer.STATE_READY:
+                                                            mainlayout.setVisibility(View.VISIBLE);
+                                                            backImage.setVisibility(View.VISIBLE);
                                                             playFab.setVisibility(View.VISIBLE);
                                                             total_duration = player.getDuration();
                                                             total_seconds = (int)total_duration/1000;
@@ -501,7 +504,6 @@ public class PlayerActivity extends AppCompatActivity {
                                                 }
                                             });
 
-                                            mainlayout.setVisibility(View.VISIBLE);
                                         }
                                     } catch (Exception io) {
                                         io.printStackTrace();
