@@ -18,7 +18,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/home/kp/android-studio-3.2.0/plugins/android/lib/android.jar!/images/material_design_icons/content/ic_content_copy_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/home/kp/android-studio-3.2.0/plugins/android/lib/android.jar!/images/material_design_icons/navigation/ic_check_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -29,7 +29,7 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="ffffff" />
-                            <entry key="outputName" value="ic_clipboard" />
+                            <entry key="outputName" value="ic_check" />
                             <entry key="sourceFile" value="$USER_HOME$/Pictures/svgs/facebook.svg" />
                           </map>
                         </option>

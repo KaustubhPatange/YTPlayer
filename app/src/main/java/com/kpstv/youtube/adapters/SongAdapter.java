@@ -43,7 +43,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
 
     private ArrayList<DiscoverModel> dataSet;
     private ArrayList<String> yturls;
-    Context con;
+    Context con; boolean CP_ADAPTER;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -62,6 +62,15 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
     }
 
     public SongAdapter(ArrayList<DiscoverModel> data, Context context) {
+        this.dataSet = data;
+        this.con = context;
+        yturls = new ArrayList<>();
+        for (DiscoverModel model: data)
+            yturls.add(0,model.getYtUrl());
+    }
+
+    public SongAdapter(ArrayList<DiscoverModel> data, Context context,boolean iscpAdapter) {
+        CP_ADAPTER = iscpAdapter;
         this.dataSet = data;
         this.con = context;
         yturls = new ArrayList<>();
@@ -105,19 +114,20 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             }
         }).into(holder.imageView);
 
-        holder.mainLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Activity activity = (Activity) con;
-                if (discoverModel.getYtUrl()==null)
-                    new layoutListener(activity,discoverModel).execute();
-                else {
-                    RunLink(discoverModel.getYtUrl(),activity);
+        if (!CP_ADAPTER) {
+            holder.mainLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Activity activity = (Activity) con;
+                    if (discoverModel.getYtUrl()==null)
+                        new layoutListener(activity,discoverModel).execute();
+                    else {
+                        RunLink(discoverModel.getYtUrl(),activity);
+                    }
+
                 }
-
-            }
-        });
-
+            });
+        }
     }
 
     public class layoutListener extends AsyncTask<Void, Void, Void> {

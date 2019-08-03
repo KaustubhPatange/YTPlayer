@@ -34,10 +34,7 @@ import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
 
-import java.io.File;
 import java.util.ArrayList;
-
-import at.huber.youtubeExtractor.YouTubeUriExtractor;
 
 public class SearchFragment extends Fragment {
 
@@ -188,7 +185,7 @@ public class SearchFragment extends Fragment {
                         "https://spotifycharts.com/regional/global/daily/latest/download");
             }
 
-            String trendRead = YTutils.ReadFile(YTutils.getFile("/YTPlayer/trend.csv"));
+            String trendRead = YTutils.readContent(getActivity(),"trend.csv");
             if (trendRead!=null && !trendRead.isEmpty()) {
                 String[] lines = trendRead.split("\n|\r");
                 if (lines[0].contains(YTutils.getTodayDate())&&lines.length==11) {
@@ -234,25 +231,26 @@ public class SearchFragment extends Fragment {
     }
 
     void saveTrendToInternal() {
-        if (!YTutils.getFile("/YTPlayer").exists())
-            YTutils.CreateDir("/YTPlayer");
+        String FILE_NAME = "trend.csv";
         StringBuilder builder = new StringBuilder();
-        builder.append(YTutils.getTodayDate()+"\n");
+        builder.append(YTutils.getTodayDate()).append("\n");
+
         for(SearchModel model : models) {
-            builder.append(model.getTitle()+","+YTutils.getVideoID(model.getYturl())+"\n");
+            builder.append(model.getTitle()).append(",").append(YTutils.getVideoID(model.getYturl())).append("\n");
         }
-        YTutils.Write(builder.toString(),YTutils.getFile("/YTPlayer/trend.csv"));
+
+        YTutils.writeContent(activity,FILE_NAME,builder.toString());
     }
 
     void saveDiscoverToInternal() {
-        if (!YTutils.getFile("/YTPlayer").exists())
-            YTutils.CreateDir("/YTPlayer");
+        String FILE_NAME = "discover.csv";
         StringBuilder builder = new StringBuilder();
         builder.append(YTutils.getTodayDate()+"\n");
         for (String image : images) {
             builder.append(image+"\n");
         }
-        YTutils.Write(builder.toString(),YTutils.getFile("/YTPlayer/discover.csv"));
+
+        YTutils.writeContent(activity,FILE_NAME,builder.toString());
     }
 
     class loadDiscoverImages extends AsyncTask<Void,Void,Void> {
@@ -277,7 +275,7 @@ public class SearchFragment extends Fragment {
                 );
             }
 
-            String discoverRead = YTutils.ReadFile(YTutils.getFile("/YTPlayer/discover.csv"));
+            String discoverRead = YTutils.readContent(getActivity(),"discover.csv");
             if (discoverRead!=null && !discoverRead.isEmpty()) {
                 String[] lines = discoverRead.split("\n|\r");
                 if (lines[0].contains(YTutils.getTodayDate())&&lines.length==5) {

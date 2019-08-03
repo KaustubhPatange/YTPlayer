@@ -18,7 +18,13 @@
     </style>
     <style name="RedAccent" parent="ThemeOverlay.AppCompat.Light">
         <item name="colorControlActivated">#DC0808</item>
-
+    </style>
+    <style name="MenuLabelsStyle">
+        <item name="android:background">@color/background</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:ellipsize">end</item>
     </style>
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>

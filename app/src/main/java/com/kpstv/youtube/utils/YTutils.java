@@ -1,17 +1,21 @@
 package com.kpstv.youtube.utils;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.Log;
+import android.widget.FrameLayout;
 
 import com.kpstv.youtube.R;
 
@@ -26,6 +30,7 @@ import org.w3c.dom.NodeList;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -40,9 +45,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class YTutils {
 
@@ -113,23 +121,53 @@ public class YTutils {
         dir.mkdirs();
     }
 
-    public static String ReadFile(File file) {
-        String texttoreturn="";
+    public static void writeContent(Activity activity, String FILE_NAME, String content) {
+        FileOutputStream fos = null;
+
         try {
-            StringBuilder text = new StringBuilder();
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = br.readLine()) != null) {
-                text.append(line);
-                text.append('\n');
+            fos = activity.openFileOutput(FILE_NAME, MODE_PRIVATE);
+            fos.write(content.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            br.close();
-            texttoreturn = text.toString();
         }
-        catch (IOException e) {
-            Log.e("ReadFile",e.getMessage());
+    }
+
+    public static String readContent(Activity activity, String FILE_NAME) {
+        FileInputStream fis = null;
+        StringBuilder sb = new StringBuilder();
+        try {
+            fis = activity.openFileInput(FILE_NAME);
+            InputStreamReader isr = new InputStreamReader(fis);
+            BufferedReader br = new BufferedReader(isr);
+
+            String text;
+
+            while ((text = br.readLine()) != null) {
+                sb.append(text).append("\n");
+            }
+            return sb.toString();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-        return texttoreturn;
+       return null;
     }
 
 
@@ -174,6 +212,14 @@ public class YTutils {
         @SuppressLint("SimpleDateFormat")
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         return df.format(c);
+    }
+
+    public static String getYesterdayDate() {
+        Date c = Calendar.getInstance().getTime();
+        @SuppressLint("SimpleDateFormat") String date = new SimpleDateFormat("dd").format(c);
+        @SuppressLint("SimpleDateFormat") String month =  new SimpleDateFormat("MM").format(c);
+        @SuppressLint("SimpleDateFormat") String year =  new SimpleDateFormat("yyyy").format(c);
+        return  (Integer.parseInt(date)-1)+"-"+month+"-"+year;
     }
 
     public static String getVideoID(String youtube_url) {
@@ -265,6 +311,19 @@ public class YTutils {
             return min+sec;
         }
     }
+
+    public static void setBackroundTint(FrameLayout frameLayout, int color) {
+        Drawable buttonDrawable = frameLayout.getBackground();
+        buttonDrawable = DrawableCompat.wrap(buttonDrawable);
+        DrawableCompat.setTint(buttonDrawable, color);
+        frameLayout.setBackground(buttonDrawable);
+    }
+
+    public static int getRandomColor(){
+        Random rnd = new Random();
+        return Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+    }
+
 
     public static String milliSecondsToTimer(long milliseconds){
         String finalTimerString = "";

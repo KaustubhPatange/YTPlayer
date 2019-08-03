@@ -14,6 +14,7 @@ import android.view.MenuItem;
 
 
 import com.kpstv.youtube.fragments.HistoryFragment;
+import com.kpstv.youtube.fragments.PlaylistFragment;
 import com.kpstv.youtube.fragments.SearchFragment;
 
 import java.lang.reflect.Method;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
     Fragment HistoryFrag;
     Fragment SearchFrag;
+    Fragment PlaylistFrag;
     SharedPreferences preferences;
 
     @Override
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
         HistoryFrag = new HistoryFragment();
         SearchFrag = new SearchFragment();
+        PlaylistFrag = new PlaylistFragment();
 
         loadFragment(HistoryFrag);
 
@@ -91,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
                     loadFragment(SearchFrag);
                     return true;
                 case R.id.navigation_playlist:
+                    loadFragment(PlaylistFrag);
                     return true;
             }
             return true;

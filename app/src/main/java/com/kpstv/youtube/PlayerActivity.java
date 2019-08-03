@@ -661,6 +661,13 @@ public class PlayerActivity extends AppCompatActivity {
             return true;
         } else if (itemId == R.id.action_youtube) {
           YTutils.StartURLIntent(YouTubeUrl,this);
+        }else if (itemId == R.id.action_share) {
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_TEXT,YouTubeUrl);
+            startActivity(Intent.createChooser(shareIntent, "Share using..."));
+        }else if (itemId == R.id.action_add) {
+         //TODO: Add to playlist
         }
 
         return super.onOptionsItemSelected(item);
