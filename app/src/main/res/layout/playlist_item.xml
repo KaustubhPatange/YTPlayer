@@ -40,7 +40,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_height="50dp"
                 android:background="@drawable/playlist_oval"
-                android:backgroundTint="#ff5427ab">
+                android:backgroundTint="@color/colorScreen">
                 <TextView
                     android:textColor="@color/white"
                     android:id="@+id/pFrameText"

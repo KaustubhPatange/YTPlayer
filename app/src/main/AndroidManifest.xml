@@ -72,7 +72,10 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".CreatePlaylist"></activity>
+        <activity android:name=".CPlaylistActivity" />
+        <activity
+            android:name=".OPlaylistActivity"
+            android:label="@string/title_activity_oplayist"></activity>
     </application>
 
 </manifest>

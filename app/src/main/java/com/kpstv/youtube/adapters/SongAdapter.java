@@ -43,7 +43,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
 
     private ArrayList<DiscoverModel> dataSet;
     private ArrayList<String> yturls;
-    Context con; boolean CP_ADAPTER;
+    Context con; boolean CP_ADAPTER, O_PLAYLIST;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -71,6 +71,15 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
 
     public SongAdapter(ArrayList<DiscoverModel> data, Context context,boolean iscpAdapter) {
         CP_ADAPTER = iscpAdapter;
+        this.dataSet = data;
+        this.con = context;
+        yturls = new ArrayList<>();
+        for (DiscoverModel model: data)
+            yturls.add(0,model.getYtUrl());
+    }
+
+    public SongAdapter(ArrayList<DiscoverModel> data, Context context,boolean iscpAdapter, boolean isOPlaylist) {
+        O_PLAYLIST = isOPlaylist;
         this.dataSet = data;
         this.con = context;
         yturls = new ArrayList<>();
@@ -114,7 +123,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             }
         }).into(holder.imageView);
 
-        if (!CP_ADAPTER) {
+        if (!CP_ADAPTER && !O_PLAYLIST) {
             holder.mainLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -128,6 +137,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                 }
             });
         }
+        // TODO: Implement CP Adapter and O playlist clicks
     }
 
     public class layoutListener extends AsyncTask<Void, Void, Void> {

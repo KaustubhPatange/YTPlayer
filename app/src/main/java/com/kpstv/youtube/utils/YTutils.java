@@ -175,7 +175,7 @@ public class YTutils {
         // https://open.spotify.com/track/4hPpVbbakQNv8YTHYaOJP4
         String url;
         if (spotifyurl.contains("open.spotify")){
-            url = spotifyurl.replace("https://open.spotify.com/track/","");
+            url = spotifyurl.split("/")[4];
             if (url.contains("?"))
                 return url.split("\\?")[0];
             else return url;

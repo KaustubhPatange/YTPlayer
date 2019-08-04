@@ -11,14 +11,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.kpstv.youtube.CreatePlaylist;
+import com.kpstv.youtube.CPlaylistActivity;
 import com.kpstv.youtube.R;
-import com.kpstv.youtube.adapters.HistoryAdapter;
 import com.kpstv.youtube.adapters.PlaylistAdapter;
 import com.kpstv.youtube.models.PlaylistModel;
 import com.kpstv.youtube.utils.YTutils;
@@ -62,7 +60,7 @@ public class PlaylistFragment extends Fragment {
             recyclerView.setLayoutManager(layoutManager);
 
             fabCreate.setOnClickListener(view -> {
-                Intent intent = new Intent(activity,CreatePlaylist.class);
+                Intent intent = new Intent(activity,CPlaylistActivity.class);
                 activity.startActivity(intent);
             });
 
@@ -101,13 +99,12 @@ public class PlaylistFragment extends Fragment {
             if (playlist_csv !=null && !playlist_csv.isEmpty()) {
                 data.clear();
                 for (String line : playlist_csv.split("\n|\r")) {
-                    Log.e("PlayFragLine",line);
                     ArrayList<String> list = new ArrayList<>();
                     String[] lines = line.split(",");
                     for(int i=2;i<lines.length;i++) {
                         list.add(lines[i]);
                     }
-                    data.add(new PlaylistModel(
+                    data.add(0,new PlaylistModel(
                             lines[0],
                             lines[1],
                             list

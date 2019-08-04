@@ -94,7 +94,7 @@ public class SearchActivity extends AppCompatActivity {
                                 new spotifySearch(textToSearch).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                             else Toast.makeText(SearchActivity.this, "Could not extract track ID!", Toast.LENGTH_SHORT).show();
                         }
-                        else if (textToSearch.contains("/playlists/")) {
+                        else if (textToSearch.contains("/playlist/")) {
                             showAlert("Note","Current spotify link seems to be a playlist.\n\n" +
                                     "It is recommend to go to the playlist menu from the app where you can manage this url!",true);
                         }else {

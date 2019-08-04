@@ -9,7 +9,7 @@
 
     <item android:id="@+id/action_url"
         android:title="Add song"
-        android:icon="@drawable/ic_link"
+        android:icon="@drawable/ic_playlist_add"
         app:showAsAction="always"/>
 
     <item android:id="@+id/action_save"

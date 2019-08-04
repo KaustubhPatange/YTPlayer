@@ -1,3 +1,14 @@
+/**
+ * The api is created by KP for YTPlayer app.
+ * https://github.com/KaustubhPatange/YTPlayer/
+ *
+ * If you want to use it in your project use it without changing the name
+ * or this header info.
+ *
+ * Support the work!
+ *
+ **/
+
 package com.kpstv.youtube.utils;
 
 import android.os.AsyncTask;

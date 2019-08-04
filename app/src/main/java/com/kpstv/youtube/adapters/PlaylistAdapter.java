@@ -91,7 +91,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
                 YTutils.milliSecondsToTimer(playlistModel.getTimeseconds()*1000));
         String letter = Character.toUpperCase(playlistModel.getTitle().charAt(0))+"";
         holder.FrameText.setText(letter);
-        YTutils.setBackroundTint(holder.frameLayout,YTutils.getRandomColor());
+       // YTutils.setBackroundTint(holder.frameLayout,YTutils.getRandomColor());
 
         String toput = playlistModel.getDate();
         String yesterdayDate = YTutils.getYesterdayDate();

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fitsSystemWindows="true"
+    tools:context=".OPlaylistActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/toolbar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
+            app:title=""
+            app:contentScrim="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="130dp">
+                <ImageView
+                    android:layout_marginStart="20dp"
+                    android:layout_width="100dp"
+                    android:src="@drawable/ic_chart_up"
+                    android:layout_height="wrap_content" />
+                <RelativeLayout
+                    android:layout_marginStart="20dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                   <LinearLayout
+                       android:orientation="vertical"
+                       android:layout_centerVertical="true"
+                       android:layout_width="match_parent"
+                       android:layout_height="wrap_content">
+                       <TextView
+                           android:id="@+id/oTitle"
+                           android:textSize="16sp"
+                           android:fontFamily="@font/dmsans_font"
+                           android:textColor="@color/white"
+                           android:layout_gravity="center_vertical"
+                           android:layout_width="wrap_content"
+                           android:text="---"
+                           android:layout_height="wrap_content" />
+                       <TextView
+                           android:layout_marginTop="2dp"
+                           android:id="@+id/oSongText"
+                           android:textColor="@color/light_white"
+                           android:text="---"
+                           android:fontFamily="@font/dmsans_font"
+                           android:layout_width="match_parent"
+                           android:layout_height="wrap_content" />
+                       <TextView
+                           android:layout_marginTop="3dp"
+                           android:drawableStart="@drawable/ic_timer"
+                           android:id="@+id/oTime"
+                           android:textColor="@color/light_white"
+                           android:text=" "
+                           android:fontFamily="@font/dmsans_font"
+                           android:layout_width="match_parent"
+                           android:layout_height="wrap_content" />
+                   </LinearLayout>
+                </RelativeLayout>
+            </LinearLayout>
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/ThemeOverlay.AppCompat" />
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+    </android.support.design.widget.AppBarLayout>
+
+   <android.support.v4.widget.NestedScrollView
+       app:layout_behavior="@string/appbar_scrolling_view_behavior"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent">
+      <LinearLayout
+          android:orientation="vertical"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+          <ProgressBar
+              android:id="@+id/progressBar"
+              android:layout_marginTop="20dp"
+              android:layout_gravity="center"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content" />
+          <TextView
+              android:id="@+id/songText"
+              android:visibility="gone"
+              android:layout_marginTop="2dp"
+              android:textColor="@color/light_white"
+              android:text="SONGS"
+              android:layout_margin="10dp"
+              android:textStyle="bold"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content" />
+          <android.support.v7.widget.RecyclerView
+              android:visibility="gone"
+              android:layout_marginTop="3dp"
+              android:id="@+id/my_recycler_view"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"/>
+      </LinearLayout>
+
+   </android.support.v4.widget.NestedScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        app:fabSize="normal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        app:layout_anchor="@id/app_bar"
+        app:layout_anchorGravity="bottom|end"
+        app:srcCompat="@drawable/ic_play" />
+
+</android.support.design.widget.CoordinatorLayout>
