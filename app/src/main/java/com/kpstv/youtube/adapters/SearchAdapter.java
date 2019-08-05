@@ -78,11 +78,6 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
 
         final SearchModel searchModel = dataSet.get(listPosition);
 
-        final ArrayList<String> urls = yturls;
-        urls.remove(searchModel.getYturl());
-        urls.add(0,searchModel.getYturl());
-        final String[] stringarray = YTutils.ConvertToStringArray(urls);
-
         holder.titleText.setText(searchModel.getTitle());
 
         Glide.with(con).load(searchModel.getImageUrl()).addListener(new RequestListener<Drawable>() {
@@ -98,22 +93,19 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
             }
         }).into(holder.imageView);
 
-        holder.mainCard.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Activity activity = (Activity) con;
-                Intent intent = new Intent(con,PlayerActivity.class);
-                intent.putExtra("youtubelink",stringarray);
-                con.startActivity(intent);
-                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
-            }
+        holder.mainCard.setOnClickListener(v -> {
+            Activity activity = (Activity) con;
+            Intent intent = new Intent(con,PlayerActivity.class);
+            intent.putExtra("youtubelink",YTutils.ConvertToStringArray(yturls));
+            intent.putExtra("playfromIndex",9-listPosition);
+            con.startActivity(intent);
+            activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
         });
 
     }
 
     @Override
     public int getItemCount() {
-
         return dataSet.size();
     }
 }

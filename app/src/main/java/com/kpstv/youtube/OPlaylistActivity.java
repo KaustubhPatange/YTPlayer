@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,6 +31,7 @@ public class OPlaylistActivity extends AppCompatActivity {
     RecyclerView.LayoutManager layoutManager;
     TextView TitleText,SongCountText,TimeText,songText;
     ProgressBar progressBar; PlaylistModel playlistModel;
+    FloatingActionButton playFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +49,7 @@ public class OPlaylistActivity extends AppCompatActivity {
         SongCountText = findViewById(R.id.oSongText);
         TimeText = findViewById(R.id.oTime);
         songText = findViewById(R.id.songText);
+        playFab = findViewById(R.id.oPlayFAB);
         progressBar = findViewById(R.id.progressBar);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
@@ -97,13 +100,18 @@ public class OPlaylistActivity extends AppCompatActivity {
 
     private View.OnClickListener recyclerItemListener = view -> {
         int position = (int)view.getTag();
+        PlayMusic(position);
+    };
+
+    void PlayMusic(int position) {
+        if (yturls.size()==0) return;
         String[] videos =YTutils.ConvertToStringArray(yturls);
         Intent intent = new Intent(OPlaylistActivity.this,PlayerActivity.class);
         intent.putExtra("playfromIndex",position);
         intent.putExtra("youtubelink",videos);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
-    };
+    }
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -120,6 +128,8 @@ public class OPlaylistActivity extends AppCompatActivity {
             progressBar.setVisibility(View.GONE);
             songText.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.VISIBLE);
+
+            playFab.setOnClickListener(v -> PlayMusic(0));
 
             super.onPostExecute(aVoid);
         }

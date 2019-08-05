@@ -101,16 +101,18 @@ public class PlaylistFragment extends Fragment {
             if (playlist_csv !=null && !playlist_csv.isEmpty()) {
                 data.clear();
                 for (String line : playlist_csv.split("\n|\r")) {
-                    ArrayList<String> list = new ArrayList<>();
-                    String[] lines = line.split(",");
-                    for(int i=2;i<lines.length;i++) {
-                        list.add(lines[i]);
+                    if (line!=null&&!line.isEmpty()) {
+                        ArrayList<String> list = new ArrayList<>();
+                        String[] lines = line.split(",");
+                        for(int i=2;i<lines.length;i++) {
+                            list.add(lines[i]);
+                        }
+                        data.add(0,new PlaylistModel(
+                                lines[0],
+                                lines[1],
+                                list
+                        ));
                     }
-                    data.add(0,new PlaylistModel(
-                            lines[0],
-                            lines[1],
-                            list
-                    ));
                 }
             }
             return null;

@@ -141,7 +141,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             holder.mainLayout.setTag(listPosition);
             holder.mainLayout.setOnClickListener(playlistListener);
         }
-        // TODO: Implement CP Adapter and O playlist clicks
+        // TODO: Implement CP Adapter clicks
     }
 
     public class layoutListener extends AsyncTask<Void, Void, Void> {

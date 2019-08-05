@@ -18,6 +18,8 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Player;
@@ -30,6 +32,8 @@ import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
@@ -62,6 +66,7 @@ import com.facebook.network.connectionclass.ConnectionQuality;
 import com.jgabrielfreitas.core.BlurImageView;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.utils.HttpHandler;
+import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
 import com.warkiz.widget.IndicatorSeekBar;
@@ -240,7 +245,7 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
-        new setData().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,YTutils.getVideoID(YouTubeUrl));
+        new getData().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,YTutils.getVideoID(YouTubeUrl));
     }
 
     @Override
@@ -267,7 +272,7 @@ public class PlayerActivity extends AppCompatActivity {
         onClear();
         YouTubeUrl = yturls.get(ytIndex-1);
         ytIndex--;
-        new setData().execute(YTutils.getVideoID(YouTubeUrl));
+        new getData().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,YTutils.getVideoID(YouTubeUrl));
     }
     void playNext() {
         if ((ytIndex+1)==yturls.size()) {
@@ -277,7 +282,7 @@ public class PlayerActivity extends AppCompatActivity {
         onClear();
         YouTubeUrl = yturls.get(ytIndex+1);
         ytIndex++;
-        new setData().execute(YTutils.getVideoID(YouTubeUrl));
+        new getData().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,YTutils.getVideoID(YouTubeUrl));
     }
 
     @Override
@@ -286,7 +291,7 @@ public class PlayerActivity extends AppCompatActivity {
             onClear();
             yturls = Arrays.asList(getIntent().getStringArrayExtra("youtubelink"));
             YouTubeUrl = yturls.get(0);
-            new setData().execute(YTutils.getVideoID(YouTubeUrl));
+            new getData().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,YTutils.getVideoID(YouTubeUrl));
         }
     }
 
@@ -335,19 +340,129 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
 
+    class getData extends AsyncTask<String,String,Void> {
 
-    class setData extends AsyncTask<String, String, Void> {
+        String videoTitle,channelTitle,viewCounts,imgUrl,link;
 
-        String videoTitle,channelTitle,viewCounts,imgUrl;
-
+        @SuppressLint("StaticFieldLeak")
         @Override
-        protected void onPreExecute() {
-            if (isfirst) {
-                mainlayout.setVisibility(View.GONE);
-            }
-            playFab.setEnabled(false);
-            mprogressBar.setVisibility(View.VISIBLE);
-            super.onPreExecute();
+        protected void onPostExecute(Void aVoid) {
+
+            mainTitle.setText(videoTitle);
+            collpaseView.setTextViewText(R.id.nTitle,videoTitle);
+            expandedView.setTextViewText(R.id.nTitle,videoTitle);
+            collpaseView.setTextViewText(R.id.nAuthor,channelTitle);
+            expandedView.setTextViewText(R.id.nAuthor,channelTitle);
+            viewCount.setText(viewCounts);
+
+            Glide.with(PlayerActivity.this)
+                    .asBitmap()
+                    .load(imgUrl)
+                    .into(new CustomTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            backImage.setImageBitmap(resource);
+                            backImage.setBlur(5);
+                            mainImageView.setImageBitmap(resource);
+
+                            collpaseView.setImageViewBitmap(R.id.nImage,resource);
+                            expandedView.setImageViewBitmap(R.id.nImage,resource);
+                            notificationManager.notify(1,builder.build());
+                        }
+
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+                        }
+                    });
+
+            new YouTubeExtractor(PlayerActivity.this) {
+
+                @Override
+                protected void onPostExecute(SparseArray<YtFile> ytFiles) {
+
+                    if (ytFiles == null) {
+                        showAlert("Failed!","Couldn't get the required audio stream. Try again!",true);
+                        return;
+                    }
+
+                    YtFile ytaudioFile = getBestStream(ytFiles);
+                    link = ytaudioFile.getUrl();
+                    link = link.replace("\\","");
+
+                    Log.e("PlayerActivity","videoTitle: "+videoTitle+", channelTitle: "+channelTitle);
+
+                    Log.e("PlayerActivity","Stream: "+link);
+
+                    for (int i = 0, itag; i < ytFiles.size(); i++) {
+                        itag = ytFiles.keyAt(i);
+                        YtFile ytFile = ytFiles.get(itag);
+
+                        if (ytFile.getFormat().getHeight() == -1 || ytFile.getFormat().getHeight() >= 360) {
+                            addFormatToList(videoTitle, ytFile);
+                        }
+                    }
+
+                    playFab.setEnabled(true);
+
+                    player.stop();
+                    player.release();
+                    mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(link));
+                    player = ExoPlayerFactory.newSimpleInstance(PlayerActivity.this, trackSelector);
+                    player.prepare(mediaSource);
+                    player.setPlayWhenReady(true);
+
+                    makePause();
+                    isplaying=true;
+
+                    player.addListener(new Player.EventListener() {
+                        @SuppressLint("RestrictedApi")
+                        @Override
+                        public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                            switch (playbackState) {
+                                case ExoPlayer.STATE_BUFFERING:
+                                    playFab.setVisibility(View.INVISIBLE);
+                                    break;
+                                case ExoPlayer.STATE_ENDED:
+                                    makePlay();
+                                    isplaying=false;
+                                    playNext();
+                                    break;
+                                case ExoPlayer.STATE_READY:
+                                    mprogressBar.setVisibility(View.GONE);
+                                    mainlayout.setVisibility(View.VISIBLE);
+                                    playFab.setVisibility(View.VISIBLE);
+                                    total_duration = player.getDuration();
+                                    total_seconds = (int)total_duration/1000;
+                                    totalDuration.setText(YTutils.milliSecondsToTimer(total_duration));
+                                    updateProgressBar();
+                                    break;
+                            }
+                        }
+                    });
+
+
+                    if (yturls.size()>1) {
+                        warningText.setText(Html.fromHtml("Saving video offline is illegal  &#8226;  "+(ytIndex+1)+"/"+yturls.size()));
+                    }
+
+                    // Store video into history
+                    new saveToHistory().execute(YouTubeUrl);
+
+                    super.onPostExecute(ytFiles);
+                }
+
+                @Override
+                protected void onExtractionComplete(SparseArray<YtFile> ytFiles, VideoMeta videoMeta) {
+
+                }
+            }.execute(YouTubeUrl);
+            super.onPostExecute(aVoid);
+        }
+
+        String jsonResponse(String videoID, int apinumber) {
+            HttpHandler httpHandler = new HttpHandler();
+            String link = "https://www.googleapis.com/youtube/v3/videos?id="+videoID+"&key="+apikeys[apinumber]+"&part=statistics";
+            return httpHandler.makeServiceCall(link);
         }
 
         @Override
@@ -355,15 +470,12 @@ public class PlayerActivity extends AppCompatActivity {
             String videoID = arg0[0];
             String json = jsonResponse(videoID,0);
 
-            HttpHandler handler = new HttpHandler();
-            String responseJson = handler.makeServiceCall("https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v="+videoID+"&format=json");
+            YTMeta ytMeta = new YTMeta(videoID);
+            videoTitle = ytMeta.getVideMeta().getTitle();
+            channelTitle = ytMeta.getVideMeta().getAuthor();
+            imgUrl = ytMeta.getVideMeta().getImgUrl();
 
-            try {
-                JSONObject jsonObject = new JSONObject(responseJson);
-                videoTitle = jsonObject.getString("title");
-                channelTitle = jsonObject.getString("author_name");
-
-            }catch (Exception e){e.printStackTrace();}
+            Log.e("ImageUrl",imgUrl+"");
 
             if (json!=null && json.contains("\"error\":")) {
                 json = jsonResponse(videoID,1);
@@ -389,146 +501,21 @@ public class PlayerActivity extends AppCompatActivity {
             return null;
         }
 
-        String jsonResponse(String videoID,int apinumber) {
-            HttpHandler httpHandler = new HttpHandler();
-            String link = "https://www.googleapis.com/youtube/v3/videos?id="+videoID+"&key="+apikeys[apinumber]+"&part=statistics";
-            return httpHandler.makeServiceCall(link);
-        }
-
-
-
-        @SuppressLint("StaticFieldLeak")
         @Override
-        protected void onPostExecute(Void aVoid) {
-
-            new YouTubeExtractor(PlayerActivity.this) {
-
-                String link;
-                @Override
-                protected void onExtractionComplete(SparseArray<YtFile> ytFiles, VideoMeta videoMeta) {
-                    if (ytFiles == null) {
-                        showAlert("Failed!","Couldn't get the required audio stream. Try again!",true);
-                        return;
-                    }
-
-                    YtFile ytaudioFile = getBestStream(ytFiles);
-                    link = ytaudioFile.getUrl();
-                    link = link.replace("\\","");
-                    imgUrl = videoMeta.getMqImageUrl();
-
-                    Log.e("PlayerActivity","videoTitle: "+videoTitle+", channelTitle: "+channelTitle);
-
-                    for (int i = 0, itag; i < ytFiles.size(); i++) {
-                        itag = ytFiles.keyAt(i);
-                        YtFile ytFile = ytFiles.get(itag);
-
-                        if (ytFile.getFormat().getHeight() == -1 || ytFile.getFormat().getHeight() >= 360) {
-                            addFormatToList(videoMeta.getTitle(), ytFile);
-                        }
-                    }
-                }
-
-                @Override
-                protected void onPostExecute(SparseArray<YtFile> ytFiles) {
-                    super.onPostExecute(ytFiles);
-                    mainTitle.setText(videoTitle);
-                    collpaseView.setTextViewText(R.id.nTitle,videoTitle);
-                    expandedView.setTextViewText(R.id.nTitle,videoTitle);
-                    collpaseView.setTextViewText(R.id.nAuthor,channelTitle);
-                    expandedView.setTextViewText(R.id.nAuthor,channelTitle);
-                    viewCount.setText(viewCounts);
-                    Glide.with(getApplicationContext())
-                            .load(imgUrl)
-                            .addListener(new RequestListener<Drawable>() {
-                                @Override
-                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                    return false;
-                                }
-
-                                @Override
-                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                    backImage.setImageDrawable(resource);
-                                    backImage.setBlur(5);
-                                    mainImageView.setImageDrawable(resource);
-
-                                    Bitmap icon = YTutils.drawableToBitmap(resource);
-
-                                    collpaseView.setImageViewBitmap(R.id.nImage,icon);
-                                    expandedView.setImageViewBitmap(R.id.nImage,icon);
-                                    mprogressBar.setVisibility(View.GONE);
-                                    notificationManager.notify(1,builder.build());
-
-                                    Log.e("ImageUrl",imgUrl+"");
-
-                                    playFab.setEnabled(true);
-                                    try {
-                                        if (player != null) {
-                                            try {
-                                                Log.e("DataSrcLink",link+"");
-                                                player.stop();
-                                                player.release();
-                                                mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(link));
-                                                player = ExoPlayerFactory.newSimpleInstance(PlayerActivity.this, trackSelector);
-                                                player.prepare(mediaSource);
-                                                player.setPlayWhenReady(true);
-                                            }catch (Exception ex) {
-                                                Log.e("DataSourceNull",ex.getMessage());
-                                                showAlert("Failed!","Couldn't set media player events. Try again!",true);
-                                            }
-
-                                            makePause();
-                                            isplaying=true;
-
-                                            player.addListener(new Player.EventListener() {
-                                                @SuppressLint("RestrictedApi")
-                                                @Override
-                                                public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                                                    switch (playbackState) {
-                                                        case ExoPlayer.STATE_BUFFERING:
-                                                            playFab.setVisibility(View.INVISIBLE);
-                                                            break;
-                                                        case ExoPlayer.STATE_ENDED:
-                                                            makePlay();
-                                                            isplaying=false;
-                                                            break;
-                                                        case ExoPlayer.STATE_READY:
-                                                            mainlayout.setVisibility(View.VISIBLE);
-                                                            backImage.setVisibility(View.VISIBLE);
-                                                            playFab.setVisibility(View.VISIBLE);
-                                                            total_duration = player.getDuration();
-                                                            total_seconds = (int)total_duration/1000;
-                                                            totalDuration.setText(YTutils.milliSecondsToTimer(total_duration));
-                                                            updateProgressBar();
-                                                            break;
-                                                    }
-                                                }
-                                            });
-
-                                        }
-                                    } catch (Exception io) {
-                                        io.printStackTrace();
-                                    }
-
-                                    if (yturls.size()>1) {
-                                        warningText.setText(Html.fromHtml("Saving video offline is illegal  &#8226;  "+(ytIndex+1)+"/"+yturls.size()));
-                                    }
-
-                                    // Store video into history
-                                    new saveToHistory().execute(YouTubeUrl);
-
-                                    return true;
-                                }
-                            })
-                            .into(backImage);
-                }
-            }.execute(YouTubeUrl);
-
-
-            super.onPostExecute(aVoid);
+        protected void onPreExecute() {
+            mainlayout.setVisibility(View.GONE);
+            playFab.setEnabled(false);
+            mprogressBar.setVisibility(View.VISIBLE);
+            super.onPreExecute();
         }
     }
 
     private class saveToHistory extends AsyncTask<String,Void,Void> {
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+        }
 
         @Override
         protected Void doInBackground(String... strings) {
@@ -638,7 +625,6 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     void onClear() {
-        backImage.setImageDrawable(null);
         mainlayout.setVisibility(View.GONE);
         player.stop();
         player.release();
