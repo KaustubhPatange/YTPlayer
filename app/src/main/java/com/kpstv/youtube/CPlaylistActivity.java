@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.kpstv.youtube.adapters.SongAdapter;
 import com.kpstv.youtube.models.DiscoverModel;
+import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.SpotifyPlaylist;
 import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTLength;
@@ -222,7 +223,8 @@ public class CPlaylistActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             try {
                 String id = YTutils.getVideoID(url);
-                JSONObject mainJson = new JSONObject("https://www.googleapis.com/youtube/v3/playlistItems?playlistId="+id+"&part=snippet&maxResults=50&key=AIzaSyCA2Py9snHNdp4Y4Dkyq-z7gUfxLqdPhtQ");
+                JSONObject mainJson = new JSONObject(new HttpHandler().makeServiceCall(
+                        "https://www.googleapis.com/youtube/v3/playlistItems?playlistId=\"+id+\"&part=snippet&maxResults=50&key=AIzaSyCA2Py9snHNdp4Y4Dkyq-z7gUfxLqdPhtQ"));
                 int current = 1;
                 parseStructure(id,mainJson,current);
              }catch (Exception e){}
@@ -242,7 +244,8 @@ public class CPlaylistActivity extends AppCompatActivity {
                     }
                     if (mainJson.getJSONObject("etag").has("nextPageToken")) {
                         String Nexttoken = mainJson.getJSONObject("etag").getString("nextPageToken");
-                        JSONObject newJSON = new JSONObject("https://www.googleapis.com/youtube/v3/playlistItems?playlistId="+id+"pageToken="+Nexttoken+"&part=snippet&maxResults=50&key=AIzaSyCA2Py9snHNdp4Y4Dkyq-z7gUfxLqdPhtQ");
+                        JSONObject newJSON = new JSONObject(new HttpHandler().makeServiceCall(
+                                "https://www.googleapis.com/youtube/v3/playlistItems?playlistId="+id+"pageToken="+Nexttoken+"&part=snippet&maxResults=50&key=AIzaSyCA2Py9snHNdp4Y4Dkyq-z7gUfxLqdPhtQ"));
                         parseStructure(id,newJSON,current);
                     }
                 }

@@ -149,6 +149,7 @@ public class PlayerActivity extends AppCompatActivity {
             yturls.add(url_link);
         }else {
             Intent intent = getIntent();
+            ytIndex = intent.getIntExtra("playfromIndex",0);
             yturls = Arrays.asList(intent.getStringArrayExtra("youtubelink"));
         }
 
@@ -299,13 +300,13 @@ public class PlayerActivity extends AppCompatActivity {
                 changePlayBack(!isplaying);
                 break;
             case "next":
-               playNext();
+                playNext();
                 break;
             case "previous":
-              playPrevious();
+                playPrevious();
                 break;
             case "add":
-              //TODO: Add to play list listener
+                //TODO: Add to play list listener
                 break;
         }
     }
@@ -343,7 +344,6 @@ public class PlayerActivity extends AppCompatActivity {
         protected void onPreExecute() {
             if (isfirst) {
                 mainlayout.setVisibility(View.GONE);
-                backImage.setVisibility(View.GONE);
             }
             playFab.setEnabled(false);
             mprogressBar.setVisibility(View.VISIBLE);
@@ -423,7 +423,7 @@ public class PlayerActivity extends AppCompatActivity {
                         YtFile ytFile = ytFiles.get(itag);
 
                         if (ytFile.getFormat().getHeight() == -1 || ytFile.getFormat().getHeight() >= 360) {
-                             addFormatToList(videoMeta.getTitle(), ytFile);
+                            addFormatToList(videoMeta.getTitle(), ytFile);
                         }
                     }
                 }
@@ -660,14 +660,14 @@ public class PlayerActivity extends AppCompatActivity {
             onBackPressed();
             return true;
         } else if (itemId == R.id.action_youtube) {
-          YTutils.StartURLIntent(YouTubeUrl,this);
+            YTutils.StartURLIntent(YouTubeUrl,this);
         }else if (itemId == R.id.action_share) {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
             shareIntent.putExtra(Intent.EXTRA_TEXT,YouTubeUrl);
             startActivity(Intent.createChooser(shareIntent, "Share using..."));
         }else if (itemId == R.id.action_add) {
-         //TODO: Add to playlist
+            //TODO: Add to playlist
         }
 
         return super.onOptionsItemSelected(item);
@@ -686,13 +686,13 @@ public class PlayerActivity extends AppCompatActivity {
             makePause();
             notificationManager.notify(1,builder.build());
             player.setPlayWhenReady(true);
-         //   updateDuration();
+            //   updateDuration();
         } else {
 
             makePlay();
             notificationManager.notify(1,builder.build());
             player.setPlayWhenReady(false);
-           // mTimer.cancel();
+            // mTimer.cancel();
         }
         Log.e("CurrentDur",player.getCurrentPosition()+"");
         isplaying = isplay;

@@ -74,8 +74,9 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".CPlaylistActivity" />
         <activity
+            android:theme="@style/AppTheme.NoActionBar1"
             android:name=".OPlaylistActivity"
-            android:label="@string/title_activity_oplayist"></activity>
+            android:label="@string/title_activity_oplayist"/>
     </application>
 
 </manifest>

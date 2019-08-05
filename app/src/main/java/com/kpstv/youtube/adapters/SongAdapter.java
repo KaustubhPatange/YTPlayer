@@ -44,6 +44,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
     private ArrayList<DiscoverModel> dataSet;
     private ArrayList<String> yturls;
     Context con; boolean CP_ADAPTER, O_PLAYLIST;
+    View.OnClickListener playlistListener;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -78,9 +79,10 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             yturls.add(0,model.getYtUrl());
     }
 
-    public SongAdapter(ArrayList<DiscoverModel> data, Context context,boolean iscpAdapter, boolean isOPlaylist) {
+    public SongAdapter(ArrayList<DiscoverModel> data, Context context, boolean isOPlaylist, View.OnClickListener oplaylistListener) {
         O_PLAYLIST = isOPlaylist;
         this.dataSet = data;
+        this.playlistListener = oplaylistListener;
         this.con = context;
         yturls = new ArrayList<>();
         for (DiscoverModel model: data)
@@ -124,18 +126,20 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         }).into(holder.imageView);
 
         if (!CP_ADAPTER && !O_PLAYLIST) {
-            holder.mainLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Activity activity = (Activity) con;
-                    if (discoverModel.getYtUrl()==null)
-                        new layoutListener(activity,discoverModel).execute();
-                    else {
-                        RunLink(discoverModel.getYtUrl(),activity);
-                    }
-
+            holder.mainLayout.setOnClickListener(v -> {
+                Activity activity = (Activity) con;
+                if (discoverModel.getYtUrl()==null)
+                    new layoutListener(activity,discoverModel).execute();
+                else {
+                    RunLink(discoverModel.getYtUrl(),activity);
                 }
+
             });
+        }
+
+        if (O_PLAYLIST) {
+            holder.mainLayout.setTag(listPosition);
+            holder.mainLayout.setOnClickListener(playlistListener);
         }
         // TODO: Implement CP Adapter and O playlist clicks
     }

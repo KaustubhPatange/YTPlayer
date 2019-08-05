@@ -1,8 +1,9 @@
 package com.kpstv.youtube.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class PlaylistModel {
+public class PlaylistModel implements Serializable {
     String Title, Date;
     int Timeseconds;
     ArrayList<String> data;

@@ -26,6 +26,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.kpstv.youtube.OPlaylistActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.DiscoverModel;
@@ -50,6 +51,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
         TextView FrameText;
         TextView DateText;
         CardView mainCard;
+        ImageView imageMore;
         FrameLayout frameLayout;
 
         public MyViewHolder(View itemView) {
@@ -59,6 +61,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
             this.FrameText = itemView.findViewById(R.id.pFrameText);
             this.DateText = itemView.findViewById(R.id.pDate);
             this.mainCard = itemView.findViewById(R.id.mainCardView);
+            this.imageMore = itemView.findViewById(R.id.pimageMore);
             this.frameLayout = itemView.findViewById(R.id.pFrame);
         }
     }
@@ -85,13 +88,11 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
     public void onBindViewHolder(final MyViewHolder holder, final int listPosition) {
 
         final PlaylistModel playlistModel = dataSet.get(listPosition);
-
         holder.titleText.setText(playlistModel.getTitle());
-        holder.SongText.setText(playlistModel.getSongCountText() + "  "+ Html.fromHtml("&#8226;")+"  " +
+        holder.SongText.setText(playlistModel.getSongCountText() + "  "+ Html.fromHtml("&#8226;") + "  " +
                 YTutils.milliSecondsToTimer(playlistModel.getTimeseconds()*1000));
         String letter = Character.toUpperCase(playlistModel.getTitle().charAt(0))+"";
         holder.FrameText.setText(letter);
-       // YTutils.setBackroundTint(holder.frameLayout,YTutils.getRandomColor());
 
         String toput = playlistModel.getDate();
         String yesterdayDate = YTutils.getYesterdayDate();
@@ -108,6 +109,14 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
             holder.DateText.setVisibility(View.VISIBLE);
             Dateset.add(playlistModel.getDate());
         }
+
+        holder.mainCard.setOnClickListener(v -> {
+            Intent intent = new Intent(con,OPlaylistActivity.class);
+            intent.putExtra("model",playlistModel);
+            con.startActivity(intent);
+        });
+
+        // TODO: Set more image on click listener
     }
 
     @Override
