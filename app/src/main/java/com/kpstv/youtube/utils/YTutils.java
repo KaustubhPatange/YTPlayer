@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -206,7 +207,20 @@ public class YTutils {
     public static boolean isValidID(String url) {
         return (url.contains("youtube.com")||url.contains("youtu.be"));
     }
-
+    public static String convertArrayToStringMethod(String[] strArray) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < strArray.length; i++) {
+            stringBuilder.append(strArray[i]).append("\n");
+        }
+        return stringBuilder.toString();
+    }
+    public static String convertListToStringMethod(List<String> strArray) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < strArray.size(); i++) {
+            stringBuilder.append(strArray.get(i)).append("\n");
+        }
+        return stringBuilder.toString();
+    }
     public static String getTodayDate() {
         Date c = Calendar.getInstance().getTime();
         @SuppressLint("SimpleDateFormat")

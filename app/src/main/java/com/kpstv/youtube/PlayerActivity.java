@@ -96,6 +96,8 @@ public class PlayerActivity extends AppCompatActivity {
     NotificationManagerCompat notificationManager;
     RemoteViews collpaseView, expandedView;
 
+    AsyncTask<String,String,Void> datasync;
+
     String[] apikeys = new String[] {"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw","AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
 
     LinearLayout downloadButton; LinearLayout mainlayout;
@@ -245,7 +247,8 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
-        new getData().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,YTutils.getVideoID(YouTubeUrl));
+        datasync = new getData();
+        datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,YTutils.getVideoID(YouTubeUrl));
     }
 
     @Override
@@ -272,7 +275,8 @@ public class PlayerActivity extends AppCompatActivity {
         onClear();
         YouTubeUrl = yturls.get(ytIndex-1);
         ytIndex--;
-        new getData().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,YTutils.getVideoID(YouTubeUrl));
+        datasync = new getData();
+        datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,YTutils.getVideoID(YouTubeUrl));
     }
     void playNext() {
         if ((ytIndex+1)==yturls.size()) {
@@ -282,7 +286,8 @@ public class PlayerActivity extends AppCompatActivity {
         onClear();
         YouTubeUrl = yturls.get(ytIndex+1);
         ytIndex++;
-        new getData().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,YTutils.getVideoID(YouTubeUrl));
+        datasync = new getData();
+        datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,YTutils.getVideoID(YouTubeUrl));
     }
 
     @Override
@@ -291,7 +296,8 @@ public class PlayerActivity extends AppCompatActivity {
             onClear();
             yturls = Arrays.asList(getIntent().getStringArrayExtra("youtubelink"));
             YouTubeUrl = yturls.get(0);
-            new getData().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,YTutils.getVideoID(YouTubeUrl));
+            datasync = new getData();
+            datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,YTutils.getVideoID(YouTubeUrl));
         }
     }
 
@@ -618,6 +624,8 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         notificationManager.cancel(1);
+        if (datasync.getStatus()==AsyncTask.Status.RUNNING)
+            datasync.cancel(true);
         player.stop();
         player.release();
         mHandler.removeCallbacks(mUpdateTimeTask);

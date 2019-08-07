@@ -14,27 +14,35 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.kpstv.youtube.CPlaylistActivity;
 import com.kpstv.youtube.OPlaylistActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
+import com.kpstv.youtube.fragments.PlaylistFragment;
 import com.kpstv.youtube.models.DiscoverModel;
 import com.kpstv.youtube.models.PlaylistModel;
 import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import at.huber.youtubeExtractor.YouTubeUriExtractor;
 
@@ -43,6 +51,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
     private ArrayList<PlaylistModel> dataSet;
     private ArrayList<String> Dateset;
     Context con;
+    String pline;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -70,7 +79,6 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
         this.dataSet = data;
         this.con = context;
         Dateset = new ArrayList<>();
-        Log.e("DatasetSize",dataSet.size()+"");
     }
 
     @Override
@@ -111,12 +119,57 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
         }
 
         holder.mainCard.setOnClickListener(v -> {
-            Intent intent = new Intent(con,OPlaylistActivity.class);
-            intent.putExtra("model",playlistModel);
-            con.startActivity(intent);
+            commonOpen(playlistModel);
         });
+        String playlist_csv = YTutils.readContent((Activity) con,"playlist.csv");
 
-        // TODO: Set more image on click listener
+        holder.imageMore.setOnClickListener(v -> {
+            PopupMenu popupMenu = new PopupMenu(con,v);
+            popupMenu.inflate(R.menu.playlist_context);
+            popupMenu.show();
+            popupMenu.setOnMenuItemClickListener(item -> {
+                int itemId = item.getItemId();
+                switch (itemId) {
+                    case R.id.action_open:
+                        commonOpen(playlistModel);
+                        break;
+                    case R.id.action_modify:
+                        if (playlist_csv!=null&&!playlist_csv.isEmpty()) {
+                            String[] lines = playlist_csv.split("\r|\n");
+                            for(int i=0;i<lines.length;i++) {
+                                if (lines[i].contains(","+playlistModel.getTitle())) {
+                                    Intent intent = new Intent(con,CPlaylistActivity.class);
+                                    intent.putExtra("line",lines[i]);
+                                    con.startActivity(intent);
+                                }
+                            }
+                        }
+
+                        break;
+                    case R.id.action_delete:
+                        if (playlist_csv!=null&&!playlist_csv.isEmpty()) {
+                            ArrayList<String> lines = new ArrayList<>(Arrays.asList(playlist_csv.split("\r|\n")));
+                            for(int i=0;i<lines.size();i++) {
+                                if (lines.get(i).contains(","+playlistModel.getTitle())) {
+                                    dataSet.remove(i);
+                                    lines.remove(i);
+                                    YTutils.writeContent((Activity)con,"playlist.csv",
+                                            YTutils.convertListToStringMethod(lines));
+                                    PlaylistFragment.loadRecyclerAgain();
+                                }
+                            }
+                        }
+                        break;
+                }
+                return false;
+            });
+        });
+    }
+
+    void commonOpen(PlaylistModel playlistModel) {
+        Intent intent = new Intent(con,OPlaylistActivity.class);
+        intent.putExtra("model",playlistModel);
+        con.startActivity(intent);
     }
 
     @Override

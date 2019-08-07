@@ -1,7 +1,6 @@
 package com.kpstv.youtube.adapters;
 
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -9,9 +8,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,17 +24,9 @@ import com.bumptech.glide.request.target.Target;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.DiscoverModel;
-import com.kpstv.youtube.models.SearchModel;
-import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTSearch;
-import com.kpstv.youtube.utils.YTutils;
 
-import org.json.JSONObject;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> {
 
@@ -45,6 +34,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
     private ArrayList<String> yturls;
     Context con; boolean CP_ADAPTER, O_PLAYLIST;
     View.OnClickListener playlistListener;
+    View.OnClickListener cplaylistener;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -70,8 +60,9 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             yturls.add(0,model.getYtUrl());
     }
 
-    public SongAdapter(ArrayList<DiscoverModel> data, Context context,boolean iscpAdapter) {
+    public SongAdapter(ArrayList<DiscoverModel> data, Context context,boolean iscpAdapter,boolean isOPlaylist,View.OnClickListener cplaylistListener) {
         CP_ADAPTER = iscpAdapter;
+        this.cplaylistener = cplaylistListener;
         this.dataSet = data;
         this.con = context;
         yturls = new ArrayList<>();
@@ -141,7 +132,12 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             holder.mainLayout.setTag(listPosition);
             holder.mainLayout.setOnClickListener(playlistListener);
         }
-        // TODO: Implement CP Adapter clicks
+
+
+        if (CP_ADAPTER) {
+            holder.mainLayout.setTag(listPosition);
+            holder.mainLayout.setOnClickListener(cplaylistener);
+        }
     }
 
     public class layoutListener extends AsyncTask<Void, Void, Void> {

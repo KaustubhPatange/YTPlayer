@@ -25,9 +25,8 @@ import java.util.ArrayList;
 
 public class OPlaylistActivity extends AppCompatActivity {
 
-    RecyclerView recyclerView;
+    RecyclerView recyclerView; ArrayList<String> yturls;
     SongAdapter adapter; ArrayList<DiscoverModel> models;
-    ArrayList<String> yturls;
     RecyclerView.LayoutManager layoutManager;
     TextView TitleText,SongCountText,TimeText,songText;
     ProgressBar progressBar; PlaylistModel playlistModel;
@@ -59,7 +58,7 @@ public class OPlaylistActivity extends AppCompatActivity {
 
         ArrayList<String> videos = playlistModel.getData();
         TitleText.setText(playlistModel.getTitle());
-        SongCountText.setText(String.format("%s songs", yturls.size()));
+        SongCountText.setText(String.format("%s songs", videos.size()));
         TimeText.setText(String.format("  %s", YTutils.milliSecondsToTimer(
                 playlistModel.getTimeseconds()*1000)));
 
@@ -138,12 +137,14 @@ public class OPlaylistActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             for (String yturl : yturls) {
                 YTMeta ytMeta = new YTMeta(YTutils.getVideoID(yturl));
-                models.add(new DiscoverModel(
-                        ytMeta.getVideMeta().getTitle(),
-                        ytMeta.getVideMeta().getAuthor(),
-                        ytMeta.getVideMeta().getImgUrl(),
-                        yturl
-                ));
+                if (ytMeta.getVideMeta()!=null) {
+                    models.add(new DiscoverModel(
+                            ytMeta.getVideMeta().getTitle(),
+                            ytMeta.getVideMeta().getAuthor(),
+                            ytMeta.getVideMeta().getImgUrl(),
+                            yturl
+                    ));
+                }
             }
             return null;
         }

@@ -135,7 +135,7 @@ public class SearchFragment extends Fragment {
 
     @Override
     public void onResume() {
-        if (!istrendloaded && trendTask.getStatus() != AsyncTask.Status.RUNNING)
+       /* if (!istrendloaded && trendTask.getStatus() != AsyncTask.Status.RUNNING)
         {
             trendTask = new getTrending();
             trendTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -144,7 +144,7 @@ public class SearchFragment extends Fragment {
         {
             discoverTask = new loadDiscoverImages();
             discoverTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }
+        }*/
         if (drawables.size()>3) {
             imageView1.setImageDrawable(drawables.get(0));
             imageView2.setImageDrawable(drawables.get(1));
@@ -156,8 +156,8 @@ public class SearchFragment extends Fragment {
 
     @Override
     public void onPause() {
-        trendTask.cancel(true);
-        discoverTask.cancel(true);
+       /* trendTask.cancel(true);
+        discoverTask.cancel(true);*/
         super.onPause();
     }
 
@@ -185,7 +185,7 @@ public class SearchFragment extends Fragment {
                         "https://spotifycharts.com/regional/global/daily/latest/download");
             }
 
-            String trendRead = YTutils.readContent(getActivity(),"trend.csv");
+            String trendRead = YTutils.readContent(activity,"trend.csv");
             if (trendRead!=null && !trendRead.isEmpty()) {
                 String[] lines = trendRead.split("\n|\r");
                 if (lines[0].contains(YTutils.getTodayDate())&&lines.length==11) {
@@ -206,22 +206,24 @@ public class SearchFragment extends Fragment {
                 models.clear();
                 String[] csvlines = SpotifyTrendsCSV.split("\n|\r");
                 for (int i=2;i<12;i++) {
-                    String line = csvlines[i];
-                    String title = line.split(",")[1].replace("\"","");
-                    String author = line.split(",")[2].replace("\"","");
+                   try {
+                       String line = csvlines[i];
+                       String title = line.split(",")[1].replace("\"","");
+                       String author = line.split(",")[2].replace("\"","");
 
-                    String search_text = title.replace(" ","+")
-                            + "+by+" + author.replace(" ","+");
+                       String search_text = title.replace(" ","+")
+                               + "+by+" + author.replace(" ","+");
 
-                    YTSearch ytSearch = new YTSearch(search_text);
+                       YTSearch ytSearch = new YTSearch(search_text);
 
-                    final String videoId = ytSearch.getVideoIDs().get(0);
-                    String imgurl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
+                       final String videoId = ytSearch.getVideoIDs().get(0);
+                       String imgurl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
 
-                    Log.e("TrendingLines",line.split(",")[1].replace("\"",""));
-                    models.add(0,new SearchModel(
-                            title, imgurl, "https://www.youtube.com/watch?v="+videoId
-                    ));
+                       Log.e("TrendingLines",line.split(",")[1].replace("\"",""));
+                       models.add(0,new SearchModel(
+                               title, imgurl, "https://www.youtube.com/watch?v="+videoId
+                       ));
+                   }catch (Exception ignored){ Log.e("ExceptionFragment",ignored.getMessage()); }
                 }
             }
             // Save data to internal storage

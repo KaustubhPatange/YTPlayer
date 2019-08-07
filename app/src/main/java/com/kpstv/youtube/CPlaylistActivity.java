@@ -1,6 +1,7 @@
 package com.kpstv.youtube;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
@@ -39,7 +40,7 @@ public class CPlaylistActivity extends AppCompatActivity {
     SongAdapter adapter; EditText playlistText;
     static RecyclerView.LayoutManager layoutManager;
     String playlist_csv; String date; ProgressBar progressBar;
-    LinearLayout mainLayout;
+    LinearLayout mainLayout; int current_to_save=-1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,16 +60,17 @@ public class CPlaylistActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String pline =  intent.getStringExtra("line");
+
+        adapter = new SongAdapter(models,this,true,false,recyclerItemListener);
+        recyclerView.setAdapter(adapter);
+
+        playlist_csv = YTutils.readContent(this,"playlist.csv");
+
         if (pline!=null&&!pline.isEmpty()) {
             // Get data of playlist line
             mainLayout.setVisibility(View.GONE);
             new getIntentData(pline).execute();
         }
-
-        adapter = new SongAdapter(models,this,true);
-        recyclerView.setAdapter(adapter);
-
-        playlist_csv = YTutils.readContent(this,"playlist.csv");
     }
 
     class getIntentData extends AsyncTask<Void,Void,Void> {
@@ -82,7 +84,8 @@ public class CPlaylistActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             mainLayout.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.GONE);
-            adapter = new SongAdapter(models,CPlaylistActivity.this,true);
+            playlistText.setText(pline.split(",")[1]);
+            adapter = new SongAdapter(models,CPlaylistActivity.this,true,false,recyclerItemListener);
             recyclerView.setAdapter(adapter);
             super.onPostExecute(aVoid);
         }
@@ -90,12 +93,17 @@ public class CPlaylistActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             date = pline.split(",")[0];
-            playlistText.setText(pline.split(",")[1]);
+            String[] plines = playlist_csv.split("[\n\r]");
+            for(int i=0;i<plines.length;i++) {
+                if (pline.equals(plines[i])) {
+                    current_to_save = i;
+                    Log.e("CurrentToSave",i+"");
+                }
+            }
             String[] lines = pline.split(",");
             for(int i=2;i<lines.length;i++) {
-                String videoID = pline.split("\\|")[0];
+                String videoID = lines[i].split("\\|")[0];
                 YTMeta ytMeta = new YTMeta(videoID);
-                YTLength ytLength = new YTLength(videoID);
                 if (ytMeta.getVideMeta()!=null) {
                     DiscoverModel model = new DiscoverModel(
                             ytMeta.getVideMeta().getTitle(),
@@ -103,7 +111,7 @@ public class CPlaylistActivity extends AppCompatActivity {
                             ytMeta.getVideMeta().getImgUrl(),
                             YTutils.getYtUrl(videoID)
                     );
-                    model.setSeconds(ytLength.getSeconds());
+                    model.setSeconds(Integer.parseInt(lines[i].split("\\|")[1]));
                     models.add(model);
                 }
             }
@@ -132,12 +140,12 @@ public class CPlaylistActivity extends AppCompatActivity {
         }else if (item.getItemId()==R.id.action_save) {
             String title = playlistText.getText().toString();
             if (!title.isEmpty()) {
-                if (playlist_csv!=null && playlist_csv.contains(","+title+",")) {
+                String[] lines = playlist_csv.split("\n|\r");
+                if (playlist_csv!=null && playlist_csv.contains(","+title)) {
                     // Update playList
-                    String[] lines = playlist_csv.split("\n|\r");
                     StringBuilder builder = new StringBuilder();
                     for (int i=0;i<lines.length;i++) {
-                        if (lines[i].contains(","+title+",")) {
+                        if (lines[i].contains(","+title)) {
                             lines[i] = createPlayListLine(title);
                         }
                         builder.append(lines[i]).append("\n");
@@ -145,7 +153,11 @@ public class CPlaylistActivity extends AppCompatActivity {
                     YTutils.writeContent(this,"playlist.csv",builder.toString());
                 }else {
                     // Add to new playlist
-                    playlist_csv+=createPlayListLine(title);
+                    if (current_to_save!=-1) {
+                        Log.e("UpdatingList","true");
+                       lines[current_to_save] = createPlayListLine(title);
+                       playlist_csv = YTutils.convertArrayToStringMethod(lines);
+                    }else playlist_csv+=createPlayListLine(title);
                     YTutils.writeContent(this,"playlist.csv",playlist_csv);
                 }
                 finish();
@@ -153,6 +165,21 @@ public class CPlaylistActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private View.OnClickListener recyclerItemListener = view -> {
+        int position = (int)view.getTag();
+        int icon = android.R.drawable.ic_dialog_alert;
+        new AlertDialog.Builder(CPlaylistActivity.this)
+                .setTitle("Delete")
+                .setMessage("Are you sure to delete selected item?")
+                .setPositiveButton("OK", (dialog, which) -> {
+                    models.remove(position);
+                    adapter.notifyItemChanged(position);
+                })
+                .setIcon(icon)
+                .show();
+    };
+
 
     String createPlayListLine(String title) {
         if (date==null) {
@@ -238,7 +265,7 @@ public class CPlaylistActivity extends AppCompatActivity {
                         .getString("totalResults"));
                 if (mainArrays.length()<total) {
                     for(int i=0;i<mainArrays.length();i++) {
-                        onProgressUpdate("Getting video "+current+"/"+total);
+                        publishProgress("Parsing video "+current+"/"+total+"...");
                         models.add(parseVideo(mainArrays.getJSONObject(i)));
                         current++;
                     }
@@ -278,6 +305,7 @@ public class CPlaylistActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
+            dialog.setCancelable(false);
             dialog.setMessage("Parsing youtube playlist");
             dialog.show();
             super.onPreExecute();
@@ -305,7 +333,7 @@ public class CPlaylistActivity extends AppCompatActivity {
             ArrayList<String> songs = playlist.getSpotifyUrls();
             if (songs!=null) {
                 for (int i=0;i<songs.size();i++) {
-                    onProgressUpdate("Getting song "+(i+1)+"/"+songs.size());
+                    publishProgress("Parsing song "+(i+1)+"/"+songs.size()+"...");
                     SpotifyTrack track = new SpotifyTrack(YTutils.getSpotifyID(songs.get(i)));
                     YTLength ytLength = new YTLength(YTutils.getVideoID(track.getYtUrl()));
                     DiscoverModel model = new DiscoverModel(
@@ -326,6 +354,7 @@ public class CPlaylistActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
+            dialog.setCancelable(false);
             dialog.setMessage("Parsing playlist songs...");
             dialog.show();
             super.onPreExecute();
@@ -351,6 +380,8 @@ public class CPlaylistActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            if (checkifItemExist(yturl))
+                return null;
             String videoID = YTutils.getVideoID(yturl);
             YTMeta ytMeta = new YTMeta(videoID);
             YTLength ytLength = new YTLength(videoID);
@@ -376,7 +407,13 @@ public class CPlaylistActivity extends AppCompatActivity {
             super.onPreExecute();
         }
     }
-
+    boolean checkifItemExist(String ytUrl) {
+        for(DiscoverModel model:  models) {
+            if (model.getYtUrl().contains(ytUrl))
+                return true;
+        }
+        return false;
+    }
 
     class spotifySearch extends AsyncTask<Void,Void,Void> {
         SpotifyTrack track;
@@ -399,6 +436,8 @@ public class CPlaylistActivity extends AppCompatActivity {
             String id = YTutils.getSpotifyID(textToSearch);
             if (id!=null) {
                 track = new SpotifyTrack(id);
+                if (checkifItemExist(track.getYtUrl()))
+                    return null;
                 YTLength ytLength = new YTLength(YTutils.getVideoID(track.getYtUrl()));
                 if (track.getTitle()!=null) {
                     DiscoverModel model = new DiscoverModel(
@@ -411,6 +450,8 @@ public class CPlaylistActivity extends AppCompatActivity {
             }
             return null;
         }
+
+
 
         @Override
         protected void onPreExecute() {
