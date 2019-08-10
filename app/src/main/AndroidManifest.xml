@@ -30,6 +30,7 @@
         </activity>
         <activity
             android:name=".PlayerActivity"
+            android:excludeFromRecents="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
@@ -60,7 +61,10 @@
             </intent-filter>
         </activity>
         <activity
+            android:theme="@style/AppTheme.NoActionBar"
             android:name=".HiddenActivity"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
             android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />

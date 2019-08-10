@@ -1,5 +1,6 @@
 package com.kpstv.youtube;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,7 +14,7 @@ import com.kpstv.youtube.fragments.HistoryFragment;
 import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTutils;
 
-public class HiddenActivity extends AppCompatActivity {
+public class HiddenActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,14 +54,14 @@ public class HiddenActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-         //   dialog.dismiss();
+            dialog.dismiss();
             if (ytLink!=null) {
                 Intent intent = new Intent(HiddenActivity.this,PlayerActivity.class);
                 intent.putExtra("youtubelink",new String[] {ytLink});
                 startActivityForResult(intent,200);
                 overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
-                finish();
             }
+            finish();
             super.onPostExecute(aVoid);
         }
 
@@ -68,13 +69,14 @@ public class HiddenActivity extends AppCompatActivity {
         protected void onPreExecute() {
             dialog.setCancelable(false);
             dialog.setMessage("Parsing spotify url...");
-           // dialog.show();
+            dialog.show();
             super.onPreExecute();
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            SpotifyTrack track = new SpotifyTrack(spotifyUrl);
+            Log.e("Original_URL",spotifyUrl+"");
+            SpotifyTrack track = new SpotifyTrack(YTutils.getSpotifyID(spotifyUrl));
             ytLink = track.getYtUrl();
             Log.e("GOTURL_Here",ytLink+"");
             return null;

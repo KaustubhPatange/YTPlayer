@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements HistoryBottomSheet.BottomSheetListener {
 
     // https://www.googleapis.com/youtube/v3/videos?id=BDocp-VpCwY&key=AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw&part=snippet,statistics
 
@@ -120,7 +120,10 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-
+    @Override
+    public void onRemoveFromHistory(int position) {
+        HistoryFragment.removeFromHistory(position);
+    }
 }
 
 

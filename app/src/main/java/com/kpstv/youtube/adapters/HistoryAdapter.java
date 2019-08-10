@@ -3,11 +3,13 @@ package com.kpstv.youtube.adapters;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -17,17 +19,20 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.kpstv.youtube.HistoryBottomSheet;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.utils.HttpHandler;
+import com.kpstv.youtube.utils.YTLength;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
@@ -46,10 +51,11 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
     private ArrayList<String> dataSet;
     String[] apiKeys = new String[]{"AIzaSyBMqerRAATEnrsfPnWYfeqDdqX0TbR0bEo","AIzaSyCA2Py9snHNdp4Y4Dkyq-z7gUfxLqdPhtQ"};
     private ArrayList<String> Dateset;
-
+    View.OnLongClickListener longClickListener;
     Context con;
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
+
+    public static class MyViewHolder extends RecyclerView.ViewHolder{
 
         TextView rate_percent;
         TextView titleText;
@@ -73,7 +79,8 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
         }
     }
 
-    public HistoryAdapter(ArrayList<String> data,Context context) {
+    public HistoryAdapter(ArrayList<String> data,Context context, View.OnLongClickListener longClickListener) {
+        this.longClickListener = longClickListener;
         this.dataSet = data;
         this.con = context;
         Dateset = new ArrayList<>();
@@ -96,16 +103,17 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
 
         new getContents(holder,urlset).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        new getData(holder,urlset).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new getData(holder,urlset,listPosition).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     class getData extends AsyncTask<String,Void,Void> {
 
         MyViewHolder viewHolder; String DateString,ytUrl;
-        MetaModel model;
+        MetaModel model;int pos; long seconds;
 
-        public getData(MyViewHolder holder, String url) {
+        public getData(MyViewHolder holder, String url,int postion) {
             viewHolder = holder;
+            pos = postion;
             ytUrl = url.split("\\|")[0];
             DateString = url.split("\\|")[1];
         }
@@ -144,18 +152,19 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
             } else if (DateString.contains(yesterday)) {
                 toput = "Yesterday";
             }
+            Object[] objects = new Object[3];
+            objects[0]=pos; objects[1]=model.getTitle();objects[2]=ytUrl;
+            viewHolder.mainCard.setTag(objects);
+            viewHolder.mainCard.setOnLongClickListener(longClickListener);
 
-            viewHolder.mainCard.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            viewHolder.mainCard.setOnClickListener(v -> {
 
-                    Activity activity = (Activity) con;
+                Activity activity = (Activity) con;
 
-                    Intent intent = new Intent(con,PlayerActivity.class);
-                    intent.putExtra("youtubelink",new String[]{ ytUrl });
-                    con.startActivity(intent);
-                    activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
-                }
+                Intent intent = new Intent(con,PlayerActivity.class);
+                intent.putExtra("youtubelink",new String[]{ ytUrl });
+                con.startActivity(intent);
+                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
             });
 
             viewHolder.dateText.setText(toput);
@@ -165,22 +174,53 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
                 Dateset.add(DateString);
             }
 
-            viewHolder.addPlaylist.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //TODO: Implement add to playlist
-                }
+            viewHolder.addPlaylist.setOnClickListener(v -> {
+                Activity activity = (Activity) con;
+                new addToPlay(activity,ytUrl).executeOnExecutor(THREAD_POOL_EXECUTOR);
             });
             super.onPostExecute(aVoid);
         }
+
+        class addToPlay extends AsyncTask<Void,Void,Void> {
+            String yturl;
+            long seconds; Activity activity; ProgressDialog dialog;
+            public addToPlay(Activity activity,String yturl) {
+                this.activity = activity;
+                this.yturl = yturl;
+                dialog = new ProgressDialog(activity);
+            }
+
+            @Override
+            protected void onPreExecute() {
+                dialog.setMessage("Parsing all playlist...");
+                dialog.show();
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                dialog.dismiss();
+                YTutils.addToPlayList(activity,yturl,seconds);
+                super.onPostExecute(aVoid);
+            }
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                YTLength ytLength = new YTLength(YTutils.getVideoID(yturl));
+                seconds = ytLength.getSeconds();
+                return null;
+            }
+        }
+
 
         @Override
         protected Void doInBackground(String... strings) {
 
             String id = YTutils.getVideoID(ytUrl);
+            YTLength length = new YTLength(YTutils.getVideoID(ytUrl));
+            seconds = length.getSeconds();
             HttpHandler handler = new HttpHandler();
             String json = handler.makeServiceCall("https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v="+id+"&format=json");
-
             try {
                 JSONObject object = new JSONObject(json);
                 model = new MetaModel(

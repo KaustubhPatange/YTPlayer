@@ -2,6 +2,7 @@ package com.kpstv.youtube.adapters;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -29,6 +30,7 @@ import com.kpstv.youtube.models.DiscoverModel;
 import com.kpstv.youtube.models.SearchModel;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.OnLoadMoreListener;
+import com.kpstv.youtube.utils.YTLength;
 import com.kpstv.youtube.utils.YTutils;
 
 import org.json.JSONObject;
@@ -109,8 +111,6 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
 
             final MyViewHolder viewHolder = ((MyViewHolder) holder);
 
-          /*  new getData(((MyViewHolder) holder),model,position).execute();*/
-
             viewHolder.authorText.setText(model.getAuthor());
             viewHolder.titleText.setText(model.getTitle());
             viewHolder.rate_percent.setText("#"+(position+1));
@@ -131,7 +131,8 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
             viewHolder.addPlaylist.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //TODO: Add to playlist
+                    Activity activity = (Activity) con;
+                    new getData(activity,model.getYtUrl()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             });
 
@@ -148,6 +149,37 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
             });
         } else {
             ((ProgressViewHolder) holder).progressBar.setIndeterminate(true);
+        }
+    }
+
+    class getData extends AsyncTask<Void,Void,Void> {
+        String yturl;
+        long seconds; Activity activity; ProgressDialog dialog;
+        public getData(Activity activity,String yturl) {
+            this.activity = activity;
+            this.yturl = yturl;
+            dialog = new ProgressDialog(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog.setMessage("Parsing all playlist...");
+            dialog.show();
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            dialog.dismiss();
+            YTutils.addToPlayList(activity,yturl,seconds);
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            YTLength ytLength = new YTLength(YTutils.getVideoID(yturl));
+            seconds = ytLength.getSeconds();
+            return null;
         }
     }
 

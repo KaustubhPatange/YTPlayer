@@ -14,8 +14,10 @@ import android.net.Uri;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.kpstv.youtube.R;
 
@@ -139,6 +141,45 @@ public class YTutils {
                 }
             }
         }
+    }
+
+    public static void addToPlayList(Activity activity,String ytUrl, long seconds) {
+        String playlist_csv = YTutils.readContent(activity,"playlist.csv");
+        if (playlist_csv==null&&playlist_csv.isEmpty()) return;
+        ArrayList<String> configs = new ArrayList<>();
+
+        String[] allPlaylist = playlist_csv.split("\n|\r");
+
+        for(String line : allPlaylist) {
+            String[] playlist = line.split(",");
+            configs.add(playlist[1]);
+        }
+        final String[] arrays = new String[configs.size()];
+        for(int i=0;i<configs.size();i++) {
+            arrays[i]=configs.get(i);
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle("Add to playlist");
+
+        builder.setItems(arrays, (dialog, which) -> {
+            boolean alreadPresent=false,added=false;
+            String name = configs.get(which);
+            for (int i=0;i<configs.size();i++) {
+                String videoID = YTutils.getVideoID(ytUrl);
+                if (allPlaylist[i].contains(","+name) && !allPlaylist[i].contains(videoID+"|")) {
+                    allPlaylist[i]+=","+videoID+"|"+seconds;
+                    writeContent(activity,"playlist.csv",
+                            join(allPlaylist,'\n'));
+                    added=true;
+                    Toast.makeText(activity, "Added to playlist", Toast.LENGTH_SHORT).show();
+                }else alreadPresent=true;
+            }
+            if (alreadPresent&&!added)
+                Toast.makeText(activity, "Already exist in playlist", Toast.LENGTH_SHORT).show();
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     public static String readContent(Activity activity, String FILE_NAME) {
@@ -364,11 +405,6 @@ public class YTutils {
         return finalTimerString;
     }
 
-    /**
-     * Function to get Progress percentage
-     * @param currentDuration
-     * @param totalDuration
-     * */
     public static int getProgressPercentage(long currentDuration, long totalDuration){
         Double percentage = (double) 0;
 
@@ -380,6 +416,13 @@ public class YTutils {
 
         // return percentage
         return percentage.intValue();
+    }
+
+    public static String join(String[] arrays,char deliminator) {
+        StringBuilder builder = new StringBuilder();
+        for (String a: arrays)
+            builder.append(a).append(deliminator);
+        return builder.toString();
     }
 
     public static Bitmap drawableToBitmap (Drawable drawable) {

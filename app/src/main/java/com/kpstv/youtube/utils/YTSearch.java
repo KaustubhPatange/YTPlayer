@@ -31,7 +31,10 @@ public class YTSearch {
 
     public YTSearch(String query) {
 
-        String tosearch = query.replace(" ","+");
+        String tosearch = query.replace(" ","+")
+                .replace("&#039;","'")
+                .replace("&#038;","%26")
+                .replace(",","%2");
 
         videoIDs = new ArrayList<>();
         try {
@@ -47,7 +50,6 @@ public class YTSearch {
                 if (line.contains("src=\"https://i.ytimg.com"))
                 {
                     videoIDs.add(line.split("/")[4]);
-                //    Log.e("YT_searchTAG","query: "+tosearch+", id:"+line.split("/")[4]);
                 }
             }
             in.close();

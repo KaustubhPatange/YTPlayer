@@ -1,16 +1,11 @@
 package com.kpstv.youtube.fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -24,30 +19,24 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import com.kpstv.youtube.MainActivity;
-import com.kpstv.youtube.PlayerActivity;
+import com.kpstv.youtube.HistoryBottomSheet;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.HistoryAdapter;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class HistoryFragment extends Fragment {
 
     SwipeRefreshLayout swipeRefreshLayout;
-    RecyclerView recyclerView;
+    static RecyclerView recyclerView;
     static RecyclerView.LayoutManager layoutManager;
-    HistoryAdapter adapter;
+    static HistoryAdapter adapter;
     View v; boolean networkCreated,onCreateViewCalled;
-    SharedPreferences sharedPreferences;
+    static SharedPreferences sharedPreferences;
+    static ArrayList<String> urls; static LinearLayout hiddenLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,9 +57,12 @@ public class HistoryFragment extends Fragment {
 
             toolbar.setTitle("History");
 
+            urls = new ArrayList<>();
+
             ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
             swipeRefreshLayout = v.findViewById(R.id.swipeRefreshLayout);
+            hiddenLayout = v.findViewById(R.id.history_linear);
 
             LoadMainMethod();
 
@@ -82,10 +74,48 @@ public class HistoryFragment extends Fragment {
                 }
             });
 
+            swipeRefreshLayout.setOnLongClickListener(v -> false);
+
             networkCreated=true;
         }
 
         return v;
+    }
+
+    private View.OnLongClickListener recyclerItemLongListener = v1 -> {
+        Object[] objects = (Object[])v1.getTag();
+        int position = (int) objects[0];
+        String title = (String) objects[1];
+        String yturl = (String) objects[2];
+        HistoryBottomSheet bottomSheet = new HistoryBottomSheet();
+        Bundle bundle = new Bundle();
+        bundle.putInt("pos",position);
+        bundle.putString("title",title);
+        bundle.putString("yturl",yturl);
+        bottomSheet.setArguments(bundle);
+        bottomSheet.show(getActivity().getSupportFragmentManager(), "");
+        return false;
+    };
+
+    public static void removeFromHistory(int position) {
+        String history = sharedPreferences.getString("urls","");
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        if (history!=null&&!history.isEmpty()) {
+            String[] items = history.split(",");
+            StringBuilder builder = new StringBuilder();
+            for (String item: items) {
+                if (!item.contains(urls.get(position))) {
+                    builder.append(item).append(",");
+                }
+            }
+            editor.putString("urls",builder.toString());
+        }
+        editor.apply();
+        urls.remove(position);
+        adapter.notifyDataSetChanged();
+        if (urls.isEmpty()) {
+            hiddenLayout.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -129,13 +159,14 @@ public class HistoryFragment extends Fragment {
     }
 
     void LoadMainMethod() {
+        urls.clear();
         swipeRefreshLayout.setEnabled(false);
         recyclerView = v.findViewById(R.id.my_recycler_view);
         layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        final ArrayList<String> urls = new ArrayList<>();
         String items = sharedPreferences.getString("urls","");
+
         if (!items.isEmpty()) {
             String[] urlarray = items.split(",");
             if (urlarray.length>25) {
@@ -145,11 +176,10 @@ public class HistoryFragment extends Fragment {
         }
         if (urls.size()>0) {
             swipeRefreshLayout.setRefreshing(true);
-            adapter = new HistoryAdapter(urls,getActivity());
+            adapter = new HistoryAdapter(urls,getActivity(),recyclerItemLongListener);
             recyclerView.setAdapter(adapter);
 
-            LinearLayout hlayout = v.findViewById(R.id.history_linear);
-            hlayout.setVisibility(View.GONE);
+            hiddenLayout.setVisibility(View.GONE);
 
             swipeRefreshLayout.setRefreshing(false);
             swipeRefreshLayout.setEnabled(true);
@@ -157,10 +187,10 @@ public class HistoryFragment extends Fragment {
         }else {
             // It is empty
             urls.clear();
-            adapter = new HistoryAdapter(urls,getActivity());
+            adapter = new HistoryAdapter(urls,getActivity(),recyclerItemLongListener);
             recyclerView.setAdapter(adapter);
-            LinearLayout hlayout = v.findViewById(R.id.history_linear);
-            hlayout.setVisibility(View.VISIBLE);
+           hiddenLayout.setVisibility(View.VISIBLE);
         }
     }
+
 }

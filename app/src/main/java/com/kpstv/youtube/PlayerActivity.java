@@ -23,6 +23,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
@@ -89,7 +90,6 @@ import at.huber.youtubeExtractor.VideoMeta;
 import at.huber.youtubeExtractor.YouTubeExtractor;
 import at.huber.youtubeExtractor.YtFile;
 
-
 public class PlayerActivity extends AppCompatActivity {
 
     String YouTubeUrl; BlurImageView backImage;
@@ -117,7 +117,7 @@ public class PlayerActivity extends AppCompatActivity {
 
     private Handler mHandler = new Handler();
 
-    SharedPreferences preferences;
+    SharedPreferences preferences; boolean isAddedToPlaylist;
 
     long total_duration=0; int total_seconds; List<String> yturls; int ytIndex=0;
 
@@ -317,7 +317,7 @@ public class PlayerActivity extends AppCompatActivity {
                 playPrevious();
                 break;
             case "add":
-                //TODO: Add to play list listener
+                YTutils.addToPlayList(this,YouTubeUrl,total_duration/1000);
                 break;
         }
     }
@@ -348,7 +348,7 @@ public class PlayerActivity extends AppCompatActivity {
 
     class getData extends AsyncTask<String,String,Void> {
 
-        String videoTitle,channelTitle,viewCounts,imgUrl,link;
+        String videoTitle="",channelTitle="",viewCounts,imgUrl,link;
 
         @SuppressLint("StaticFieldLeak")
         @Override
@@ -459,7 +459,15 @@ public class PlayerActivity extends AppCompatActivity {
 
                 @Override
                 protected void onExtractionComplete(SparseArray<YtFile> ytFiles, VideoMeta videoMeta) {
-
+                    if (videoTitle.isEmpty()&&videoMeta.getTitle()!=null) {
+                        videoTitle = videoMeta.getTitle();
+                        channelTitle = videoMeta.getAuthor();
+                        mainTitle.setText(videoTitle);
+                        collpaseView.setTextViewText(R.id.nTitle,videoTitle);
+                        expandedView.setTextViewText(R.id.nTitle,videoTitle);
+                        collpaseView.setTextViewText(R.id.nAuthor,channelTitle);
+                        expandedView.setTextViewText(R.id.nAuthor,channelTitle);
+                    }
                 }
             }.execute(YouTubeUrl);
             super.onPostExecute(aVoid);
@@ -477,9 +485,11 @@ public class PlayerActivity extends AppCompatActivity {
             String json = jsonResponse(videoID,0);
 
             YTMeta ytMeta = new YTMeta(videoID);
-            videoTitle = ytMeta.getVideMeta().getTitle();
-            channelTitle = ytMeta.getVideMeta().getAuthor();
-            imgUrl = ytMeta.getVideMeta().getImgUrl();
+            if (ytMeta.getVideMeta()!=null) {
+                videoTitle = ytMeta.getVideMeta().getTitle();
+                channelTitle = ytMeta.getVideMeta().getAuthor();
+                imgUrl = ytMeta.getVideMeta().getImgUrl();
+            }
 
             Log.e("ImageUrl",imgUrl+"");
 
@@ -537,7 +547,7 @@ public class PlayerActivity extends AppCompatActivity {
 
             // Add to playlist by removing it first
             for (int i=0;i<urls.size();i++) {
-                if (urls.get(i).contains(url_link)) {
+                if (urls.get(i).contains(Objects.requireNonNull(YTutils.getVideoID(url_link)))) {
                     urls.remove(i);
                 }
             }
@@ -628,6 +638,7 @@ public class PlayerActivity extends AppCompatActivity {
             datasync.cancel(true);
         player.stop();
         player.release();
+
         mHandler.removeCallbacks(mUpdateTimeTask);
         super.onDestroy();
     }
@@ -661,7 +672,7 @@ public class PlayerActivity extends AppCompatActivity {
             shareIntent.putExtra(Intent.EXTRA_TEXT,YouTubeUrl);
             startActivity(Intent.createChooser(shareIntent, "Share using..."));
         }else if (itemId == R.id.action_add) {
-            //TODO: Add to playlist
+            YTutils.addToPlayList(this,YouTubeUrl,total_duration/1000);
         }
 
         return super.onOptionsItemSelected(item);

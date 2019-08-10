@@ -168,13 +168,14 @@ public class CPlaylistActivity extends AppCompatActivity {
 
     private View.OnClickListener recyclerItemListener = view -> {
         int position = (int)view.getTag();
+        Log.e("PositionTORemove",position+"");
         int icon = android.R.drawable.ic_dialog_alert;
         new AlertDialog.Builder(CPlaylistActivity.this)
                 .setTitle("Delete")
                 .setMessage("Are you sure to delete selected item?")
                 .setPositiveButton("OK", (dialog, which) -> {
                     models.remove(position);
-                    adapter.notifyItemChanged(position);
+                    adapter.notifyDataSetChanged();
                 })
                 .setIcon(icon)
                 .show();
