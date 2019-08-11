@@ -22,8 +22,10 @@
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
             android:layout_width="match_parent"
-            android:layout_height="50dp">
+            android:layout_height="wrap_content">
             <LinearLayout
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
@@ -195,71 +197,173 @@
         <android.support.v7.widget.CardView
             android:layout_marginTop="10dp"
             app:cardCornerRadius="5dp"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="15dp"
             android:layout_marginStart="15dp"
             android:layout_marginEnd="15dp"
             app:cardUseCompatPadding="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <LinearLayout
                 android:layout_width="match_parent"
-                android:orientation="vertical"
-                android:layout_height="wrap_content">
-                <LinearLayout
-                    android:id="@+id/SOW_layout"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:background="@drawable/history_background"
-                    android:padding="10dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <!-- <ImageView
+                    android:tint="@color/grey"
+                    android:padding="20dp"
                     android:layout_width="match_parent"
-                    android:orientation="horizontal"
-                    android:layout_height="wrap_content">
+                    android:src="@drawable/ic_pulse"
+                    android:layout_height="110dp" />-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
                     <ImageView
-                        android:layout_width="40dp"
-                        android:src="@drawable/ic_whatsapp"
-                        android:layout_height="40dp" />
-                    <TextView
-                        android:gravity="center_vertical"
-                        android:layout_alignParentStart="true"
-                        android:textSize="16sp"
-                        android:textColor="@color/light_white"
-                        android:fontFamily="@font/dmsans_font"
+                        android:id="@+id/githubImage"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginEnd="15dp"
+                        android:background="@drawable/history_background"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:src="@drawable/ic_github"
+                        android:tint="@color/grey" />
+
+                    <ImageView
+                        android:id="@+id/pulseWebImage"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:background="@drawable/history_background"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:src="@drawable/ic_pulse"
+                        android:tint="@color/grey" />
+
+                    <ImageView
+                        android:id="@+id/myWebImage"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         android:layout_marginStart="15dp"
-                        android:layout_width="wrap_content"
-                        android:text="Share on Whatsapp"
-                        android:layout_height="match_parent" />
+                        android:background="@drawable/history_background"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:src="@drawable/ic_web"
+                        android:tint="@color/grey" />
                 </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="15dp"
+                    android:fontFamily="@font/dmsans_font"
+                    android:text="Support me by sharing app with your friends &#38; colleagues."
+                    android:textAlignment="center"
+                    android:textColor="@color/light_white" />
+
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/colorScreen1"/>
+                    android:background="@color/colorScreen1" />
+
                 <LinearLayout
-                    android:id="@+id/SOF_layout"
+                    android:id="@+id/SOW_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/history_background"
                     android:clickable="true"
                     android:focusable="true"
-                    android:background="@drawable/history_background"
-                    android:padding="10dp"
-                    android:layout_width="match_parent"
                     android:orientation="horizontal"
-                    android:layout_height="wrap_content">
+                    android:padding="10dp">
+
                     <ImageView
                         android:layout_width="40dp"
-                        android:src="@drawable/ic_facebook"
-                        android:layout_height="40dp" />
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_whatsapp" />
+
                     <TextView
-                        android:gravity="center_vertical"
-                        android:layout_alignParentStart="true"
-                        android:textSize="16sp"
-                        android:textColor="@color/light_white"
-                        android:fontFamily="@font/dmsans_font"
-                        android:layout_marginStart="15dp"
                         android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="15dp"
+                        android:fontFamily="@font/dmsans_font"
+                        android:gravity="center_vertical"
+                        android:text="Share on Whatsapp"
+                        android:textColor="@color/bit_light_white"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/colorScreen1" />
+
+                <LinearLayout
+                    android:id="@+id/SOF_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/history_background"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_facebook" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="15dp"
+                        android:fontFamily="@font/dmsans_font"
+                        android:gravity="center_vertical"
                         android:text="Share on Facebook"
-                        android:layout_height="match_parent" />
+                        android:textColor="@color/bit_light_white"
+                        android:textSize="16sp" />
                 </LinearLayout>
             </LinearLayout>
-
-
         </android.support.v7.widget.CardView>
+        <LinearLayout
+            android:layout_gravity="center"
+            android:layout_marginBottom="15dp"
+            android:id="@+id/settingsLayout"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="horizontal"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:background="@drawable/settings_shape"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp">
+            <ImageView
+                android:layout_gravity="center_vertical"
+                android:tint="@color/colorScreen"
+                android:src="@drawable/ic_settings"
+                android:layout_width="16dp"
+                android:layout_height="16dp" />
+            <TextView
+                android:textSize="14sp"
+                android:layout_marginEnd="5dp"
+                android:textStyle="bold"
+                android:layout_marginStart="10dp"
+                android:gravity="center_vertical"
+                android:text="SETTINGS"
+                android:textColor="@color/colorScreen"
+                android:fontFamily="@font/dmsans_font"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
+        </LinearLayout>
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

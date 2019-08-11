@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="General">
+        <ListPreference
+            android:defaultValue="global"
+            android:dialogTitle="Select Region"
+            android:entries="@array/pref_region_entries"
+            android:entryValues="@array/pref_region_values"
+            android:key="pref_select_region"
+            android:summary="This will change your trending, viral songs as per your region choice."
+            android:title="Select Region" />
+    </PreferenceCategory>
+</PreferenceScreen>

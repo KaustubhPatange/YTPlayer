@@ -1,6 +1,7 @@
 package com.kpstv.youtube;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -48,6 +49,8 @@ public class SearchActivity extends AppCompatActivity {
     private Activity activity; boolean showTrend;
     private AsyncTask<Void, Void, Void> task;
 
+    SharedPreferences preferences; String region="global";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +63,11 @@ public class SearchActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         SongList = intent.getStringExtra("data_csv");
+
+        preferences = getSharedPreferences("appSettings",Context.MODE_PRIVATE);
+        if (preferences!=null) {
+            region = preferences.getString("pref_select_region","global");
+        }
 
         activity = this;
         discoverModels = new ArrayList<>();
@@ -245,7 +253,7 @@ public class SearchActivity extends AppCompatActivity {
     void MakeSpotifyList() {
         if (SongList ==null) {
             HttpHandler handler = new HttpHandler();
-            SongList = handler.makeServiceCall("https://spotifycharts.com/viral/global/daily/latest/download");
+            SongList = handler.makeServiceCall("https://spotifycharts.com/viral/"+region+"/daily/latest/download");
         }
 
         String[] csvlines = SongList.split("\r|\n");

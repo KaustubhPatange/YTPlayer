@@ -22,16 +22,10 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".PlayerActivity"
-            android:excludeFromRecents="true"
-            android:launchMode="singleTop"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -61,11 +55,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:theme="@style/AppTheme.NoActionBar"
             android:name=".HiddenActivity"
-            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
             android:taskAffinity=""
-            android:launchMode="singleInstance">
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -75,6 +68,7 @@
             </intent-filter>
         </activity>
         <activity
+            android:theme="@style/AppTheme"
             android:name=".DiscoverActivity"
             android:screenOrientation="portrait" />
         <activity
@@ -84,9 +78,22 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".CPlaylistActivity" />
         <activity
-            android:theme="@style/AppTheme.NoActionBar1"
             android:name=".OPlaylistActivity"
-            android:label="@string/title_activity_oplayist"/>
+            android:label="@string/title_activity_oplayist"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar1" />
+        <activity android:name=".SettingsActivity" />
+        <activity
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:screenOrientation="portrait"
+
+            android:theme="@style/SplashTheme" android:name=".SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

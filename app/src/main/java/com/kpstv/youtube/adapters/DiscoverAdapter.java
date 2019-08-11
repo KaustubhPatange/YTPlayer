@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -44,8 +46,8 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
     private List<DiscoverModel> discoverModels;
     Context con;
     private int visibleThreshold = 5;
-    private int lastVisibleItem, totalItemCount;
-    private boolean loading;
+    private int lastVisibleItem, totalItems;
+    private boolean loading,isScrolling; int scrollOutItems,currentItems;
     private OnLoadMoreListener onLoadMoreListener;
 
     public DiscoverAdapter(Context context, List<DiscoverModel> students, RecyclerView recyclerView) {
@@ -58,25 +60,33 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
 
 
             recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                        @Override
-                        public void onScrolled(RecyclerView recyclerView,
-                                               int dx, int dy) {
-                            super.onScrolled(recyclerView, dx, dy);
 
-                            totalItemCount = linearLayoutManager.getItemCount();
-                            lastVisibleItem = linearLayoutManager
-                                    .findLastVisibleItemPosition();
-                            if (!loading
-                                    && totalItemCount <= (lastVisibleItem + visibleThreshold)) {
-                                // End has been reached
-                                // Do something
-                                if (onLoadMoreListener != null) {
-                                    onLoadMoreListener.onLoadMore();
-                                }
-                                loading = true;
-                            }
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    if(newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL)
+                    {
+                        isScrolling = true;
+                    }
+                    super.onScrollStateChanged(recyclerView, newState);
+                }
+
+                @Override
+                public void onScrolled(RecyclerView recyclerView,
+                                       int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    currentItems = linearLayoutManager.getChildCount();
+                    scrollOutItems = linearLayoutManager.findFirstVisibleItemPosition();
+                    totalItems = linearLayoutManager.getItemCount();
+                    if(!loading && isScrolling && (currentItems + scrollOutItems == totalItems))
+                    {
+                        isScrolling = false;
+                        if (onLoadMoreListener != null) {
+                            onLoadMoreListener.onLoadMore();
                         }
-                    });
+                        loading = true;
+                    }
+                }
+            });
         }
     }
 
@@ -163,7 +173,7 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
 
         @Override
         protected void onPreExecute() {
-            dialog.setMessage("Parsing all playlist...");
+            dialog.setMessage("Parsing your playlist...");
             dialog.show();
             super.onPreExecute();
         }

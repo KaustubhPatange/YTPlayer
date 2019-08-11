@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="isoparser-1.9.39.isoparser-1.9.39">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/isoparser-1.9.39/isoparser-1.9.39.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

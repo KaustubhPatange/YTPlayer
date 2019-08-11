@@ -109,7 +109,7 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
     class getData extends AsyncTask<String,Void,Void> {
 
         MyViewHolder viewHolder; String DateString,ytUrl;
-        MetaModel model;int pos; long seconds;
+        MetaModel model;int pos;
 
         public getData(MyViewHolder holder, String url,int postion) {
             viewHolder = holder;
@@ -192,7 +192,7 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
 
             @Override
             protected void onPreExecute() {
-                dialog.setMessage("Parsing all playlist...");
+                dialog.setMessage("Parsing your playlist...");
                 dialog.show();
                 super.onPreExecute();
             }
@@ -217,8 +217,6 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
         protected Void doInBackground(String... strings) {
 
             String id = YTutils.getVideoID(ytUrl);
-            YTLength length = new YTLength(YTutils.getVideoID(ytUrl));
-            seconds = length.getSeconds();
             HttpHandler handler = new HttpHandler();
             String json = handler.makeServiceCall("https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v="+id+"&format=json");
             try {

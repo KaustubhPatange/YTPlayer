@@ -3,6 +3,7 @@ package com.kpstv.youtube.utils;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 
 import org.json.JSONException;
@@ -67,9 +69,29 @@ public class YTutils {
     public static String getImageUrl(String YtUrl) {
         return "https://i.ytimg.com/vi/"+getVideoID(YtUrl)+"/mqdefault.jpg";
     }
+    public static String getImageUrlID(String videoID) {
+        return "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg";
+    }
 
     public static String getYtUrl(String videoID) {
         return "https://www.youtube.com/watch?v="+videoID;
+    }
+
+    public static void showAlert(Activity activity,String title, String message, boolean isalert) {
+        int icon = android.R.drawable.ic_dialog_info;
+        if (isalert) icon = android.R.drawable.ic_dialog_alert;
+        new AlertDialog.Builder(activity)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                       dialog.dismiss();
+                    }
+                })
+                .setIcon(icon)
+                .show();
+
     }
 
     public static String convertStreamToString(InputStream is) {
@@ -225,7 +247,7 @@ public class YTutils {
         return null;
     }
 
-    public static String getViewCount(int number) {
+    public static String getViewCount(long number) {
         if (number > 1000000000) { // billion
             return number/1000000000+"B";
         } else if (number > 1000000) { // million

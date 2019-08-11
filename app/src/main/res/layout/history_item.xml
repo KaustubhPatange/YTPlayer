@@ -128,7 +128,10 @@
                         android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
+
+
         </RelativeLayout>
+
     </android.support.v7.widget.CardView>
 
 </LinearLayout>

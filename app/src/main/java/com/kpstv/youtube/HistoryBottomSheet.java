@@ -100,7 +100,7 @@ public class HistoryBottomSheet extends BottomSheetDialogFragment {
             copyLink.setOnClickListener(v -> {
                 ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(CLIPBOARD_SERVICE);
                 clipboard.setText(ytUrl);
-                Toast.makeText(activity, "Link copied to url", Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "Link copied to clipboard", Toast.LENGTH_SHORT).show();
                 dismiss();
             });
 

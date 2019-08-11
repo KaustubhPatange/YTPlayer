@@ -2,12 +2,16 @@ package com.kpstv.youtube.fragments;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -25,9 +30,11 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.DiscoverActivity;
 import com.kpstv.youtube.SearchActivity;
+import com.kpstv.youtube.SettingsActivity;
 import com.kpstv.youtube.adapters.SearchAdapter;
 import com.kpstv.youtube.models.SearchModel;
 import com.kpstv.youtube.utils.HttpHandler;
@@ -45,8 +52,10 @@ public class SearchFragment extends Fragment {
     ArrayList<SearchModel> models; RelativeLayout progresslayout;
     ArrayList<Drawable> drawables; Activity activity; TextView moreTrend;
     CardView discoverViral, searchCard; boolean istrendloaded,isdiscoverloaded;
+    ImageView githubView,pulseView,myWebView; LinearLayout settingsLayout;
+    AsyncTask<Void,Void,Void> trendTask, discoverTask; boolean alertShown=false;
 
-    AsyncTask<Void,Void,Void> trendTask, discoverTask;
+    SharedPreferences preferences; String region="global";
 
     private static String SpotifyTrendsCSV, SpotifyViralCSV;
 
@@ -70,6 +79,12 @@ public class SearchFragment extends Fragment {
             v = inflater.inflate(R.layout.fragment_search, container, false);
 
             activity = getActivity();
+            preferences = activity.getSharedPreferences("appSettings",Context.MODE_PRIVATE);
+            if (preferences!=null) {
+                region = preferences.getString("pref_select_region","global");
+            }
+
+            Log.e("RegionSelected",region+"");
 
             models = new ArrayList<>();
             drawables = new ArrayList<>();
@@ -81,6 +96,10 @@ public class SearchFragment extends Fragment {
             imageView2 = v.findViewById(R.id.dImage2);
             imageView3 = v.findViewById(R.id.dImage3);
             imageView4 = v.findViewById(R.id.dImage4);
+            githubView = v.findViewById(R.id.githubImage);
+            pulseView = v.findViewById(R.id.pulseWebImage);
+            myWebView = v.findViewById(R.id.myWebImage);
+            settingsLayout = v.findViewById(R.id.settingsLayout);
 
             recyclerView = v.findViewById(R.id.my_recycler_view);
             discoverViral = v.findViewById(R.id.discoverViral);
@@ -89,37 +108,41 @@ public class SearchFragment extends Fragment {
                     LinearLayoutManager.HORIZONTAL,true);
             recyclerView.setLayoutManager(layoutManager);
 
-            searchCard.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(activity,SearchActivity.class);
-                    intent.putExtra("data_csv",SpotifyViralCSV);
-                    activity.startActivity(intent);
-                    activity.overridePendingTransition(R.anim.right_enter,R.anim.left_exit);
-                }
+            githubView.setOnClickListener(v1 -> {
+                YTutils.StartURL("https://github.com/KaustubhPatange/YTPlayer",activity);
+            });
+            pulseView.setOnClickListener(v1 -> {
+               //TODO: Create a website for app and put it here
+            });
+            myWebView.setOnClickListener(v1 -> {
+                YTutils.StartURL("https://kaustubhpatange.github.io",activity);
             });
 
-            moreTrend.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(activity,DiscoverActivity.class);
-                    intent.putExtra("data_csv",SpotifyTrendsCSV);
-                    intent.putExtra("title","Discover Trends");
-                    activity.startActivity(intent);
-                    activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
-                }
+            searchCard.setOnClickListener(v -> {
+                Intent intent = new Intent(activity,SearchActivity.class);
+                intent.putExtra("data_csv",SpotifyViralCSV);
+                activity.startActivity(intent);
+                activity.overridePendingTransition(R.anim.right_enter,R.anim.left_exit);
             });
 
-            discoverViral.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(activity,DiscoverActivity.class);
-                    intent.putExtra("data_csv",SpotifyViralCSV);
-                    intent.putExtra("title","Discover Viral");
-                    activity.startActivity(intent);
-                    activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
-                }
+            moreTrend.setOnClickListener(v -> {
+                Intent intent = new Intent(activity,DiscoverActivity.class);
+                intent.putExtra("data_csv",SpotifyTrendsCSV);
+                intent.putExtra("title","Discover Trends");
+                activity.startActivity(intent);
+                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
             });
+
+            discoverViral.setOnClickListener(v -> {
+                Intent intent = new Intent(activity,DiscoverActivity.class);
+                intent.putExtra("data_csv",SpotifyViralCSV);
+                intent.putExtra("title","Discover Viral");
+                activity.startActivity(intent);
+                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+            });
+
+            settingsLayout.setOnClickListener(v->
+                    startActivity(new Intent(activity,SettingsActivity.class)));
 
             networkCreated = true;
 
@@ -135,29 +158,25 @@ public class SearchFragment extends Fragment {
 
     @Override
     public void onResume() {
-       /* if (!istrendloaded && trendTask.getStatus() != AsyncTask.Status.RUNNING)
-        {
-            trendTask = new getTrending();
-            trendTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        super.onResume();
+        String newregion = preferences.getString("pref_select_region","global");
+        Log.e("onResume","region: "+region+", newregion: "+newregion);
+        if (!newregion.contains(region)&&!alertShown) {
+            Log.e("LoadAgainBro","true");
+            YTutils.showAlert(activity,"Settings",
+                    "You need to restart the app in order for changes to take effect",false);
+            alertShown = true;
         }
-        if (!isdiscoverloaded && discoverTask.getStatus() != AsyncTask.Status.RUNNING)
-        {
-            discoverTask = new loadDiscoverImages();
-            discoverTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }*/
         if (drawables.size()>3) {
             imageView1.setImageDrawable(drawables.get(0));
             imageView2.setImageDrawable(drawables.get(1));
             imageView3.setImageDrawable(drawables.get(2));
             imageView4.setImageDrawable(drawables.get(3));
         }
-        super.onResume();
     }
 
     @Override
     public void onPause() {
-       /* trendTask.cancel(true);
-        discoverTask.cancel(true);*/
         super.onPause();
     }
 
@@ -182,10 +201,10 @@ public class SearchFragment extends Fragment {
             if (SpotifyTrendsCSV==null) {
                 HttpHandler handler = new HttpHandler();
                 SpotifyTrendsCSV = handler.makeServiceCall(
-                        "https://spotifycharts.com/regional/global/daily/latest/download");
+                        "https://spotifycharts.com/regional/"+region+"/daily/latest/download");
             }
 
-            String trendRead = YTutils.readContent(activity,"trend.csv");
+            String trendRead = YTutils.readContent(activity,"trend_"+region+".csv");
             if (trendRead!=null && !trendRead.isEmpty()) {
                 String[] lines = trendRead.split("\n|\r");
                 if (lines[0].contains(YTutils.getTodayDate())&&lines.length==11) {
@@ -233,7 +252,7 @@ public class SearchFragment extends Fragment {
     }
 
     void saveTrendToInternal() {
-        String FILE_NAME = "trend.csv";
+        String FILE_NAME = "trend_"+region+".csv";
         StringBuilder builder = new StringBuilder();
         builder.append(YTutils.getTodayDate()).append("\n");
 
@@ -245,7 +264,7 @@ public class SearchFragment extends Fragment {
     }
 
     void saveDiscoverToInternal() {
-        String FILE_NAME = "discover.csv";
+        String FILE_NAME = "discover_"+region+".csv";
         StringBuilder builder = new StringBuilder();
         builder.append(YTutils.getTodayDate()+"\n");
         for (String image : images) {
@@ -273,11 +292,11 @@ public class SearchFragment extends Fragment {
             if (SpotifyViralCSV==null) {
                 HttpHandler handler = new HttpHandler();
                 SpotifyViralCSV = handler.makeServiceCall(
-                        "https://spotifycharts.com/viral/global/daily/latest/download"
+                        "https://spotifycharts.com/viral/"+region+"/daily/latest/download"
                 );
             }
 
-            String discoverRead = YTutils.readContent(getActivity(),"discover.csv");
+            String discoverRead = YTutils.readContent(getActivity(),"discover_"+region+".csv");
             if (discoverRead!=null && !discoverRead.isEmpty()) {
                 String[] lines = discoverRead.split("\n|\r");
                 if (lines[0].contains(YTutils.getTodayDate())&&lines.length==5) {

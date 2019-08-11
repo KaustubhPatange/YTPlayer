@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_region_entries">
+        <item>Global (Default)</item>
+        <item>United States</item>
+        <item>United Kingdom</item>
+        <item>Australia</item>
+        <item>Belgium</item>
+        <item>Brazil</item>
+        <item>Canada</item>
+        <item>Switzerland</item>
+        <item>Colombia</item>
+        <item>Germany</item>
+        <item>Estonia</item>
+        <item>Spain</item>
+        <item>France</item>
+        <item>Greece</item>
+        <item>Hong Kong</item>
+        <item>Ireland</item>
+        <item>Israel</item>
+        <item>India</item>
+        <item>Iceland</item>
+        <item>Italy</item>
+        <item>Japan</item>
+        <item>Luxembourg</item>
+        <item>Mexico</item>
+        <item>Malaysia</item>
+        <item>Netherlands</item>
+        <item>Norway</item>
+        <item>New Zealand</item>
+        <item>Romania</item>
+        <item>Singapore</item>
+        <item>South Africa</item>
+        <item>Thailand</item>
+    </string-array>
+    <string-array name="pref_region_values">
+        <item>global</item>
+        <item>us</item>
+        <item>gb</item>
+        <item>au</item>
+        <item>be</item>
+        <item>br</item>
+        <item>ca</item>
+        <item>ch</item>
+        <item>co</item>
+        <item>de</item>
+        <item>ee</item>
+        <item>es</item>
+        <item>fr</item>
+        <item>gr</item>
+        <item>hk</item>
+        <item>ie</item>
+        <item>il</item>
+        <item>in</item>
+        <item>is</item>
+        <item>it</item>
+        <item>jp</item>
+        <item>lu</item>
+        <item>mx</item>
+        <item>my</item>
+        <item>nl</item>
+        <item>no</item>
+        <item>nz</item>
+        <item>ro</item>
+        <item>sg</item>
+        <item>za</item>
+        <item>th</item>
+    </string-array>
+</resources>
