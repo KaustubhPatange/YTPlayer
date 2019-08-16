@@ -65,6 +65,7 @@ public class CPlaylistActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         playlist_csv = YTutils.readContent(this,"playlist.csv");
+        if (playlist_csv==null) playlist_csv="";
 
         if (pline!=null&&!pline.isEmpty()) {
             // Get data of playlist line

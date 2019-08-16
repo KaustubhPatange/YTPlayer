@@ -93,6 +93,7 @@ public class PlaylistFragment extends Fragment {
                 }
             });
 
+            if (YTutils.isInternetAvailable())
             new getData(activity).execute();
 
             networkCreated=true;

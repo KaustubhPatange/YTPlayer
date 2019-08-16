@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:gravity="center"
+    android:layout_height="match_parent"
+    tools:context=".fragments.NCFragment">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_centerHorizontal="true"
+        android:tint="@color/dark_white"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_connection_error" />
+
+    <TextView
+        android:layout_centerHorizontal="true"
+        android:id="@+id/textView"
+        android:textAlignment="center"
+        android:layout_below="@id/imageView"
+        android:text="No Connection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:backgroundTint="@color/colorAccent"
+        android:id="@+id/button"
+        android:layout_marginTop="20dp"
+        android:textSize="12sp"
+        android:text="Force Refresh"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp" />
+
+</RelativeLayout>

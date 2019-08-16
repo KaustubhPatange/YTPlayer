@@ -4,6 +4,8 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,7 +26,6 @@ import com.coremedia.iso.boxes.Container;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
@@ -52,8 +53,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -62,10 +61,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.facebook.network.connectionclass.ConnectionClassManager;
 import com.facebook.network.connectionclass.ConnectionQuality;
 import com.googlecode.mp4parser.authoring.Movie;
@@ -114,7 +109,9 @@ public class PlayerActivity extends AppCompatActivity {
 
     String YouTubeUrl;
     BlurImageView backImage;
-    NotificationManagerCompat notificationManager;
+    NotificationManagerCompat notificationManagerCompat;
+    NotificationManager notificationManager;
+    NotificationChannel notificationChannel;
     RemoteViews collpaseView, expandedView;
 
     AsyncTask<String, String, Void> datasync;
@@ -354,7 +351,17 @@ public class PlayerActivity extends AppCompatActivity {
 
 
     private void setNotification() {
-        notificationManager = NotificationManagerCompat.from(this);
+
+        // Need to create notification channel to display notification on/above android 8.0
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
+            notificationChannel = new NotificationChannel("channel_01",
+                    "YTPlayer",NotificationManager.IMPORTANCE_DEFAULT);
+            notificationChannel.setDescription("Playing song");
+            notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        notificationManagerCompat = NotificationManagerCompat.from(this);
 
         collpaseView = new RemoteViews(getPackageName(),
                 R.layout.notification_layout_small);
@@ -372,7 +379,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         notification = builder.build();
 
-        notificationManager.notify(1, notification);
+        notificationManagerCompat.notify(1, notification);
     }
 
 
@@ -403,7 +410,10 @@ public class PlayerActivity extends AppCompatActivity {
 
                             collpaseView.setImageViewBitmap(R.id.nImage, resource);
                             expandedView.setImageViewBitmap(R.id.nImage, resource);
-                            notificationManager.notify(1, builder.build());
+                            if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
+                                notificationManager.notify(1,builder.build());
+                            }
+                            notificationManagerCompat.notify(1, builder.build());
                         }
 
                         @Override
@@ -662,7 +672,10 @@ public class PlayerActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        notificationManager.cancel(1);
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
+            notificationManager.deleteNotificationChannel("channel_01");
+        }
+        notificationManagerCompat.cancel(1);
         if (datasync.getStatus() == AsyncTask.Status.RUNNING)
             datasync.cancel(true);
         player.stop();
@@ -719,13 +732,10 @@ public class PlayerActivity extends AppCompatActivity {
         if (isplay) {
 
             makePause();
-            notificationManager.notify(1, builder.build());
             player.setPlayWhenReady(true);
             //   updateDuration();
         } else {
-
             makePlay();
-            notificationManager.notify(1, builder.build());
             player.setPlayWhenReady(false);
             // mTimer.cancel();
         }
@@ -737,14 +747,20 @@ public class PlayerActivity extends AppCompatActivity {
         playFab.setImageDrawable(getResources().getDrawable(R.drawable.ic_play));
         collpaseView.setImageViewResource(R.id.nPlay, R.drawable.ic_play_notify);
         expandedView.setImageViewResource(R.id.nPlay, R.drawable.ic_play_notify);
-        notificationManager.notify(1, builder.build());
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
+            notificationManager.notify(1,builder.build());
+        }
+        notificationManagerCompat.notify(1, builder.build());
     }
 
     void makePause() {
         playFab.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause));
         collpaseView.setImageViewResource(R.id.nPlay, R.drawable.ic_pause_notify);
         expandedView.setImageViewResource(R.id.nPlay, R.drawable.ic_pause_notify);
-        notificationManager.notify(1, builder.build());
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
+            notificationManager.notify(1,builder.build());
+        }
+        notificationManagerCompat.notify(1, builder.build());
     }
 
     private void getAllViews() {
@@ -845,7 +861,7 @@ public class PlayerActivity extends AppCompatActivity {
                 final AlertDialog.Builder alert= new AlertDialog.Builder(PlayerActivity.this);
                 alert.setIcon(icon);
                 alert.setTitle("Merge");
-                alert.setMessage("The current sample you selected does not contain audio stream.\nDo you want to merge the audio with it?");
+                alert.setMessage("The current sample you selected does not contain audio stream.\n\nDo you want to merge the audio with it?");
                 alert.setPositiveButton("Yes", (dialog1, which1) -> {
                     mergeTask = new MergeAudioVideo(PlayerActivity.this,"/sdcard/Download/"+fileCurrent);
                     mergeTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,audioLink,config.getUrl());

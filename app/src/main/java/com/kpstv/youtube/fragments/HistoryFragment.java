@@ -20,10 +20,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.kpstv.youtube.HistoryBottomSheet;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.HistoryAdapter;
+import com.kpstv.youtube.utils.YTutils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,8 +66,6 @@ public class HistoryFragment extends Fragment {
             swipeRefreshLayout = v.findViewById(R.id.swipeRefreshLayout);
             hiddenLayout = v.findViewById(R.id.history_linear);
 
-            LoadMainMethod();
-
             swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {
@@ -77,6 +77,8 @@ public class HistoryFragment extends Fragment {
             swipeRefreshLayout.setOnLongClickListener(v -> false);
 
             networkCreated=true;
+
+            LoadMainMethod();
         }
 
         return v;
@@ -159,6 +161,10 @@ public class HistoryFragment extends Fragment {
     }
 
     void LoadMainMethod() {
+        if (!YTutils.isInternetAvailable()) {
+            Toast.makeText(getContext(), getString(R.string.error), Toast.LENGTH_SHORT).show();
+            return;
+        }
         urls.clear();
         swipeRefreshLayout.setEnabled(false);
         recyclerView = v.findViewById(R.id.my_recycler_view);

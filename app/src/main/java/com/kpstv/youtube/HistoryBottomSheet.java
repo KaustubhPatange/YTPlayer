@@ -28,7 +28,7 @@ import static android.content.Context.CLIPBOARD_SERVICE;
 
 public class HistoryBottomSheet extends BottomSheetDialogFragment {
 
-    LinearLayout addToPlaylist, removeList, copyLink, shareButton, mainLayout;
+    LinearLayout addToPlaylist, removeList, copyLink, shareButton, mainLayout, watchOnYouTube;
     String ytUrl, Title; BottomSheetListener mListener; ProgressBar progressBar;
     Activity activity; int position;
     long ytseconds; View v; TextView title_TextView;
@@ -46,9 +46,14 @@ public class HistoryBottomSheet extends BottomSheetDialogFragment {
         mainLayout = v.findViewById(R.id.mainlayout);
         progressBar = v.findViewById(R.id.progressBar);
         title_TextView = v.findViewById(R.id.btitle);
+        watchOnYouTube = v.findViewById(R.id.bwatch);
+
+        if (getTag().equals("discover"))
+            removeList.setVisibility(View.GONE);
 
         ChangetoDefaultColor(R.id.baddToPlaylist_textView);
-        ChangetoDefaultColor(R.id.bcopyLink_textVoew);
+        ChangetoDefaultColor(R.id.bwatch_textView);
+        ChangetoDefaultColor(R.id.bcopyLink_textView);
         ChangetoDefaultColor(R.id.bshare_textView);
         ChangetoDefaultColor(R.id.bremoveFromHistory_textView);
 
@@ -101,6 +106,11 @@ public class HistoryBottomSheet extends BottomSheetDialogFragment {
                 ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(CLIPBOARD_SERVICE);
                 clipboard.setText(ytUrl);
                 Toast.makeText(activity, "Link copied to clipboard", Toast.LENGTH_SHORT).show();
+                dismiss();
+            });
+
+            watchOnYouTube.setOnClickListener(v1 -> {
+                YTutils.StartURLIntent(ytUrl,activity);
                 dismiss();
             });
 

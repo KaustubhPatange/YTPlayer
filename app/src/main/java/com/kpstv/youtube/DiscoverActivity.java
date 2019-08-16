@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class DiscoverActivity extends AppCompatActivity {
+public class DiscoverActivity extends AppCompatActivity implements HistoryBottomSheet.BottomSheetListener {
 
     private String[] apikeys = new String[] {"AIzaSyCA2Py9snHNdp4Y4Dkyq-z7gUfxLqdPhtQ","AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
 
@@ -93,10 +93,30 @@ public class DiscoverActivity extends AppCompatActivity {
     }
 
 
+    private View.OnLongClickListener recyclerItemLongListener = v1 -> {
+        Object[] objects = (Object[])v1.getTag();
+        int position = (int) objects[0];
+        String title = (String) objects[1];
+        String yturl = (String) objects[2];
+        HistoryBottomSheet bottomSheet = new HistoryBottomSheet();
+        Bundle bundle = new Bundle();
+        bundle.putInt("pos",position);
+        bundle.putString("title",title);
+        bundle.putString("yturl",yturl);
+        bottomSheet.setArguments(bundle);
+        bottomSheet.show(getSupportFragmentManager(), "discover");
+        return false;
+    };
+
     @Override
     public boolean onSupportNavigateUp() {
         finish();
         return true;
+    }
+
+    @Override
+    public void onRemoveFromHistory(int position) {
+        // Blank stuff...
     }
 
     class loadInitialData extends AsyncTask<Void,Void,Void> {
@@ -115,7 +135,7 @@ public class DiscoverActivity extends AppCompatActivity {
 
             mLayoutManager = new LinearLayoutManager(DiscoverActivity.this);
             mRecyclerView.setLayoutManager(mLayoutManager);
-            mAdapter = new DiscoverAdapter(DiscoverActivity.this, discoverModels, mRecyclerView);
+            mAdapter = new DiscoverAdapter(DiscoverActivity.this, discoverModels, mRecyclerView,recyclerItemLongListener);
             mRecyclerView.setAdapter(mAdapter);
 
 

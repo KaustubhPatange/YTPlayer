@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -53,6 +55,7 @@ public class SearchFragment extends Fragment {
     ArrayList<Drawable> drawables; Activity activity; TextView moreTrend;
     CardView discoverViral, searchCard; boolean istrendloaded,isdiscoverloaded;
     ImageView githubView,pulseView,myWebView; LinearLayout settingsLayout;
+    NestedScrollView nestedScrollView;
     AsyncTask<Void,Void,Void> trendTask, discoverTask; boolean alertShown=false;
 
     SharedPreferences preferences; String region="global";
@@ -90,6 +93,7 @@ public class SearchFragment extends Fragment {
             drawables = new ArrayList<>();
             images = new ArrayList<>();
 
+            nestedScrollView = v.findViewById(R.id.nestedScrollView);
             searchCard = v.findViewById(R.id.cardView_search);
             imageView1 = v.findViewById(R.id.dImage1);
             moreTrend = v.findViewById(R.id.moreTrending);
@@ -119,6 +123,10 @@ public class SearchFragment extends Fragment {
             });
 
             searchCard.setOnClickListener(v -> {
+                if (!YTutils.isInternetAvailable()) {
+                    Toast.makeText(activity, getString(R.string.error), Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 Intent intent = new Intent(activity,SearchActivity.class);
                 intent.putExtra("data_csv",SpotifyViralCSV);
                 activity.startActivity(intent);
@@ -126,6 +134,10 @@ public class SearchFragment extends Fragment {
             });
 
             moreTrend.setOnClickListener(v -> {
+                if (!YTutils.isInternetAvailable()) {
+                    Toast.makeText(activity, getString(R.string.error), Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 Intent intent = new Intent(activity,DiscoverActivity.class);
                 intent.putExtra("data_csv",SpotifyTrendsCSV);
                 intent.putExtra("title","Discover Trends");
@@ -134,6 +146,10 @@ public class SearchFragment extends Fragment {
             });
 
             discoverViral.setOnClickListener(v -> {
+                if (!YTutils.isInternetAvailable()) {
+                    Toast.makeText(activity, getString(R.string.error), Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 Intent intent = new Intent(activity,DiscoverActivity.class);
                 intent.putExtra("data_csv",SpotifyViralCSV);
                 intent.putExtra("title","Discover Viral");
@@ -144,6 +160,7 @@ public class SearchFragment extends Fragment {
             settingsLayout.setOnClickListener(v->
                     startActivity(new Intent(activity,SettingsActivity.class)));
 
+            if (YTutils.isInternetAvailable())
             networkCreated = true;
 
             trendTask = new getTrending();
@@ -161,11 +178,30 @@ public class SearchFragment extends Fragment {
         super.onResume();
         String newregion = preferences.getString("pref_select_region","global");
         Log.e("onResume","region: "+region+", newregion: "+newregion);
-        if (!newregion.contains(region)&&!alertShown) {
-            Log.e("LoadAgainBro","true");
-            YTutils.showAlert(activity,"Settings",
-                    "You need to restart the app in order for changes to take effect",false);
-            alertShown = true;
+        if (!newregion.contains(region)) {
+
+            nestedScrollView.scrollTo(0, 0);
+            Toast.makeText(activity, "Reloading data from new region!", Toast.LENGTH_SHORT).show();
+           
+            models.clear();
+            adapter.notifyDataSetChanged();
+            drawables.clear();
+            images.clear();
+            progresslayout.setVisibility(View.VISIBLE);
+            region = newregion;
+            SpotifyTrendsCSV=null;
+            SpotifyViralCSV=null;
+
+            imageView1.setImageDrawable(null);
+            imageView2.setImageDrawable(null);
+            imageView3.setImageDrawable(null);
+            imageView4.setImageDrawable(null);
+
+            trendTask = new getTrending();
+            trendTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+            discoverTask = new loadDiscoverImages();
+            discoverTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
         if (drawables.size()>3) {
             imageView1.setImageDrawable(drawables.get(0));
@@ -181,6 +217,13 @@ public class SearchFragment extends Fragment {
     }
 
     class getTrending extends AsyncTask<Void,Void,Void> {
+
+        @Override
+        protected void onPreExecute() {
+            if (!YTutils.isInternetAvailable())
+                trendTask.cancel(true);
+            super.onPreExecute();
+        }
 
         @Override
         protected void onPostExecute(Void aVoid) {
@@ -275,6 +318,14 @@ public class SearchFragment extends Fragment {
     }
 
     class loadDiscoverImages extends AsyncTask<Void,Void,Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            if (!YTutils.isInternetAvailable()) {
+                discoverTask.cancel(true);
+            }
+        }
 
         @Override
         protected void onPostExecute(Void aVoid) {

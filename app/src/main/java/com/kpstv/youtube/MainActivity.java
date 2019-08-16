@@ -11,18 +11,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 
 import com.kpstv.youtube.fragments.HistoryFragment;
+import com.kpstv.youtube.fragments.NCFragment;
 import com.kpstv.youtube.fragments.PlaylistFragment;
 import com.kpstv.youtube.fragments.SearchFragment;
+import com.kpstv.youtube.utils.YTutils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity implements HistoryBottomSheet.BottomSheetListener {
+public class MainActivity extends AppCompatActivity implements HistoryBottomSheet.BottomSheetListener, NCFragment.NoConnectionListener {
 
     // https://www.googleapis.com/youtube/v3/videos?id=BDocp-VpCwY&key=AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw&part=snippet,statistics
 
@@ -42,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     Fragment HistoryFrag;
     Fragment SearchFrag;
     Fragment PlaylistFrag;
+    Fragment NCFrag;
     SharedPreferences preferences;
 
     @Override
@@ -73,12 +77,16 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         HistoryFrag = new HistoryFragment();
         SearchFrag = new SearchFragment();
         PlaylistFrag = new PlaylistFragment();
-
-        loadFragment(HistoryFrag);
+        NCFrag = new NCFragment();
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
+        if (YTutils.isInternetAvailable())
+            loadFragment(HistoryFrag);
+        else {
+            loadFragment(NCFrag);
+        }
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -88,7 +96,9 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_history:
-                    loadFragment(HistoryFrag);
+                    if (YTutils.isInternetAvailable()) {
+                        loadFragment(HistoryFrag);
+                    }else loadFragment(NCFrag);
                     return true;
                 case R.id.navigation_search:
                     loadFragment(SearchFrag);
@@ -97,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                     loadFragment(PlaylistFrag);
                     return true;
             }
+
             return true;
         }
     };
@@ -123,6 +134,14 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     @Override
     public void onRemoveFromHistory(int position) {
         HistoryFragment.removeFromHistory(position);
+    }
+
+    @Override
+    public void ReplaceFragment() {
+        if (YTutils.isInternetAvailable()) {
+            HistoryFrag = new HistoryFragment();
+            loadFragment(HistoryFrag);
+        } else Toast.makeText(this, getString(R.string.error), Toast.LENGTH_SHORT).show();
     }
 }
 

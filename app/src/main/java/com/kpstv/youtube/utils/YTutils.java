@@ -43,6 +43,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -167,7 +168,10 @@ public class YTutils {
 
     public static void addToPlayList(Activity activity,String ytUrl, long seconds) {
         String playlist_csv = YTutils.readContent(activity,"playlist.csv");
-        if (playlist_csv==null&&playlist_csv.isEmpty()) return;
+        if (playlist_csv==null||playlist_csv.isEmpty()) {
+            Toast.makeText(activity, "No playlist found!", Toast.LENGTH_SHORT).show();
+            return;
+        }
         ArrayList<String> configs = new ArrayList<>();
 
         String[] allPlaylist = playlist_csv.split("\n|\r");
@@ -485,6 +489,17 @@ public class YTutils {
             Log.e("PlayerActivity_JSON",e.getMessage());
         }
         return imageuri;
+    }
+
+    public static boolean isInternetAvailable() {
+        try {
+            InetAddress ipAddr = InetAddress.getByName("google.com");
+            //You can replace it with your name
+            return !ipAddr.equals("");
+
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public static String getDuration(int number) {

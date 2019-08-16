@@ -83,7 +83,10 @@ public class SearchActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-
+                    if (!YTutils.isInternetAvailable()) {
+                        Toast.makeText(activity, getString(R.string.error), Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
                     String textToSearch = searchEdit.getText().toString();
                     if (textToSearch.isEmpty())
                         return false;
@@ -217,6 +220,14 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     class getVirals extends AsyncTask<Void,Void,Void> {
+
+        @Override
+        protected void onPreExecute() {
+            if (!YTutils.isInternetAvailable()) {
+                task.cancel(true);
+            }
+            super.onPreExecute();
+        }
 
         @Override
         protected void onPostExecute(Void aVoid) {

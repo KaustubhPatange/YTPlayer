@@ -96,6 +96,34 @@
         </LinearLayout>
         <LinearLayout
             android:background="@drawable/history_background"
+            android:id="@+id/bwatch"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="7dp"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="53dp">
+            <ImageView
+                android:layout_marginStart="5dp"
+                android:layout_gravity="center_vertical"
+                android:tint="@color/light_white"
+                android:src="@drawable/ic_youtube"
+                android:layout_width="32dp"
+                android:layout_height="32dp" />
+            <TextView
+                android:id="@+id/bwatch_textView"
+                android:layout_marginStart="20dp"
+                android:gravity="center_vertical"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:tint="@color/light_white"
+                android:fontFamily="@font/dmsans_font"
+                android:layout_width="match_parent"
+                android:text="Watch on YouTube"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+        <LinearLayout
+            android:background="@drawable/history_background"
             android:id="@+id/bcopyLink"
             android:clickable="true"
             android:focusable="true"
@@ -111,7 +139,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp" />
             <TextView
-                android:id="@+id/bcopyLink_textVoew"
+                android:id="@+id/bcopyLink_textView"
                 android:layout_marginStart="20dp"
                 android:gravity="center_vertical"
                 android:textStyle="bold"

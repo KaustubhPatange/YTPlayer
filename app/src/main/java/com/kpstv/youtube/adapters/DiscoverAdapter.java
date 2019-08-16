@@ -39,20 +39,23 @@ import org.json.JSONObject;
 
 import java.util.List;
 
+import static android.view.View.*;
+
 public class DiscoverAdapter extends RecyclerView.Adapter {
     private final int VIEW_ITEM = 1;
     private final int VIEW_PROG = 0;
 
     private List<DiscoverModel> discoverModels;
     Context con;
-    private int visibleThreshold = 5;
+    private int visibleThreshold = 5; View.OnLongClickListener longClickListener;
     private int lastVisibleItem, totalItems;
     private boolean loading,isScrolling; int scrollOutItems,currentItems;
     private OnLoadMoreListener onLoadMoreListener;
 
-    public DiscoverAdapter(Context context, List<DiscoverModel> students, RecyclerView recyclerView) {
+    public DiscoverAdapter(Context context, List<DiscoverModel> students, RecyclerView recyclerView, View.OnLongClickListener longClickListener) {
         discoverModels = students;
         this.con = context;
+        this.longClickListener = longClickListener;
         if (recyclerView.getLayoutManager() instanceof LinearLayoutManager) {
 
             final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView
@@ -138,24 +141,23 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
                 }
             }).into(viewHolder.imageView);
 
-            viewHolder.addPlaylist.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Activity activity = (Activity) con;
-                    new getData(activity,model.getYtUrl()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                }
+            viewHolder.addPlaylist.setOnClickListener(v -> {
+                Activity activity = (Activity) con;
+                new getData(activity,model.getYtUrl()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             });
 
-            viewHolder.mainCard.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Activity activity = (Activity) con;
+            Object[] objects = new Object[3];
+            objects[0]=position; objects[1]=model.getTitle();objects[2]=model.getYtUrl();
+            viewHolder.mainCard.setTag(objects);
+            viewHolder.mainCard.setOnLongClickListener(longClickListener);
 
-                    Intent intent = new Intent(con,PlayerActivity.class);
-                    intent.putExtra("youtubelink",new String[]{ model.getYtUrl() });
-                    con.startActivity(intent);
-                    activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
-                }
+            viewHolder.mainCard.setOnClickListener(v -> {
+                Activity activity = (Activity) con;
+
+                Intent intent = new Intent(con,PlayerActivity.class);
+                intent.putExtra("youtubelink",new String[]{ model.getYtUrl() });
+                con.startActivity(intent);
+                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
             });
         } else {
             ((ProgressViewHolder) holder).progressBar.setIndeterminate(true);
