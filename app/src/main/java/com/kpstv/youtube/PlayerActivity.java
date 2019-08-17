@@ -47,6 +47,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -167,7 +168,20 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_player);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        Log.e("DisplayMatrix",height+"");
+
+        // Using this dirty logic to support screen sizes since there is no flexibility using
+        // default method, can't work for custom resolutions!
+        if (height>2770) {
+            setContentView(R.layout.activity_player_2880);
+        }else if (height>1920&&height<2770) {
+            setContentView(R.layout.activity_player_1920);
+        }else
+            setContentView(R.layout.activity_player);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

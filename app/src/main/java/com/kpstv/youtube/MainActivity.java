@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -52,6 +53,11 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        Log.e("HeightMatrix",height+"");
 
         preferences = getSharedPreferences("history",MODE_PRIVATE);
         String list = preferences.getString("urls","");

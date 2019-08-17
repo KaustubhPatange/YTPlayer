@@ -39,12 +39,11 @@
     <android.support.v4.widget.NestedScrollView
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
+        android:layout_height="match_parent">
         <LinearLayout
             android:id="@+id/mainlayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
             android:paddingStart="13dp"
             android:paddingEnd="13dp">
@@ -165,23 +164,23 @@
                     app:fabSize="mini" />
 
 
-                   <RelativeLayout
-                       android:layout_width="wrap_content"
-                       android:layout_height="wrap_content">
-                       <ProgressBar
-                           android:id="@+id/progress_circular"
-                           android:layout_centerInParent="true"
-                           android:layout_width="wrap_content"
-                           android:layout_height="wrap_content" />
-                       <android.support.design.widget.FloatingActionButton
-                           android:id="@+id/play_pause_button"
-                           android:layout_width="wrap_content"
-                           android:layout_height="wrap_content"
-                           android:scaleType="center"
-                           android:layout_margin="8dp"
-                           android:src="@drawable/ic_play"
-                           app:fabSize="normal" />
-                   </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <ProgressBar
+                        android:id="@+id/progress_circular"
+                        android:layout_centerInParent="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                    <android.support.design.widget.FloatingActionButton
+                        android:id="@+id/play_pause_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:scaleType="center"
+                        android:layout_margin="8dp"
+                        android:src="@drawable/ic_play"
+                        app:fabSize="normal" />
+                </RelativeLayout>
 
 
                 <android.support.design.widget.FloatingActionButton
@@ -214,30 +213,30 @@
                     android:textColor="@color/dark_white" />
             </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/downloadlayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
+            <LinearLayout
+                android:id="@+id/downloadlayout"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/download_background"
+                android:gravity="center"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_download" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:layout_marginTop="5dp"
-                    android:background="@drawable/download_background"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_download" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:fontFamily="@font/dmsans"
-                        android:text="Download"
-                        android:textColor="@color/white"
-                        android:textSize="18dp"
-                        android:textStyle="bold" />
-                </LinearLayout>
+                    android:fontFamily="@font/dmsans"
+                    android:text="Download"
+                    android:textColor="@color/white"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
+            </LinearLayout>
             <TextView
                 android:id="@+id/termsText"
                 android:layout_marginTop="7dp"

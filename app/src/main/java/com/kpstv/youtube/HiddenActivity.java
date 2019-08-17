@@ -19,8 +19,8 @@ public class HiddenActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_hidden);
-        setTitle(" ");
+      /*  setContentView(R.layout.activity_hidden);
+        setTitle(" ");*/
         CheckIntent(true);
 
     }
