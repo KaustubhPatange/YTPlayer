@@ -1,12 +1,20 @@
 package com.kpstv.youtube;
 
+import android.app.ProgressDialog;
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleObserver;
+import android.arch.lifecycle.OnLifecycleEvent;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -19,6 +27,7 @@ import com.kpstv.youtube.fragments.HistoryFragment;
 import com.kpstv.youtube.fragments.NCFragment;
 import com.kpstv.youtube.fragments.PlaylistFragment;
 import com.kpstv.youtube.fragments.SearchFragment;
+import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTutils;
 
 import java.lang.reflect.Method;
@@ -54,10 +63,14 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Remove this code afterwards...
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;
         Log.e("HeightMatrix",height+"");
+
+        // Check onComing links from YouTube or Spotify...
+        CheckIntent(getIntent());
 
         preferences = getSharedPreferences("history",MODE_PRIVATE);
         String list = preferences.getString("urls","");
@@ -130,6 +143,11 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         return false;
     }
 
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        CheckIntent(intent);
+    }
+
     @Override
     protected void onDestroy() {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
@@ -148,6 +166,64 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             HistoryFrag = new HistoryFragment();
             loadFragment(HistoryFrag);
         } else Toast.makeText(this, getString(R.string.error), Toast.LENGTH_SHORT).show();
+    }
+
+    void CheckIntent(Intent incoming) {
+        if (Intent.ACTION_SEND.equals(incoming.getAction())
+                && incoming.getType() != null && "text/plain".equals(incoming.getType())) {
+            String ytLink = incoming.getStringExtra(Intent.EXTRA_TEXT);
+            Log.e("IntentYTLink",ytLink+"");
+            if (YTutils.isValidID(ytLink)){
+                Intent intent = new Intent(MainActivity.this,PlayerActivity.class);
+                intent.putExtra("youtubelink",new String[] {ytLink});
+                startActivityForResult(intent,200);
+                overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+            }else if (ytLink.contains("open.spotify.com")&&ytLink.contains("/track/")) {
+                new MainActivity.getData(ytLink).execute();
+            }else {
+                YTutils.showAlert(MainActivity.this,"Callback Error",
+                        "The requested url is not a valid YouTube url", true);
+            }
+        }
+    }
+
+    class getData extends AsyncTask<Void,Void,Void> {
+
+        String spotifyUrl,ytLink;
+        ProgressDialog dialog;
+        public getData(String yturl) {
+            this.spotifyUrl = yturl;
+            dialog = new ProgressDialog(MainActivity.this);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            dialog.dismiss();
+            if (ytLink!=null) {
+                Intent intent = new Intent(MainActivity.this,PlayerActivity.class);
+                intent.putExtra("youtubelink",new String[] {ytLink});
+                startActivityForResult(intent,200);
+                overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+            }
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog.setCancelable(false);
+            dialog.setMessage("Parsing spotify url...");
+            dialog.show();
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Log.e("Original_URL",spotifyUrl+"");
+            SpotifyTrack track = new SpotifyTrack(YTutils.getSpotifyID(spotifyUrl));
+            ytLink = track.getYtUrl();
+            Log.e("GOTURL_Here",ytLink+"");
+            return null;
+        }
     }
 }
 

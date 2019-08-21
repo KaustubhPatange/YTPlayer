@@ -101,7 +101,7 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
 
         String urlset = dataSet.get(listPosition);
 
-        new getContents(holder,urlset).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        //new getContents(holder,urlset).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         new getData(holder,urlset,listPosition).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -109,13 +109,14 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
     class getData extends AsyncTask<String,Void,Void> {
 
         MyViewHolder viewHolder; String DateString,ytUrl;
-        MetaModel model;int pos;
+        MetaModel model;int pos; String percent;
 
         public getData(MyViewHolder holder, String url,int postion) {
             viewHolder = holder;
             pos = postion;
             ytUrl = url.split("\\|")[0];
             DateString = url.split("\\|")[1];
+            percent = url.split("\\|")[2]+"%";
         }
 
         @Override
@@ -144,6 +145,7 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
             }).into(viewHolder.imageView);
             viewHolder.titleText.setText(model.getTitle());
             viewHolder.authorText.setText(model.getAuthor());
+            viewHolder.rate_percent.setText(percent);
 
             String toput = DateString;
             String yesterday = String.format("%s-%s-%s",dateOnly-1,monthOnly,yearOnly);

@@ -140,11 +140,15 @@ public class YTutils {
         return dir;
     }
 
-    public static void CreateDir(String targetfolder) {
-        File root = android.os.Environment.getExternalStorageDirectory();
-        Log.e("CreateDir",targetfolder);
-        File dir = new File (root.getAbsolutePath() + "/" + targetfolder);
-        dir.mkdirs();
+    public static void CreateFile(File file) {
+        /*File root = android.os.Environment.getExternalStorageDirectory();
+        Log.e("CreateDir",targetfolder);*/
+        File dir = file;
+        try {
+            dir.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void writeContent(Activity activity, String FILE_NAME, String content) {

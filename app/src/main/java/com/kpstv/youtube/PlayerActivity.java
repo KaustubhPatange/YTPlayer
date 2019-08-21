@@ -68,9 +68,11 @@ import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
+import com.googlecode.mp4parser.authoring.tracks.AppendTrack;
 import com.jgabrielfreitas.core.BlurImageView;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.utils.HttpHandler;
+import com.kpstv.youtube.utils.Mp4Cutter;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
@@ -123,6 +125,7 @@ public class PlayerActivity extends AppCompatActivity {
     LinearLayout mainlayout;
 
     TextView mainTitle, viewCount, currentDuration, totalDuration, warningText;
+    int likeCounts, dislikeCounts;
 
     ImageView mainImageView;
     public boolean isplaying = false, isfirst = true;
@@ -139,7 +142,7 @@ public class PlayerActivity extends AppCompatActivity {
 
     private Handler mHandler = new Handler();
 
-    AsyncTask<String, String, String> mergeTask;
+    AsyncTask<String, String, String> mergeTask, cutTask;
 
     SharedPreferences preferences;
     boolean isAddedToPlaylist;
@@ -552,6 +555,8 @@ public class PlayerActivity extends AppCompatActivity {
                 if (json.contains("\"error\":")) {
                     YTStatistics ytStatistics = new YTStatistics(videoID);
                     viewCounts = ytStatistics.getViewCount();
+                    likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
+                    dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
                     json = null;
                 }
             }
@@ -560,7 +565,12 @@ public class PlayerActivity extends AppCompatActivity {
                     JSONObject statistics = new JSONObject(json).getJSONArray("items")
                             .getJSONObject(0).getJSONObject("statistics");
                     viewCounts = YTutils.getViewCount(Long.parseLong(statistics.getString("viewCount")));
-
+                    likeCounts = 100;
+                    dislikeCounts = 0;
+                    try {
+                        likeCounts = Integer.parseInt(statistics.getString("likeCount"));
+                        dislikeCounts = Integer.parseInt(statistics.getString("dislikeCount"));
+                    }catch (Exception e){e.printStackTrace();}
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -605,8 +615,12 @@ public class PlayerActivity extends AppCompatActivity {
                 }
             }
             String formattedDate = YTutils.getTodayDate();
-            Log.e("StringtoAdd", url_link + "|" + formattedDate);
-            urls.add(0, url_link + "|" + formattedDate);
+            int percent = 100;
+            try {
+               percent = likeCounts*100/(likeCounts+dislikeCounts);
+            }catch (Exception e){e.printStackTrace();}
+            Log.e("StringtoAdd", url_link + "|" + formattedDate+"|"+percent);
+            urls.add(0, url_link + "|" + formattedDate+"|"+percent);
 
             // Save playlist
             StringBuilder sb = new StringBuilder();
@@ -801,12 +815,7 @@ public class PlayerActivity extends AppCompatActivity {
         new AlertDialog.Builder(PlayerActivity.this)
                 .setTitle(title)
                 .setMessage(message)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        callFinish();
-                    }
-                })
+                .setPositiveButton("OK", (dialog, which) -> callFinish())
                 .setIcon(icon)
                 .show();
 
@@ -889,6 +898,28 @@ public class PlayerActivity extends AppCompatActivity {
                 alert.show();
                 return;
             }
+            long duration = player.getCurrentPosition();
+            long total = total_duration;
+            if (duration>1000 && duration!=total_duration) {
+                int icon = android.R.drawable.ic_dialog_info;
+                final AlertDialog.Builder alert= new AlertDialog.Builder(PlayerActivity.this);
+                alert.setIcon(icon);
+                alert.setTitle("Trim Sample");
+                alert.setMessage("Do you want to cut the sample from selected position and download?\n\nIf so select \"Cut\" else \"Normal\" to begin usual download.");
+                alert.setPositiveButton("Cut", (dialog1, which1) -> {
+                    cutTask = new cutTask(PlayerActivity.this,
+                            "Download/"+fileCurrent,duration,total);
+                    cutTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,audioLink);
+                });
+                alert.setNeutralButton("Cancel",null);
+                alert.setNegativeButton("Normal", (dialog12, which12) -> {
+                    downloadFromUrl(config.getUrl(), config.getTitle(), fileCurrent);
+                    Toast.makeText(PlayerActivity.this, "Download started",
+                            Toast.LENGTH_SHORT).show();
+                });
+                alert.show();
+                return;
+            }
             downloadFromUrl(config.getUrl(), config.getTitle(), filename);
 
             Toast.makeText(PlayerActivity.this, "Download started",
@@ -932,6 +963,107 @@ public class PlayerActivity extends AppCompatActivity {
             mHandler.postDelayed(this, 100);
         }
     };
+
+    class cutTask extends AsyncTask<String, String, String> {
+
+        AlertDialog alertdialog;
+        View dialogView;
+        TextView tview;
+        ProgressBar bar;
+        Context con;
+        String target;
+        long currentDuration;
+        long totalDuration;
+
+        public cutTask(Context context, String targetfile, long currentDuration, long totalDuration) {
+            this.con = context;
+            this.target = targetfile;
+            this.currentDuration = currentDuration;
+            this.totalDuration = totalDuration;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            Log.e("ExecutingTask","true");
+            LayoutInflater inflater = getLayoutInflater();
+            dialogView = inflater.inflate(R.layout.alert_merger, null);
+            tview = dialogView.findViewById(R.id.textView);
+            bar = dialogView.findViewById(R.id.progressBar);
+            AlertDialog.Builder alert = new AlertDialog.Builder(PlayerActivity.this);
+            alert.setTitle("Trimming");
+            alert.setMessage("This could take a while depending upon length of audio!");
+            alert.setCancelable(false);
+            alert.setView(dialogView);
+            alert.setNegativeButton("Cancel", (dialog, which) -> {
+                cutTask.cancel(true);
+            });
+            alertdialog = alert.create();
+            alertdialog.show();
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            tview.setText(values[1]);
+            if (Integer.parseInt(values[0])==-1) {
+                bar.setIndeterminate(true);
+                return;
+            }
+            bar.setIndeterminate(false);
+            bar.setProgress(Integer.parseInt(values[0]));
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            Toast.makeText(PlayerActivity.this, "Saved at /sdcard/"+target, Toast.LENGTH_LONG).show();
+            alertdialog.dismiss();
+        }
+
+        @Override
+        protected String doInBackground(String... sUrl) {
+            try {
+                String audioUrl = sUrl[0];
+
+                // Download audio file first...
+                URL url = new URL(audioUrl);
+                URLConnection connection = url.openConnection();
+                connection.connect();
+
+                long fileLength = connection.getContentLength();
+                File root = android.os.Environment.getExternalStorageDirectory();
+
+                DataInputStream input = new DataInputStream(url.openStream());
+                DataOutputStream output = new DataOutputStream(new FileOutputStream(
+                        root.getAbsolutePath() + "/YTPlayer/audio.download"));
+
+                byte data[] = new byte[4096];
+                long total = 0;
+                int count;
+                while ((count = input.read(data)) != -1) {
+                    total += count;
+                    publishProgress(((int) (total * 100 / fileLength)) + "",
+                            "Downloading Audio... 1/2");
+                    output.write(data, 0, count);
+                    output.flush();
+                }
+                output.flush();
+                output.close();
+                input.close();
+
+                // Trimming audio
+                publishProgress((-1) + "", "Trimming media... 2/2");
+                Mp4Cutter mp4Cutter = new Mp4Cutter();
+                mp4Cutter.startTrim(
+                        YTutils.getFile("YTPlayer/audio.download"),
+                        YTutils.getFile(target),
+                        currentDuration, totalDuration
+
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
 
     class MergeAudioVideo extends AsyncTask<String, String, String> {
 
@@ -990,7 +1122,8 @@ public class PlayerActivity extends AppCompatActivity {
                 int count;
                 while ((count = input.read(data)) != -1) {
                     total += count;
-                    publishProgress(((int) (total * 100 / fileLength)) + "", "Downloading Audio... 1/3");
+                    publishProgress(((int) (total * 100 / fileLength)) + "",
+                            "Downloading Audio... 1/3");
                     output.write(data, 0, count);
                     output.flush();
                 }
@@ -1042,7 +1175,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String s) {
-            Toast.makeText(PlayerActivity.this, "Merge sample has been created at "+target, Toast.LENGTH_LONG).show();
+            Toast.makeText(PlayerActivity.this, "Saved at "+target, Toast.LENGTH_LONG).show();
             alertdialog.dismiss();
         }
 
@@ -1072,7 +1205,6 @@ public class PlayerActivity extends AppCompatActivity {
 
             Track audioTrack = audio.getTracks().get(0);
             video.addTrack(audioTrack);
-
             Container out = new DefaultMp4Builder().build(video);
             FileOutputStream fos;
             try {

@@ -143,14 +143,11 @@ public class HistoryFragment extends Fragment {
                 new AlertDialog.Builder(getContext())
                         .setTitle("Clear History")
                         .setMessage("Are you sure? This can't be undone.")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                SharedPreferences.Editor editor = sharedPreferences.edit();
-                                editor.putString("urls","");
-                                editor.apply();
-                                LoadMainMethod();
-                            }
+                        .setPositiveButton("Yes", (dialog, which) -> {
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("urls","");
+                            editor.apply();
+                            LoadMainMethod();
                         })
                         .setNegativeButton("No",null)
                         .setIcon(icon)
