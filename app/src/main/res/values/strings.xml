@@ -6,8 +6,7 @@
     <string name="title_dashboard">Search</string>
     <string name="title_notifications">Playlist</string>
     <string name="title_activity_oplayist">OPlayist</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
+    <string name="updateUri">https://raw.githubusercontent.com/KaustubhPatange/Toolkit_Files/master/Insightdatabase</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="error">Not a stable connection</string>
 

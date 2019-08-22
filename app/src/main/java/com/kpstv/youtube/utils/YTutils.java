@@ -478,23 +478,6 @@ public class YTutils {
     }
 
 
-
-    public static String getImageUri(String videoID) {
-        String url = "https://www.googleapis.com/youtube/v3/videos?id="+videoID+"&key=AIzaSyBMqerRAATEnrsfPnWYfeqDdqX0TbR0bEo&part=snippet,contentDetails,statistics,status";
-        HttpHandler sh = new HttpHandler();
-        String json = sh.makeServiceCall(url);
-        String imageuri=null;
-        try {
-            JSONObject snippets = new JSONObject(json).getJSONArray("items")
-                    .getJSONObject(0).getJSONObject("snippet");
-            imageuri = snippets.getJSONObject("thumbnails").getJSONObject("medium").getString("url");
-
-        } catch (JSONException e) {
-            Log.e("PlayerActivity_JSON",e.getMessage());
-        }
-        return imageuri;
-    }
-
     public static boolean isInternetAvailable() {
         try {
             InetAddress ipAddr = InetAddress.getByName("google.com");

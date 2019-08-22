@@ -49,7 +49,6 @@ import java.util.Date;
 public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewHolder> {
 
     private ArrayList<String> dataSet;
-    String[] apiKeys = new String[]{"AIzaSyBMqerRAATEnrsfPnWYfeqDdqX0TbR0bEo","AIzaSyCA2Py9snHNdp4Y4Dkyq-z7gUfxLqdPhtQ"};
     private ArrayList<String> Dateset;
     View.OnLongClickListener longClickListener;
     Context con;
@@ -233,65 +232,6 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
             }
             return null;
         }
-    }
-
-    class getContents extends AsyncTask<Void,Void,Void> {
-
-        String json;
-        String ytUrl;
-        MyViewHolder viewHolder; YTStatistics ytStatistics;
-
-        public getContents(MyViewHolder holder, String url) {
-            viewHolder = holder;
-            ytUrl = url.split("\\|")[0];
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-          if (json!=null){
-              try {
-
-                  JSONObject statistics = new JSONObject(json).getJSONArray("items")
-                          .getJSONObject(0).getJSONObject("statistics");
-                  int likeCounts = Integer.parseInt(statistics.getString("likeCount"));
-                  int dislikeCounts = Integer.parseInt(statistics.getString("dislikeCount"));
-                  viewHolder.rate_percent.setText((likeCounts*100/(likeCounts+dislikeCounts))+"%");
-
-              }catch (Exception e) {
-                  viewHolder.rate_percent.setText("100%");
-                  e.printStackTrace();
-              }
-          }else {
-              try {
-                  int likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
-                  int dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
-                  viewHolder.rate_percent.setText((likeCounts*100/(likeCounts+dislikeCounts))+"%");
-              }catch (Exception e){
-                  viewHolder.rate_percent.setText("100%");
-              }
-          }
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            String videoID = YTutils.getVideoID(ytUrl);
-            json = jsonResponse(videoID,0);
-            if (json!=null && json.contains("\"error\":")) {
-                json = jsonResponse(videoID,1);
-                if (json.contains("\"error\":"))
-                {
-                    ytStatistics = new YTStatistics(videoID);
-                    json = null;
-                }
-            }
-            return null;
-        }
-    }
-
-    String jsonResponse(String videoID,int apinumber) {
-        HttpHandler httpHandler = new HttpHandler();
-        String link = "https://www.googleapis.com/youtube/v3/videos?id="+videoID+"&key="+apiKeys[apinumber]+"&part=statistics";
-        return httpHandler.makeServiceCall(link);
     }
 
     boolean containsDateItem(String item) {

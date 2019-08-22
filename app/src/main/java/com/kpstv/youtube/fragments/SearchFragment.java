@@ -255,7 +255,7 @@ public class SearchFragment extends Fragment {
                         String id = lines[i].split(",")[1];
                         models.add(new SearchModel(
                                 lines[i].split(",")[0],
-                                YTutils.getImageUri(id),
+                                YTutils.getImageUrlID(id),
                                 YTutils.getYtUrl(id)
 
                         ));
