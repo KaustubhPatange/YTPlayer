@@ -10,4 +10,10 @@
             android:summary="This will change your trending, viral songs as per your region choice."
             android:title="Select Region" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="Updates">
+        <Preference
+            android:key="pref_update"
+            android:summary="Check if there is a new version of app."
+            android:title="Check For Updates" />
+    </PreferenceCategory>
 </PreferenceScreen>

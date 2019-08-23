@@ -6,7 +6,8 @@
     <string name="title_dashboard">Search</string>
     <string name="title_notifications">Playlist</string>
     <string name="title_activity_oplayist">OPlayist</string>
-    <string name="updateUri">https://raw.githubusercontent.com/KaustubhPatange/Toolkit_Files/master/Insightdatabase</string>
+    <!-- TODO: Change download link -->
+    <string name="updateUri">https://raw.githubusercontent.com/KaustubhPatange/YTPlayer/master/update.json?token=AFIYJLW25WY2HTJCF2R5CPC5L3DCS</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="error">Not a stable connection</string>
 

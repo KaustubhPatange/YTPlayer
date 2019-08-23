@@ -103,6 +103,8 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
         //new getContents(holder,urlset).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         new getData(holder,urlset,listPosition).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        new YTutils.CheckForUpdates(con,true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     class getData extends AsyncTask<String,Void,Void> {

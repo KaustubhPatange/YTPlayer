@@ -2,20 +2,31 @@ package com.kpstv.youtube.utils;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Application;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Environment;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AlertDialog;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.Toast;
@@ -56,6 +67,7 @@ import java.util.Random;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import static android.content.Context.DOWNLOAD_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
 
 public class YTutils {
@@ -404,11 +416,98 @@ public class YTutils {
         frameLayout.setBackground(buttonDrawable);
     }
 
+    public static Spanned getHtml(String text) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT);
+        } else {
+            return Html.fromHtml(text);
+        }
+    }
+
     public static int getRandomColor(){
         Random rnd = new Random();
         return Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
     }
 
+    public static class CheckForUpdates extends AsyncTask<Void,Void,Void> {
+        boolean isAutomatic;
+        String json;
+        @SuppressLint("StaticFieldLeak")
+        Context context;
+        String updateName;
+        long downloadID;
+
+        public CheckForUpdates(Context context, boolean isAutomatic) {
+            this.context = context;
+            this.isAutomatic = isAutomatic;
+        }
+
+        BroadcastReceiver onComplete = new BroadcastReceiver() {
+            public void onReceive(Context ctxt, Intent intent) {
+                long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                if (downloadID == id) {
+                    Intent install = new Intent(Intent.ACTION_VIEW)
+                            .setDataAndType(Uri.fromFile(getFile("Download/"+updateName)),
+                                    "application/vnd.android.package-archive");
+                    context.startActivity(install);
+
+                    context.unregisterReceiver(this);
+                }
+            }
+        };
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (json==null||json.isEmpty())
+                return;
+            try {
+                JSONObject object = new JSONObject(json);
+                String changelogHtml = object.getString("changelog");
+                String downloadUri = object.getString("download");
+                int newVer = Integer.parseInt(object.getString("version")
+                        .replace(".",""));
+                updateName = "YTPlayer_v"+newVer+".apk";
+                PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+                int curVer = Integer.parseInt(pInfo.versionName.replace(".",""));
+                if (newVer>curVer) {
+                    new AlertDialog.Builder(context)
+                            .setTitle("Update Available")
+                            .setMessage(getHtml(changelogHtml))
+                            .setPositiveButton("Update", (dialog, which) -> {
+                                DownloadManager downloadManager= (DownloadManager) context.getSystemService(DOWNLOAD_SERVICE);
+                                Uri Download_Uri = Uri.parse(downloadUri);
+                                DownloadManager.Request request = new DownloadManager.Request(Download_Uri);
+
+                                request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
+                                request.setTitle("Downloading Update");
+                                request.setDestinationInExternalFilesDir(context,
+                                        Environment.DIRECTORY_DOWNLOADS,updateName);
+                                context.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+                                downloadID = downloadManager.enqueue(request);
+                            })
+                            .setNegativeButton("Cancel",null)
+                            .show();
+                }else if (!isAutomatic) {
+                    Toast.makeText(context, "No update available!", Toast.LENGTH_SHORT).show();
+                }
+            } catch (JSONException | PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (!isInternetAvailable()) {
+                return null;
+            }
+            String updateLink = context.getResources().getString(R.string.updateUri);
+            HttpHandler handler = new HttpHandler();
+            json = handler.makeServiceCall(updateLink);
+            return null;
+        }
+    }
 
     public static String milliSecondsToTimer(long milliseconds){
         String finalTimerString = "";
