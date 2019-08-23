@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical">
+
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                android:contentInsetStart="0dp"
+                app:contentInsetStart="0dp"
+                app:popupTheme="@style/AppTheme.PopupOverlay">
+
+            </android.support.v7.widget.Toolbar>
+        </android.support.design.widget.AppBarLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            >
+
+            <RelativeLayout
+                android:background="@color/dark_white"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <com.kpstv.youtube.Ringdroid.WaveformView
+                    android:id="@+id/waveform"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"/>
+
+                <com.kpstv.youtube.Ringdroid.MarkerView
+                    android:id="@+id/endmarker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/end_marker"
+                    android:nextFocusDown="@+id/info"
+                    android:nextFocusUp="@+id/startmarker"
+                    android:src="@drawable/end_dragger"/>
+
+                <com.kpstv.youtube.Ringdroid.MarkerView
+                    android:id="@+id/startmarker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/start_marker"
+                    android:nextFocusDown="@+id/endmarker"
+                    android:src="@drawable/start_dragger"/>
+
+            </RelativeLayout>
+        </LinearLayout>
+
+        <TextView
+            android:textSize="15sp"
+            android:id="@+id/info"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:nextFocusDown="@+id/play"
+            android:nextFocusUp="@+id/endmarker"
+            android:text="Demo"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="62dip"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/rew"
+                style="@android:style/MediaButton"
+                android:layout_width="64dip"
+                android:layout_height="52dip"
+                android:layout_marginBottom="6dip"
+                android:layout_marginTop="6dip"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/rewind"
+                android:src="@drawable/skip_backward"/>
+
+            <ImageButton
+                android:id="@+id/play"
+                style="@android:style/MediaButton"
+                android:layout_width="71dip"
+                android:layout_height="52dip"
+                android:tint="@color/black"
+                android:layout_marginBottom="6dip"
+                android:layout_marginTop="6dip"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/play"
+                android:src="@drawable/play"/>
+
+            <ImageButton
+                android:id="@+id/ffwd"
+                style="@android:style/MediaButton"
+                android:layout_width="64dip"
+                android:layout_height="52dip"
+                android:layout_marginBottom="6dip"
+                android:layout_marginRight="5dip"
+                android:layout_marginTop="6dip"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/ffwd"
+                android:src="@drawable/skip_forward"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="62dip"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp">
+
+            <TextView
+                android:id="@+id/mark_start"
+                android:layout_width="0dp"
+                android:layout_height="31dip"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:gravity="center"
+                android:labelFor="@+id/starttext"
+                android:text="@string/start_label"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+
+            <EditText
+                android:id="@+id/starttext"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dip"
+                android:layout_marginRight="30dip"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:inputType="number|numberDecimal"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:text="00.00"
+                android:textColorHint="@color/white"
+                />
+
+            <TextView
+                android:id="@+id/mark_end"
+                android:layout_width="0dp"
+                android:layout_height="31dip"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:gravity="center"
+                android:labelFor="@+id/endtext"
+                android:text="@string/end_label"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+
+            <EditText
+                android:id="@+id/endtext"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dip"
+                android:layout_marginRight="30dip"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:inputType="number|numberDecimal"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:text="00.00"
+                android:textColorHint="@color/white"/>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

@@ -29,6 +29,19 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".RingdroidEditActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:exported="true"
+            android:hardwareAccelerated="true"
+            android:theme="@style/AppTheme.NoActionBar1"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter android:label="@string/edit_intent">
+                <action android:name="android.intent.action.EDIT"/>
+
+                <data android:mimeType="audio/*"/>
+            </intent-filter>
+        </activity>
+        <activity
             android:label="Music Player"
             android:name=".PlayerActivity"
             android:launchMode="singleInstance"

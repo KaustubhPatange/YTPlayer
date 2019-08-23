@@ -3,11 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/action_add"
-        android:title="Add to playlist"
+        android:title="@string/addplayList"
         app:showAsAction="collapseActionView" />
 
     <item android:id="@+id/action_share"
-        android:title="Share"
+        android:title="@string/share"
+        app:showAsAction="collapseActionView" />
+
+    <item android:id="@+id/action_loop"
+        android:title="@string/loop"
+        android:checked="false"
+        android:checkable="true"
         app:showAsAction="collapseActionView" />
 
     <item android:id="@+id/action_youtube"

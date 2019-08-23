@@ -12,6 +12,10 @@
         <item name="android:windowBackground">@drawable/splash_background</item>
     </style>
 
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat"/>
+
     <style name="BottomNavigationTheme" parent="Theme.AppCompat.Light">
         <item name="android:textColorSecondary">@color/darkest_white</item>
     </style>

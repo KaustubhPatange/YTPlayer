@@ -125,7 +125,7 @@ public class PlayerActivity extends AppCompatActivity {
     LinearLayout mainlayout;
 
     TextView mainTitle, viewCount, currentDuration, totalDuration, warningText;
-    int likeCounts, dislikeCounts;
+    int likeCounts, dislikeCounts; boolean isLoop = false;
 
     ImageView mainImageView;
     public boolean isplaying = false, isfirst = true;
@@ -316,7 +316,7 @@ public class PlayerActivity extends AppCompatActivity {
             return;
         }
         onClear();
-        YouTubeUrl = yturls.get(ytIndex - 1);
+        YouTubeUrl = yturls.get(ytIndex-1);
         ytIndex--;
         datasync = new getData();
         datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
@@ -324,11 +324,15 @@ public class PlayerActivity extends AppCompatActivity {
 
     void playNext() {
         if ((ytIndex + 1) == yturls.size()) {
-            Toast.makeText(getApplicationContext(), "No new song in playlist", Toast.LENGTH_SHORT).show();
-            return;
+            if (isLoop) {
+                ytIndex=-1;
+            }else {
+                Toast.makeText(getApplicationContext(), "No new song in playlist", Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
         onClear();
-        YouTubeUrl = yturls.get(ytIndex + 1);
+        YouTubeUrl = yturls.get(ytIndex+1);
         ytIndex++;
         datasync = new getData();
         datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
@@ -744,6 +748,9 @@ public class PlayerActivity extends AppCompatActivity {
             startActivity(Intent.createChooser(shareIntent, "Share using..."));
         } else if (itemId == R.id.action_add) {
             YTutils.addToPlayList(this, YouTubeUrl, total_duration / 1000);
+        } else if (itemId == R.id.action_loop) {
+            isLoop = !isLoop;
+            item.setChecked(isLoop);
         }
 
         return super.onOptionsItemSelected(item);
@@ -897,19 +904,16 @@ public class PlayerActivity extends AppCompatActivity {
                 });
                 alert.show();
                 return;
-            }
-            long duration = player.getCurrentPosition();
-            long total = total_duration;
-            if (duration>1000 && duration!=total_duration) {
+            } else if (arrays[which].contains("Audio ")) {
                 int icon = android.R.drawable.ic_dialog_info;
                 final AlertDialog.Builder alert= new AlertDialog.Builder(PlayerActivity.this);
                 alert.setIcon(icon);
                 alert.setTitle("Trim Sample");
-                alert.setMessage("Do you want to cut the sample from selected position and download?\n\nIf so select \"Cut\" else \"Normal\" to begin usual download.");
+                alert.setMessage("Do you want to download and cut sample in editor?\n\nIf so select \"Cut\" else \"Normal\" to begin usual download.");
                 alert.setPositiveButton("Cut", (dialog1, which1) -> {
                     cutTask = new cutTask(PlayerActivity.this,
-                            "Download/"+fileCurrent,duration,total);
-                    cutTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,audioLink);
+                            "Download/"+fileCurrent);
+                    cutTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,config.getUrl());
                 });
                 alert.setNeutralButton("Cancel",null);
                 alert.setNegativeButton("Normal", (dialog12, which12) -> {
@@ -971,15 +975,11 @@ public class PlayerActivity extends AppCompatActivity {
         TextView tview;
         ProgressBar bar;
         Context con;
-        String target;
-        long currentDuration;
-        long totalDuration;
+        String target,fileName;
 
-        public cutTask(Context context, String targetfile, long currentDuration, long totalDuration) {
+        public cutTask(Context context, String targetfile) {
             this.con = context;
             this.target = targetfile;
-            this.currentDuration = currentDuration;
-            this.totalDuration = totalDuration;
         }
 
         @Override
@@ -990,7 +990,7 @@ public class PlayerActivity extends AppCompatActivity {
             tview = dialogView.findViewById(R.id.textView);
             bar = dialogView.findViewById(R.id.progressBar);
             AlertDialog.Builder alert = new AlertDialog.Builder(PlayerActivity.this);
-            alert.setTitle("Trimming");
+            alert.setTitle("Download");
             alert.setMessage("This could take a while depending upon length of audio!");
             alert.setCancelable(false);
             alert.setView(dialogView);
@@ -1014,13 +1014,23 @@ public class PlayerActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String s) {
-            Toast.makeText(PlayerActivity.this, "Saved at /sdcard/"+target, Toast.LENGTH_LONG).show();
+         //   Toast.makeText(PlayerActivity.this, "Saved at /sdcard/"+target, Toast.LENGTH_LONG).show();
+            Log.e("FileName",fileName);
             alertdialog.dismiss();
+            startEditor("file:/"+YTutils.getFile("YTPlayer/"+fileName).toString());
+        }
+
+        private void startEditor(String filePathUri) {
+            Intent intent = new Intent(con, RingdroidEditActivity.class);
+            intent.putExtra("FILE_PATH", filePathUri);
+            startActivity(intent);
         }
 
         @Override
         protected String doInBackground(String... sUrl) {
             try {
+                fileName = YTutils.getFile(target).getName();
+
                 String audioUrl = sUrl[0];
 
                 // Download audio file first...
@@ -1033,7 +1043,7 @@ public class PlayerActivity extends AppCompatActivity {
 
                 DataInputStream input = new DataInputStream(url.openStream());
                 DataOutputStream output = new DataOutputStream(new FileOutputStream(
-                        root.getAbsolutePath() + "/YTPlayer/audio.download"));
+                        root.getAbsolutePath() + "/YTPlayer/"+fileName));
 
                 byte data[] = new byte[4096];
                 long total = 0;
@@ -1050,14 +1060,15 @@ public class PlayerActivity extends AppCompatActivity {
                 input.close();
 
                 // Trimming audio
-                publishProgress((-1) + "", "Trimming media... 2/2");
+
+                /*publishProgress((-1) + "", "Trimming media... 2/2");
                 Mp4Cutter mp4Cutter = new Mp4Cutter();
                 mp4Cutter.startTrim(
                         YTutils.getFile("YTPlayer/audio.download"),
                         YTutils.getFile(target),
                         currentDuration, totalDuration
 
-                );
+                );*/
             } catch (Exception e) {
                 e.printStackTrace();
             }
