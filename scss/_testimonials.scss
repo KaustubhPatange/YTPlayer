@@ -1,0 +1,94 @@
+/* Testimonials Area css
+============================================================================================ */
+.testimonials_area{
+	background: #f9f9ff;
+	position: relative;
+	.owl-prev, .owl-next{
+		position: absolute;
+		right: 150px;
+		background: #fff;
+		font-size: 24px;
+		color: #c1c1c1;
+		padding-left: 10px;
+		padding-right: 10px;
+		@include transition;
+		cursor: pointer;
+		box-shadow: -14.142px 14.142px 20px 0px rgba(157, 157, 157, 0.2);
+		&:hover{
+			color: $dip;
+		}
+	}
+	.owl-prev{
+		bottom: 50%;
+		padding-top: 15px;
+		padding-bottom: 10px;
+		&:before{
+			content: "";
+			width: 28px;
+			background: #e8e8e8;
+			position: absolute;
+			left: 50%;
+			transform: translateX(-50%);
+			bottom: 0px;
+			height: 1px;
+		}
+	}
+	.owl-next{
+		top: 50%;
+		padding-top: 10px;
+		padding-bottom: 15px;
+	}
+}
+.testi_slider{
+	margin-top: -30px;
+	margin-bottom: -30px;
+}
+.testi_item{
+	padding: 30px 0px;
+	.media{
+		border-radius: 10px;
+		padding: 40px;
+		background: #fff;
+		@include transition;
+		.d-flex{
+			padding-right: 25px;
+		}
+		.media-body{
+			p{
+				margin-bottom: 20px;
+			}
+			h4{
+				color: $dip;
+				font-family: $rob;
+				font-weight: 500;
+				font-size: 20px;
+				@include transition;
+			}
+			h5{
+				margin-bottom: 0px;
+				font-size: 14px;
+				color: $pfont;
+				font-weight: normal;
+				font-family: $rob;
+			}
+		}
+	}
+	&:hover{
+		.media{
+			box-shadow: 0px 10px 30px 0px rgba(157, 157, 157, 0.2);
+			background: #fff;
+			border-color: #fff;
+			.media-body{
+				h4{
+					background-image: -webkit-gradient( linear, left top, right top, color-stop(0, #bc2bff), color-stop(0.15, #bc2bff), color-stop(0.3, #7249fb), color-stop(0.45, #7249fb), color-stop(0.6, #7249fb),color-stop(0.75, #7249fb), color-stop(0.9, #7249fb), color-stop(1, #7249fb) );
+					background-image: gradient( linear, left top, right top, color-stop(0, #bc2bff), color-stop(0.15, #bc2bff), color-stop(0.3, #7249fb), color-stop(0.45, #7249fb), color-stop(0.6, #7249fb),color-stop(0.75, #7249fb), color-stop(0.9, #7249fb), color-stop(1, #7249fb) );
+					color:transparent;
+					-webkit-background-clip: text;
+					background-clip: text;
+				}
+			}
+		}
+	}
+}
+/* End Testimonials Area css
+============================================================================================ */

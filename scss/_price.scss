@@ -1,0 +1,57 @@
+/* Price Area css
+============================================================================================ */
+.price_area{
+	background: #f9f9ff;
+}
+.price_item_inner{
+	
+}
+.price_item{
+	background: #fff;
+	.price_head{
+		overflow: hidden;
+		border-bottom: 1px solid #eeeeee;
+		padding: 40px;
+		h3{
+			color: $dip;
+			font-size: 20px;
+			font-family: $open;
+			margin-bottom: 5px;
+		}
+		h2{
+			color: $dip;
+			margin-bottom: 0px;
+			font-weight: bold;
+			font-size: 36px;
+			font-family: $rob;
+		}
+		p{
+			margin-bottom: 0px;
+		}
+	}
+	.price_body{
+		text-align: center;
+		padding-top: 30px;
+		padding-bottom: 30px;
+		.list{
+			li{
+				margin-bottom: 10px;
+				a{
+					font-size: 14px;
+					font-family: $rob;
+					font-weight: normal;
+					color: $pfont;
+				}
+				&:last-child{
+					margin-bottom: 0px;
+				}
+			}
+		}
+	}
+	.price_footer{
+		text-align: center;
+		padding-bottom: 40px;
+	}
+}
+/* End Price Area css
+============================================================================================ */

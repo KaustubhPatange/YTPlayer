@@ -1,0 +1,156 @@
+/*============== footer-area css ===============*/
+.footer-area{
+    background: $dip;
+}
+.single-footer-widget{
+    p{
+        margin-bottom: 0px;
+    }
+    .instafeed{
+        margin-left: -5px;
+        margin-right: -5px;
+        li{
+            margin: 5px;
+        }
+    }
+    .subscribe_form{
+        padding-top: 25px;
+    }
+	.input-group{
+		display: block !important;
+	}
+    input{
+        max-width: 100%;
+		width: 100%;
+        border: 1px solid #333333;
+        font-size: 13px;
+        line-height: 40px;
+		padding-right: 110px;
+		height: 40px;
+        color: #999999;
+		border-radius: 20px;
+		background: #fff;
+        padding-left: 20px;
+        @include placeholder{
+            color: #999999;
+        }
+        &:focus{
+            outline: none;
+        }
+    }
+    .sub-btn{
+		background-image: -moz-linear-gradient( 0deg, rgb(188,43,255) 0%, rgb(114,73,251) 100%);
+		background-image: -webkit-linear-gradient( 0deg, rgb(188,43,255) 0%, rgb(114,73,251) 100%);
+		background-image: -ms-linear-gradient( 0deg, rgb(188,43,255) 0%, rgb(114,73,251) 100%);
+        color: #fff;
+        font-weight: 500;
+        line-height: 38px;
+		font-size: 12px;
+        padding: 0px 38px;
+		display: inline-block;
+        cursor: pointer;
+		position: absolute;
+		top: 0px;
+		right: -26px;
+		border-radius: 20px;
+		@include transition;
+		outline: none !important;
+		box-shadow: none !important;
+    }
+}
+.ab_wd{
+	p{
+		max-width: 230px;
+	}
+}
+.contact_wd{
+	margin-right: -15px;
+	p{
+		margin-bottom: 15px;
+	}
+	a{
+		display: block;
+		color: $baseColor;
+		font-size: 24px;
+		font-family: $rob;
+		font-weight: 500;
+		margin-bottom: 10px;
+		& + a{
+			margin-bottom: 0px;
+		}
+	}
+}
+.tp_widgets{
+	.list{
+		li{
+			margin-bottom: 12px;
+			a{
+				color: #fff;
+				font-size: 14px;
+				font-weight: 300;
+				font-family: $rob;
+			}
+			&:last-child{
+				margin-bottom: 0px;
+			}
+		}
+	}	
+}
+.news_widgets{
+	p{
+		color: #fff;
+		opacity: .6;
+	}
+}
+.footer_title{
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: 600;
+	font-family: $open;
+    color: #fff;
+    margin-bottom: 28px;
+	text-transform: uppercase;
+}
+.border_line{
+    width: 100%;
+    height: 1px;
+    background: #333333;
+    margin-top: 30px;
+}
+.footer-bottom{
+    padding-top: 85px;
+    .footer-text{
+		color: #fff;
+		opacity: .6;
+		i{
+			color: $baseColor;
+			opacity: 1;
+		}
+        a{
+            color: $baseColor;
+			opacity: 1;
+        }
+    }
+    .footer-social{
+        text-align: right;
+        a{
+            font-size: 14px;
+            line-height: 30px;
+            color: #fff;
+            margin-left: 6px;
+            transition: all 0.3s linear;
+			background: #111111;
+			height: 30px;
+			width: 30px;
+			text-align: center;
+			display: inline-block;
+			@include transition;
+            &:hover{
+                color: #fff;
+				background-image: -moz-linear-gradient( 0deg, rgba(188,43,255,.8) 0%, rgba(114,73,251,.8) 100%);
+				background-image: -webkit-linear-gradient( 0deg, rgba(188,43,255,.8) 0%, rgba(114,73,251,.8) 100%);
+				background-image: -ms-linear-gradient( 0deg, rgba(188,43,255,.8) 0%, rgba(114,73,251,.8) 100%);
+            }
+        }
+    }
+}

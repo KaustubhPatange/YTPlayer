@@ -1,0 +1,151 @@
+/* Feature Area css
+============================================================================================ */
+.feature_area{
+	
+}
+.feature_inner{}
+.feature_item{
+	box-shadow: 0px 10px 30px 0px rgba(0, 0, 0, 0.08);
+	padding: 50px 30px;
+	border-radius: 5px;
+	img{
+		margin-bottom: 35px;
+	}
+	h4{
+		color: $dip;
+		font-size: 20px;
+		font-family: $open;
+		font-weight: 600;
+		margin-bottom: 15px;
+	}
+	p{
+		margin-bottom: 0px;
+	}
+}
+/* End Feature Area css
+============================================================================================ */
+
+/* End Feature Area css
+============================================================================================ */
+.interior_area{
+	background: #f9faff;
+	padding-top: 65px;
+	padding-bottom: 65px;
+	&.interior_two{
+		background: #fff;
+	}
+}
+.interior_inner{
+	.col-lg-5{
+		vertical-align: middle;
+		align-self: center;
+	}
+	.interior_text{
+		h4{
+			color: $dip;
+			font-family: $open;
+			font-weight: 600;
+			line-height: 45px;
+			font-size: 36px;
+			margin-bottom: 30px;
+		}
+		p{
+			margin-bottom: 40px;
+		}
+	}
+}
+/* End Feature Area css
+============================================================================================ */
+
+/* Download App Area css
+============================================================================================ */
+.download_app_area{
+	background-image: -moz-linear-gradient( 0deg, rgb(188,43,255) 0%, rgb(114,73,251) 100%);
+	background-image: -webkit-linear-gradient( 0deg, rgb(188,43,255) 0%, rgb(114,73,251) 100%);
+	background-image: -ms-linear-gradient( 0deg, rgb(188,43,255) 0%, rgb(114,73,251) 100%);
+}
+.app_inner{
+	max-width: 780px;
+	margin: auto;
+	text-align: center;
+	h2{
+		color: #fff;
+		font-size: 36px;
+		font-family: $open;
+		font-weight: 600;
+		margin-bottom: 18px;
+	}
+	p{
+		color: #fff;
+		margin-bottom: 40px;
+	}
+}
+.app_btn_area{
+	.app_btn{
+		display: inline-block;
+		border: 1px solid #eeeeee;
+		padding-top: 12px;
+		padding-bottom: 12px;
+		padding-left: 30px;
+		padding-right: 30px;
+		border-radius: 5px;
+		margin-right: 16px;
+		@inlcude transition;
+		&:hover{
+			background: #fff;
+			box-shadow: 0px 20px 20px 0px rgba(0, 0, 0, 0.1);
+			.media{
+				.d-flex{
+					i{
+						background: -webkit-linear-gradient(left, #bb2bff, #7349fb);
+						background: linear-gradient(left, #bb2bff, #7349fb);
+						-webkit-background-clip: text;
+						-webkit-text-fill-color: transparent;
+					}
+				}
+				.media-body{
+					h4{
+						color: $dip;
+					}
+					p{
+						color: $dip;
+					}	
+				}
+			}
+		}
+	}
+	.media{
+		text-align: left;
+		.d-flex{
+			vertical-align: middle;
+			align-self: center;
+			padding-right: 22px;
+			i{
+				font-size: 40px;
+				color: #fff;
+			}
+		}
+		.media-body{
+			vertical-align: middle;
+			align-self: center;
+			color: #fff;
+			h4{
+				margin-bottom: 0px;
+				color: #fff;
+				font-size: 24px;
+				font-family: $open;
+				font-weight: 600;
+				@include transition;
+			}
+			p{
+				margin-bottom: 0px;
+				font-size: 14px;
+				font-family: $rob;
+				font-weight: normal;
+				@include transition;
+			}
+		}
+	}
+}
+/* End Download App Area css
+============================================================================================ */
