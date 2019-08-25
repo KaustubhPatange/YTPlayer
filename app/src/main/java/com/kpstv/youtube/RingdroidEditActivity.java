@@ -596,7 +596,7 @@ public class RingdroidEditActivity extends AppCompatActivity implements MarkerVi
         mProgressDialog = new ProgressDialog(RingdroidEditActivity.this);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mProgressDialog.setTitle(R.string.progress_dialog_loading);
-        mProgressDialog.setCancelable(true);
+        mProgressDialog.setCancelable(false);
         mProgressDialog.setOnCancelListener(
                 new DialogInterface.OnCancelListener() {
                     public void onCancel(DialogInterface dialog) {

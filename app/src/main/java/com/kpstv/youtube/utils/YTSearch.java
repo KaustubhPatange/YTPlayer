@@ -47,10 +47,7 @@ public class YTSearch {
             String line = null;
             while((line = reader.readLine()) != null)
             {
-                if (line.contains("src=\"https://i.ytimg.com"))
-                {
-                    videoIDs.add(line.split("/")[4]);
-                }
+                // Parsing code
             }
             in.close();
 
