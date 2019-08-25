@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
+        buildToolsVersion "28.0.2"
         applicationId "com.kpstv.youtube"
         minSdkVersion 21
         targetSdkVersion 28
