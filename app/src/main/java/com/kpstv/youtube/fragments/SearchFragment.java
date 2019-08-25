@@ -57,6 +57,7 @@ public class SearchFragment extends Fragment {
     ImageView githubView,pulseView,myWebView; LinearLayout settingsLayout;
     NestedScrollView nestedScrollView;
     AsyncTask<Void,Void,Void> trendTask, discoverTask; boolean alertShown=false;
+    LinearLayout SOW,SOF;
 
     SharedPreferences preferences; String region="global";
 
@@ -104,6 +105,8 @@ public class SearchFragment extends Fragment {
             pulseView = v.findViewById(R.id.pulseWebImage);
             myWebView = v.findViewById(R.id.myWebImage);
             settingsLayout = v.findViewById(R.id.settingsLayout);
+            SOW = v.findViewById(R.id.SOW_layout);
+            SOF = v.findViewById(R.id.SOF_layout);
 
             recyclerView = v.findViewById(R.id.my_recycler_view);
             discoverViral = v.findViewById(R.id.discoverViral);
@@ -116,10 +119,34 @@ public class SearchFragment extends Fragment {
                 YTutils.StartURL("https://github.com/KaustubhPatange/YTPlayer",activity);
             });
             pulseView.setOnClickListener(v1 -> {
-               //TODO: Create a website for app and put it here
+                YTutils.StartURL("https://kaustubhpatange.github.io/YTPlayer",activity);
             });
             myWebView.setOnClickListener(v1 -> {
                 YTutils.StartURL("https://kaustubhpatange.github.io",activity);
+            });
+            SOW.setOnClickListener(v1 -> {
+                String shareText = "If you are a music lover and wants to download Spotify, YouTube music for free try this app https://kaustubhpatange.github.io/YTPlayer";
+                Intent whatsappIntent = new Intent(Intent.ACTION_SEND);
+                whatsappIntent.setType("text/plain");
+                whatsappIntent.setPackage("com.whatsapp");
+                whatsappIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+                try {
+                    activity.startActivity(whatsappIntent);
+                } catch (android.content.ActivityNotFoundException ex) {
+                    Toast.makeText(activity, "WhatsApp is not installed!", Toast.LENGTH_SHORT).show();
+                    whatsappIntent = new Intent(Intent.ACTION_SEND);
+                    whatsappIntent.setType("text/plain");
+                    whatsappIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+                    activity.startActivity(whatsappIntent);
+                }
+            });
+            SOF.setOnClickListener(v1 -> {
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Share this app");
+                String shareMessage = "https://kaustubhpatange.github.io/YTPlayer";
+                shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
+                startActivity(Intent.createChooser(shareIntent, "Choose the messenger to share this App"));
             });
 
             searchCard.setOnClickListener(v -> {

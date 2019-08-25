@@ -6,6 +6,7 @@ import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
@@ -46,12 +47,14 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewHolder> {
 
     private ArrayList<String> dataSet;
     private ArrayList<String> Dateset;
     View.OnLongClickListener longClickListener;
-    Context con;
+    Context con; boolean checkForUpdates;
 
 
     public static class MyViewHolder extends RecyclerView.ViewHolder{
@@ -91,6 +94,9 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.history_item, parent, false);
 
+        SharedPreferences preferences = parent.getContext().getSharedPreferences("appSettings",MODE_PRIVATE);
+        checkForUpdates = preferences.getBoolean("pref_update_check",true);
+
         MyViewHolder myViewHolder = new MyViewHolder(view);
 
         return myViewHolder;
@@ -100,11 +106,10 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
 
         String urlset = dataSet.get(listPosition);
 
-        //new getContents(holder,urlset).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
         new getData(holder,urlset,listPosition).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        new YTutils.CheckForUpdates(con,true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        if (checkForUpdates)
+            new YTutils.CheckForUpdates(con,true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     class getData extends AsyncTask<String,Void,Void> {
@@ -175,7 +180,7 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
             if (!containsDateItem(DateString)) {
                 viewHolder.dateLayout.setVisibility(View.VISIBLE);
                 Dateset.add(DateString);
-            }
+            }else viewHolder.dateLayout.setVisibility(View.GONE);
 
             viewHolder.addPlaylist.setOnClickListener(v -> {
                 Activity activity = (Activity) con;

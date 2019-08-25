@@ -17,6 +17,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <!-- TODO: Change Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleInstance"
@@ -42,7 +47,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:label="Music Player"
             android:name=".PlayerActivity"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
@@ -79,7 +83,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".SearchActivity"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".CPlaylistActivity" />

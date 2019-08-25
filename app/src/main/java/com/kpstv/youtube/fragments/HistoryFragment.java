@@ -172,9 +172,6 @@ public class HistoryFragment extends Fragment {
 
         if (!items.isEmpty()) {
             String[] urlarray = items.split(",");
-            if (urlarray.length>25) {
-                // TODO: If so try to implement after events when history length is more than 25
-            }
             urls.addAll(Arrays.asList(urlarray));
         }
         if (urls.size()>0) {

@@ -64,6 +64,8 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.facebook.network.connectionclass.ConnectionClassManager;
 import com.facebook.network.connectionclass.ConnectionQuality;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
@@ -82,6 +84,7 @@ import com.warkiz.widget.SeekParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -134,6 +137,7 @@ public class PlayerActivity extends AppCompatActivity {
     FloatingActionButton previousFab, playFab, nextFab;
 
     IndicatorSeekBar indicatorSeekBar;
+    private InterstitialAd mInterstitialAd;
 
     Notification notification;
     NotificationCompat.Builder builder;
@@ -181,8 +185,10 @@ public class PlayerActivity extends AppCompatActivity {
         // default method, can't work for custom resolutions!
         if (height>2770) {
             setContentView(R.layout.activity_player_2880);
-        }else if (height>1920&&height<2770) {
+        }else if (height>1920&&height<2000) {
             setContentView(R.layout.activity_player_1920);
+        } else if (height>2000&&height<2770) {
+            setContentView(R.layout.activity_player_2000);
         }else
             setContentView(R.layout.activity_player);
 
@@ -294,6 +300,13 @@ public class PlayerActivity extends AppCompatActivity {
         datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
     }
 
+    void LoadAd() {
+        //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
@@ -351,6 +364,17 @@ public class PlayerActivity extends AppCompatActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
+        if (intent.getData()!=null) {
+            if(yturls.size()>1) {
+                // Insert to playlist and play
+                yturls.add(ytIndex,intent.getData().toString());
+                YouTubeUrl = intent.getData().toString();
+            }else {
+                YouTubeUrl = intent.getData().toString();
+            }
+            datasync = new getData();
+            datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
+        }
         String action = intent.getStringExtra("DO");
         Log.e("PRINTING_RESULT", "Code: " + action);
         if (action == null) return;
@@ -366,6 +390,10 @@ public class PlayerActivity extends AppCompatActivity {
                 break;
             case "add":
                 YTutils.addToPlayList(this, YouTubeUrl, total_duration / 1000);
+                break;
+            case "focus":
+                Log.e("FocusWindow","true");
+                this.getCurrentFocus();
                 break;
         }
     }
@@ -700,6 +728,13 @@ public class PlayerActivity extends AppCompatActivity {
 
         expandedView.setOnClickPendingIntent(R.id.nAdd, pendingIntent);
 
+        // Focus on Click Listener
+        newintent = new Intent(PlayerActivity.this, PlayerActivity.class);
+        newintent.putExtra("DO", "focus");
+        pendingIntent = PendingIntent.getActivity(this, 4, newintent, 0);
+
+        expandedView.setOnClickPendingIntent(R.id.mainlayout, pendingIntent);
+        collpaseView.setOnClickPendingIntent(R.id.mainlayout, pendingIntent);
     }
 
     @Override
@@ -847,10 +882,20 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     void callFinish() {
-        finish();
+        startActivity(new Intent(this,MainActivity.class));
+    }
+
+    void showAd() {
+        if (mInterstitialAd.isLoaded()) {
+            mInterstitialAd.show();
+        } else {
+            Log.e("TAG", "The interstitial wasn't loaded yet.");
+        }
     }
 
     void showListDialog() {
+
+        LoadAd();
 
         ArrayList<String> tmplist = new ArrayList<>();
         final ArrayList<YTConfig> configs = new ArrayList<>();
@@ -893,6 +938,7 @@ public class PlayerActivity extends AppCompatActivity {
                 alert.setTitle("Merge");
                 alert.setMessage("The current sample you selected does not contain audio stream.\n\nDo you want to merge the audio with it?");
                 alert.setPositiveButton("Yes", (dialog1, which1) -> {
+                    showAd();
                     mergeTask = new MergeAudioVideo(PlayerActivity.this,"/sdcard/Download/"+fileCurrent);
                     mergeTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,audioLink,config.getUrl());
                 });
@@ -901,6 +947,7 @@ public class PlayerActivity extends AppCompatActivity {
 
                     Toast.makeText(PlayerActivity.this, "Download started",
                             Toast.LENGTH_SHORT).show();
+                    showAd();
                 });
                 alert.show();
                 return;
@@ -911,6 +958,7 @@ public class PlayerActivity extends AppCompatActivity {
                 alert.setTitle("Trim Sample");
                 alert.setMessage("Do you want to download and cut sample in editor?\n\nIf so select \"Cut\" else \"Normal\" to begin usual download.");
                 alert.setPositiveButton("Cut", (dialog1, which1) -> {
+                    showAd();
                     cutTask = new cutTask(PlayerActivity.this,
                             "Download/"+fileCurrent);
                     cutTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,config.getUrl());
@@ -920,6 +968,7 @@ public class PlayerActivity extends AppCompatActivity {
                     downloadFromUrl(config.getUrl(), config.getTitle(), fileCurrent);
                     Toast.makeText(PlayerActivity.this, "Download started",
                             Toast.LENGTH_SHORT).show();
+                    showAd();
                 });
                 alert.show();
                 return;
@@ -928,6 +977,7 @@ public class PlayerActivity extends AppCompatActivity {
 
             Toast.makeText(PlayerActivity.this, "Download started",
                     Toast.LENGTH_SHORT).show();
+            showAd();
         });
         AlertDialog dialog = builder.create();
         dialog.show();

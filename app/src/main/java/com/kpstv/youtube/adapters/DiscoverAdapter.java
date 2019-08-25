@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,9 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.DiscoverModel;
@@ -37,6 +41,7 @@ import com.kpstv.youtube.utils.YTutils;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.view.View.*;
@@ -49,6 +54,7 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
     Context con;
     private int visibleThreshold = 5; View.OnLongClickListener longClickListener;
     private int lastVisibleItem, totalItems;
+    ArrayList<Integer> adNumbers = new ArrayList<>();
     private boolean loading,isScrolling; int scrollOutItems,currentItems;
     private OnLoadMoreListener onLoadMoreListener;
 
@@ -119,7 +125,7 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof MyViewHolder) {
-
+            int total = discoverModels.size();
             final DiscoverModel model = discoverModels.get(position);
 
             final MyViewHolder viewHolder = ((MyViewHolder) holder);
@@ -159,10 +165,22 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
                 con.startActivity(intent);
                 activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
             });
+
+            if (position%5==0 && position!=0 && position%10!=0) {
+                // Load ads on 5,15,25...
+                Log.e("ShowingAds","pos: "+position);
+                viewHolder.adLayout.setVisibility(VISIBLE);
+                AdRequest adRequest = new AdRequest.Builder().build();
+                viewHolder.adView.loadAd(adRequest);
+            }else {
+                viewHolder.adLayout.setVisibility(GONE);
+            }
         } else {
             ((ProgressViewHolder) holder).progressBar.setIndeterminate(true);
         }
     }
+
+
 
     class getData extends AsyncTask<Void,Void,Void> {
         String yturl;
@@ -195,43 +213,6 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
         }
     }
 
-   /* class getData extends AsyncTask<Void,Void,Void> {
-
-        private MyViewHolder viewHolder;
-        private DiscoverModel model;
-        String json; int pos;
-
-        public getData(MyViewHolder viewHolder, DiscoverModel model, int position) {
-            this.viewHolder = viewHolder;
-            this.model = model;
-            this.pos = position;
-        }
-
-        @SuppressLint("SetTextI18n")
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            if (json!=null) {
-                try {
-
-                    JSONObject jsonObject = new JSONObject(json);
-
-
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-            super.onPostExecute(aVoid);
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-          *//*  HttpHandler handler = new HttpHandler();
-            json = handler.makeServiceCall(
-                    "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v="+YTutils.getVideoID(model.getYtUrl()) +"&format=json");
-         *//*   return null;
-        }
-    }*/
-
     public void setLoaded() {
         loading = false;
     }
@@ -255,6 +236,8 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
         LinearLayout dateLayout;
         LinearLayout addPlaylist;
         CardView mainCard;
+        LinearLayout adLayout;
+        AdView adView;
 
         public MyViewHolder(View v) {
             super(v);
@@ -266,6 +249,8 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
             this.dateLayout = itemView.findViewById(R.id.hDate_layout);
             this.addPlaylist = itemView.findViewById(R.id.hAdd_playlist);
             this.mainCard = itemView.findViewById(R.id.cardView);
+            this.adLayout = itemView.findViewById(R.id.adViewLayout);
+            this.adView = itemView.findViewById(R.id.adView);
         }
     }
 

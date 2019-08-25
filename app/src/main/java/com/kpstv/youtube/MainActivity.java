@@ -23,6 +23,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 
+import com.google.android.gms.ads.MobileAds;
 import com.kpstv.youtube.fragments.HistoryFragment;
 import com.kpstv.youtube.fragments.NCFragment;
 import com.kpstv.youtube.fragments.PlaylistFragment;
@@ -30,6 +31,8 @@ import com.kpstv.youtube.fragments.SearchFragment;
 import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTutils;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kpstv.youtube.adapters.SongAdapter;
+import com.kpstv.youtube.fragments.SearchFragment;
 import com.kpstv.youtube.models.DiscoverModel;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.SpotifyTrack;
@@ -247,6 +248,11 @@ public class SearchActivity extends AppCompatActivity {
             SharedPreferences preferences = getSharedPreferences("history",MODE_PRIVATE);
             String list = preferences.getString("urls",null);
             if (list!=null) {
+                if (list.isEmpty()) {
+                    MakeSpotifyList();
+                    showTrend=true;
+                    return null;
+                }
                 String[] songList = list.split(",");
                 if (songList.length>5) {
                     MakeList(songList,5);
@@ -263,12 +269,29 @@ public class SearchActivity extends AppCompatActivity {
 
     void MakeSpotifyList() {
         if (SongList ==null) {
+            String discoverViral = YTutils.readContent(SearchActivity.this,"discover_"+region+".csv");
+            if (discoverViral!=null && !discoverViral.isEmpty()) {
+                String[] csvlines = discoverViral.split("\r|\n");
+                for(int i=1;i<csvlines.length;i++) {
+                    String videoID = csvlines[i].split("/")[4];
+                    YTMeta ytMeta = new YTMeta(videoID);
+                    if (ytMeta.getVideMeta()!=null) {
+                        discoverModels.add(new DiscoverModel(
+                                ytMeta.getVideMeta().getTitle(),
+                                ytMeta.getVideMeta().getAuthor(),
+                                ytMeta.getVideMeta().getImgUrl(),
+                                YTutils.getYtUrl(videoID)
+                        ));
+                    }
+                    return;
+                }
+            }
             HttpHandler handler = new HttpHandler();
             SongList = handler.makeServiceCall("https://spotifycharts.com/viral/"+region+"/daily/latest/download");
         }
 
         String[] csvlines = SongList.split("\r|\n");
-        for(int i=1;i<3;i++) {
+        for(int i=1;i<5;i++) {
             String line = csvlines[i];
             String title = line.split(",")[1].replace("\"","");
             String author = line.split(",")[2].replace("\"","");

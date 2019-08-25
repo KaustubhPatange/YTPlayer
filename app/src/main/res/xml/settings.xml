@@ -11,6 +11,11 @@
             android:title="Select Region" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Updates">
+        <CheckBoxPreference
+            android:key="pref_update_check"
+            android:defaultValue="true"
+            android:title="Auto Check Updates"
+            android:summary="Check updates whenever the app is launched."/>
         <Preference
             android:key="pref_update"
             android:summary="Check if there is a new version of app."
