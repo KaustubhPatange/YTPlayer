@@ -1,6 +1,5 @@
 # YTPlayer
-
-![Build Status](https://img.shields.io/travis/KaustubhPatange/YTPlayer)
+[![CircleCI](https://circleci.com/gh/KaustubhPatange/YTPlayer.svg?style=shield)](https://circleci.com/gh/KaustubhPatange/YTPlayer)
 ![GitHub issues](https://img.shields.io/github/issues/KaustubhPatange/YTPlayer.svg)
 [![Licence](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 ![GitHub repo size](https://img.shields.io/github/repo-size/KaustubhPatange/YTPlayer.svg)
