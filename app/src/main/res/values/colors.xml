@@ -13,22 +13,13 @@
     <color name="dark_white">#999898</color>
     <color name="darkest_white">#7b7a7a</color>
     <color name="grey">#616161</color>
-    <color name="teal">#10B793</color>
     <color name="black">#000000</color>
+    <color name="welcomeScreen">#9fc3d3</color>
 
-    <color name="waveform_selected">#33b5e5</color>
-    <color name="waveform_unselected">#195a72</color>
-    <color name="waveform_unselected_bkgnd_overlay">#0a242d</color>
     <color name="transparent_black">#60000000</color>
     <color name="selection_border">#ffffff</color>
     <color name="playback_indicator">#ffff66</color>
     <color name="grid_line">#66ffffff</color>
-    <color name="timecode">#ddffffdd</color>
     <color name="timecode_shadow">#aa000000</color>
 
-    <color name="type_bkgnd_alarm">#88880000</color>
-    <color name="type_bkgnd_ringtone">#88008888</color>
-    <color name="type_bkgnd_notification">#88666600</color>
-    <color name="type_bkgnd_music">#88000000</color>
-    <color name="type_bkgnd_unsupported">#88cccccc</color>
 </resources>

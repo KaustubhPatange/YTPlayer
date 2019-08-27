@@ -110,7 +110,7 @@ public class PlaylistFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemID = item.getItemId();
-        switch (itemID) {
+        /*switch (itemID) {
             case R.id.action_removeAll:
                 int icon = android.R.drawable.ic_dialog_alert;
                 new AlertDialog.Builder(activity)
@@ -123,7 +123,7 @@ public class PlaylistFragment extends Fragment {
                         .setIcon(icon)
                         .show();
                 break;
-        }
+        }*/
         return super.onOptionsItemSelected(item);
     }
 

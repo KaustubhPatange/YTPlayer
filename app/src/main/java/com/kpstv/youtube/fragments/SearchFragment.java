@@ -387,8 +387,9 @@ public class SearchFragment extends Fragment {
 
             if (images.size()<4) {
                 images.clear();
+                int length=5;
                 String[] csvlines = SpotifyViralCSV.split("\n|\r");
-                for (int i=1;i<5;i++) {
+                for (int i=1;i<length;i++) {
                     String line = csvlines[i];
                     String title = line.split(",")[1].replace("\"","");
                     String author = line.split(",")[2].replace("\"","");
@@ -398,10 +399,13 @@ public class SearchFragment extends Fragment {
 
                     YTSearch ytSearch = new YTSearch(search_text);
 
-                    final String videoId = ytSearch.getVideoIDs().get(0);
-                    String imgurl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
-
-                    images.add(imgurl);
+                    if (ytSearch.getVideoIDs().size()>0) {
+                        final String videoId = ytSearch.getVideoIDs().get(0);
+                        String imgurl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
+                        images.add(imgurl);
+                    }else {
+                        length++;
+                    }
                 }
             }
             saveDiscoverToInternal();

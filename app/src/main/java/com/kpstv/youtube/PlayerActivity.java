@@ -181,7 +181,7 @@ public class PlayerActivity extends AppCompatActivity {
         int height = displayMetrics.heightPixels;
         Log.e("DisplayMatrix",height+"");
 
-        // Using this dirty logic to support screen sizes since there is no flexibility using
+        // Using this fuzzy logic to support screen sizes since there is no flexibility using
         // default method, can't work for custom resolutions!
         if (height>2770) {
             setContentView(R.layout.activity_player_2880);

@@ -1,6 +1,7 @@
 package com.kpstv.youtube;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +14,8 @@ import java.io.File;
 
 public class SplashActivity extends AppCompatActivity {
 
+    // A perfect example of splash screen
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,8 +25,14 @@ public class SplashActivity extends AppCompatActivity {
         File f = YTutils.getFile("YTPlayer");
         f.mkdirs();
 
-        // A perfect example of splash screen
-        startActivity(new Intent(SplashActivity.this,MainActivity.class));
-        finish();
+        SharedPreferences preferences = getSharedPreferences("settings",MODE_PRIVATE);
+        if (!preferences.getBoolean("intro",false)) {
+            startActivity(new Intent(this,IntroActivity.class));
+            overridePendingTransition(android.R.anim.fade_in,android.R.anim.fade_out);
+            finish();
+        }else {
+            startActivity(new Intent(SplashActivity.this, MainActivity.class));
+            finish();
+        }
     }
 }

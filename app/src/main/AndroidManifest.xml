@@ -17,10 +17,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+
         <!-- TODO: Change Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-3940256099942544~3347511713" />
 
         <activity
             android:name=".MainActivity"
@@ -28,7 +29,9 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
@@ -40,9 +43,9 @@
             android:theme="@style/AppTheme.NoActionBar1"
             android:windowSoftInputMode="adjustResize">
             <intent-filter android:label="@string/edit_intent">
-                <action android:name="android.intent.action.EDIT"/>
+                <action android:name="android.intent.action.EDIT" />
 
-                <data android:mimeType="audio/*"/>
+                <data android:mimeType="audio/*" />
             </intent-filter>
         </activity>
         <activity
@@ -77,9 +80,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:theme="@style/AppTheme"
             android:name=".DiscoverActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".SearchActivity"
             android:launchMode="singleTask"
@@ -93,13 +96,18 @@
             android:theme="@style/AppTheme.NoActionBar1" />
         <activity android:name=".SettingsActivity" />
         <activity
+            android:name=".SplashActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/SplashTheme" android:name=".SplashActivity">
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".IntroActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar1"/>
     </application>
 
 </manifest>
