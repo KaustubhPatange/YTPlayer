@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -42,8 +43,11 @@ import com.kpstv.youtube.models.SearchModel;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
+import com.spyhunter99.supertooltips.ToolTip;
+import com.spyhunter99.supertooltips.ToolTipManager;
 
 import java.util.ArrayList;
+
 
 public class SearchFragment extends Fragment {
 
@@ -62,6 +66,7 @@ public class SearchFragment extends Fragment {
     SharedPreferences preferences; String region="global";
 
     private static String SpotifyTrendsCSV, SpotifyViralCSV;
+    ToolTipManager toolTipManager;
 
     ImageView imageView1;
     ImageView imageView2;
@@ -83,12 +88,20 @@ public class SearchFragment extends Fragment {
             v = inflater.inflate(R.layout.fragment_search, container, false);
 
             activity = getActivity();
+            SharedPreferences pref = activity.getSharedPreferences("settings",Context.MODE_PRIVATE);
             preferences = activity.getSharedPreferences("appSettings",Context.MODE_PRIVATE);
             if (preferences!=null) {
                 region = preferences.getString("pref_select_region","global");
             }
 
             Log.e("RegionSelected",region+"");
+
+            toolTipManager = new ToolTipManager(activity);
+            ToolTip toolTip = new ToolTip()
+                    .withText("You can also enter Spotify or YouTube url.")
+                    .withColor(getResources().getColor(R.color.colorAccent)) //or whatever you want
+                    .withAnimationType(ToolTip.AnimationType.FROM_MASTER_VIEW)
+                    .withShadow();
 
             models = new ArrayList<>();
             drawables = new ArrayList<>();
@@ -195,6 +208,13 @@ public class SearchFragment extends Fragment {
 
             discoverTask = new loadDiscoverImages();
             discoverTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+            if (!pref.getBoolean("searchTip",false)) {
+                toolTipManager.showToolTip(toolTip,searchCard);
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putBoolean("searchTip",true);
+                editor.apply();
+            }
         }
 
         return v;
@@ -374,7 +394,7 @@ public class SearchFragment extends Fragment {
                 );
             }
 
-            String discoverRead = YTutils.readContent(getActivity(),"discover_"+region+".csv");
+            String discoverRead = YTutils.readContent(activity,"discover_"+region+".csv");
             if (discoverRead!=null && !discoverRead.isEmpty()) {
                 String[] lines = discoverRead.split("\n|\r");
                 if (lines[0].contains(YTutils.getTodayDate())&&lines.length==5) {

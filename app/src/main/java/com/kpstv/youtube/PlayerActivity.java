@@ -374,6 +374,16 @@ public class PlayerActivity extends AppCompatActivity {
             }
             datasync = new getData();
             datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
+            return;
+        }
+        String[] arr = intent.getStringArrayExtra("youtubelink");
+        if (arr!=null) {
+            ytIndex = intent.getIntExtra("playfromIndex", 0);
+            yturls = Arrays.asList(intent.getStringArrayExtra("youtubelink"));
+            YouTubeUrl = yturls.get(ytIndex);
+            datasync = new getData();
+            datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
+            return;
         }
         String action = intent.getStringExtra("DO");
         Log.e("PRINTING_RESULT", "Code: " + action);
@@ -772,7 +782,7 @@ public class PlayerActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == android.R.id.home) {
-            onBackPressed();
+            callFinish();
             return true;
         } else if (itemId == R.id.action_youtube) {
             YTutils.StartURLIntent(YouTubeUrl, this);
@@ -793,8 +803,9 @@ public class PlayerActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
+        Log.e("OnSupportFinished","called");
         callFinish();
-        return true;
+        return false;
     }
 
     public void changePlayBack(boolean isplay) {
@@ -882,7 +893,10 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     void callFinish() {
-        startActivity(new Intent(this,MainActivity.class));
+        Intent i = new Intent(this, MainActivity.class);
+        i.setAction(Intent.ACTION_MAIN);
+        i.addCategory(Intent.CATEGORY_LAUNCHER);
+        startActivity(i);
     }
 
     void showAd() {
@@ -949,6 +963,7 @@ public class PlayerActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
                     showAd();
                 });
+                alert.setNeutralButton("Cancel",null);
                 alert.show();
                 return;
             } else if (arrays[which].contains("Audio ")) {

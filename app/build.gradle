@@ -29,6 +29,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.google.android.exoplayer:exoplayer:2.9.6'
     implementation 'com.google.android.gms:play-services-ads:17.0.0'
+    implementation 'com.github.spyhunter99:super-tooltip-aar:4.0.2'
     implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:support-v4:28.0.0'
