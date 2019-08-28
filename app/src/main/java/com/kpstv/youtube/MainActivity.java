@@ -172,12 +172,12 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     }
 
     void CheckIntent(Intent incoming) {
-        if (Intent.ACTION_SEND.equals(incoming.getAction())
-                && incoming.getType() != null && "text/plain".equals(incoming.getType())) {
-            String ytLink = incoming.getStringExtra(Intent.EXTRA_TEXT);
+        if (incoming.getData()!=null) {
+            String ytLink = incoming.getData().toString();
             Log.e("IntentYTLink",ytLink+"");
             if (YTutils.isValidID(ytLink)){
                 Intent intent = new Intent(MainActivity.this,PlayerActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 intent.putExtra("youtubelink",new String[] {ytLink});
                 startActivityForResult(intent,200);
                 overridePendingTransition(R.anim.slide_up,R.anim.slide_down);

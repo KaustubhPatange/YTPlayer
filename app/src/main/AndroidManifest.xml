@@ -28,13 +28,31 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
+          <!--  <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:mimeType="text/plain" />
-            </intent-filter>
+                <data
+                    android:host="youtube.com"
+                    android:scheme="http" />
+                <data
+                    android:host="open.spotify.com"
+                    android:scheme="http" />
+                <data
+                    android:host="open.spotify.com"
+                    android:scheme="https" />
+                <data
+                    android:host="youtube.com"
+                    android:scheme="https" />
+                <data
+                    android:host="youtu.be"
+                    android:scheme="http" />
+                <data
+                    android:host="youtu.be"
+                    android:scheme="https" />
+            </intent-filter>-->
         </activity>
         <activity
             android:name=".RingdroidEditActivity"
@@ -51,15 +69,18 @@
         </activity>
         <activity
             android:name=".PlayerActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar2">
             <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data
                     android:host="youtube.com"
                     android:scheme="http" />

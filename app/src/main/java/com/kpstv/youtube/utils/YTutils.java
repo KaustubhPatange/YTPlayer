@@ -59,6 +59,7 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -223,6 +224,11 @@ public class YTutils {
         });
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    public static ArrayList<String> convertArrayToArrayList(String[] arr) {
+        ArrayList<String> l = new ArrayList<>(Arrays.asList(arr));
+        return l;
     }
 
     public static String readContent(Activity activity, String FILE_NAME) {

@@ -7,6 +7,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -75,6 +76,7 @@ import com.jgabrielfreitas.core.BlurImageView;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.Mp4Cutter;
+import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
@@ -153,7 +155,7 @@ public class PlayerActivity extends AppCompatActivity {
 
     long total_duration = 0;
     int total_seconds;
-    List<String> yturls;
+    ArrayList<String> yturls;
     int ytIndex = 0;
 
     ArrayList<YTConfig> ytConfigs;
@@ -196,29 +198,12 @@ public class PlayerActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Get the links loaded using schemes
-        Intent appLinkIntent = getIntent();
-        Uri appLinkData = appLinkIntent.getData();
-
-        if (appLinkData != null) {
-            String url_link = appLinkData.toString();
-            yturls = new ArrayList<>();
-            yturls.add(url_link);
-        } else {
-            Intent intent = getIntent();
-            ytIndex = intent.getIntExtra("playfromIndex", 0);
-            yturls = Arrays.asList(intent.getStringArrayExtra("youtubelink"));
-        }
-
         TextView tms = findViewById(R.id.termsText);
 
         preferences = getSharedPreferences("settings", MODE_PRIVATE);
+        yturls = new ArrayList<>();
 
         setTitle("");
-
-        if (yturls.size() > 0) {
-            YouTubeUrl = yturls.get(ytIndex);
-        }
 
         setNotification();
 
@@ -296,8 +281,27 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
-        datasync = new getData();
-        datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
+        if (!CheckIntent(getIntent())) {
+            // Get the links loaded using schemes
+            Intent appLinkIntent = getIntent();
+            Uri appLinkData = appLinkIntent.getData();
+
+            if (appLinkData != null) {
+                String url_link = appLinkData.toString();
+                yturls.add(url_link);
+            } else {
+                Intent intent = getIntent();
+                ytIndex = intent.getIntExtra("playfromIndex", 0);
+                yturls = YTutils.convertArrayToArrayList(intent.getStringArrayExtra("youtubelink"));
+            }
+
+
+            if (yturls.size() > 0) {
+                YouTubeUrl = yturls.get(ytIndex);
+                datasync = new getData();
+                datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
+            }
+        }
     }
 
     void LoadAd() {
@@ -355,7 +359,7 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == 200) {
             onClear();
-            yturls = Arrays.asList(getIntent().getStringArrayExtra("youtubelink"));
+            yturls = YTutils.convertArrayToArrayList(getIntent().getStringArrayExtra("youtubelink"));
             YouTubeUrl = yturls.get(0);
             datasync = new getData();
             datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
@@ -365,9 +369,11 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         if (intent.getData()!=null) {
+            Log.e("Firing","intent.getData()");
             if(yturls.size()>1) {
                 // Insert to playlist and play
                 yturls.add(ytIndex,intent.getData().toString());
+                ytIndex=yturls.size()-1;
                 YouTubeUrl = intent.getData().toString();
             }else {
                 YouTubeUrl = intent.getData().toString();
@@ -378,13 +384,15 @@ public class PlayerActivity extends AppCompatActivity {
         }
         String[] arr = intent.getStringArrayExtra("youtubelink");
         if (arr!=null) {
+            Log.e("Firing","arr!=null");
             ytIndex = intent.getIntExtra("playfromIndex", 0);
-            yturls = Arrays.asList(intent.getStringArrayExtra("youtubelink"));
+            yturls = YTutils.convertArrayToArrayList(arr);
             YouTubeUrl = yturls.get(ytIndex);
             datasync = new getData();
             datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
             return;
         }
+        CheckIntent(intent);
         String action = intent.getStringExtra("DO");
         Log.e("PRINTING_RESULT", "Code: " + action);
         if (action == null) return;
@@ -408,6 +416,72 @@ public class PlayerActivity extends AppCompatActivity {
         }
     }
 
+    boolean CheckIntent(Intent incoming) {
+        if (Intent.ACTION_SEND.equals(incoming.getAction())
+                && incoming.getType() != null && "text/plain".equals(incoming.getType())) {
+            Log.e("Firing","checkIntent");
+            String ytLink = incoming.getStringExtra(Intent.EXTRA_TEXT);
+            Log.e("IntentYTLink",ytLink+"");
+            if (YTutils.isValidID(ytLink)){
+                yturls = new ArrayList<>();
+                yturls.add(ytLink);
+                ytIndex=0;
+                YouTubeUrl = ytLink;
+                datasync = new getData();
+                datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
+                return true;
+            }else if (ytLink.contains("open.spotify.com")&&ytLink.contains("/track/")) {
+                new makeData(ytLink).execute();
+                return true;
+            }else {
+                YTutils.showAlert(PlayerActivity.this,"Callback Error",
+                        "The requested url is not a valid YouTube url", true);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    class makeData extends AsyncTask<Void,Void,Void> {
+
+        String spotifyUrl,ytLink;
+        ProgressDialog dialog;
+        public makeData(String yturl) {
+            this.spotifyUrl = yturl;
+            dialog = new ProgressDialog(PlayerActivity.this);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            dialog.dismiss();
+            if (ytLink!=null) {
+               yturls.add(ytLink);
+               ytIndex=yturls.size()-1;
+               YouTubeUrl=ytLink;
+
+                datasync = new getData();
+                datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
+            }
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog.setCancelable(false);
+            dialog.setMessage("Parsing spotify url...");
+            dialog.show();
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Log.e("Original_URL",spotifyUrl+"");
+            SpotifyTrack track = new SpotifyTrack(YTutils.getSpotifyID(spotifyUrl));
+            ytLink = track.getYtUrl();
+            Log.e("GOTURL_Here",ytLink+"");
+            return null;
+        }
+    }
 
     private void setNotification() {
 
