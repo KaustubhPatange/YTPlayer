@@ -51,16 +51,19 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
     private final int VIEW_PROG = 0;
 
     private List<DiscoverModel> discoverModels;
-    Context con;
+    Context con; String csvString,intentTitle;
     private int visibleThreshold = 5; View.OnLongClickListener longClickListener;
     private int lastVisibleItem, totalItems;
     ArrayList<Integer> adNumbers = new ArrayList<>();
     private boolean loading,isScrolling; int scrollOutItems,currentItems;
     private OnLoadMoreListener onLoadMoreListener;
 
-    public DiscoverAdapter(Context context, List<DiscoverModel> students, RecyclerView recyclerView, View.OnLongClickListener longClickListener) {
+    public DiscoverAdapter(Context context, List<DiscoverModel> students, RecyclerView recyclerView, View.OnLongClickListener longClickListener,
+                           String data,String title) {
         discoverModels = students;
         this.con = context;
+        this.csvString = data;
+        this.intentTitle = title;
         this.longClickListener = longClickListener;
         if (recyclerView.getLayoutManager() instanceof LinearLayoutManager) {
 
@@ -161,7 +164,11 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
                 Activity activity = (Activity) con;
 
                 Intent intent = new Intent(con,PlayerActivity.class);
+                intent.putExtra("sendActivity","discover");
+                intent.putExtra("data_csv",csvString);
+                intent.putExtra("title",intentTitle);
                 intent.putExtra("youtubelink",new String[]{ model.getYtUrl() });
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 con.startActivity(intent);
                 activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
             });

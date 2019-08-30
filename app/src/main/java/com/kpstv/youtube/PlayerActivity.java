@@ -2,6 +2,8 @@ package com.kpstv.youtube;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -105,8 +107,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import at.huber.youtubeExtractor.Format;
 import at.huber.youtubeExtractor.VideoMeta;
@@ -127,7 +132,7 @@ public class PlayerActivity extends AppCompatActivity {
     String[] apikeys = new String[]{"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw", "AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
 
     LinearLayout downloadButton;
-    LinearLayout mainlayout;
+    static LinearLayout mainlayout;
 
     TextView mainTitle, viewCount, currentDuration, totalDuration, warningText;
     int likeCounts, dislikeCounts; boolean isLoop = false;
@@ -156,7 +161,7 @@ public class PlayerActivity extends AppCompatActivity {
     long total_duration = 0;
     int total_seconds;
     ArrayList<String> yturls;
-    int ytIndex = 0;
+    int ytIndex = 0; static String sendActivity,csvString,intentTitle;
 
     ArrayList<YTConfig> ytConfigs;
 
@@ -284,8 +289,10 @@ public class PlayerActivity extends AppCompatActivity {
         if (!CheckIntent(getIntent())) {
             // Get the links loaded using schemes
             Intent appLinkIntent = getIntent();
+            sendActivity = appLinkIntent.getStringExtra("sendActivity");
+            csvString = appLinkIntent.getStringExtra("data_csv");
+            intentTitle = appLinkIntent.getStringExtra("title");
             Uri appLinkData = appLinkIntent.getData();
-
             if (appLinkData != null) {
                 String url_link = appLinkData.toString();
                 yturls.add(url_link);
@@ -367,7 +374,31 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        /* Fuzzy logic to save notification channel as bringing activity back to stack
+         * is removing the channel. */
+        if (notificationManagerCompat!=null && notification!=null) {
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    notificationManagerCompat.notify(1, notification);
+                }
+            },500);
+        }
+    }
+
+    @Override
     protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+           sendActivity = intent.getStringExtra("sendActivity");
+            csvString = intent.getStringExtra("data_csv");
+            intentTitle = intent.getStringExtra("title");
+        String changePlayBack = intent.getStringExtra("changePlayback");
+        if (changePlayBack!=null && changePlayBack.equals("true")) {
+            changePlayBack(false);
+        }
+
         if (intent.getData()!=null) {
             Log.e("Firing","intent.getData()");
             if(yturls.size()>1) {
@@ -565,6 +596,10 @@ public class PlayerActivity extends AppCompatActivity {
                     }
 
                     YtFile ytaudioFile = getBestStream(ytFiles);
+                    if (ytaudioFile.getUrl()==null) {
+                        showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
+                        return;
+                    }
                     link = ytaudioFile.getUrl();
                     link = link.replace("\\", "");
 
@@ -822,6 +857,44 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        if (isSameActivity()) {
+            startActivity(new Intent(this, MainActivity.class));
+        }else
+        {
+            /*ActivityManager m = (ActivityManager) getSystemService(ACTIVITY_SERVICE );
+            List<ActivityManager.RunningTaskInfo> runningTaskInfoList =  m.getRunningTasks(1);
+            ActivityManager.RunningTaskInfo runningTaskInfo = runningTaskInfoList.get(0);
+            String baseActivity = runningTaskInfo.baseActivity.getShortClassName();
+            switch (baseActivity) {
+                case ".MainActivity":
+                    startActivity(new Intent(this, MainActivity.class));
+                    break;
+                case ".DiscoverActivity":
+                    startActivity(new Intent(this, DiscoverActivity.class));
+                    break;
+                default:
+                    super.onBackPressed();
+                    break;
+            }*/
+            super.onBackPressed();
+        }
+    }
+
+    boolean isSameActivity() {
+        ActivityManager m = (ActivityManager) getSystemService(ACTIVITY_SERVICE );
+        List<ActivityManager.RunningTaskInfo> runningTaskInfoList =  m.getRunningTasks(1);
+        ActivityManager.RunningTaskInfo runningTaskInfo = runningTaskInfoList.get(0);
+        String topActivity = runningTaskInfo.topActivity.getShortClassName();
+        String baseActivity = runningTaskInfo.baseActivity.getShortClassName();
+        Log.e("TopActivity",topActivity+"");
+        Log.e("BaseActivity",baseActivity+"");
+        if (topActivity.equals(baseActivity)){
+            return true;
+        }else return false;
+    }
+
+    @Override
     protected void onDestroy() {
         if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
             notificationManager.deleteNotificationChannel("channel_01");
@@ -941,6 +1014,7 @@ public class PlayerActivity extends AppCompatActivity {
         if (isalert) icon = android.R.drawable.ic_dialog_alert;
         new AlertDialog.Builder(PlayerActivity.this)
                 .setTitle(title)
+                .setCancelable(false)
                 .setMessage(message)
                 .setPositiveButton("OK", (dialog, which) -> callFinish())
                 .setIcon(icon)
@@ -967,9 +1041,27 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     void callFinish() {
+        String toput = "false";
+        if (isplaying) toput="true";
         Intent i = new Intent(this, MainActivity.class);
-        i.setAction(Intent.ACTION_MAIN);
-        i.addCategory(Intent.CATEGORY_LAUNCHER);
+        Log.e("SendActivity",sendActivity+"");
+        if (sendActivity!=null && !isSameActivity()) {
+            switch (sendActivity) {
+                //TODO: Add sendActivity switch
+                case "discover":
+                    i = new Intent(this,DiscoverActivity.class);
+                    i.putExtra("data_csv",csvString);
+                    i.putExtra("title",intentTitle);
+                    Log.e("IntentTitle",intentTitle+"");
+                    break;
+                default:
+                    break;
+            }
+        }
+        i.putExtra("is_playing",toput);
+        i.putExtra("b_title",mainTitle.getText().toString());
+        Log.e("sendActivity",sendActivity+"");
+        i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(i);
     }
 

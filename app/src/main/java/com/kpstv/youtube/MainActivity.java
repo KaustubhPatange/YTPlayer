@@ -20,6 +20,11 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -60,6 +65,9 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     Fragment PlaylistFrag;
     Fragment NCFrag;
     SharedPreferences preferences;
+    LinearLayout bottom_player;
+    ImageButton actionUp,actionPlay;
+    TextView actionTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +79,12 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;
         Log.e("HeightMatrix",height+"");
+
+        // Get required views...
+        bottom_player = findViewById(R.id.bottom_player);
+        actionPlay = findViewById(R.id.action_play);
+        actionUp = findViewById(R.id.action_maximize);
+        actionTitle = findViewById(R.id.action_title);
 
         // Check onComing links from YouTube or Spotify...
         CheckIntent(getIntent());
@@ -171,7 +185,28 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         } else Toast.makeText(this, getString(R.string.error), Toast.LENGTH_SHORT).show();
     }
 
+    void openPlayer(boolean changePlayBack) {
+        Intent i=new Intent(MainActivity.this,PlayerActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        i.putExtra("sendActivity","main");
+        if (changePlayBack)
+        i.putExtra("changePlayback","true");
+        startActivity(i);
+    }
     void CheckIntent(Intent incoming) {
+        String playerCheck = incoming.getStringExtra("is_playing");
+        if (playerCheck!=null && playerCheck.equals("true")) {
+            bottom_player.setVisibility(View.VISIBLE);
+            actionTitle.setSelected(true);
+            actionTitle.setText(incoming.getStringExtra("b_title"));
+            bottom_player.setOnClickListener(v -> openPlayer(false));
+            actionUp.setOnClickListener(v -> openPlayer(false));
+            actionPlay.setOnClickListener(v -> openPlayer(true));
+
+        }else {
+            actionTitle.setText(" ");
+            bottom_player.setVisibility(View.GONE);
+        }
         if (incoming.getData()!=null) {
             String ytLink = incoming.getData().toString();
             Log.e("IntentYTLink",ytLink+"");

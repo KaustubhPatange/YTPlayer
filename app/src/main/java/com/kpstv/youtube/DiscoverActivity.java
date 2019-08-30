@@ -1,5 +1,6 @@
 package com.kpstv.youtube;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,7 +12,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.kpstv.youtube.adapters.DiscoverAdapter;
 import com.kpstv.youtube.models.DiscoverModel;
@@ -22,6 +26,7 @@ import com.kpstv.youtube.utils.YTutils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class DiscoverActivity extends AppCompatActivity implements HistoryBottomSheet.BottomSheetListener {
@@ -44,6 +49,10 @@ public class DiscoverActivity extends AppCompatActivity implements HistoryBottom
 
     protected Handler handler; String fileName, intentTitle,csvString;
 
+    LinearLayout bottom_player;
+    ImageButton actionUp,actionPlay;
+    TextView actionTitle; String bTitle,isPlaying;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,10 +65,17 @@ public class DiscoverActivity extends AppCompatActivity implements HistoryBottom
             region = preferences.getString("pref_select_region","global");
         }
 
+        // Get required views...
+        bottom_player = findViewById(R.id.bottom_player);
+        actionPlay = findViewById(R.id.action_play);
+        actionUp = findViewById(R.id.action_maximize);
+        actionTitle = findViewById(R.id.action_title);
+
         csvlines = new ArrayList<>();
         directItems = new ArrayList<>();
 
         Intent intent = getIntent();
+        checkIntent(intent);
         csvString = intent.getStringExtra("data_csv");
         intentTitle = intent.getStringExtra("title");
 
@@ -81,6 +97,42 @@ public class DiscoverActivity extends AppCompatActivity implements HistoryBottom
             setTitle(intentTitle+" ("+ csvlines.size() +")");
         }
         new loadInitialData().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    void openPlayer(boolean changePlayBack) {
+        Intent i=new Intent(DiscoverActivity.this,PlayerActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        i.putExtra("data_csv",csvString);
+        i.putExtra("title",intentTitle);
+        Log.e("IntentTitle",intentTitle);
+        i.putExtra("sendActivity","discover");
+        if (changePlayBack)
+            i.putExtra("changePlayback","true");
+        startActivity(i);
+    }
+
+    void checkIntent(Intent intent) {
+        csvString = intent.getStringExtra("data_csv");
+        isPlaying = intent.getStringExtra("is_playing");
+        Log.e("IsPlayingWork",isPlaying+"");
+        if (isPlaying!=null && isPlaying.equals("true")) {
+            bTitle = intent.getStringExtra("b_title");
+            bottom_player.setVisibility(View.VISIBLE);
+            actionTitle.setSelected(true);
+            actionTitle.setText(bTitle);
+            bottom_player.setOnClickListener(v -> openPlayer(false));
+            actionUp.setOnClickListener(v -> openPlayer(false));
+            actionPlay.setOnClickListener(v -> openPlayer(true));
+        }else {
+            bottom_player.setVisibility(View.GONE);
+            actionTitle.setText(" ");
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        checkIntent(intent);
     }
 
     void setInitial() {
@@ -110,7 +162,12 @@ public class DiscoverActivity extends AppCompatActivity implements HistoryBottom
 
     @Override
     public boolean onSupportNavigateUp() {
-        finish();
+
+        Intent i = new Intent(this,MainActivity.class);
+        i.putExtra("b_title",bTitle);
+        i.putExtra("is_playing",isPlaying);
+        i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(i);
         return true;
     }
 
@@ -135,7 +192,8 @@ public class DiscoverActivity extends AppCompatActivity implements HistoryBottom
 
             mLayoutManager = new LinearLayoutManager(DiscoverActivity.this);
             mRecyclerView.setLayoutManager(mLayoutManager);
-            mAdapter = new DiscoverAdapter(DiscoverActivity.this, discoverModels, mRecyclerView,recyclerItemLongListener);
+            mAdapter = new DiscoverAdapter(DiscoverActivity.this, discoverModels, mRecyclerView,
+                    recyclerItemLongListener,csvString,intentTitle);
             mRecyclerView.setAdapter(mAdapter);
 
 
