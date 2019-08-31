@@ -164,11 +164,8 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
                 Activity activity = (Activity) con;
 
                 Intent intent = new Intent(con,PlayerActivity.class);
-                intent.putExtra("sendActivity","discover");
-                intent.putExtra("data_csv",csvString);
-                intent.putExtra("title",intentTitle);
                 intent.putExtra("youtubelink",new String[]{ model.getYtUrl() });
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 con.startActivity(intent);
                 activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
             });

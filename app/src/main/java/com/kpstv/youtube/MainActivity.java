@@ -1,5 +1,7 @@
 package com.kpstv.youtube;
 
+import android.app.ActivityManager;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
@@ -13,6 +15,8 @@ import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -28,9 +32,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.kpstv.youtube.fragments.DiscoverFragment;
 import com.kpstv.youtube.fragments.HistoryFragment;
 import com.kpstv.youtube.fragments.NCFragment;
+import com.kpstv.youtube.fragments.OPlaylistFragment;
 import com.kpstv.youtube.fragments.PlaylistFragment;
 import com.kpstv.youtube.fragments.SearchFragment;
 import com.kpstv.youtube.utils.SpotifyTrack;
@@ -41,7 +49,11 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
+
+import static android.view.View.VISIBLE;
 
 public class MainActivity extends AppCompatActivity implements HistoryBottomSheet.BottomSheetListener, NCFragment.NoConnectionListener {
 
@@ -61,13 +73,14 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     * */
 
     Fragment HistoryFrag;
-    Fragment SearchFrag;
-    Fragment PlaylistFrag;
-    Fragment NCFrag;
+    static Fragment SearchFrag;
+    static FragmentManager fragmentManager;
+    static Fragment PlaylistFrag;
+    Fragment NCFrag; String ytLink;
     SharedPreferences preferences;
-    LinearLayout bottom_player;
+    LinearLayout bottom_player,adViewLayout;
     ImageButton actionUp,actionPlay;
-    TextView actionTitle;
+    TextView actionTitle; AdView adView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +94,8 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         Log.e("HeightMatrix",height+"");
 
         // Get required views...
+        adView = findViewById(R.id.adView);
+        adViewLayout = findViewById(R.id.adViewLayout);
         bottom_player = findViewById(R.id.bottom_player);
         actionPlay = findViewById(R.id.action_play);
         actionUp = findViewById(R.id.action_maximize);
@@ -110,10 +125,12 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             }
         }
 
+        fragmentManager = getSupportFragmentManager();
         HistoryFrag = new HistoryFragment();
         SearchFrag = new SearchFragment();
         PlaylistFrag = new PlaylistFragment();
         NCFrag = new NCFragment();
+
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -123,6 +140,19 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         else {
             loadFragment(NCFrag);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof DiscoverFragment) {
+            loadFragment(SearchFrag);
+            return;
+        }
+        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof OPlaylistFragment) {
+            loadFragment(PlaylistFrag);
+            return;
+        }
+       finish();
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -151,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     public boolean loadFragment(Fragment fragment) {
         if (fragment != null) {
             Log.e("LoadingFragment","");
+
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.fragment_container, fragment)
@@ -165,15 +196,34 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         CheckIntent(intent);
     }
 
+    public static void loadPlayFrag() {
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, PlaylistFrag)
+                .commit();
+    }
+
+    public static void loadSearchFrag() {
+       fragmentManager.beginTransaction()
+               .replace(R.id.fragment_container, SearchFrag)
+               .commit();
+    }
+
     @Override
     protected void onDestroy() {
+       /* if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = (NotificationManager)
+                    getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.deleteNotificationChannel("channel_01");
+        }
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.cancel(1);
+        notificationManager.cancel(1);*/
         super.onDestroy();
     }
 
     @Override
     public void onRemoveFromHistory(int position) {
+        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container)
+                instanceof HistoryFragment)
         HistoryFragment.removeFromHistory(position);
     }
 
@@ -187,13 +237,18 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
 
     void openPlayer(boolean changePlayBack) {
         Intent i=new Intent(MainActivity.this,PlayerActivity.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        i.putExtra("sendActivity","main");
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        i.putExtra("youtubelink",new String[]{ytLink});
+        i.putExtra("isNewIntent","true");
         if (changePlayBack)
         i.putExtra("changePlayback","true");
         startActivity(i);
+        overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
     }
+
     void CheckIntent(Intent incoming) {
+        ytLink = incoming.getStringExtra("yturl");
+        Log.e("YouTubeUrl",ytLink+"");
         String playerCheck = incoming.getStringExtra("is_playing");
         if (playerCheck!=null && playerCheck.equals("true")) {
             bottom_player.setVisibility(View.VISIBLE);
@@ -202,11 +257,15 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             bottom_player.setOnClickListener(v -> openPlayer(false));
             actionUp.setOnClickListener(v -> openPlayer(false));
             actionPlay.setOnClickListener(v -> openPlayer(true));
-
+            adViewLayout.setVisibility(VISIBLE);
+            AdRequest adRequest = new AdRequest.Builder().build();
+            adView.loadAd(adRequest);
         }else {
+            adViewLayout.setVisibility(View.GONE);
             actionTitle.setText(" ");
             bottom_player.setVisibility(View.GONE);
         }
+
         if (incoming.getData()!=null) {
             String ytLink = incoming.getData().toString();
             Log.e("IntentYTLink",ytLink+"");

@@ -151,12 +151,11 @@ public class PlayerActivity extends AppCompatActivity {
 
     ConnectionQuality connectionQuality = ConnectionQuality.MODERATE;
 
-    private Handler mHandler = new Handler();
+    static Handler mHandler = new Handler();
 
     AsyncTask<String, String, String> mergeTask, cutTask;
 
     SharedPreferences preferences;
-    boolean isAddedToPlaylist;
 
     long total_duration = 0;
     int total_seconds;
@@ -165,8 +164,8 @@ public class PlayerActivity extends AppCompatActivity {
 
     ArrayList<YTConfig> ytConfigs;
 
-    ExoPlayer player;
-    MediaSource mediaSource;
+    static ExoPlayer player;
+    static MediaSource mediaSource;
     DefaultDataSourceFactory dataSourceFactory;
     DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
     TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory();
@@ -391,9 +390,11 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-           sendActivity = intent.getStringExtra("sendActivity");
-            csvString = intent.getStringExtra("data_csv");
-            intentTitle = intent.getStringExtra("title");
+        String NewIntent = intent.getStringExtra("isNewIntent");
+        if (NewIntent==null) NewIntent="false";
+        sendActivity = intent.getStringExtra("sendActivity");
+        csvString = intent.getStringExtra("data_csv");
+        intentTitle = intent.getStringExtra("title");
         String changePlayBack = intent.getStringExtra("changePlayback");
         if (changePlayBack!=null && changePlayBack.equals("true")) {
             changePlayBack(false);
@@ -413,8 +414,9 @@ public class PlayerActivity extends AppCompatActivity {
             datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
             return;
         }
+
         String[] arr = intent.getStringArrayExtra("youtubelink");
-        if (arr!=null) {
+        if (arr!=null && !NewIntent.equals("true")) {
             Log.e("Firing","arr!=null");
             ytIndex = intent.getIntExtra("playfromIndex", 0);
             yturls = YTutils.convertArrayToArrayList(arr);
@@ -858,27 +860,13 @@ public class PlayerActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (isSameActivity()) {
+        super.onBackPressed();
+        /*if (isSameActivity()) {
             startActivity(new Intent(this, MainActivity.class));
         }else
         {
-            /*ActivityManager m = (ActivityManager) getSystemService(ACTIVITY_SERVICE );
-            List<ActivityManager.RunningTaskInfo> runningTaskInfoList =  m.getRunningTasks(1);
-            ActivityManager.RunningTaskInfo runningTaskInfo = runningTaskInfoList.get(0);
-            String baseActivity = runningTaskInfo.baseActivity.getShortClassName();
-            switch (baseActivity) {
-                case ".MainActivity":
-                    startActivity(new Intent(this, MainActivity.class));
-                    break;
-                case ".DiscoverActivity":
-                    startActivity(new Intent(this, DiscoverActivity.class));
-                    break;
-                default:
-                    super.onBackPressed();
-                    break;
-            }*/
             super.onBackPressed();
-        }
+        }*/
     }
 
     boolean isSameActivity() {
@@ -1044,24 +1032,11 @@ public class PlayerActivity extends AppCompatActivity {
         String toput = "false";
         if (isplaying) toput="true";
         Intent i = new Intent(this, MainActivity.class);
-        Log.e("SendActivity",sendActivity+"");
-        if (sendActivity!=null && !isSameActivity()) {
-            switch (sendActivity) {
-                //TODO: Add sendActivity switch
-                case "discover":
-                    i = new Intent(this,DiscoverActivity.class);
-                    i.putExtra("data_csv",csvString);
-                    i.putExtra("title",intentTitle);
-                    Log.e("IntentTitle",intentTitle+"");
-                    break;
-                default:
-                    break;
-            }
-        }
+        i.putExtra("yturl",YouTubeUrl);
         i.putExtra("is_playing",toput);
         i.putExtra("b_title",mainTitle.getText().toString());
         Log.e("sendActivity",sendActivity+"");
-        i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(i);
     }
 

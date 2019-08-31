@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.CardView;
@@ -22,6 +23,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -52,7 +54,7 @@ import java.util.ArrayList;
 public class SearchFragment extends Fragment {
 
     View v;
-    RecyclerView recyclerView;
+    RecyclerView recyclerView; Fragment discoverFrag;
     static RecyclerView.LayoutManager layoutManager;
     SearchAdapter adapter; boolean networkCreated; ArrayList<String> images;
     ArrayList<SearchModel> models; RelativeLayout progresslayout;
@@ -178,11 +180,25 @@ public class SearchFragment extends Fragment {
                     Toast.makeText(activity, getString(R.string.error), Toast.LENGTH_SHORT).show();
                     return;
                 }
-                Intent intent = new Intent(activity,DiscoverActivity.class);
+                FrameLayout layout = activity.findViewById(R.id.fragment_container);
+                if (layout!=null) {
+                    discoverFrag = new DiscoverFragment();
+                    Bundle args = new Bundle();
+                    args.putString("data_csv",SpotifyTrendsCSV);
+                    args.putString("title","Discover Trends");
+                    discoverFrag.setArguments(args);
+                    FragmentManager manager = getActivity().getSupportFragmentManager();
+                    FragmentTransaction ft = manager.beginTransaction();
+                    ft.setCustomAnimations(android.R.anim.fade_in,
+                            android.R.anim.fade_out);
+                    ft.replace(R.id.fragment_container, discoverFrag);
+                    ft.commit();
+                }
+              /*  Intent intent = new Intent(activity,DiscoverActivity.class);
                 intent.putExtra("data_csv",SpotifyTrendsCSV);
                 intent.putExtra("title","Discover Trends");
                 activity.startActivity(intent);
-                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);*/
             });
 
             discoverViral.setOnClickListener(v -> {
@@ -190,11 +206,30 @@ public class SearchFragment extends Fragment {
                     Toast.makeText(activity, getString(R.string.error), Toast.LENGTH_SHORT).show();
                     return;
                 }
+                FrameLayout layout = activity.findViewById(R.id.fragment_container);
+                if (layout!=null) {
+                    discoverFrag = new DiscoverFragment();
+                    Bundle args = new Bundle();
+                    args.putString("data_csv",SpotifyViralCSV);
+                    args.putString("title","Discover Viral");
+                    discoverFrag.setArguments(args);
+                    FragmentManager manager = getActivity().getSupportFragmentManager();
+                    FragmentTransaction ft = manager.beginTransaction();
+                    ft.setCustomAnimations(android.R.anim.fade_in,
+                            android.R.anim.fade_out);
+                    ft.replace(R.id.fragment_container, discoverFrag);
+                    ft.commit();
+                }
+                return;
+               /* if (!YTutils.isInternetAvailable()) {
+                    Toast.makeText(activity, getString(R.string.error), Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 Intent intent = new Intent(activity,DiscoverActivity.class);
                 intent.putExtra("data_csv",SpotifyViralCSV);
                 intent.putExtra("title","Discover Viral");
                 activity.startActivity(intent);
-                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);*/
             });
 
             settingsLayout.setOnClickListener(v->

@@ -66,12 +66,9 @@ public class HistoryFragment extends Fragment {
             swipeRefreshLayout = v.findViewById(R.id.swipeRefreshLayout);
             hiddenLayout = v.findViewById(R.id.history_linear);
 
-            swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-                @Override
-                public void onRefresh() {
-                    LoadMainMethod();
-                    swipeRefreshLayout.setRefreshing(false);
-                }
+            swipeRefreshLayout.setOnRefreshListener(() -> {
+                LoadMainMethod();
+                swipeRefreshLayout.setRefreshing(false);
             });
 
             swipeRefreshLayout.setOnLongClickListener(v -> false);

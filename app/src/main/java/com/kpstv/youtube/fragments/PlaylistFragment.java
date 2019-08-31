@@ -9,6 +9,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -38,12 +41,12 @@ import java.util.ArrayList;
 
 public class PlaylistFragment extends Fragment {
 
-    View v; static Activity activity; static ProgressBar progressBar;
+    View v; static FragmentActivity activity; static ProgressBar progressBar;
     boolean networkCreated;static String playlist_csv;
     static ArrayList<PlaylistModel> data; FloatingActionButton fabCreate;
     static RecyclerView recyclerView; static PlaylistAdapter adapter;
-    static RecyclerView.LayoutManager layoutManager;
-    NestedScrollView nestedScrollView;
+    static RecyclerView.LayoutManager layoutManager; static Fragment OPlayFrag;
+    NestedScrollView nestedScrollView; static FragmentManager fragmentManager;
 
     public PlaylistFragment() {}
 
@@ -67,6 +70,7 @@ public class PlaylistFragment extends Fragment {
             ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
             activity = getActivity();
+            fragmentManager = activity.getSupportFragmentManager();
 
             recyclerView = v.findViewById(R.id.my_recycler_view);
             progressBar = v.findViewById(R.id.progressBar);
@@ -106,6 +110,19 @@ public class PlaylistFragment extends Fragment {
         inflater.inflate(R.menu.player_menu,menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
+
+    private static View.OnClickListener listener = v1 -> {
+        OPlayFrag = new OPlaylistFragment();
+        PlaylistModel playlistModel = (PlaylistModel) v1.getTag();
+        Bundle args = new Bundle();
+        args.putSerializable("model",playlistModel);
+        OPlayFrag.setArguments(args);
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        ft.setCustomAnimations(android.R.anim.fade_in,
+                android.R.anim.fade_out);
+        ft.replace(R.id.fragment_container, OPlayFrag);
+        ft.commit();
+    };
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -156,7 +173,7 @@ public class PlaylistFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             if (data.size()>0) {
-                adapter = new PlaylistAdapter(data,activity);
+                adapter = new PlaylistAdapter(data,activity,listener);
                 recyclerView.setAdapter(adapter);
                 recyclerView.setVisibility(View.VISIBLE);
             }

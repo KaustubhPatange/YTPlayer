@@ -26,9 +26,9 @@
 
         <activity
             android:name=".MainActivity"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar1">
           <!--  <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -70,7 +70,7 @@
         </activity>
         <activity
             android:name=".PlayerActivity"
-            android:launchMode="singleTask"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar2">
             <intent-filter>

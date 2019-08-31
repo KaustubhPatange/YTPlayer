@@ -51,7 +51,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
     private ArrayList<PlaylistModel> dataSet;
     private ArrayList<String> Dateset;
     Context con;
-    String pline;
+    String pline; View.OnClickListener listener;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -75,9 +75,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
         }
     }
 
-    public PlaylistAdapter(ArrayList<PlaylistModel> data, Context context) {
+    public PlaylistAdapter(ArrayList<PlaylistModel> data, Context context, View.OnClickListener listener) {
         this.dataSet = data;
         this.con = context;
+        this.listener = listener;
         Dateset = new ArrayList<>();
     }
 
@@ -118,9 +119,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
             Dateset.add(playlistModel.getDate());
         }
 
-        holder.mainCard.setOnClickListener(v -> {
-            commonOpen(playlistModel);
-        });
+        holder.mainCard.setTag(playlistModel);
+
+        holder.mainCard.setOnClickListener(listener);
+
         String playlist_csv = YTutils.readContent((Activity) con,"playlist.csv");
 
         holder.imageMore.setOnClickListener(v -> {
@@ -131,7 +133,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
                 int itemId = item.getItemId();
                 switch (itemId) {
                     case R.id.action_open:
-                        commonOpen(playlistModel);
+                        listener.onClick(holder.mainCard);
                         break;
                     case R.id.action_modify:
                         if (playlist_csv!=null&&!playlist_csv.isEmpty()) {
