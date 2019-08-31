@@ -74,6 +74,7 @@ import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
 import com.googlecode.mp4parser.authoring.tracks.AppendTrack;
+import com.gw.swipeback.SwipeBackLayout;
 import com.jgabrielfreitas.core.BlurImageView;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.utils.HttpHandler;
@@ -82,6 +83,8 @@ import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
+import com.spyhunter99.supertooltips.ToolTip;
+import com.spyhunter99.supertooltips.ToolTipManager;
 import com.warkiz.widget.IndicatorSeekBar;
 import com.warkiz.widget.OnSeekChangeListener;
 import com.warkiz.widget.SeekParams;
@@ -127,14 +130,14 @@ public class PlayerActivity extends AppCompatActivity {
     NotificationChannel notificationChannel;
     RemoteViews collpaseView, expandedView;
 
-    AsyncTask<String, String, Void> datasync;
+    static AsyncTask<String, String, Void> datasync;
 
     String[] apikeys = new String[]{"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw", "AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
 
     LinearLayout downloadButton;
     static LinearLayout mainlayout;
 
-    TextView mainTitle, viewCount, currentDuration, totalDuration, warningText;
+    static TextView mainTitle, viewCount, currentDuration, totalDuration, warningText;
     int likeCounts, dislikeCounts; boolean isLoop = false;
 
     ImageView mainImageView;
@@ -143,7 +146,7 @@ public class PlayerActivity extends AppCompatActivity {
     ProgressBar mprogressBar, progressBar; String audioLink;
     FloatingActionButton previousFab, playFab, nextFab;
 
-    IndicatorSeekBar indicatorSeekBar;
+    static IndicatorSeekBar indicatorSeekBar;
     private InterstitialAd mInterstitialAd;
 
     Notification notification;
@@ -1156,7 +1159,7 @@ public class PlayerActivity extends AppCompatActivity {
         mHandler.postDelayed(mUpdateTimeTask, 100);
     }
 
-    private Runnable mUpdateTimeTask = new Runnable() {
+    public static Runnable mUpdateTimeTask = new Runnable() {
         public void run() {
             long totalDuration = player.getDuration();
             long currentDur = player.getCurrentPosition();

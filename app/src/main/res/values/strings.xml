@@ -81,6 +81,6 @@
     <string name="share">Share</string>
     <string name="loop">Loop</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="helpMessage">Go to the official <a href="https://kaustubhpatange.github.io/YTPlayer">website</a> to request for help regarding your issue.
+        You can also visit <a href="https://github.com/KaustubhPatange/YTPlayer">Github</a> repository to create issue.</string>
 </resources>

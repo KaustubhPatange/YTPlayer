@@ -29,7 +29,9 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar1">
-          <!--  <intent-filter>
+
+            <!--
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -53,7 +55,8 @@
                 <data
                     android:host="youtu.be"
                     android:scheme="https" />
-            </intent-filter>-->
+            </intent-filter>
+            -->
         </activity>
         <activity
             android:name=".RingdroidEditActivity"
@@ -75,13 +78,17 @@
             android:theme="@style/AppTheme.NoActionBar2">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:host="youtube.com"
                     android:scheme="http" />
@@ -103,20 +110,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DiscoverActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
-        <activity
             android:name=".SearchActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".CPlaylistActivity" />
-        <activity
-            android:name=".OPlaylistActivity"
-            android:label="@string/title_activity_oplayist"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar1" />
         <activity android:name=".SettingsActivity" />
         <activity
             android:name=".SplashActivity"
@@ -128,9 +126,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".IntroActivity"
+        <activity
+            android:name=".IntroActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar1"/>
+            android:theme="@style/AppTheme.NoActionBar1" />
+        <activity android:name=".ErrorActivity"></activity>
     </application>
 
 </manifest>

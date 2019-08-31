@@ -5,10 +5,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -35,9 +33,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
-import com.kpstv.youtube.DiscoverActivity;
 import com.kpstv.youtube.SearchActivity;
 import com.kpstv.youtube.SettingsActivity;
 import com.kpstv.youtube.adapters.SearchAdapter;
@@ -194,11 +190,6 @@ public class SearchFragment extends Fragment {
                     ft.replace(R.id.fragment_container, discoverFrag);
                     ft.commit();
                 }
-              /*  Intent intent = new Intent(activity,DiscoverActivity.class);
-                intent.putExtra("data_csv",SpotifyTrendsCSV);
-                intent.putExtra("title","Discover Trends");
-                activity.startActivity(intent);
-                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);*/
             });
 
             discoverViral.setOnClickListener(v -> {
@@ -221,15 +212,7 @@ public class SearchFragment extends Fragment {
                     ft.commit();
                 }
                 return;
-               /* if (!YTutils.isInternetAvailable()) {
-                    Toast.makeText(activity, getString(R.string.error), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Intent intent = new Intent(activity,DiscoverActivity.class);
-                intent.putExtra("data_csv",SpotifyViralCSV);
-                intent.putExtra("title","Discover Viral");
-                activity.startActivity(intent);
-                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);*/
+
             });
 
             settingsLayout.setOnClickListener(v->

@@ -44,14 +44,17 @@ public class YTSearch {
             InputStream in = connection.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
+            StringBuilder builder = new StringBuilder();
             String line = null;
             while((line = reader.readLine()) != null)
             {
+                builder.append(line).append("\n");
                 if (line.contains("src=\"https://i.ytimg.com"))
                 {
                     videoIDs.add(line.split("/")[4]);
                 }
             }
+          //  YTutils.Write(builder.toString(),YTutils.getFile("Documents/search.txt"));
             in.close();
 
         } catch (MalformedURLException e) {

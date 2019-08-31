@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp"
+    tools:context=".ErrorActivity">
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_marginTop="5dp"
+        android:layout_above="@id/crashLayout"
+        android:id="@+id/submit_filename_textinputlayout"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="10dp"
+        android:layout_height="match_parent">
+        <EditText
+            android:gravity="top"
+            android:id="@+id/reportText"
+            android:hint="Leave your report message"
+            android:background="@android:color/transparent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </android.support.design.widget.TextInputLayout>
+
+    <RelativeLayout
+        android:clickable="true"
+        android:focusable="true"
+        android:id="@+id/crashLayout"
+        android:layout_above="@+id/textView"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:gravity="center_vertical"
+        android:background="@drawable/error_back"
+        android:layout_width="match_parent"
+        android:layout_height="65dp">
+      <CheckBox
+          android:layout_alignParentStart="true"
+          android:id="@+id/sendLogs"
+          android:checked="true"
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent" />
+        <LinearLayout
+            android:layout_toEndOf="@id/sendLogs"
+            android:layout_marginStart="20dp"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+            <TextView
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:fontFamily="@font/dmsans_font"
+                android:text="Crash Logs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:textColor="@color/colorAccent"
+                android:textSize="13sp"
+                android:fontFamily="@font/dmsans_font"
+                android:text="View"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <ImageView
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_log"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
+
+    <TextView
+        android:autoLink="web"
+        android:linksClickable="true"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="5dp"
+        android:id="@+id/textView"
+        android:textSize="12sp"
+        android:layout_alignParentBottom="true"
+        android:text="@string/helpMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>

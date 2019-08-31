@@ -2,7 +2,6 @@ package com.kpstv.youtube.fragments;
 
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,7 +20,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.kpstv.youtube.DiscoverActivity;
 import com.kpstv.youtube.HistoryBottomSheet;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;

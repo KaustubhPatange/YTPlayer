@@ -42,6 +42,7 @@ import com.kpstv.youtube.fragments.OPlaylistFragment;
 import com.kpstv.youtube.fragments.PlaylistFragment;
 import com.kpstv.youtube.fragments.SearchFragment;
 import com.kpstv.youtube.utils.SpotifyTrack;
+import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
 
 import java.io.File;
@@ -52,6 +53,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+
+import cat.ereza.customactivityoncrash.config.CaocConfig;
 
 import static android.view.View.VISIBLE;
 
@@ -93,6 +96,11 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         int height = displayMetrics.heightPixels;
         Log.e("HeightMatrix",height+"");
 
+        // Set CrashActivity...
+        CaocConfig.Builder.create()
+                .errorActivity(ErrorActivity.class)
+                .apply();
+
         // Get required views...
         adView = findViewById(R.id.adView);
         adViewLayout = findViewById(R.id.adViewLayout);
@@ -131,7 +139,6 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         PlaylistFrag = new PlaylistFragment();
         NCFrag = new NCFragment();
 
-
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
@@ -152,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             loadFragment(PlaylistFrag);
             return;
         }
-       finish();
+        finish();
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -210,13 +217,20 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
 
     @Override
     protected void onDestroy() {
-       /* if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
-            NotificationManager notificationManager = (NotificationManager)
-                    getSystemService(NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             notificationManager.deleteNotificationChannel("channel_01");
         }
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.cancel(1);*/
+        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
+        notificationManagerCompat.cancel(1);
+       try {
+           if (PlayerActivity.datasync.getStatus() == AsyncTask.Status.RUNNING)
+               PlayerActivity.datasync.cancel(true);
+           PlayerActivity.player.stop();
+           PlayerActivity.player.release();
+
+           PlayerActivity.mHandler.removeCallbacks(PlayerActivity.mUpdateTimeTask);
+       }catch (Exception e) { e.printStackTrace(); }
         super.onDestroy();
     }
 
