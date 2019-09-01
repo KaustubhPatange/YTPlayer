@@ -101,6 +101,9 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                 .errorActivity(ErrorActivity.class)
                 .apply();
 
+        //TODO: Change app unit id, Sample : ca-app-pub-3940256099942544~3347511713, ca-app-pub-1763645001743174~5602018181
+        MobileAds.initialize(this, "ca-app-pub-1763645001743174~5602018181");
+
         // Get required views...
         adView = findViewById(R.id.adView);
         adViewLayout = findViewById(R.id.adViewLayout);
@@ -249,13 +252,13 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         } else Toast.makeText(this, getString(R.string.error), Toast.LENGTH_SHORT).show();
     }
 
-    void openPlayer(boolean changePlayBack) {
+    void openPlayer(boolean enablePlayback,String changePlayBack) {
         Intent i=new Intent(MainActivity.this,PlayerActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         i.putExtra("youtubelink",new String[]{ytLink});
         i.putExtra("isNewIntent","true");
-        if (changePlayBack)
-        i.putExtra("changePlayback","true");
+        if (enablePlayback)
+        i.putExtra("changePlayback",changePlayBack);
         startActivity(i);
         overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
     }
@@ -264,20 +267,22 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         ytLink = incoming.getStringExtra("yturl");
         Log.e("YouTubeUrl",ytLink+"");
         String playerCheck = incoming.getStringExtra("is_playing");
-        if (playerCheck!=null && playerCheck.equals("true")) {
+        if (playerCheck!=null) {
             bottom_player.setVisibility(View.VISIBLE);
             actionTitle.setSelected(true);
             actionTitle.setText(incoming.getStringExtra("b_title"));
-            bottom_player.setOnClickListener(v -> openPlayer(false));
-            actionUp.setOnClickListener(v -> openPlayer(false));
-            actionPlay.setOnClickListener(v -> openPlayer(true));
+            bottom_player.setOnClickListener(v -> openPlayer(false,null));
+            actionUp.setOnClickListener(v -> openPlayer(false,null));
+            if (playerCheck.equals("true")) {
+                actionPlay.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause_circle));
+                actionPlay.setOnClickListener(v -> openPlayer(true,"true"));
+            }else {
+                actionPlay.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_circle));
+                actionPlay.setOnClickListener(v -> openPlayer(true,"false"));
+            }
             adViewLayout.setVisibility(VISIBLE);
             AdRequest adRequest = new AdRequest.Builder().build();
             adView.loadAd(adRequest);
-        }else {
-            adViewLayout.setVisibility(View.GONE);
-            actionTitle.setText(" ");
-            bottom_player.setVisibility(View.GONE);
         }
 
         if (incoming.getData()!=null) {

@@ -61,7 +61,7 @@ public class SearchFragment extends Fragment {
     AsyncTask<Void,Void,Void> trendTask, discoverTask; boolean alertShown=false;
     LinearLayout SOW,SOF;
 
-    SharedPreferences preferences; String region="global";
+    SharedPreferences preferences,settingpref; String region="global";
 
     private static String SpotifyTrendsCSV, SpotifyViralCSV;
     ToolTipManager toolTipManager;
@@ -86,7 +86,7 @@ public class SearchFragment extends Fragment {
             v = inflater.inflate(R.layout.fragment_search, container, false);
 
             activity = getActivity();
-            SharedPreferences pref = activity.getSharedPreferences("settings",Context.MODE_PRIVATE);
+            settingpref = activity.getSharedPreferences("settings",Context.MODE_PRIVATE);
             preferences = activity.getSharedPreferences("appSettings",Context.MODE_PRIVATE);
             if (preferences!=null) {
                 region = preferences.getString("pref_select_region","global");
@@ -227,20 +227,20 @@ public class SearchFragment extends Fragment {
             discoverTask = new loadDiscoverImages();
             discoverTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-            if (!pref.getBoolean("searchTip",false)) {
+            if (!settingpref.getBoolean("searchTip",false)) {
                 toolTipManager.showToolTip(toolTip,searchCard);
-                SharedPreferences.Editor editor = pref.edit();
+                SharedPreferences.Editor editor = settingpref.edit();
                 editor.putBoolean("searchTip",true);
                 editor.apply();
             }
         }
-
         return v;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
         String newregion = preferences.getString("pref_select_region","global");
         Log.e("onResume","region: "+region+", newregion: "+newregion);
         if (!newregion.contains(region)) {

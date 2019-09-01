@@ -2,6 +2,7 @@ package com.kpstv.youtube;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -45,6 +46,12 @@ public class ErrorActivity extends AppCompatActivity {
             alert.setPositiveButton("OK", null);
             alert.show();
         });
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        Toast.makeText(this, "Application crashed due an error!", Toast.LENGTH_LONG).show();
     }
 
     @Override

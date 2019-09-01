@@ -174,10 +174,11 @@ public class CPlaylistActivity extends AppCompatActivity {
         new AlertDialog.Builder(CPlaylistActivity.this)
                 .setTitle("Delete")
                 .setMessage("Are you sure to delete selected item?")
-                .setPositiveButton("OK", (dialog, which) -> {
+                .setPositiveButton("Yes", (dialog, which) -> {
                     models.remove(position);
                     adapter.notifyDataSetChanged();
                 })
+                .setNegativeButton("No",null)
                 .setIcon(icon)
                 .show();
     };

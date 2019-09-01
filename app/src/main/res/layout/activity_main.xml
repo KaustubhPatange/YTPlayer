@@ -38,12 +38,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             ads:adSize="BANNER"
-            ads:adUnitId="ca-app-pub-3940256099942544/6300978111">
+            ads:adUnitId="ca-app-pub-1763645001743174/9349691503">
         </com.google.android.gms.ads.AdView>
     </LinearLayout>
 
 
     <LinearLayout
+        android:visibility="gone"
         android:layout_above="@id/navigation"
         android:id="@+id/bottom_player"
         android:clickable="true"

@@ -22,6 +22,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -224,6 +226,15 @@ public class YTutils {
         });
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    public static void Vibrate(Context context) {
+        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
+        } else {
+            vibrator.vibrate(100);
+        }
     }
 
     public static ArrayList<String> convertArrayToArrayList(String[] arr) {

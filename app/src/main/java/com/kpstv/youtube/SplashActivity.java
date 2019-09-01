@@ -19,8 +19,6 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //TODO: Change app unit id, Sample : ca-app-pub-3940256099942544~3347511713
-        MobileAds.initialize(this, "ca-app-pub-3940256099942544~3347511713");
 
         File f = YTutils.getFile("YTPlayer");
         f.mkdirs();

@@ -32,7 +32,6 @@
                 app:popupTheme="@style/ThemeOverlay.AppCompat" />
 
             <LinearLayout
-                android:id="@+id/toolbar_mainLayout"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="175dp">

@@ -12,7 +12,6 @@
     <android.support.design.widget.TextInputLayout
         android:layout_marginTop="5dp"
         android:layout_above="@id/crashLayout"
-        android:id="@+id/submit_filename_textinputlayout"
         android:layout_width="match_parent"
         android:layout_marginBottom="10dp"
         android:layout_height="match_parent">

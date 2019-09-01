@@ -3,6 +3,8 @@ package com.kpstv.youtube.adapters;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -15,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -25,6 +28,7 @@ import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.DiscoverModel;
 import com.kpstv.youtube.utils.YTSearch;
+import com.kpstv.youtube.utils.YTutils;
 
 import java.util.ArrayList;
 
@@ -124,7 +128,16 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                 else {
                     RunLink(discoverModel.getYtUrl(),activity);
                 }
-
+            });
+            holder.mainLayout.setOnLongClickListener(v -> {
+                if (discoverModel.getYtUrl()!=null) {
+                    ClipboardManager clipboard = (ClipboardManager) con.getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("Copied Text", discoverModel.getYtUrl());
+                    clipboard.setPrimaryClip(clip);
+                    YTutils.Vibrate(con);
+                    Toast.makeText(con, "Copied to clipboard!", Toast.LENGTH_SHORT).show();
+                }
+                return true;
             });
         }
 

@@ -39,6 +39,8 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -129,6 +131,7 @@ public class PlayerActivity extends AppCompatActivity {
     NotificationManager notificationManager;
     NotificationChannel notificationChannel;
     RemoteViews collpaseView, expandedView;
+    ToolTipManager toolTipManager;
 
     static AsyncTask<String, String, Void> datasync;
 
@@ -141,7 +144,7 @@ public class PlayerActivity extends AppCompatActivity {
     int likeCounts, dislikeCounts; boolean isLoop = false;
 
     ImageView mainImageView;
-    public boolean isplaying = false, isfirst = true;
+    public static boolean isplaying = false, isfirst = true;
 
     ProgressBar mprogressBar, progressBar; String audioLink;
     FloatingActionButton previousFab, playFab, nextFab;
@@ -208,6 +211,7 @@ public class PlayerActivity extends AppCompatActivity {
         TextView tms = findViewById(R.id.termsText);
 
         preferences = getSharedPreferences("settings", MODE_PRIVATE);
+        toolTipManager = new ToolTipManager(PlayerActivity.this);
         yturls = new ArrayList<>();
 
         setTitle("");
@@ -274,6 +278,14 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
+        mainImageView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                YTutils.Vibrate(PlayerActivity.this);
+                callFinish();
+                return true;
+            }
+        });
 
         downloadButton.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.M)
@@ -316,7 +328,7 @@ public class PlayerActivity extends AppCompatActivity {
     void LoadAd() {
         //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712
         mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.setAdUnitId("ca-app-pub-1763645001743174/8453566324");
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
     }
 
@@ -399,9 +411,11 @@ public class PlayerActivity extends AppCompatActivity {
         csvString = intent.getStringExtra("data_csv");
         intentTitle = intent.getStringExtra("title");
         String changePlayBack = intent.getStringExtra("changePlayback");
+        Log.e("PlayBackState",changePlayBack+"");
         if (changePlayBack!=null && changePlayBack.equals("true")) {
             changePlayBack(false);
-        }
+        }else if (changePlayBack!=null && changePlayBack.equals("false"))
+            changePlayBack(true);
 
         if (intent.getData()!=null) {
             Log.e("Firing","intent.getData()");
@@ -662,6 +676,18 @@ public class PlayerActivity extends AppCompatActivity {
 
                     if (yturls.size() > 1) {
                         warningText.setText(Html.fromHtml("Saving video offline is illegal  &#8226;  " + (ytIndex + 1) + "/" + yturls.size()));
+                    }
+
+                    if (!preferences.getBoolean("showHome",false)) {
+                        ToolTip toolTip = new ToolTip()
+                                .withText("Long press the image to minimize the player.")
+                                .withColor(getResources().getColor(R.color.colorAccent)) //or whatever you want
+                                .withAnimationType(ToolTip.AnimationType.FROM_MASTER_VIEW)
+                                .withShadow();
+                        toolTipManager.showToolTip(toolTip,R.id.mainImage);
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putBoolean("showHome",true);
+                        editor.apply();
                     }
 
                     // Store video into history
@@ -1032,8 +1058,8 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     void callFinish() {
-        String toput = "false";
-        if (isplaying) toput="true";
+        String toput = "true";
+        if (!isplaying) toput = "false";
         Intent i = new Intent(this, MainActivity.class);
         i.putExtra("yturl",YouTubeUrl);
         i.putExtra("is_playing",toput);
