@@ -33,6 +33,8 @@
                     android:layout_height="wrap_content">
                     <EditText
                         android:maxLines="1"
+                        android:singleLine="true"
+                        android:lines="1"
                         android:id="@+id/cPlaylistText"
                         android:hint="Playlist Name"
                         android:layout_width="match_parent"

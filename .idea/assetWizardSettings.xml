@@ -89,10 +89,13 @@
                         </option>
                         <option name="values">
                           <map>
+                            <entry key="assetSourceType" value="FILE" />
                             <entry key="color" value="ffffff" />
-                            <entry key="outputName" value="ic_send" />
+                            <entry key="height" value="47" />
+                            <entry key="outputName" value="ic_icon_small" />
                             <entry key="overrideSize" value="true" />
-                            <entry key="sourceFile" value="$USER_HOME$/Pictures/svgs/log.svg" />
+                            <entry key="sourceFile" value="$USER_HOME$/Pictures/svgs/sound-bars-pulse.svg" />
+                            <entry key="width" value="47" />
                           </map>
                         </option>
                       </PersistentState>
