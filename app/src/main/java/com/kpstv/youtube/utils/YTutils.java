@@ -464,10 +464,14 @@ public class YTutils {
             public void onReceive(Context ctxt, Intent intent) {
                 long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                 if (downloadID == id) {
+                    Log.e("FileDownloadLink",Uri.fromFile(getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName)).toString());
                     Intent install = new Intent(Intent.ACTION_VIEW)
-                            .setDataAndType(Uri.fromFile(getFile("Download/"+updateName)),
+                            .setDataAndType(Uri.fromFile(getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName)),
                                     "application/vnd.android.package-archive");
+                    if (getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName).exists())
                     context.startActivity(install);
+                    else
+                        Toast.makeText(ctxt, "There is a problem with update package!", Toast.LENGTH_SHORT).show();
 
                     context.unregisterReceiver(this);
                 }
@@ -499,8 +503,7 @@ public class YTutils {
 
                                 request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
                                 request.setTitle("Downloading Update");
-                                request.setDestinationInExternalFilesDir(context,
-                                        Environment.DIRECTORY_DOWNLOADS,updateName);
+                                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,updateName);
                                 context.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
                                 downloadID = downloadManager.enqueue(request);
                             })
