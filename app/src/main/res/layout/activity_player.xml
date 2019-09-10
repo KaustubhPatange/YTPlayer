@@ -36,32 +36,34 @@
             android:layout_height="wrap_content" />
     </RelativeLayout>
 
-    <android.support.v4.widget.NestedScrollView
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <LinearLayout
+
+        <android.support.constraint.ConstraintLayout
             android:id="@+id/mainlayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
             android:paddingStart="13dp"
-            android:paddingEnd="13dp">
+            android:paddingEnd="13dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- Song Name and View counts -->
 
             <RelativeLayout
+                android:id="@+id/relativeLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
 
                 <TextView
                     android:id="@+id/maintitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
+                    android:layout_marginEnd="60dp"
                     android:ellipsize="end"
                     android:fontFamily="@font/dmsans"
                     android:maxLines="2"
-                    android:layout_marginEnd="60dp"
                     android:text="---"
                     android:textColor="@color/white"
                     android:textSize="25dp"
@@ -70,140 +72,196 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:minWidth="50dp"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
+                    android:minWidth="50dp"
                     android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/mainviews"
                         android:layout_width="match_parent"
-                        android:textAlignment="center"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/dmsans"
                         android:text="---"
+                        android:textAlignment="center"
                         android:textColor="@color/light_white"
                         android:textSize="20dp"
                         android:textStyle="bold" />
 
                     <TextView
-                        android:maxLines="1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/dmsans"
+                        android:maxLines="1"
                         android:text="Views"
                         android:textAlignment="center"
                         android:textColor="@color/light_white" />
                 </LinearLayout>
             </RelativeLayout>
 
-            <android.support.v7.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:layout_margin="27dp"
-                android:background="@android:color/transparent"
-                app:cardElevation="5dp"
-                android:layout_gravity="center"
-                app:cardUseCompatPadding="true">
-                <ImageView
-                    android:id="@+id/mainImage"
-                    android:layout_width="match_parent"
-                    android:scaleType="fitXY"
-                    android:layout_height="match_parent" />
-            </android.support.v7.widget.CardView>
+            <!-- main ImageView -->
 
             <LinearLayout
+                android:id="@+id/linearLayout4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
                 android:gravity="center"
-                android:orientation="horizontal">
-                <TextView
-                    android:id="@+id/currentDur"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/dmsans"
-                    android:text="00:00"
-                    android:textAlignment="center"
-                    android:textColor="@color/light_white"
-                    android:textSize="12sp" />
+                app:layout_constraintBottom_toTopOf="@+id/linearLayout6"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/relativeLayout">
 
-                <com.warkiz.widget.IndicatorSeekBar
-                    android:id="@+id/seekBar"
-                    android:layout_width="255dp"
-                    android:layout_height="wrap_content"
-                    app:isb_show_indicator="none"
-                    app:isb_thumb_color="@color/colorAccent"
-                    app:isb_track_progress_color="@color/colorAccent"/>
+                <android.support.v7.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp"
+                    android:layout_gravity="center"
+                    android:layout_margin="27dp"
+                    android:background="@android:color/transparent"
+                    app:cardElevation="5dp"
+                    app:cardUseCompatPadding="true">
 
-
-                <TextView
-                    android:id="@+id/totalDur"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/dmsans"
-                    android:text="04:02"
-                    android:textAlignment="center"
-                    android:textColor="@color/light_white"
-                    android:textSize="12sp" />
+                    <ImageView
+                        android:id="@+id/mainImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="fitXY" />
+                </android.support.v7.widget.CardView>
             </LinearLayout>
 
+            <!-- Bottom stuff downloads and all -->
+
             <LinearLayout
+                android:id="@+id/linearLayout6"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="22dp"
-                android:gravity="center"
-                android:orientation="horizontal">
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="25dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
 
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/rewindButton"
-                    android:tint="@color/white"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/linearLayout3"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="25dp"
-                    android:src="@drawable/ic_skip_previous"
-                    app:fabSize="mini" />
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="15dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
 
-
-                <RelativeLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-                    <ProgressBar
-                        android:id="@+id/progress_circular"
-                        android:layout_centerInParent="true"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                    <android.support.design.widget.FloatingActionButton
-                        android:id="@+id/play_pause_button"
+                    <TextView
+                        android:id="@+id/currentDur"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:scaleType="center"
-                        android:layout_margin="8dp"
-                        android:src="@drawable/ic_play"
-                        app:fabSize="normal" />
-                </RelativeLayout>
+                        android:fontFamily="@font/dmsans"
+                        android:text="00:00"
+                        android:textAlignment="center"
+                        android:textColor="@color/light_white"
+                        android:textSize="12sp" />
+
+                    <com.warkiz.widget.IndicatorSeekBar
+                        android:id="@+id/seekBar"
+                        android:layout_width="255dp"
+                        android:layout_height="wrap_content"
+                        app:isb_show_indicator="none"
+                        app:isb_thumb_color="@color/colorAccent"
+                        app:isb_track_progress_color="@color/colorAccent" />
 
 
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/forwardButton"
-                    android:tint="@color/white"
-                    android:layout_marginStart="25dp"
-                    android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/totalDur"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/dmsans"
+                        android:text="04:02"
+                        android:textAlignment="center"
+                        android:textColor="@color/light_white"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linearLayout2"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_skip_next"
-                    app:fabSize="mini" />
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+
+                    <android.support.design.widget.FloatingActionButton
+                        android:id="@+id/rewindButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="25dp"
+                        android:src="@drawable/ic_skip_previous"
+                        android:tint="@color/white"
+                        app:fabSize="mini" />
+
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <ProgressBar
+                            android:id="@+id/progress_circular"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true" />
+
+                        <android.support.design.widget.FloatingActionButton
+                            android:id="@+id/play_pause_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="8dp"
+                            android:scaleType="center"
+                            android:src="@drawable/ic_play"
+                            app:fabSize="normal" />
+                    </RelativeLayout>
+
+
+                    <android.support.design.widget.FloatingActionButton
+                        android:id="@+id/forwardButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="25dp"
+                        android:src="@drawable/ic_skip_next"
+                        android:tint="@color/white"
+                        app:fabSize="mini" />
+                </LinearLayout>
             </LinearLayout>
 
+
+
             <LinearLayout
+                android:id="@+id/linearLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="20dp"
-                android:orientation="horizontal">
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toTopOf="@+id/downloadlayout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:layout_marginEnd="8dp"
                     android:src="@drawable/ic_warning" />
+
                 <TextView
                     android:id="@+id/warningText"
                     android:layout_width="wrap_content"
@@ -217,16 +275,21 @@
                 android:id="@+id/downloadlayout"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginTop="5dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
                 android:background="@drawable/download_background"
                 android:gravity="center"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toTopOf="@+id/termsText"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@drawable/ic_download" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -237,16 +300,22 @@
                     android:textSize="18dp"
                     android:textStyle="bold" />
             </LinearLayout>
+
             <TextView
                 android:id="@+id/termsText"
-                android:layout_marginTop="7dp"
-                android:fontFamily="@font/dmsans"
-                android:textColor="@color/white"
-                android:textAlignment="center"
-                android:text="@string/tandt"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
-    </android.support.v4.widget.NestedScrollView>
+                android:layout_height="21dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="15dp"
+                android:fontFamily="@font/dmsans"
+                android:text="@string/tandt"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -44,6 +44,7 @@ import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -138,7 +139,7 @@ public class PlayerActivity extends AppCompatActivity {
     String[] apikeys = new String[]{"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw", "AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
 
     LinearLayout downloadButton;
-    static LinearLayout mainlayout;
+    static ConstraintLayout mainlayout;
 
     static TextView mainTitle, viewCount, currentDuration, totalDuration, warningText;
     int likeCounts, dislikeCounts; boolean isLoop = false;
@@ -195,14 +196,17 @@ public class PlayerActivity extends AppCompatActivity {
 
         // Using this fuzzy logic to support screen sizes since there is no flexibility using
         // default method, can't work for custom resolutions!
-        if (height>2770) {
+
+        setContentView(R.layout.activity_player);
+
+        /*if (height>2770) {
             setContentView(R.layout.activity_player_2880);
         }else if (height>1920&&height<2000) {
             setContentView(R.layout.activity_player_1920);
         } else if (height>2000&&height<2770) {
             setContentView(R.layout.activity_player_2000);
         }else
-            setContentView(R.layout.activity_player);
+            setContentView(R.layout.activity_player);*/
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -251,7 +255,7 @@ public class PlayerActivity extends AppCompatActivity {
         tms.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                YTutils.StartURL("https://google.com", PlayerActivity.this);
+                YTutils.StartURL("https://kaustubhpatange.github.io/YTPlayer", PlayerActivity.this);
             }
         });
 
@@ -316,20 +320,12 @@ public class PlayerActivity extends AppCompatActivity {
                 yturls = YTutils.convertArrayToArrayList(intent.getStringArrayExtra("youtubelink"));
             }
 
-
             if (yturls.size() > 0) {
                 YouTubeUrl = yturls.get(ytIndex);
                 datasync = new getData();
                 datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
             }
         }
-    }
-
-    void LoadAd() {
-        //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712
-        mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-1763645001743174/8453566324");
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
     }
 
     @Override
@@ -625,7 +621,7 @@ public class PlayerActivity extends AppCompatActivity {
                     Log.e("PlayerActivity", "videoTitle: " + videoTitle + ", channelTitle: " + channelTitle);
 
                     Log.e("PlayerActivity", "Stream: " + link);
-
+                    ytConfigs.clear();
                     for (int i = 0, itag; i < ytFiles.size(); i++) {
                         itag = ytFiles.keyAt(i);
                         YtFile ytFile = ytFiles.get(itag);
@@ -1077,9 +1073,19 @@ public class PlayerActivity extends AppCompatActivity {
         }
     }
 
+    void LoadAd() {
+        //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712, Use ca-app-pub-1763645001743174/8453566324
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-1763645001743174/8453566324");
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+
+    }
+
     void showListDialog() {
 
         LoadAd();
+
+        Log.e("YOUTUBEURL",YouTubeUrl);
 
         ArrayList<String> tmplist = new ArrayList<>();
         final ArrayList<YTConfig> configs = new ArrayList<>();
@@ -1166,6 +1172,8 @@ public class PlayerActivity extends AppCompatActivity {
         });
         AlertDialog dialog = builder.create();
         dialog.show();
+
+
     }
 
     private void downloadFromUrl(String youtubeDlUrl, String downloadTitle, String fileName) {

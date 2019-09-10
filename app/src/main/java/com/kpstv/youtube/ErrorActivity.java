@@ -1,6 +1,9 @@
 package com.kpstv.youtube;
 
+import android.app.Application;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -71,13 +74,18 @@ public class ErrorActivity extends AppCompatActivity {
                 }
                 if (sendLogs.isChecked())
                 message += "------ StackTrace ------\n"+"<pre>"+crashDetails+"</pre>";
-                Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
-                emailIntent.setType("plain/text");
-                emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL,new String[] { "developerkp16@gmail.com" });
-                emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,"YTPlayer Crash "+YTutils.getTodayDate());
-                emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, message);
-                startActivity(emailIntent);
-                break;
+                try {
+                    PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+                    Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+                    emailIntent.setType("plain/text");
+                    emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL,new String[] { "developerkp16@gmail.com" });
+                    emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,"YTPlayer v"+ pInfo.versionName  +" Crash "+YTutils.getTodayDate());
+                    emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, message);
+                    startActivity(emailIntent);
+                } catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
+                }
+               break;
         }
         return super.onOptionsItemSelected(item);
     }

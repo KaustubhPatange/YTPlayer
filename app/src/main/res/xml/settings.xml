@@ -21,4 +21,18 @@
             android:summary="Check if there is a new version of app."
             android:title="Check For Updates" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="Backup &#38; Restore">
+        <Preference
+            android:key="pref_backup"
+            android:title="Backup Data"
+            android:summary="This will backup your history, playlist and all important sessions."/>
+        <Preference
+            android:key="pref_restore"
+            android:title="Restore Data"
+            android:summary="Restore your saved session."/>
+        <Preference
+            android:key="pref_delete"
+            android:title="Clear backups"
+            android:summary="Clear all of your saved sessions."/>
+    </PreferenceCategory>
 </PreferenceScreen>

@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -115,6 +116,17 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         // Check onComing links from YouTube or Spotify...
         CheckIntent(getIntent());
 
+        String history = YTutils.readContent(this,"History");
+        if (history !=null && !history.isEmpty()) {
+            Log.e("historyContents",history+"");
+
+            SharedPreferences preferences = getSharedPreferences("history",Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString("urls",history.replace("&#10;","").trim());
+            editor.apply();
+            new File(getFilesDir().toString()+"/History").delete();
+        }
+
         preferences = getSharedPreferences("history",MODE_PRIVATE);
         String list = preferences.getString("urls","");
         ArrayList<String> urls = new ArrayList<>();
@@ -150,6 +162,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         else {
             loadFragment(NCFrag);
         }
+
     }
 
     @Override

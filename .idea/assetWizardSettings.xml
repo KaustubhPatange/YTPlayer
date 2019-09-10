@@ -23,7 +23,7 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="scalingPercent" value="45" />
+                                                <entry key="scalingPercent" value="33" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -36,6 +36,9 @@
                                       <entry key="backgroundAssetType" value="COLOR" />
                                       <entry key="backgroundColor" value="f47600" />
                                       <entry key="foregroundImage" value="$USER_HOME$/Pictures/svgs/sound-bars-pulse.svg" />
+                                      <entry key="generateLegacyIcon" value="false" />
+                                      <entry key="generateRoundIcon" value="false" />
+                                      <entry key="generateWebIcon" value="false" />
                                       <entry key="showGrid" value="true" />
                                     </map>
                                   </option>

@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <!-- TODO: Change ad unit ID for banner; Sample ca-app-pub-3940256099942544/6300978111-->
+    <!-- TODO: Change ad unit ID for banner; Sample ca-app-pub-3940256099942544/6300978111 , Use ca-app-pub-1763645001743174/9349691503-->
 
     <LinearLayout
         android:id="@+id/adViewLayout"

@@ -21,6 +21,7 @@
         tools:ignore="GoogleAppIndexingWarning">
 
         <!-- TODO: Change Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713, ca-app-pub-1763645001743174~5602018181 -->
+
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-1763645001743174~5602018181" />
@@ -30,34 +31,6 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar1">
-
-            <!--
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="youtube.com"
-                    android:scheme="http" />
-                <data
-                    android:host="open.spotify.com"
-                    android:scheme="http" />
-                <data
-                    android:host="open.spotify.com"
-                    android:scheme="https" />
-                <data
-                    android:host="youtube.com"
-                    android:scheme="https" />
-                <data
-                    android:host="youtu.be"
-                    android:scheme="http" />
-                <data
-                    android:host="youtu.be"
-                    android:scheme="https" />
-            </intent-filter>
-            -->
         </activity>
         <activity
             android:name=".RingdroidEditActivity"

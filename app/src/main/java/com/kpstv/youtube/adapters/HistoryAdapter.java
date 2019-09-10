@@ -180,6 +180,7 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
             if (!containsDateItem(DateString)) {
                 viewHolder.dateLayout.setVisibility(View.VISIBLE);
                 Dateset.add(DateString);
+                Log.e("ShownDataLayout",pos+"");
             }else viewHolder.dateLayout.setVisibility(View.GONE);
 
             viewHolder.addPlaylist.setOnClickListener(v -> {
