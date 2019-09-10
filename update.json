@@ -1,5 +1,5 @@
 {
-	"version":"1.0",
-	"changelog":"<h3>V1.1 September 2019</h3><hr>*Fixed splash for <i>Lollipop</i> devices<br>*Fixed bug in playlist creation<br>",
-	"download":"https://github.com/KaustubhPatange/YTPlayer/releases/download/1.1/YTPlayer_v1.1.apk"
+	"version":"1.2",
+	"changelog":"<h3>V1.2 September 2019</h3><hr>*Added Backup &amp; Restore settings<br>*Fixed <i>Music Player</i> view<br>*Fixed Auto-update method<br>",
+	"download":"https://github.com/KaustubhPatange/YTPlayer/releases/download/1.2/YTPlayer_v1.2.apk"
 }
