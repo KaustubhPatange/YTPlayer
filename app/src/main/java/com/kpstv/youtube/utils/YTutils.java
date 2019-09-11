@@ -1,5 +1,6 @@
 package com.kpstv.youtube.utils;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
@@ -24,8 +25,10 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.support.annotation.RequiresApi;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.Html;
@@ -34,6 +37,13 @@ import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
+import com.kpstv.youtube.BuildConfig;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 
@@ -467,9 +477,49 @@ public class YTutils {
         String updateName;
         long downloadID;
 
-        public CheckForUpdates(Context context, boolean isAutomatic) {
+
+        public CheckForUpdates(Activity context, boolean isAutomatic) {
             this.context = context;
             this.isAutomatic = isAutomatic;
+
+            if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) {
+                if (context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    Dexter.withActivity(context)
+                            .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            .withListener(new PermissionListener() {
+                                @Override public void onPermissionGranted(PermissionGrantedResponse response) { }
+
+                                @Override
+                                public void onPermissionDenied(PermissionDeniedResponse response) {
+                                    return;
+                                }
+
+                                @Override
+                                public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+                                    return;
+                                }
+
+                            }).check();
+
+                }
+            }
+        }
+
+        void runInstall(String updateName) {
+            Intent install = new Intent(Intent.ACTION_VIEW)
+                    .setDataAndType(Uri.fromFile(getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName)),
+                            "application/vnd.android.package-archive");
+            install.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          /*  if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.N) {
+                File apkFile = getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName);
+                Uri apkUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileprovider", apkFile);
+                Intent intent1 = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+                intent1.setData(apkUri);
+                intent1.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                context.startActivity(intent1);
+            }else
+               */ context.startActivity(install);
         }
 
         BroadcastReceiver onComplete = new BroadcastReceiver() {
@@ -477,11 +527,11 @@ public class YTutils {
                 long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                 if (downloadID == id) {
                     Log.e("FileDownloadLink",Uri.fromFile(getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName)).toString());
-                    Intent install = new Intent(Intent.ACTION_VIEW)
-                            .setDataAndType(Uri.fromFile(getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName)),
-                                    "application/vnd.android.package-archive");
+
                     if (getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName).exists())
-                    context.startActivity(install);
+                    {
+                        runInstall(updateName);
+                    }
                     else
                         Toast.makeText(ctxt, "There is a problem with update package!", Toast.LENGTH_SHORT).show();
 
@@ -499,7 +549,7 @@ public class YTutils {
                 JSONObject object = new JSONObject(json);
                 String changelogHtml = object.getString("changelog");
                 String downloadUri = object.getString("download");
-                int newVer = Integer.parseInt(object.getString("version")
+                int newVer = Integer.parseInt(object.getString("new")
                         .replace(".",""));
                 updateName = "YTPlayer_v"+newVer+".apk";
                 PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);

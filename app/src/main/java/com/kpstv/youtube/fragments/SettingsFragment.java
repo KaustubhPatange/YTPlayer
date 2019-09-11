@@ -107,8 +107,6 @@ public class SettingsFragment extends PreferenceFragment {
                 Log.e("FileToExtract", torestore.toString());
                 YTutils.extractZip(torestore.toString(),getActivity().getFilesDir().getParent());
 
-
-
                 Intent intent = new Intent(getActivity(),MainActivity.class);
                 ProcessPhoenix.triggerRebirth(getActivity(),intent);
             });

@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.StrictMode;
@@ -19,6 +20,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -91,6 +93,11 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Disabling URI exposure coz I don't want to take much efforts...
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+        builder.detectFileUriExposure();
+
         // Remove this code afterwards...
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -138,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                 .permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-        // Disabling URI exposure for lame android 8.0+ who can't do by themselves.
+        /*// Disabling URI exposure for lame android 7.0+ who can't do by themselves.
         if(Build.VERSION.SDK_INT>=24){
             try{
                 Method m = StrictMode.class.getMethod("disableDeathOnFileUriExposure");
@@ -146,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             }catch(Exception e){
                 e.printStackTrace();
             }
-        }
+        }*/
 
         fragmentManager = getSupportFragmentManager();
         HistoryFrag = new HistoryFragment();
@@ -176,6 +183,12 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             return;
         }
         finish();
+    }
+
+    Uri getFileUri(Context context, File file) {
+        return FileProvider.getUriForFile(context,
+                context.getApplicationContext().getPackageName() + ".authorityStr"
+                , file);
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
