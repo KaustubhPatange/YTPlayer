@@ -27,22 +27,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a557dc4f-ab9e-4a2d-b6f7-ffb5a9f4a7f1" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileContent/fileContent.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileContent/fileContent.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.6/javaCompile/classAnalysis.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/javaCompile/classAnalysis.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.6/javaCompile/javaCompile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/javaCompile/javaCompile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.6/javaCompile/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/javaCompile/taskHistory.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_github_HaarigerHarald_android_youtubeExtractor_master_SNAPSHOT.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/release/app-release.apk" beforeDir="false" afterPath="$PROJECT_DIR$/app/release/app-release.apk" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/update.json" beforeDir="false" afterPath="$PROJECT_DIR$/update.json" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -127,11 +112,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="YTutils.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="YTutils.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2952">
-              <caret line="88" column="51" selection-start-line="88" selection-start-column="51" selection-end-line="88" selection-end-column="51" />
+            <state relative-caret-position="429">
+              <caret line="570" selection-start-line="570" selection-end-line="570" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -153,6 +138,19 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="762">
               <caret line="107" column="97" selection-start-line="107" selection-start-column="97" selection-end-line="107" selection-end-column="97" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PlayerActivity.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="321">
+              <caret line="570" column="50" selection-start-line="570" selection-start-column="50" selection-end-line="570" selection-end-column="50" />
+              <folding>
+                <element signature="e#24600#26029#0" expanded="true" />
+                <element signature="e#26028#26029#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -2791,6 +2789,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
       <pane id="AndroidView">
         <subPane>
           <expand>
@@ -2868,7 +2867,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
       <pane id="ProjectPane" />
     </panes>
   </component>
@@ -3496,20 +3494,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1118">
-          <caret line="557" lean-forward="true" selection-start-line="557" selection-end-line="557" />
-          <folding>
-            <element signature="e#8535#8578#0" expanded="true" />
-            <element signature="e#14498#14680#0" expanded="true" />
-            <element signature="e#14679#14680#0" expanded="true" />
-            <element signature="e#24600#26029#0" expanded="true" />
-            <element signature="e#26028#26029#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/SettingsFragment.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="762">
@@ -3519,10 +3503,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2952">
-          <caret line="88" column="51" selection-start-line="88" selection-start-column="51" selection-end-line="88" selection-end-column="51" />
+        <state relative-caret-position="429">
+          <caret line="570" selection-start-line="570" selection-end-line="570" />
           <folding>
             <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="321">
+          <caret line="570" column="50" selection-start-line="570" selection-start-column="50" selection-end-line="570" selection-end-column="50" />
+          <folding>
+            <element signature="e#24600#26029#0" expanded="true" />
+            <element signature="e#26028#26029#0" expanded="true" />
           </folding>
         </state>
       </provider>
