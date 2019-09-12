@@ -568,7 +568,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         @SuppressLint("StaticFieldLeak")
         @Override
-        protected void onPostExecute(Void aVoid) {
+        protected void  (Void aVoid) {
 
             mainTitle.setText(videoTitle);
             collpaseView.setTextViewText(R.id.nTitle, videoTitle);

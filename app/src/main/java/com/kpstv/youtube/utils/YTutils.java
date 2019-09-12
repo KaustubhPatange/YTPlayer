@@ -25,7 +25,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.support.annotation.RequiresApi;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -511,15 +510,7 @@ public class YTutils {
                             "application/vnd.android.package-archive");
             install.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-          /*  if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.N) {
-                File apkFile = getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName);
-                Uri apkUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileprovider", apkFile);
-                Intent intent1 = new Intent(Intent.ACTION_INSTALL_PACKAGE);
-                intent1.setData(apkUri);
-                intent1.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                context.startActivity(intent1);
-            }else
-               */ context.startActivity(install);
+            context.startActivity(install);
         }
 
         BroadcastReceiver onComplete = new BroadcastReceiver() {
@@ -554,6 +545,7 @@ public class YTutils {
                 updateName = "YTPlayer_v"+newVer+".apk";
                 PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
                 int curVer = Integer.parseInt(pInfo.versionName.replace(".",""));
+                Log.e("VersionLOG","NewVersion: "+newVer+", currVersion: "+curVer);
                 if (newVer>curVer) {
                     new AlertDialog.Builder(context)
                             .setTitle("Update Available")
@@ -564,10 +556,11 @@ public class YTutils {
                                 DownloadManager.Request request = new DownloadManager.Request(Download_Uri);
 
                                 request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
-                                request.setTitle("Downloading Update");
+                                request.setTitle("Downloading "+updateName);
                                 request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,updateName);
                                 context.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
                                 downloadID = downloadManager.enqueue(request);
+                                Toast.makeText(context, "Download Started!", Toast.LENGTH_SHORT).show();
                             })
                             .setNegativeButton("Cancel",null)
                             .show();
