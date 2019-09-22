@@ -1,7 +1,7 @@
 {
 	"version":"1.0",
-	"new":"1.2",
-	"changelog":"<h3>V1.2 September 2019</h3><hr>*Added Backup &amp; Restore settings<br>*Fixed <i>Music Player</i> view<br>*Fixed Auto-update method<br>",
+	"new":"1.3",
+	"changelog":"<h3>V1.3 September 2019</h3><hr>*Added tip layouts<br>*Fixed parsing some of YouTube urls<br>",
 	"download":"https://github.com/KaustubhPatange/YTPlayer/releases/download/1.3/YTPlayer_v1.3.apk",
 	"msg":""
 }
