@@ -86,6 +86,10 @@ import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
+import com.kpstv.youtube.ytextractor.ExtractorException;
+import com.kpstv.youtube.ytextractor.YoutubeStreamExtractor;
+import com.kpstv.youtube.ytextractor.model.YoutubeMedia;
+import com.kpstv.youtube.ytextractor.model.YoutubeMeta;
 import com.spyhunter99.supertooltips.ToolTip;
 import com.spyhunter99.supertooltips.ToolTipManager;
 import com.warkiz.widget.IndicatorSeekBar;
@@ -144,7 +148,7 @@ public class PlayerActivity extends AppCompatActivity {
     static TextView mainTitle, viewCount, currentDuration, totalDuration, warningText;
     int likeCounts, dislikeCounts; boolean isLoop = false;
 
-    ImageView mainImageView;
+    ImageView mainImageView; boolean isgoing = false;
     public static boolean isplaying = false, isfirst = true;
 
     ProgressBar mprogressBar, progressBar; String audioLink;
@@ -600,94 +604,75 @@ public class PlayerActivity extends AppCompatActivity {
                         }
                     });
 
+
+           /* new YoutubeStreamExtractor(new YoutubeStreamExtractor.ExtractorListner(){
+
+                @Override
+                public void onExtractionDone(List<YoutubeMedia> adativeStream, List<YoutubeMedia> muxedStream, YoutubeMeta meta) {
+                    if (muxedStream.isEmpty()) {
+                        showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
+                        return;
+                    }
+                    ytConfigs.clear();
+
+                    List<YoutubeMedia> bestStream = getBestStream(adativeStream);
+
+                    for(int i=0; i<bestStream.size();i++) addVideoToList(bestStream.get(i),videoTitle);
+
+                    if (videoTitle.isEmpty() && meta.getTitle() != null) {
+                        videoTitle = meta.getTitle();
+                        channelTitle = meta.getAuthor();
+                        mainTitle.setText(videoTitle);
+                        collpaseView.setTextViewText(R.id.nTitle, videoTitle);
+                        expandedView.setTextViewText(R.id.nTitle, videoTitle);
+                        collpaseView.setTextViewText(R.id.nAuthor, channelTitle);
+                        expandedView.setTextViewText(R.id.nAuthor, channelTitle);
+                    }
+
+                    continueinMainThread(audioLink);
+                }
+
+                @Override
+                public void onExtractionGoesWrong(final ExtractorException e) {
+                    showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
+                }
+            }).Extract(YTutils.getVideoID(YouTubeUrl));*/
+
             new YouTubeExtractor(PlayerActivity.this) {
 
                 @Override
                 protected void onPostExecute(SparseArray<YtFile> ytFiles) {
 
                     if (ytFiles == null) {
-                        showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
+                        parseVideoNewMethod(YouTubeUrl,videoTitle);
                         return;
                     }
 
-                    YtFile ytaudioFile = getBestStream(ytFiles);
-                    if (ytaudioFile.getUrl()==null) {
-                        showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
-                        return;
-                    }
-                    link = ytaudioFile.getUrl();
-                    link = link.replace("\\", "");
+                        YtFile ytaudioFile = getBestStream(ytFiles);
+                        if (ytaudioFile.getUrl() == null) {
+                            parseVideoNewMethod(YouTubeUrl, videoTitle);
+                            return;
+                        } else {
+                            link = ytaudioFile.getUrl();
+                            link = link.replace("\\", "");
 
-                    Log.e("PlayerActivity", "videoTitle: " + videoTitle + ", channelTitle: " + channelTitle);
+                            Log.e("PlayerActivity", "videoTitle: " + videoTitle + ", channelTitle: " + channelTitle);
 
-                    Log.e("PlayerActivity", "Stream: " + link);
-                    ytConfigs.clear();
-                    for (int i = 0, itag; i < ytFiles.size(); i++) {
-                        itag = ytFiles.keyAt(i);
-                        YtFile ytFile = ytFiles.get(itag);
+                            Log.e("PlayerActivity", "Stream: " + link);
+                            ytConfigs.clear();
+                            for (int i = 0, itag; i < ytFiles.size(); i++) {
+                                itag = ytFiles.keyAt(i);
+                                YtFile ytFile = ytFiles.get(itag);
 
-                        if (ytFile.getFormat().getHeight() == -1 || ytFile.getFormat().getHeight() >= 360) {
-                            addFormatToList(videoTitle, ytFile);
-                        }
-                    }
-
-                    playFab.setEnabled(true);
-
-                    player.stop();
-                    player.release();
-                    mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(link));
-                    player = ExoPlayerFactory.newSimpleInstance(PlayerActivity.this, trackSelector);
-                    player.prepare(mediaSource);
-                    player.setPlayWhenReady(true);
-
-                    makePause();
-                    isplaying = true;
-
-                    player.addListener(new Player.EventListener() {
-                        @SuppressLint("RestrictedApi")
-                        @Override
-                        public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                            switch (playbackState) {
-                                case ExoPlayer.STATE_BUFFERING:
-                                    playFab.setVisibility(View.INVISIBLE);
-                                    break;
-                                case ExoPlayer.STATE_ENDED:
-                                    makePlay();
-                                    isplaying = false;
-                                    playNext();
-                                    break;
-                                case ExoPlayer.STATE_READY:
-                                    mprogressBar.setVisibility(View.GONE);
-                                    mainlayout.setVisibility(View.VISIBLE);
-                                    playFab.setVisibility(View.VISIBLE);
-                                    total_duration = player.getDuration();
-                                    total_seconds = (int) total_duration / 1000;
-                                    totalDuration.setText(YTutils.milliSecondsToTimer(total_duration));
-                                    updateProgressBar();
-                                    break;
+                                if (ytFile.getFormat().getHeight() == -1 || ytFile.getFormat().getHeight() >= 360) {
+                                    addFormatToList(videoTitle, ytFile);
+                                }
                             }
+
+                            if (audioLink == null) audioLink = link;
+
+                            continueinMainThread(link);
                         }
-                    });
-
-
-                    if (yturls.size() > 1) {
-                        warningText.setText(Html.fromHtml("Saving video offline is illegal  &#8226;  " + (ytIndex + 1) + "/" + yturls.size()));
-                    }
-
-                    if (!preferences.getBoolean("showHome",false)) {
-                        ToolTip toolTip = new ToolTip()
-                                .withText("Long press the image to minimize the player.")
-                                .withColor(getResources().getColor(R.color.colorAccent)) //or whatever you want
-                                .withAnimationType(ToolTip.AnimationType.FROM_MASTER_VIEW)
-                                .withShadow();
-                        toolTipManager.showToolTip(toolTip,R.id.mainImage);
-                        SharedPreferences.Editor editor = preferences.edit();
-                        editor.putBoolean("showHome",true);
-                        editor.apply();
-                    }
-
-                    // Store video into history
-                    new saveToHistory().execute(YouTubeUrl);
 
                     super.onPostExecute(ytFiles);
                 }
@@ -707,6 +692,7 @@ public class PlayerActivity extends AppCompatActivity {
             }.execute(YouTubeUrl);
             super.onPostExecute(aVoid);
         }
+
 
         String jsonResponse(String videoID, int apinumber) {
             HttpHandler httpHandler = new HttpHandler();
@@ -767,6 +753,66 @@ public class PlayerActivity extends AppCompatActivity {
         }
     }
 
+    void continueinMainThread(String link) {
+        playFab.setEnabled(true);
+
+        player.stop();
+        player.release();
+        mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(link));
+        player = ExoPlayerFactory.newSimpleInstance(PlayerActivity.this, trackSelector);
+        player.prepare(mediaSource);
+        player.setPlayWhenReady(true);
+
+        makePause();
+        isplaying = true;
+
+        player.addListener(new Player.EventListener() {
+            @SuppressLint("RestrictedApi")
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                switch (playbackState) {
+                    case ExoPlayer.STATE_BUFFERING:
+                        playFab.setVisibility(View.INVISIBLE);
+                        break;
+                    case ExoPlayer.STATE_ENDED:
+                        makePlay();
+                        isplaying = false;
+                        playNext();
+                        break;
+                    case ExoPlayer.STATE_READY:
+                        mprogressBar.setVisibility(View.GONE);
+                        mainlayout.setVisibility(View.VISIBLE);
+                        playFab.setVisibility(View.VISIBLE);
+                        total_duration = player.getDuration();
+                        total_seconds = (int) total_duration / 1000;
+                        totalDuration.setText(YTutils.milliSecondsToTimer(total_duration));
+                        updateProgressBar();
+                        break;
+                }
+            }
+        });
+
+
+        if (yturls.size() > 1) {
+            warningText.setText(Html.fromHtml("Saving video offline is illegal  &#8226;  " + (ytIndex + 1) + "/" + yturls.size()));
+        }
+
+        if (!preferences.getBoolean("showHome",false)) {
+            ToolTip toolTip = new ToolTip()
+                    .withText("Long press the image to minimize the player.")
+                    .withColor(getResources().getColor(R.color.colorAccent)) //or whatever you want
+                    .withAnimationType(ToolTip.AnimationType.FROM_MASTER_VIEW)
+                    .withShadow();
+            toolTipManager.showToolTip(toolTip,R.id.mainImage);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("showHome",true);
+            editor.apply();
+        }
+
+        // Store video into history
+        new saveToHistory().execute(YouTubeUrl);
+    }
+
     private class saveToHistory extends AsyncTask<String, Void, Void> {
 
         @Override
@@ -812,8 +858,97 @@ public class PlayerActivity extends AppCompatActivity {
         }
     }
 
-    private YtFile getBestStream(SparseArray<YtFile> ytFiles) {
+    private void addVideoToList(final YoutubeMedia media, final String videoTitle) {
 
+        String ytText;
+        if (media.getResSize()!=null) {
+            ytText = "Video "+media.getResolution();
+            if (media.isVideoOnly()) {
+                ytText+=" (no audio)";
+            }
+            Log.e("VideoUrlFound",media.getUrl()+"");
+        }else {
+            ytText = "Audio "+YTutils.getAvgBitRate(Integer.parseInt(media.getBitrate()))+" kbit/s";
+            if (media.getCodec().contains("mp4a")){
+                audioLink = media.getUrl();
+                media.setExtension("m4a");
+                Log.e("AudioSpecialLink",media.getUrl()+"");
+            }else {
+                Log.e("AudioURLFOUND",media.getUrl()+"");
+            }
+        }
+      /*  Format ytFrVideo = ytfile.getFormat();
+
+        String ytText;
+        if (ytFrVideo.getHeight() == -1)
+            ytText = "Audio " + ytFrVideo.getAudioBitrate() + " kbit/s";
+        else {
+            ytText = (ytFrVideo.getFps() == 60) ? "Video " + ytFrVideo.getHeight() + "p60" :
+                    "Video " + ytFrVideo.getHeight() + "p";
+            if (ytfile.getFormat().getAudioBitrate() == -1) {
+                ytText += " (no audio)";
+            }
+        }
+        if (ytText.contains("128 kbit/s"))
+            audioLink = ytfile.getUrl();*/
+        ytConfigs.add(new YTConfig(ytText, media.getUrl(), media.getExtension(), videoTitle));
+    }
+
+    private void parseVideoNewMethod(String yturl, String videoTitle) {
+        isgoing = true;
+        new YoutubeStreamExtractor(new YoutubeStreamExtractor.ExtractorListner(){
+
+            @Override
+            public void onExtractionDone(List<YoutubeMedia> adativeStream, List<YoutubeMedia> muxedStream, YoutubeMeta meta) {
+                if (muxedStream.isEmpty()) {
+                    showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
+                    return;
+                }
+
+                Log.e("Method2","Extracted using new method");
+
+                ytConfigs.clear();
+
+                List<YoutubeMedia> bestStream = getBestStream(adativeStream);
+
+                for(int i=0; i<bestStream.size();i++) addVideoToList(bestStream.get(i),videoTitle);
+
+                continueinMainThread(audioLink);
+            }
+
+            @Override
+            public void onExtractionGoesWrong(final ExtractorException e) {
+                showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
+            }
+        }).Extract(YTutils.getVideoID(yturl));
+    }
+
+    private List<YoutubeMedia> getBestStream(List<YoutubeMedia> streams) {
+        List<YoutubeMedia> medias = new ArrayList<>();
+        for(int i=0; i<streams.size();i++) {
+            YoutubeMedia media = streams.get(i);
+            if (!media.isAudioOnly()) {
+                int j=0;
+                while (j<streams.size()) {
+                    YoutubeMedia media1 = streams.get(j);
+                    if (media.getResolution().equals(media1.getResolution())) {
+                        int m1 = Integer.parseInt(media.getBitrate());
+                        int m2 = Integer.parseInt(media1.getBitrate());
+                        if (m2>m1) {
+                            media=media1;
+                        }
+                    }
+                    j++;
+                }
+                if (!medias.contains(media)) medias.add(media);
+            }else {
+                medias.add(media);
+            }
+        }
+        return medias;
+    }
+
+    private YtFile getBestStream(SparseArray<YtFile> ytFiles) {
         connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQuality();
         int[] itags = new int[]{251, 141, 140, 17};
 

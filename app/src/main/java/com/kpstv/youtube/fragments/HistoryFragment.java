@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -37,8 +38,9 @@ public class HistoryFragment extends Fragment {
     static RecyclerView.LayoutManager layoutManager;
     static HistoryAdapter adapter;
     View v; boolean networkCreated,onCreateViewCalled;
-    static SharedPreferences sharedPreferences;
+    static SharedPreferences sharedPreferences, settingspref;
     static ArrayList<String> urls; static LinearLayout hiddenLayout;
+    ConstraintLayout tipLayout; LinearLayout historyButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,6 +56,7 @@ public class HistoryFragment extends Fragment {
             v = inflater.inflate(R.layout.fragment_history, container, false);
 
             sharedPreferences = getContext().getSharedPreferences("history",Context.MODE_PRIVATE);
+            settingspref = getContext().getSharedPreferences("settings",Context.MODE_PRIVATE);
 
             Toolbar toolbar = v.findViewById(R.id.toolbar);
 
@@ -65,6 +68,8 @@ public class HistoryFragment extends Fragment {
 
             swipeRefreshLayout = v.findViewById(R.id.swipeRefreshLayout);
             hiddenLayout = v.findViewById(R.id.history_linear);
+            tipLayout = v.findViewById(R.id.history_layout);
+            historyButton = v.findViewById(R.id.history_gotButton);
 
             swipeRefreshLayout.setOnRefreshListener(() -> {
                 LoadMainMethod();
@@ -181,6 +186,15 @@ public class HistoryFragment extends Fragment {
             swipeRefreshLayout.setRefreshing(false);
             swipeRefreshLayout.setEnabled(true);
 
+            if (!settingspref.getBoolean("showHTip",false)) {
+                tipLayout.setVisibility(View.VISIBLE);
+                historyButton.setOnClickListener(view -> {
+                    tipLayout.setVisibility(View.GONE);
+                    SharedPreferences.Editor editor = settingspref.edit();
+                    editor.putBoolean("showHTip",true);
+                    editor.apply();
+                });
+            }
         }else {
             // It is empty
             urls.clear();

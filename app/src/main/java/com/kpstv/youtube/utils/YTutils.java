@@ -678,6 +678,10 @@ public class YTutils {
         return returnstring;
     }
 
+    public static int getAvgBitRate(int bitrate) {
+        return (bitrate/1000);
+    }
+
     public  static void StartURLIntent(String url,Context context) {
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(url));

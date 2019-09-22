@@ -6,8 +6,8 @@ android {
         applicationId "com.kpstv.youtube"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 3
-        versionName "1.2"
+        versionCode 4
+        versionName "1.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     lintOptions {
@@ -29,6 +29,8 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.jakewharton:process-phoenix:2.0.0'
     implementation 'com.karumi:dexter:5.0.0'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'org.mozilla:rhino:1.7R4'
     implementation 'com.google.android.exoplayer:exoplayer:2.9.6'
     implementation 'com.google.android.gms:play-services-ads:17.1.2'
     implementation 'com.github.spyhunter99:super-tooltip-aar:4.0.2'

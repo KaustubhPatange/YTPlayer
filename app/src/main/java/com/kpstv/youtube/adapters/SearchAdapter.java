@@ -58,6 +58,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
             this.imageView = itemView.findViewById(R.id.sImage);
             this.mainCard = itemView.findViewById(R.id.cardView);
         }
+
     }
 
     public SearchAdapter(ArrayList<SearchModel> data, Context context) {
@@ -114,3 +115,4 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
         return dataSet.size();
     }
 }
+

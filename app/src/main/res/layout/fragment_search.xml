@@ -103,6 +103,9 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/colorScreen"/>
+
+        <include layout="@layout/search_tip"/>
+
         <android.support.v7.widget.CardView
             android:id="@+id/discoverViral"
             android:layout_marginTop="20dp"

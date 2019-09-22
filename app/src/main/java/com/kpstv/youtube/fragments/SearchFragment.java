@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -59,7 +60,7 @@ public class SearchFragment extends Fragment {
     ImageView githubView,pulseView,myWebView; LinearLayout settingsLayout;
     NestedScrollView nestedScrollView;
     AsyncTask<Void,Void,Void> trendTask, discoverTask; boolean alertShown=false;
-    LinearLayout SOW,SOF;
+    LinearLayout SOW,SOF;  ConstraintLayout tipLayout; LinearLayout searchButton;
 
     SharedPreferences preferences,settingpref; String region="global";
 
@@ -105,6 +106,8 @@ public class SearchFragment extends Fragment {
             drawables = new ArrayList<>();
             images = new ArrayList<>();
 
+            tipLayout = v.findViewById(R.id.search_layout);
+            searchButton = v.findViewById(R.id.search_gotButton);
             nestedScrollView = v.findViewById(R.id.nestedScrollView);
             searchCard = v.findViewById(R.id.cardView_search);
             imageView1 = v.findViewById(R.id.dImage1);
@@ -301,6 +304,17 @@ public class SearchFragment extends Fragment {
             recyclerView.setVisibility(View.VISIBLE);
 
             istrendloaded = true;
+
+            if (!settingpref.getBoolean("showSTip",false)) {
+                tipLayout.setVisibility(View.VISIBLE);
+                searchButton.setOnClickListener(view -> {
+                    tipLayout.setVisibility(View.GONE);
+                    SharedPreferences.Editor editor = settingpref.edit();
+                    editor.putBoolean("showSTip",true);
+                    editor.apply();
+                });
+            }
+
             super.onPostExecute(aVoid);
         }
 

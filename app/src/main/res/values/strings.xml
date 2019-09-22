@@ -82,4 +82,8 @@
 
     <string name="helpMessage">Go to the official <a href="https://kaustubhpatange.github.io/YTPlayer">website</a> to request for help regarding your issue.
         You can also visit <a href="https://github.com/KaustubhPatange/YTPlayer">Github</a> repository to create issue.</string>
+    <string name="history_text"><![CDATA[You can tap and hold the card to see some of the common options like Copy Link, Watch on YouTube & stuff.]]></string>
+    <string name="history_title">Tap and hold the card</string>
+    <string name="search_title">Change your region</string>
+    <string name="search_text"><![CDATA[You can change Region from settings to get latest trend & viral songs from that particular region.]]></string>
 </resources>
