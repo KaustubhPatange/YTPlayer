@@ -27,6 +27,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
+import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.SearchModel;
@@ -100,12 +101,13 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
                 });
 
         holder.mainCard.setOnClickListener(v -> {
-            Activity activity = (Activity) con;
+            /*Activity activity = (Activity) con;
             Intent intent = new Intent(con,PlayerActivity.class);
             intent.putExtra("youtubelink",YTutils.ConvertToStringArray(yturls));
             intent.putExtra("playfromIndex",9-listPosition);
             con.startActivity(intent);
-            activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+            activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);*/
+            MainActivity.PlayVideo(YTutils.ConvertToStringArray(yturls),9-listPosition);
         });
 
     }

@@ -21,7 +21,7 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.LOLLIPOP_MR1) {
+        if (Build.VERSION.SDK_INT<Build.VERSION_CODES.M) {
             setContentView(R.layout.splash_lollipop);
         }
 
@@ -33,7 +33,7 @@ public class SplashActivity extends AppCompatActivity {
             startActivity(new Intent(this,IntroActivity.class));
             overridePendingTransition(android.R.anim.fade_in,android.R.anim.fade_out);
             finish();
-        }else {
+        } else {
             startActivity(new Intent(SplashActivity.this, MainActivity.class));
             finish();
         }

@@ -123,11 +123,12 @@ public class OPlaylistFragment extends Fragment {
     void PlayMusic(int position) {
         if (yturls.size()==0) return;
         String[] videos =YTutils.ConvertToStringArray(yturls);
-        Intent intent = new Intent(activity,PlayerActivity.class);
+        /*Intent intent = new Intent(activity,PlayerActivity.class);
         intent.putExtra("playfromIndex",position);
         intent.putExtra("youtubelink",videos);
         startActivity(intent);
-        activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+        activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);*/
+        MainActivity.PlayVideo(videos,position);
     }
 
     class getData extends AsyncTask<Void,Void,Void> {

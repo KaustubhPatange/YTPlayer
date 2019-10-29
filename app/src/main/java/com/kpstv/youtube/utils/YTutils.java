@@ -560,7 +560,7 @@ public class YTutils {
                                 request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,updateName);
                                 context.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
                                 downloadID = downloadManager.enqueue(request);
-                                Toast.makeText(context, "Download Started!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "Download Started! Check notification", Toast.LENGTH_SHORT).show();
                             })
                             .setNegativeButton("Cancel",null)
                             .show();

@@ -24,6 +24,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.DiscoverModel;
@@ -191,10 +192,11 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
     }
 
     void RunLink(String link, Activity activity) {
-        Intent intent = new Intent(con,PlayerActivity.class);
+       /* Intent intent = new Intent(con,PlayerActivity.class);
         intent.putExtra("youtubelink",new String[] {link});
         con.startActivity(intent);
-        activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+        activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);*/
+        MainActivity.PlayVideo(new String[]{ link });
     }
 
     @Override

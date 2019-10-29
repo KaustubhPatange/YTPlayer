@@ -162,12 +162,11 @@ public class PlayerActivity extends AppCompatActivity {
 
     ConnectionQuality connectionQuality = ConnectionQuality.MODERATE;
 
-    static Handler mHandler = new Handler();
 
     AsyncTask<String, String, String> mergeTask, cutTask;
 
     SharedPreferences preferences;
-
+    static Handler mHandler = new Handler();
     long total_duration = 0;
     int total_seconds;
     ArrayList<String> yturls;
@@ -175,12 +174,12 @@ public class PlayerActivity extends AppCompatActivity {
 
     ArrayList<YTConfig> ytConfigs;
 
-    static ExoPlayer player;
+/*    static ExoPlayer player;
     static MediaSource mediaSource;
     DefaultDataSourceFactory dataSourceFactory;
     DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
     TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory();
-    TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
+    TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);*/
 
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
 
@@ -198,19 +197,7 @@ public class PlayerActivity extends AppCompatActivity {
         int height = displayMetrics.heightPixels;
         Log.e("DisplayMatrix",height+"");
 
-        // Using this fuzzy logic to support screen sizes since there is no flexibility using
-        // default method, can't work for custom resolutions!
-
         setContentView(R.layout.activity_player);
-
-        /*if (height>2770) {
-            setContentView(R.layout.activity_player_2880);
-        }else if (height>1920&&height<2000) {
-            setContentView(R.layout.activity_player_1920);
-        } else if (height>2000&&height<2770) {
-            setContentView(R.layout.activity_player_2000);
-        }else
-            setContentView(R.layout.activity_player);*/
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -231,10 +218,10 @@ public class PlayerActivity extends AppCompatActivity {
         if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
             CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
         }
-        dataSourceFactory = new DefaultDataSourceFactory(PlayerActivity.this,
+       /* dataSourceFactory = new DefaultDataSourceFactory(PlayerActivity.this,
                 Util.getUserAgent(PlayerActivity.this,
                         getResources().getString(R.string.app_name)), BANDWIDTH_METER);
-        player = ExoPlayerFactory.newSimpleInstance(PlayerActivity.this, trackSelector);
+        player = ExoPlayerFactory.newSimpleInstance(PlayerActivity.this, trackSelector); */
         ytConfigs = new ArrayList<>();
 
         playFab.setOnClickListener(new View.OnClickListener() {
@@ -280,7 +267,7 @@ public class PlayerActivity extends AppCompatActivity {
 
                 long progresstoSeek = YTutils.progressToTimer(seekBar.getProgress(), total_duration);
                 Log.e("ProgresstoSeek", progresstoSeek + "");
-                player.seekTo(progresstoSeek);
+                MainActivity.player.seekTo(progresstoSeek);
 
                 updateProgressBar();
             }
@@ -565,6 +552,46 @@ public class PlayerActivity extends AppCompatActivity {
         notificationManagerCompat.notify(1, notification);
     }
 
+    private void setListener() {
+        // Play or Pause listener
+        Intent newintent = new Intent(PlayerActivity.this, PlayerActivity.class);
+        newintent.putExtra("DO", "play");
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, newintent, 0);
+
+        expandedView.setOnClickPendingIntent(R.id.nPlay, pendingIntent);
+        collpaseView.setOnClickPendingIntent(R.id.nPlay, pendingIntent);
+
+        // Next song Listener
+        newintent = new Intent(PlayerActivity.this, PlayerActivity.class);
+        newintent.putExtra("DO", "next");
+        pendingIntent = PendingIntent.getActivity(this, 1, newintent, 0);
+
+        expandedView.setOnClickPendingIntent(R.id.nForward, pendingIntent);
+        collpaseView.setOnClickPendingIntent(R.id.nForward, pendingIntent);
+
+        // Previous song Listener
+        newintent = new Intent(PlayerActivity.this, PlayerActivity.class);
+        newintent.putExtra("DO", "previous");
+        pendingIntent = PendingIntent.getActivity(this, 2, newintent, 0);
+
+        expandedView.setOnClickPendingIntent(R.id.nPrevious, pendingIntent);
+        collpaseView.setOnClickPendingIntent(R.id.nPrevious, pendingIntent);
+
+        // Add to playlist Listener
+        newintent = new Intent(PlayerActivity.this, PlayerActivity.class);
+        newintent.putExtra("DO", "add");
+        pendingIntent = PendingIntent.getActivity(this, 3, newintent, 0);
+
+        expandedView.setOnClickPendingIntent(R.id.nAdd, pendingIntent);
+
+        // Focus on Click Listener
+        newintent = new Intent(PlayerActivity.this, PlayerActivity.class);
+        newintent.putExtra("DO", "focus");
+        pendingIntent = PendingIntent.getActivity(this, 4, newintent, 0);
+
+        expandedView.setOnClickPendingIntent(R.id.mainlayout, pendingIntent);
+        collpaseView.setOnClickPendingIntent(R.id.mainlayout, pendingIntent);
+    }
 
     class getData extends AsyncTask<String, String, Void> {
 
@@ -603,40 +630,6 @@ public class PlayerActivity extends AppCompatActivity {
                         public void onLoadCleared(@Nullable Drawable placeholder) {
                         }
                     });
-
-
-           /* new YoutubeStreamExtractor(new YoutubeStreamExtractor.ExtractorListner(){
-
-                @Override
-                public void onExtractionDone(List<YoutubeMedia> adativeStream, List<YoutubeMedia> muxedStream, YoutubeMeta meta) {
-                    if (muxedStream.isEmpty()) {
-                        showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
-                        return;
-                    }
-                    ytConfigs.clear();
-
-                    List<YoutubeMedia> bestStream = getBestStream(adativeStream);
-
-                    for(int i=0; i<bestStream.size();i++) addVideoToList(bestStream.get(i),videoTitle);
-
-                    if (videoTitle.isEmpty() && meta.getTitle() != null) {
-                        videoTitle = meta.getTitle();
-                        channelTitle = meta.getAuthor();
-                        mainTitle.setText(videoTitle);
-                        collpaseView.setTextViewText(R.id.nTitle, videoTitle);
-                        expandedView.setTextViewText(R.id.nTitle, videoTitle);
-                        collpaseView.setTextViewText(R.id.nAuthor, channelTitle);
-                        expandedView.setTextViewText(R.id.nAuthor, channelTitle);
-                    }
-
-                    continueinMainThread(audioLink);
-                }
-
-                @Override
-                public void onExtractionGoesWrong(final ExtractorException e) {
-                    showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
-                }
-            }).Extract(YTutils.getVideoID(YouTubeUrl));*/
 
             new YouTubeExtractor(PlayerActivity.this) {
 
@@ -690,6 +683,7 @@ public class PlayerActivity extends AppCompatActivity {
                     }
                 }
             }.execute(YouTubeUrl);
+
             super.onPostExecute(aVoid);
         }
 
@@ -756,17 +750,17 @@ public class PlayerActivity extends AppCompatActivity {
     void continueinMainThread(String link) {
         playFab.setEnabled(true);
 
-        player.stop();
-        player.release();
-        mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(link));
-        player = ExoPlayerFactory.newSimpleInstance(PlayerActivity.this, trackSelector);
-        player.prepare(mediaSource);
-        player.setPlayWhenReady(true);
+        MainActivity.player.stop();
+        MainActivity.player.release();
+        MainActivity.mediaSource = new ExtractorMediaSource.Factory(MainActivity.dataSourceFactory).createMediaSource(Uri.parse(link));
+        MainActivity.player = ExoPlayerFactory.newSimpleInstance(PlayerActivity.this, MainActivity.trackSelector);
+        MainActivity.player.prepare(MainActivity.mediaSource);
+        MainActivity.player.setPlayWhenReady(true);
 
         makePause();
         isplaying = true;
 
-        player.addListener(new Player.EventListener() {
+        MainActivity.player.addListener(new Player.EventListener() {
             @SuppressLint("RestrictedApi")
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
@@ -783,7 +777,7 @@ public class PlayerActivity extends AppCompatActivity {
                         mprogressBar.setVisibility(View.GONE);
                         mainlayout.setVisibility(View.VISIBLE);
                         playFab.setVisibility(View.VISIBLE);
-                        total_duration = player.getDuration();
+                        total_duration = MainActivity.player.getDuration();
                         total_seconds = (int) total_duration / 1000;
                         totalDuration.setText(YTutils.milliSecondsToTimer(total_duration));
                         updateProgressBar();
@@ -977,46 +971,7 @@ public class PlayerActivity extends AppCompatActivity {
         return ytFiles.get(itags[3]);
     }
 
-    private void setListener() {
-        // Play or Pause listener
-        Intent newintent = new Intent(PlayerActivity.this, PlayerActivity.class);
-        newintent.putExtra("DO", "play");
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, newintent, 0);
 
-        expandedView.setOnClickPendingIntent(R.id.nPlay, pendingIntent);
-        collpaseView.setOnClickPendingIntent(R.id.nPlay, pendingIntent);
-
-        // Next song Listener
-        newintent = new Intent(PlayerActivity.this, PlayerActivity.class);
-        newintent.putExtra("DO", "next");
-        pendingIntent = PendingIntent.getActivity(this, 1, newintent, 0);
-
-        expandedView.setOnClickPendingIntent(R.id.nForward, pendingIntent);
-        collpaseView.setOnClickPendingIntent(R.id.nForward, pendingIntent);
-
-        // Previous song Listener
-        newintent = new Intent(PlayerActivity.this, PlayerActivity.class);
-        newintent.putExtra("DO", "previous");
-        pendingIntent = PendingIntent.getActivity(this, 2, newintent, 0);
-
-        expandedView.setOnClickPendingIntent(R.id.nPrevious, pendingIntent);
-        collpaseView.setOnClickPendingIntent(R.id.nPrevious, pendingIntent);
-
-        // Add to playlist Listener
-        newintent = new Intent(PlayerActivity.this, PlayerActivity.class);
-        newintent.putExtra("DO", "add");
-        pendingIntent = PendingIntent.getActivity(this, 3, newintent, 0);
-
-        expandedView.setOnClickPendingIntent(R.id.nAdd, pendingIntent);
-
-        // Focus on Click Listener
-        newintent = new Intent(PlayerActivity.this, PlayerActivity.class);
-        newintent.putExtra("DO", "focus");
-        pendingIntent = PendingIntent.getActivity(this, 4, newintent, 0);
-
-        expandedView.setOnClickPendingIntent(R.id.mainlayout, pendingIntent);
-        collpaseView.setOnClickPendingIntent(R.id.mainlayout, pendingIntent);
-    }
 
     @Override
     public void onBackPressed() {
@@ -1050,8 +1005,8 @@ public class PlayerActivity extends AppCompatActivity {
         notificationManagerCompat.cancel(1);
         if (datasync.getStatus() == AsyncTask.Status.RUNNING)
             datasync.cancel(true);
-        player.stop();
-        player.release();
+        MainActivity.player.stop();
+        MainActivity.player.release();
 
         mHandler.removeCallbacks(mUpdateTimeTask);
         super.onDestroy();
@@ -1059,8 +1014,8 @@ public class PlayerActivity extends AppCompatActivity {
 
     void onClear() {
         mainlayout.setVisibility(View.GONE);
-        player.stop();
-        player.release();
+        MainActivity.player.stop();
+        MainActivity.player.release();
         mHandler.removeCallbacks(mUpdateTimeTask);
         isplaying = false;
         total_duration = 0;
@@ -1108,14 +1063,14 @@ public class PlayerActivity extends AppCompatActivity {
         if (isplay) {
 
             makePause();
-            player.setPlayWhenReady(true);
+            MainActivity.player.setPlayWhenReady(true);
             //   updateDuration();
         } else {
             makePlay();
-            player.setPlayWhenReady(false);
+            MainActivity.player.setPlayWhenReady(false);
             // mTimer.cancel();
         }
-        Log.e("CurrentDur", player.getCurrentPosition() + "");
+        Log.e("CurrentDur", MainActivity.player.getCurrentPosition() + "");
         isplaying = isplay;
     }
 
@@ -1330,8 +1285,8 @@ public class PlayerActivity extends AppCompatActivity {
 
     public static Runnable mUpdateTimeTask = new Runnable() {
         public void run() {
-            long totalDuration = player.getDuration();
-            long currentDur = player.getCurrentPosition();
+            long totalDuration = MainActivity.player.getDuration();
+            long currentDur = MainActivity.player.getCurrentPosition();
 
             // Displaying time completed playing
             currentDuration.setText("" + YTutils.milliSecondsToTimer(currentDur));

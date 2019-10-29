@@ -170,12 +170,13 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
 
             viewHolder.mainCard.setOnClickListener(v -> {
 
-                Activity activity = (Activity) con;
+               /* Activity activity = (Activity) con;
 
                 Intent intent = new Intent(con,PlayerActivity.class);
                 intent.putExtra("youtubelink",new String[]{ ytUrl });
                 con.startActivity(intent);
-                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);*/
+                MainActivity.PlayVideo(new String[]{ ytUrl });
             });
 
             viewHolder.dateText.setText(toput);

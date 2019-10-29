@@ -345,6 +345,7 @@ public class SearchFragment extends Fragment {
 
             if (models.size()<10) {
                 models.clear();
+                if (SpotifyTrendsCSV==null) return null;
                 String[] csvlines = SpotifyTrendsCSV.split("\n|\r");
                 for (int i=2;i<12;i++) {
                    try {

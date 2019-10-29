@@ -1,40 +1,63 @@
 package com.kpstv.youtube;
 
-import android.app.ActivityManager;
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleObserver;
-import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
+import com.facebook.network.connectionclass.ConnectionClassManager;
+import com.facebook.network.connectionclass.ConnectionQuality;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
@@ -44,22 +67,39 @@ import com.kpstv.youtube.fragments.NCFragment;
 import com.kpstv.youtube.fragments.OPlaylistFragment;
 import com.kpstv.youtube.fragments.PlaylistFragment;
 import com.kpstv.youtube.fragments.SearchFragment;
+import com.kpstv.youtube.models.YTConfig;
+import com.kpstv.youtube.receivers.SongBroadCast;
+import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.SpotifyTrack;
-import com.kpstv.youtube.utils.YTSearch;
+import com.kpstv.youtube.utils.YTMeta;
+import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
+import com.kpstv.youtube.ytextractor.ExtractorException;
+import com.kpstv.youtube.ytextractor.YoutubeStreamExtractor;
+import com.kpstv.youtube.ytextractor.model.YoutubeMedia;
+import com.kpstv.youtube.ytextractor.model.YoutubeMeta;
+import com.spyhunter99.supertooltips.ToolTip;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
+import at.huber.youtubeExtractor.Format;
+import at.huber.youtubeExtractor.VideoMeta;
+import at.huber.youtubeExtractor.YouTubeExtractor;
+import at.huber.youtubeExtractor.YtFile;
 import cat.ereza.customactivityoncrash.config.CaocConfig;
 
 import static android.view.View.VISIBLE;
+import static com.facebook.network.connectionclass.ConnectionQuality.EXCELLENT;
+import static com.facebook.network.connectionclass.ConnectionQuality.GOOD;
+import static com.facebook.network.connectionclass.ConnectionQuality.MODERATE;
+import static com.facebook.network.connectionclass.ConnectionQuality.POOR;
 
 public class MainActivity extends AppCompatActivity implements HistoryBottomSheet.BottomSheetListener, NCFragment.NoConnectionListener {
 
@@ -83,10 +123,20 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     static FragmentManager fragmentManager;
     static Fragment PlaylistFrag;
     Fragment NCFrag; String ytLink;
-    SharedPreferences preferences;
-    LinearLayout bottom_player,adViewLayout;
-    ImageButton actionUp,actionPlay;
-    TextView actionTitle; AdView adView;
+    static SharedPreferences preferences;
+    static LinearLayout bottom_player, adViewLayout;
+    static ImageButton actionUp,actionPlay;static ProgressBar loadProgress,songProgress;
+    static TextView actionTitle; static AdView adView;
+    static AsyncTask<String,String,Void> LoadVideo; static Activity activity;
+
+    static String[] apikeys = new String[]{"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw", "AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
+
+    public static ExoPlayer player;
+    public static MediaSource mediaSource;
+    public static DefaultDataSourceFactory dataSourceFactory;
+    public static DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
+    public static TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory();
+    public static TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +147,19 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
         builder.detectFileUriExposure();
+
+        dataSourceFactory = new DefaultDataSourceFactory(MainActivity.this,
+                Util.getUserAgent(MainActivity.this,
+                        getResources().getString(R.string.app_name)), BANDWIDTH_METER);
+
+        player = ExoPlayerFactory.newSimpleInstance(MainActivity.this, trackSelector);
+
+        activity = MainActivity.this;
+
+        createNotification();
+
+        ytConfigs = new ArrayList<>();
+        yturls = new ArrayList<>();
 
         // Remove this code afterwards...
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -110,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                 .apply();
 
         //TODO: Change app unit id, Sample : ca-app-pub-3940256099942544~3347511713, ca-app-pub-1763645001743174~5602018181
-        MobileAds.initialize(this, "ca-app-pub-1763645001743174~5602018181");
+        MobileAds.initialize(this, "ca-app-pub-xxx3645001743174~5602018181");
 
         // Get required views...
         adView = findViewById(R.id.adView);
@@ -119,6 +182,8 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         actionPlay = findViewById(R.id.action_play);
         actionUp = findViewById(R.id.action_maximize);
         actionTitle = findViewById(R.id.action_title);
+        songProgress = findViewById(R.id.songLayoutProgress);
+        loadProgress = findViewById(R.id.song_progress);
 
         // Check onComing links from YouTube or Spotify...
         CheckIntent(getIntent());
@@ -144,6 +209,10 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
                 .permitAll().build();
         StrictMode.setThreadPolicy(policy);
+
+        actionPlay.setOnClickListener(v -> changePlayBack(!isplaying));
+        bottom_player.setOnClickListener(v-> openPlayer());
+        actionUp.setOnClickListener(v->openPlayer());
 
         /*// Disabling URI exposure for lame android 7.0+ who can't do by themselves.
         if(Build.VERSION.SDK_INT>=24){
@@ -172,6 +241,33 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
 
     }
 
+    public static void PlayVideo(String[] ytUrls) {
+        yturls.clear();
+        if (LoadVideo !=null && LoadVideo.getStatus() == AsyncTask.Status.RUNNING)
+        {
+            player.stop(); player.release();
+            LoadVideo.cancel(true);
+        }
+        yturls.addAll(Arrays.asList(ytUrls));
+        videoID = YTutils.getVideoID(yturls.get(0));
+        Log.e("VideoID_ToPLAY",videoID+"");
+        LoadVideo = new loadVideo();
+        LoadVideo.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videoID);
+    }
+
+    public static void PlayVideo(String[] ytUrls, int position) {
+        yturls.clear();
+        if (LoadVideo !=null && LoadVideo.getStatus() == AsyncTask.Status.RUNNING)
+        {
+            player.stop(); player.release();
+            LoadVideo.cancel(true);
+        }
+        yturls.addAll(Arrays.asList(ytUrls));
+        videoID = YTutils.getVideoID(yturls.get(position));
+        LoadVideo = new loadVideo();
+        LoadVideo.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videoID);
+    }
+
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof DiscoverFragment) {
@@ -183,12 +279,6 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             return;
         }
         finish();
-    }
-
-    Uri getFileUri(Context context, File file) {
-        return FileProvider.getUriForFile(context,
-                context.getApplicationContext().getPackageName() + ".authorityStr"
-                , file);
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -255,8 +345,8 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
        try {
            if (PlayerActivity.datasync.getStatus() == AsyncTask.Status.RUNNING)
                PlayerActivity.datasync.cancel(true);
-           PlayerActivity.player.stop();
-           PlayerActivity.player.release();
+           player.stop();
+           player.release();
 
            PlayerActivity.mHandler.removeCallbacks(PlayerActivity.mUpdateTimeTask);
        }catch (Exception e) { e.printStackTrace(); }
@@ -278,19 +368,37 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         } else Toast.makeText(this, getString(R.string.error), Toast.LENGTH_SHORT).show();
     }
 
-    void openPlayer(boolean enablePlayback,String changePlayBack) {
-        Intent i=new Intent(MainActivity.this,PlayerActivity.class);
+    void openPlayer() {
+        Intent i=new Intent(MainActivity.this,PlayerActivity2.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        i.putExtra("youtubelink",new String[]{ytLink});
+       /* i.putExtra("youtubelink",new String[]{ytLink});
         i.putExtra("isNewIntent","true");
         if (enablePlayback)
-        i.putExtra("changePlayback",changePlayBack);
+        i.putExtra("changePlayback",changePlayBack);*/
         startActivity(i);
         overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
     }
 
-    void CheckIntent(Intent incoming) {
-        ytLink = incoming.getStringExtra("yturl");
+    boolean CheckIntent(Intent incoming) {
+        if (Intent.ACTION_SEND.equals(incoming.getAction())
+                && incoming.getType() != null && "text/plain".equals(incoming.getType())) {
+            Log.e("Firing","checkIntent");
+            String ytLink = incoming.getStringExtra(Intent.EXTRA_TEXT);
+            Log.e("IntentYTLink",ytLink+"");
+            if (YTutils.isValidID(ytLink)){
+                PlayVideo(new String[]{ytLink});
+                return true;
+            }else if (ytLink.contains("open.spotify.com")&&ytLink.contains("/track/")) {
+                new makeSpotifyData(ytLink).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                return true;
+            }else {
+                YTutils.showAlert(MainActivity.this,"Callback Error",
+                        "The requested url is not a valid YouTube url", true);
+                return true;
+            }
+        }
+        return false;
+        /*ytLink = incoming.getStringExtra("yturl");
         Log.e("YouTubeUrl",ytLink+"");
         String playerCheck = incoming.getStringExtra("is_playing");
         if (playerCheck!=null) {
@@ -306,12 +414,10 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                 actionPlay.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_circle));
                 actionPlay.setOnClickListener(v -> openPlayer(true,"false"));
             }
-            adViewLayout.setVisibility(VISIBLE);
-            AdRequest adRequest = new AdRequest.Builder().build();
-            adView.loadAd(adRequest);
-        }
 
-        if (incoming.getData()!=null) {
+        }*/
+
+        /*if (incoming.getData()!=null) {
             String ytLink = incoming.getData().toString();
             Log.e("IntentYTLink",ytLink+"");
             if (YTutils.isValidID(ytLink)){
@@ -326,7 +432,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                 YTutils.showAlert(MainActivity.this,"Callback Error",
                         "The requested url is not a valid YouTube url", true);
             }
-        }
+        }*/
     }
 
     class getData extends AsyncTask<Void,Void,Void> {
@@ -367,6 +473,657 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             return null;
         }
     }
+
+    /**
+    * Implementing a new player within main activity itself...
+    */
+
+    public static String videoTitle = "", channelTitle = "", viewCounts, imgUrl, videoID,audioLink;
+    public static int likeCounts,dislikeCounts;
+    static NotificationManagerCompat notificationManagerCompat;
+    static NotificationManager notificationManager;
+    static NotificationChannel notificationChannel;
+    static PendingIntent prevPendingIntent,pausePendingIntent,nextPendingIntent,clickPendingIntent;
+    public static Bitmap bitmapIcon; static ArrayList<YTConfig> ytConfigs;
+    static NotificationCompat.Builder builder; public static boolean isplaying;
+    static boolean isLoop=false;
+    static Handler mHandler = new Handler();
+    static long total_duration = 0;
+    static int total_seconds;
+    static ArrayList<String> yturls;
+    static int ytIndex = 0;
+
+    static class loadVideo extends AsyncTask<String,String,Void> {
+
+        @SuppressLint("StaticFieldLeak")
+        @Override
+        protected void onPostExecute(Void aVoid) {
+
+            Glide.with(activity)
+                    .asBitmap()
+                    .load(imgUrl)
+                    .into(new CustomTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            bitmapIcon = resource;
+                        }
+
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                        }
+                    });
+
+            new YouTubeExtractor(activity) {
+
+                @Override
+                protected void onPostExecute(SparseArray<YtFile> ytFiles) {
+
+                    if (ytFiles == null) {
+                        parseVideoNewMethod(YTutils.getYtUrl(videoID),videoTitle);
+                        return;
+                    }
+
+                    YtFile ytaudioFile = getBestStream(ytFiles);
+                    if (ytaudioFile.getUrl() == null) {
+                        parseVideoNewMethod(YTutils.getYtUrl(videoID), videoTitle);
+                        return;
+                    } else {
+                        audioLink = ytaudioFile.getUrl();
+                        audioLink = audioLink.replace("\\", "");
+
+                        Log.e("PlayerActivity", "videoTitle: " + videoTitle + ", channelTitle: " + channelTitle);
+
+                        Log.e("PlayerActivity", "Stream: " + audioLink);
+                        ytConfigs.clear();
+                        for (int i = 0, itag; i < ytFiles.size(); i++) {
+                            itag = ytFiles.keyAt(i);
+                            YtFile ytFile = ytFiles.get(itag);
+
+                            if (ytFile.getFormat().getHeight() == -1 || ytFile.getFormat().getHeight() >= 360) {
+                                addFormatToList(videoTitle, ytFile);
+                            }
+                        }
+
+                        continueinMainThread(audioLink);
+                    }
+
+                    super.onPostExecute(ytFiles);
+                }
+
+                @Override
+                protected void onExtractionComplete(SparseArray<YtFile> ytFiles, VideoMeta videoMeta) {
+                    if (videoTitle.isEmpty() && videoMeta.getTitle() != null) {
+                        videoTitle = videoMeta.getTitle();
+                        channelTitle = videoMeta.getAuthor();
+                    }
+                }
+            }.execute(YTutils.getYtUrl(videoID));
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(String... arg0) {
+            videoID = arg0[0];
+            String json = jsonResponse(videoID, 0);
+
+            YTMeta ytMeta = new YTMeta(videoID);
+            if (ytMeta.getVideMeta() != null) {
+                videoTitle = ytMeta.getVideMeta().getTitle();
+                channelTitle = ytMeta.getVideMeta().getAuthor();
+                imgUrl = ytMeta.getVideMeta().getImgUrl();
+            }
+
+            Log.e("ImageUrl", imgUrl + "");
+
+            if (json != null && json.contains("\"error\":")) {
+                json = jsonResponse(videoID, 1);
+                if (json.contains("\"error\":")) {
+                    YTStatistics ytStatistics = new YTStatistics(videoID);
+                    viewCounts = ytStatistics.getViewCount();
+                    likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
+                    dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
+                    json = null;
+                }
+            }
+            if (json != null) {
+                try {
+                    JSONObject statistics = new JSONObject(json).getJSONArray("items")
+                            .getJSONObject(0).getJSONObject("statistics");
+                    viewCounts = YTutils.getViewCount(Long.parseLong(statistics.getString("viewCount")));
+                    likeCounts = 100;
+                    dislikeCounts = 0;
+                    try {
+                        likeCounts = Integer.parseInt(statistics.getString("likeCount"));
+                        dislikeCounts = Integer.parseInt(statistics.getString("dislikeCount"));
+                    }catch (Exception e){e.printStackTrace();}
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.e("PlayerActivity_JSON", e.getMessage());
+                }
+            }
+            return null;
+        }
+
+        String jsonResponse(String videoID, int apinumber) {
+            HttpHandler httpHandler = new HttpHandler();
+            String link = "https://www.googleapis.com/youtube/v3/videos?id=" + videoID + "&key=" + apikeys[apinumber] + "&part=statistics";
+            return httpHandler.makeServiceCall(link);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            adViewLayout.setVisibility(VISIBLE);
+            AdRequest adRequest = new AdRequest.Builder().build();
+            adView.loadAd(adRequest);
+            adView.setAdListener(new AdListener(){
+                @Override
+                public void onAdLoaded() {
+                    adView.setVisibility(VISIBLE);
+                    super.onAdLoaded();
+                }
+            });
+            bottom_player.setVisibility(VISIBLE);
+            onClear();
+            super.onPreExecute();
+        }
+    }
+
+    private static void parseVideoNewMethod(String yturl, String videoTitle) {
+        new YoutubeStreamExtractor(new YoutubeStreamExtractor.ExtractorListner(){
+
+            @Override
+            public void onExtractionDone(List<YoutubeMedia> adativeStream, List<YoutubeMedia> muxedStream, YoutubeMeta meta) {
+                if (muxedStream.isEmpty()) {
+                    showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
+                    return;
+                }
+
+                Log.e("Method2","Extracted using new method");
+
+                ytConfigs.clear();
+
+                List<YoutubeMedia> bestStream = getBestStream(adativeStream);
+
+                for(int i=0; i<bestStream.size();i++) addVideoToList(bestStream.get(i),videoTitle);
+
+                continueinMainThread(audioLink);
+            }
+
+            @Override
+            public void onExtractionGoesWrong(final ExtractorException e) {
+                showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
+            }
+        }).Extract(YTutils.getVideoID(yturl));
+    }
+
+    private static void continueinMainThread(String link) {
+        player.stop();
+        player.release();
+        mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(link));
+        player = ExoPlayerFactory.newSimpleInstance(activity, trackSelector);
+        player.prepare(mediaSource);
+        player.setPlayWhenReady(true);
+
+        makePause();
+        isplaying = true;
+
+        player.addListener(new Player.EventListener() {
+            @SuppressLint("RestrictedApi")
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                switch (playbackState) {
+                    case ExoPlayer.STATE_BUFFERING:
+                        break;
+                    case ExoPlayer.STATE_ENDED:
+                        makePlay();
+                        isplaying = false;
+                        playNext();
+                        break;
+                    case ExoPlayer.STATE_READY:
+                        rebuildNotification();
+                        actionTitle.setVisibility(VISIBLE);
+                        actionTitle.setText(videoTitle);
+                        loadProgress.setVisibility(View.GONE);
+                        songProgress.setVisibility(VISIBLE);
+                        actionPlay.setVisibility(VISIBLE);
+                        actionUp.setVisibility(VISIBLE);
+                        total_duration = MainActivity.player.getDuration();
+                        total_seconds = (int) total_duration / 1000;
+                        updateProgressBar();
+                        break;
+                }
+            }
+        });
+
+        // Store video into history
+        new saveToHistory().execute(YTutils.getYtUrl(videoID));
+    }
+
+    private static void addFormatToList(final String videoTitle, final YtFile ytfile) {
+        Format ytFrVideo = ytfile.getFormat();
+
+        String ytText;
+        if (ytFrVideo.getHeight() == -1)
+            ytText = "Audio " + ytFrVideo.getAudioBitrate() + " kbit/s";
+        else {
+            ytText = (ytFrVideo.getFps() == 60) ? "Video " + ytFrVideo.getHeight() + "p60" :
+                    "Video " + ytFrVideo.getHeight() + "p";
+            if (ytfile.getFormat().getAudioBitrate() == -1) {
+                ytText += " (no audio)";
+            }
+        }
+        if (ytText.contains("128 kbit/s"))
+            audioLink = ytfile.getUrl();
+        ytConfigs.add(new YTConfig(ytText, ytfile.getUrl(), ytfile.getFormat().getExt(), videoTitle));
+    }
+
+    private static void addVideoToList(final YoutubeMedia media, final String videoTitle) {
+
+        String ytText;
+        if (media.getResSize()!=null) {
+            ytText = "Video "+media.getResolution();
+            if (media.isVideoOnly()) {
+                ytText+=" (no audio)";
+            }
+            Log.e("VideoUrlFound",media.getUrl()+"");
+        }else {
+            ytText = "Audio "+YTutils.getAvgBitRate(Integer.parseInt(media.getBitrate()))+" kbit/s";
+            if (media.getCodec().contains("mp4a")){
+                audioLink = media.getUrl();
+                media.setExtension("m4a");
+                Log.e("AudioSpecialLink",media.getUrl()+"");
+            }else {
+                Log.e("AudioURLFOUND",media.getUrl()+"");
+            }
+        }
+        ytConfigs.add(new YTConfig(ytText, media.getUrl(), media.getExtension(), videoTitle));
+    }
+
+    public static void rebuildNotification() {
+        boolean setgoing = true;
+        int icon = R.drawable.ic_pause_notify;
+        if (!isplaying) {
+            icon = R.drawable.ic_play_notify;
+            setgoing = false;
+        }
+        builder = new NotificationCompat.Builder(activity, "channel_01")
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setPriority(Notification.PRIORITY_LOW)
+                .setSmallIcon(R.drawable.ic_music)
+                .addAction(R.drawable.ic_previous_notify, "Previous", prevPendingIntent)
+                .addAction(icon, "Pause", pausePendingIntent)
+                .addAction(R.drawable.ic_next_notify, "Next", nextPendingIntent)
+                .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
+                        .setShowActionsInCompactView(1))
+                .setContentTitle(videoTitle)
+                .setOngoing(setgoing)
+                .setSound(null)
+                .setContentIntent(clickPendingIntent)
+                .setContentText(channelTitle)
+                .setLargeIcon(bitmapIcon);
+
+        notificationManagerCompat.notify(1, builder.build());
+    }
+
+    public static void changePlayBack(boolean isplay) {
+        Log.e("PlayingState", "Playing State: " + player.isPlayingAd() + ", isPlay:" + isplay);
+        if (isplay) {
+            makePause();
+            MainActivity.player.setPlayWhenReady(true);
+            //   updateDuration();
+        } else {
+            makePlay();
+            MainActivity.player.setPlayWhenReady(false);
+            // mTimer.cancel();
+        }
+        Log.e("CurrentDur", MainActivity.player.getCurrentPosition() + "");
+        isplaying = isplay;
+        rebuildNotification();
+    }
+
+    static void onClear() {
+        loadProgress.setVisibility(VISIBLE);
+        actionTitle.setVisibility(View.GONE);
+        songProgress.setVisibility(View.GONE);
+        actionPlay.setVisibility(View.GONE);
+        songProgress.setProgress(0);
+        actionUp.setVisibility(View.GONE);
+        player.stop();
+        player.release();
+        mHandler.removeCallbacks(mUpdateTimeTask);
+        isplaying = false;
+        total_duration = 0;
+        total_seconds = 0;
+    }
+
+    public static void updateProgressBar() {
+        mHandler.postDelayed(mUpdateTimeTask, 100);
+    }
+
+    public static Runnable mUpdateTimeTask = new Runnable() {
+        public void run() {
+            long totalDuration = MainActivity.player.getDuration();
+            long currentDur = MainActivity.player.getCurrentPosition();
+            int progress = (YTutils.getProgressPercentage(currentDur, totalDuration));
+            songProgress.setProgress(progress);
+            mHandler.postDelayed(this, 100);
+        }
+    };
+
+    static class makeSpotifyData extends AsyncTask<Void,Void,Void> {
+
+        String spotifyUrl,ytLink;
+        public makeSpotifyData(String yturl) {
+            this.spotifyUrl = yturl;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if (ytLink!=null) {
+                yturls.add(ytLink);
+                ytIndex=yturls.size()-1;
+                videoID = YTutils.getVideoID(ytLink);
+                PlayVideo(new String[]{ytLink});
+            }
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            onClear();
+            bottom_player.setVisibility(VISIBLE);
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Log.e("Original_URL",spotifyUrl+"");
+            SpotifyTrack track = new SpotifyTrack(YTutils.getSpotifyID(spotifyUrl));
+            ytLink = track.getYtUrl();
+            Log.e("GOTURL_Here",ytLink+"");
+            return null;
+        }
+    }
+
+
+
+    public static void playPrevious() {
+        if (ytIndex <= 0) {
+            Toast.makeText(activity, "No previous song in playlist", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        onClear();
+        videoID = YTutils.getVideoID(yturls.get(ytIndex-1));
+        ytIndex--;
+        LoadVideo = new loadVideo();
+        LoadVideo.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videoID);
+    }
+
+    public static void playNext() {
+        if ((ytIndex + 1) == yturls.size()) {
+            if (isLoop) {
+                ytIndex=-1;
+            }else {
+                Toast.makeText(activity, "No new song in playlist", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+        onClear();
+        videoID = YTutils.getVideoID(yturls.get(ytIndex+1));
+        ytIndex++;
+        LoadVideo = new loadVideo();
+        LoadVideo.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videoID);
+    }
+
+    static void makePlay() {
+        actionPlay.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_play_circle));
+        try {
+            PlayerActivity2.makePlay();
+        }catch (Exception ignored) {
+            Log.e("PlayerActivity","isnull");
+        }
+    }
+
+    static void makePause() {
+        actionPlay.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_pause_circle));
+        try {
+            PlayerActivity2.makePause();
+        }catch (Exception ignored) {
+            Log.e("PlayerActivity","isnull");
+        }
+       /* playFab.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause));
+        collpaseView.setImageViewResource(R.id.nPlay, R.drawable.ic_pause_notify);
+        expandedView.setImageViewResource(R.id.nPlay, R.drawable.ic_pause_notify);
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
+            notificationManager.notify(1,builder.build());
+        }
+        notificationManagerCompat.notify(1, builder.build());*/
+    }
+
+    private static List<YoutubeMedia> getBestStream(List<YoutubeMedia> streams) {
+        List<YoutubeMedia> medias = new ArrayList<>();
+        for(int i=0; i<streams.size();i++) {
+            YoutubeMedia media = streams.get(i);
+            if (!media.isAudioOnly()) {
+                int j=0;
+                while (j<streams.size()) {
+                    YoutubeMedia media1 = streams.get(j);
+                    if (media.getResolution().equals(media1.getResolution())) {
+                        int m1 = Integer.parseInt(media.getBitrate());
+                        int m2 = Integer.parseInt(media1.getBitrate());
+                        if (m2>m1) {
+                            media=media1;
+                        }
+                    }
+                    j++;
+                }
+                if (!medias.contains(media)) medias.add(media);
+            }else {
+                medias.add(media);
+            }
+        }
+        return medias;
+    }
+
+    private static class saveToHistory extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            String url_link = strings[0];
+            String set = preferences.getString("urls", "");
+
+            // Get playlist
+            ArrayList<String> urls = new ArrayList<>();
+            if (!Objects.requireNonNull(set).isEmpty()) {
+                urls.addAll(Arrays.asList(set.split(",")));
+            }
+
+            // Add to playlist by removing it first
+            for (int i = 0; i < urls.size(); i++) {
+                if (urls.get(i).contains(Objects.requireNonNull(YTutils.getVideoID(url_link)))) {
+                    urls.remove(i);
+                }
+            }
+            String formattedDate = YTutils.getTodayDate();
+            int percent = 100;
+            try {
+                percent = likeCounts*100/(likeCounts+dislikeCounts);
+            }catch (Exception e){e.printStackTrace();}
+            Log.e("StringtoAdd", url_link + "|" + formattedDate+"|"+percent);
+            urls.add(0, url_link + "|" + formattedDate+"|"+percent);
+
+            // Save playlist
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < urls.size(); i++) {
+                sb.append(urls.get(i)).append(",");
+            }
+            SharedPreferences.Editor prefsEditor = preferences.edit();
+            prefsEditor.putString("urls", sb.toString());
+            prefsEditor.apply();
+            return null;
+        }
+    }
+
+    private static YtFile getBestStream(SparseArray<YtFile> ytFiles) {
+        ConnectionQuality connectionQuality = ConnectionQuality.MODERATE;
+        connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQuality();
+        int[] itags = new int[]{251, 141, 140, 17};
+
+        if (connectionQuality != null && connectionQuality != ConnectionQuality.UNKNOWN) {
+            switch (connectionQuality) {
+                case POOR:
+                    itags = new int[]{17, 140, 251, 141};
+                    break;
+                case MODERATE:
+                    itags = new int[]{251, 141, 140, 17};
+                    break;
+                case GOOD:
+                    itags = new int[]{141, 251, 140, 17};
+                    break;
+                case EXCELLENT:
+                    itags = new int[]{141, 251, 140, 17};
+                    break;
+            }
+        }
+
+        if (ytFiles.get(itags[0]) != null) {
+            return ytFiles.get(itags[0]);
+        } else if (ytFiles.get(itags[1]) != null) {
+            return ytFiles.get(itags[1]);
+        } else if (ytFiles.get(itags[2]) != null) {
+            return ytFiles.get(itags[2]);
+        }
+        return ytFiles.get(itags[3]);
+    }
+
+    static void showAlert(String title, String message, boolean isalert) {
+        int icon = android.R.drawable.ic_dialog_info;
+        if (isalert) icon = android.R.drawable.ic_dialog_alert;
+        new AlertDialog.Builder(activity)
+                .setTitle(title)
+                .setCancelable(false)
+                .setMessage(message)
+                .setPositiveButton("OK", (dialog, which) -> {
+                    bottom_player.setVisibility(View.GONE);
+                })
+                .setIcon(icon)
+                .show();
+
+    }
+
+    public void createNotification() {
+
+        /** Next song Listener */
+        Intent newintent = new Intent(this, SongBroadCast.class);
+        newintent.setAction("com.kpstv.youtube.ACTION_NEXT");
+        nextPendingIntent = PendingIntent.getBroadcast(this, 1, newintent, 0);
+        /** Previous song Listener */
+        newintent = new Intent(this, SongBroadCast.class);
+        newintent.setAction("com.kpstv.youtube.ACTION_PREVIOUS");
+        prevPendingIntent = PendingIntent.getBroadcast(this, 2, newintent, 0);
+        /** Play or Pause listener */
+        newintent = new Intent(this, SongBroadCast.class);
+        newintent.setAction("com.kpstv.youtube.ACTION_PLAY");
+        pausePendingIntent = PendingIntent.getBroadcast(this, 3, newintent, 0);
+       /* *//*
+        Intent newintent = new Intent(MainActivity.this, MainActivity.class);
+        newintent.putExtra("DO", "next");
+        nextPendingIntent = PendingIntent.getActivity(this, 1, newintent, 0);
+        *//** Previous song Listener *//*
+        newintent = new Intent(MainActivity.this, MainActivity.class);
+        newintent.putExtra("DO", "previous");
+        prevPendingIntent = PendingIntent.getActivity(this, 2, newintent, 0);
+        *//** Play or Pause listener *//*
+        newintent = new Intent(MainActivity.this, MainActivity.class);
+        newintent.putExtra("DO", "play");
+        pausePendingIntent = PendingIntent.getActivity(this, 0, newintent, 0);
+        *//** Focus on Click Listener */
+        newintent = new Intent(MainActivity.this, MainActivity.class);
+        newintent.putExtra("DO", "focus");
+        clickPendingIntent = PendingIntent.getActivity(this, 4, newintent, 0);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            notificationChannel = new NotificationChannel("channel_01", name, importance);
+            notificationChannel.setDescription(description);
+            notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        notificationManagerCompat = NotificationManagerCompat.from(this);
+
+       /* builder = new NotificationCompat.Builder(this, "channel_01")
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setSmallIcon(R.drawable.ic_music)
+                .addAction(R.drawable.ic_previous_notify, "Previous", prevPendingIntent)
+                .addAction(R.drawable.ic_play_notify, "Pause", pausePendingIntent)
+                .addAction(R.drawable.ic_next_notify, "Next", nextPendingIntent)
+                .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
+                        .setShowActionsInCompactView(1))
+                .setContentTitle("Wonderful music")
+                .setContentText("My Awesome Band")
+                .setLargeIcon(albumArtBitmap)
+                .build();*/
+
+        /*builder = new NotificationCompat.Builder(this, "channel_01")
+                .setSmallIcon(R.drawable.ic_music)
+                .setContentTitle("YTApp")
+                .setContent(collpaseView)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setCustomBigContentView(expandedView);*/
+
+       // notification = builder.build();
+    }
+
+   /* private void setListener() {
+        // Play or Pause listener
+        Intent newintent = new Intent(MainActivity.this, MainActivity.class);
+        newintent.putExtra("DO", "play");
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, newintent, 0);
+
+        expandedView.setOnClickPendingIntent(R.id.nPlay, pendingIntent);
+        collpaseView.setOnClickPendingIntent(R.id.nPlay, pendingIntent);
+
+        // Next song Listener
+        newintent = new Intent(MainActivity.this, MainActivity.class);
+        newintent.putExtra("DO", "next");
+        pendingIntent = PendingIntent.getActivity(this, 1, newintent, 0);
+
+        expandedView.setOnClickPendingIntent(R.id.nForward, pendingIntent);
+        collpaseView.setOnClickPendingIntent(R.id.nForward, pendingIntent);
+
+        // Previous song Listener
+        newintent = new Intent(MainActivity.this, MainActivity.class);
+        newintent.putExtra("DO", "previous");
+        pendingIntent = PendingIntent.getActivity(this, 2, newintent, 0);
+
+        expandedView.setOnClickPendingIntent(R.id.nPrevious, pendingIntent);
+        collpaseView.setOnClickPendingIntent(R.id.nPrevious, pendingIntent);
+
+        // Add to playlist Listener
+        newintent = new Intent(MainActivity.this, MainActivity.class);
+        newintent.putExtra("DO", "add");
+        pendingIntent = PendingIntent.getActivity(this, 3, newintent, 0);
+
+        expandedView.setOnClickPendingIntent(R.id.nAdd, pendingIntent);
+
+        // Focus on Click Listener
+        newintent = new Intent(PlayerActivity.this, PlayerActivity.class);
+        newintent.putExtra("DO", "focus");
+        pendingIntent = PendingIntent.getActivity(this, 4, newintent, 0);
+
+        expandedView.setOnClickPendingIntent(R.id.mainlayout, pendingIntent);
+        collpaseView.setOnClickPendingIntent(R.id.mainlayout, pendingIntent);
+    }*/
 }
 
 

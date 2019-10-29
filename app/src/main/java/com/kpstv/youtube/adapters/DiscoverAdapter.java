@@ -30,6 +30,7 @@ import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.DiscoverModel;
@@ -163,11 +164,12 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
             viewHolder.mainCard.setOnClickListener(v -> {
                 Activity activity = (Activity) con;
 
-                Intent intent = new Intent(con,PlayerActivity.class);
+                /*Intent intent = new Intent(con,PlayerActivity.class);
                 intent.putExtra("youtubelink",new String[]{ model.getYtUrl() });
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 con.startActivity(intent);
-                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);*/
+                MainActivity.PlayVideo(new String[]{ model.getYtUrl() });
             });
 
             if (position%5==0 && position!=0 && position%10!=0) {

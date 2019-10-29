@@ -30,6 +30,7 @@
             android:scaleType="fitXY"
             android:tint="#3F000000"/>
         <ProgressBar
+            android:visibility="gone"
             android:id="@+id/mainprogress"
             android:layout_centerInParent="true"
             android:layout_width="wrap_content"
@@ -53,7 +54,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent">
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
                     android:id="@+id/maintitle"
@@ -226,7 +228,7 @@
                             android:layout_height="wrap_content"
                             android:layout_margin="8dp"
                             android:scaleType="center"
-                            android:src="@drawable/ic_play"
+                            android:src="@drawable/ic_pause"
                             app:fabSize="normal" />
                     </RelativeLayout>
 

@@ -38,7 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             ads:adSize="BANNER"
-            ads:adUnitId="ca-app-pub-1763645001743174/9349691503">
+            ads:adUnitId="ca-app-pub-xxx3645001743174/9349691503">
         </com.google.android.gms.ads.AdView>
     </LinearLayout>
 
@@ -52,14 +52,28 @@
         android:focusable="true"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="50dp">
+        android:layout_height="53dp">
+
+        <ProgressBar
+            android:id="@+id/songLayoutProgress"
+            android:visibility="gone"
+            android:background="@color/black"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"/>
 
         <RelativeLayout
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="49dp">
+            <ProgressBar
+                android:layout_margin="5dp"
+                android:id="@+id/song_progress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
             <ImageButton
+                android:visibility="gone"
                 android:id="@+id/action_maximize"
                 android:layout_marginStart="10dp"
                 android:background="@color/transparent_black"
@@ -67,6 +81,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent" />
             <TextView
+                android:visibility="gone"
                 android:textStyle="bold"
                 android:textColor="@color/white"
                 android:fontFamily="@font/dmsans_font"
@@ -85,6 +100,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
             <ImageButton
+                android:visibility="gone"
                 android:layout_marginEnd="10dp"
                 android:id="@+id/action_play"
                 android:layout_alignParentEnd="true"

@@ -32,25 +32,6 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar1">
-        </activity>
-        <activity
-            android:name=".RingdroidEditActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:exported="true"
-            android:hardwareAccelerated="true"
-            android:theme="@style/AppTheme.NoActionBar1"
-            android:windowSoftInputMode="adjustResize">
-            <intent-filter android:label="@string/edit_intent">
-                <action android:name="android.intent.action.EDIT" />
-
-                <data android:mimeType="audio/*" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".PlayerActivity"
-            android:launchMode="singleInstance"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar2">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -85,6 +66,26 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".RingdroidEditActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:exported="true"
+            android:hardwareAccelerated="true"
+            android:theme="@style/AppTheme.NoActionBar1"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter android:label="@string/edit_intent">
+                <action android:name="android.intent.action.EDIT" />
+
+                <data android:mimeType="audio/*" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".PlayerActivity2"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar2">
+
+        </activity>
+        <activity
             android:name=".SearchActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
@@ -106,6 +107,21 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar1" />
         <activity android:name=".ErrorActivity"></activity>
+        <receiver
+            android:name=".receivers.SongBroadCast"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="com.kpstv.youtube.ACTION_PLAY" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.kpstv.youtube.ACTION_PREVIOUS" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.kpstv.youtube.ACTION_NEXT" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

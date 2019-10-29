@@ -86,4 +86,6 @@
     <string name="history_title">Tap and hold the card</string>
     <string name="search_title">Change your region</string>
     <string name="search_text"><![CDATA[You can change Region from settings to get latest trend & viral songs from that particular region.]]></string>
+    <string name="channel_name">YTPlayer</string>
+    <string name="channel_description">Youtube Music Player</string>
 </resources>
