@@ -673,8 +673,8 @@ public class PlayerActivity extends AppCompatActivity {
                 @Override
                 protected void onExtractionComplete(SparseArray<YtFile> ytFiles, VideoMeta videoMeta) {
                     if (videoTitle.isEmpty() && videoMeta.getTitle() != null) {
-                        videoTitle = videoMeta.getTitle();
                         channelTitle = videoMeta.getAuthor();
+                        videoTitle = YTutils.setVideoTitle(videoMeta.getTitle());
                         mainTitle.setText(videoTitle);
                         collpaseView.setTextViewText(R.id.nTitle, videoTitle);
                         expandedView.setTextViewText(R.id.nTitle, videoTitle);
@@ -701,8 +701,8 @@ public class PlayerActivity extends AppCompatActivity {
 
             YTMeta ytMeta = new YTMeta(videoID);
             if (ytMeta.getVideMeta() != null) {
-                videoTitle = ytMeta.getVideMeta().getTitle();
                 channelTitle = ytMeta.getVideMeta().getAuthor();
+                videoTitle = YTutils.setVideoTitle(ytMeta.getVideMeta().getTitle());
                 imgUrl = ytMeta.getVideMeta().getImgUrl();
             }
 

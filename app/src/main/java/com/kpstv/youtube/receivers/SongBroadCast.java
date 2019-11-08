@@ -101,8 +101,8 @@ public class SongBroadCast extends BroadcastReceiver {
 
             YTMeta ytMeta = new YTMeta(videoID);
             if (ytMeta.getVideMeta() != null) {
-                MainActivity.videoTitle = ytMeta.getVideMeta().getTitle();
                 MainActivity.channelTitle = ytMeta.getVideMeta().getAuthor();
+                MainActivity.videoTitle = YTutils.setVideoTitle(ytMeta.getVideMeta().getTitle());
                 MainActivity.imgUrl = ytMeta.getVideMeta().getImgUrl();
             }
 

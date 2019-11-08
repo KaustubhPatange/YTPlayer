@@ -52,25 +52,23 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
     private final int VIEW_PROG = 0;
 
     private List<DiscoverModel> discoverModels;
-    Context con; String csvString,intentTitle;
-    private int visibleThreshold = 5; View.OnLongClickListener longClickListener;
-    private int lastVisibleItem, totalItems;
+    Context con; String csvString,intentTitle;View.OnLongClickListener longClickListener;
+    private int totalItems;
     ArrayList<Integer> adNumbers = new ArrayList<>();
-    private boolean loading,isScrolling; int scrollOutItems,currentItems;
-    private OnLoadMoreListener onLoadMoreListener;
+    private boolean loading;
 
-    public DiscoverAdapter(Context context, List<DiscoverModel> students, RecyclerView recyclerView, View.OnLongClickListener longClickListener,
-                           String data,String title) {
-        discoverModels = students;
+    public DiscoverAdapter(Context context, List<DiscoverModel> list, RecyclerView recyclerView, View.OnLongClickListener longClickListener,
+                           String data,String title,int maxSize) {
+        discoverModels = list;
         this.con = context;
         this.csvString = data;
         this.intentTitle = title;
         this.longClickListener = longClickListener;
-        if (recyclerView.getLayoutManager() instanceof LinearLayoutManager) {
+        this.totalItems = maxSize;
+        /*if (recyclerView.getLayoutManager() instanceof LinearLayoutManager) {
 
             final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView
                     .getLayoutManager();
-
 
             recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
@@ -84,8 +82,7 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
                 }
 
                 @Override
-                public void onScrolled(RecyclerView recyclerView,
-                                       int dx, int dy) {
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
                     currentItems = linearLayoutManager.getChildCount();
                     scrollOutItems = linearLayoutManager.findFirstVisibleItemPosition();
@@ -94,47 +91,62 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
                     {
                         isScrolling = false;
                         if (onLoadMoreListener != null) {
-                            onLoadMoreListener.onLoadMore();
+                         try {
+                             onLoadMoreListener.onLoadMore();
+                         }catch (Exception e) {e.printStackTrace();}
                         }
                         loading = true;
                     }
+
+                   *//* LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+
+                    if (!loading) {
+                        if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() ==
+                                discoverModels.size() - 1) {
+                            if (onLoadMoreListener != null) {
+                                onLoadMoreListener.onLoadMore();
+                            }
+                            loading = true;
+                        }
+                    }*//*
                 }
             });
-        }
+        }*/
     }
 
     @Override
     public int getItemViewType(int position) {
-        return discoverModels.get(position) != null ? VIEW_ITEM : VIEW_PROG;
+        try {
+            return discoverModels.get(position) != null ? VIEW_ITEM : VIEW_PROG;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return VIEW_ITEM;
+        }
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                       int viewType) {
         RecyclerView.ViewHolder vh;
-        if (viewType == VIEW_ITEM) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(
-                    R.layout.history_item, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(
+                R.layout.history_item, parent, false);
 
-            vh = new MyViewHolder(v);
-        } else {
-            View v = LayoutInflater.from(parent.getContext()).inflate(
-                    R.layout.progress_item, parent, false);
-
-            vh = new ProgressViewHolder(v);
-        }
+        vh = new MyViewHolder(v);
         return vh;
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof MyViewHolder) {
-            int total = discoverModels.size();
             final DiscoverModel model = discoverModels.get(position);
 
             final MyViewHolder viewHolder = ((MyViewHolder) holder);
 
-            viewHolder.authorText.setText(model.getAuthor());
+            if (position==discoverModels.size()-1 && position!=totalItems-1) {
+                viewHolder.progressBar.setVisibility(VISIBLE);
+            }else viewHolder.progressBar.setVisibility(GONE);
+
+            viewHolder.authorText.setText(model.getAuthor()+"");
             viewHolder.titleText.setText(model.getTitle());
             viewHolder.rate_percent.setText("#"+(position+1));
 
@@ -223,14 +235,19 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
         loading = false;
     }
 
+    public void setLoading() {
+        loading = true;
+    }
+
+    public boolean getLoaded() {
+        return loading;
+    }
+
     @Override
     public int getItemCount() {
         return discoverModels.size();
     }
 
-    public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
-        this.onLoadMoreListener = onLoadMoreListener;
-    }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -244,6 +261,7 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
         CardView mainCard;
         LinearLayout adLayout;
         AdView adView;
+        ProgressBar progressBar;
 
         public MyViewHolder(View v) {
             super(v);
@@ -257,6 +275,7 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
             this.mainCard = itemView.findViewById(R.id.cardView);
             this.adLayout = itemView.findViewById(R.id.adViewLayout);
             this.adView = itemView.findViewById(R.id.adView);
+            this.progressBar = itemView.findViewById(R.id.LprogressBar);
         }
     }
 

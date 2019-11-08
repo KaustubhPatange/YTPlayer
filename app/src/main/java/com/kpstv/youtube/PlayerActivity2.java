@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -29,8 +30,10 @@ import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.util.DisplayMetrics;
@@ -39,7 +42,9 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -99,6 +104,7 @@ import java.net.URLConnection;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.FileVisitOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -115,20 +121,22 @@ public class PlayerActivity2 extends AppCompatActivity {
 
     static String YouTubeUrl;
     static BlurImageView backImage;
-    ToolTipManager toolTipManager;
 
     String[] apikeys = new String[]{"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw", "AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
 
-    LinearLayout downloadButton;
     static ConstraintLayout mainlayout;
 
-    static TextView mainTitle, viewCount, currentDuration, totalDuration, warningText;
-    int likeCounts, dislikeCounts; static Activity activity;
+    static TextView mainTitle, viewCount, currentDuration, totalDuration, channelTitle;
+
+    static Activity activity;
+
+    static ImageButton previousFab, playFab, nextFab, repeatButton, downloadButton, playlistButton, youTubeButton;
+
+    ImageButton navigationDown;
 
     static ImageView mainImageView;
 
-    static ProgressBar mprogressBar, progressBar; String audioLink;
-    static FloatingActionButton previousFab, playFab, nextFab;
+    static ProgressBar mprogressBar; String audioLink;
 
     static IndicatorSeekBar indicatorSeekBar;
     private InterstitialAd mInterstitialAd;
@@ -141,14 +149,9 @@ public class PlayerActivity2 extends AppCompatActivity {
 
     AsyncTask<Void,Void,Void> setData;
 
+    int accentColor;
 
-/*    static ExoPlayer player;
-    static MediaSource mediaSource;
-    DefaultDataSourceFactory dataSourceFactory;
-    DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
-    TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory();
-    TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);*/
-
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -160,38 +163,88 @@ public class PlayerActivity2 extends AppCompatActivity {
 
         activity = this;
 
-        setContentView(R.layout.activity_player);
+        setContentView(R.layout.activity_player_new);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        accentColor = ContextCompat.getColor(this,R.color.colorAccent);
+
+      /*  Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        TextView tms = findViewById(R.id.termsText);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);*/
 
         preferences = getSharedPreferences("settings", MODE_PRIVATE);
-        toolTipManager = new ToolTipManager(PlayerActivity2.this);
 
         setTitle("");
 
         getAllViews();
 
         playFab.setOnClickListener(v -> changePlayBack(!MainActivity.isplaying));
-        nextFab.setOnClickListener(v -> {
+     /*   nextFab.setOnClickListener(v -> {
             MainActivity.playNext();
             if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                 setData.cancel(true);
             setData = new loadData();
             setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        });*/
+
+        nextFab.setOnTouchListener((v, motionEvent) -> {
+            switch (motionEvent.getAction()) {
+                case MotionEvent.ACTION_DOWN: {
+                    ImageButton view = (ImageButton ) v;
+                    view.setColorFilter(accentColor);
+                    v.invalidate();
+                    break;
+                }
+                case MotionEvent.ACTION_UP:
+
+                    MainActivity.playNext();
+                    if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
+                        setData.cancel(true);
+                    setData = new loadData();
+                    setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+                case MotionEvent.ACTION_CANCEL: {
+                    ImageButton view = (ImageButton) v;
+                    view.clearColorFilter();
+                    view.invalidate();
+                    break;
+                }
+            }
+            return true;
         });
-        previousFab.setOnClickListener(v -> {
+
+       /* previousFab.setOnClickListener(v -> {
             MainActivity.playPrevious();
             if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                 setData.cancel(true);
             setData = new loadData();
             setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        });
+        });*/
 
-        tms.setOnClickListener(v -> YTutils.StartURL("https://kaustubhpatange.github.io/YTPlayer", PlayerActivity2.this));
+       previousFab.setOnTouchListener((v, event) -> {
+           switch (event.getAction()) {
+               case MotionEvent.ACTION_DOWN: {
+                   ImageButton view = (ImageButton ) v;
+                   view.setColorFilter(accentColor);
+                   v.invalidate();
+                   break;
+               }
+               case MotionEvent.ACTION_UP:
+
+                   MainActivity.playPrevious();
+                   if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
+                       setData.cancel(true);
+                   setData = new loadData();
+                   setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+               case MotionEvent.ACTION_CANCEL: {
+                   ImageButton view = (ImageButton) v;
+                   view.clearColorFilter();
+                   view.invalidate();
+                   break;
+               }
+           }
+           return true;
+       });
 
         indicatorSeekBar.setOnSeekChangeListener(new OnSeekChangeListener() {
             @Override
@@ -224,17 +277,87 @@ public class PlayerActivity2 extends AppCompatActivity {
             return true;
         });
 
-        downloadButton.setOnClickListener(new View.OnClickListener() {
+        downloadButton.setOnTouchListener(new View.OnTouchListener() {
             @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
-            public void onClick(View v) {
-                if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                            100);
-                    return;
-                } else showListDialog();
+            public boolean onTouch(View v, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        ImageButton view = (ImageButton ) v;
+                        view.setColorFilter(accentColor);
+                        v.invalidate();
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP:
+
+                        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                != PackageManager.PERMISSION_GRANTED) {
+                            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                    100);
+                            return false;
+                        } else showListDialog();
+
+                    case MotionEvent.ACTION_CANCEL: {
+                        ImageButton view = (ImageButton) v;
+                        view.clearColorFilter();
+                        view.invalidate();
+                        break;
+                    }
+                }
+                return true;
             }
+        });
+
+        youTubeButton.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN: {
+                    ImageButton view = (ImageButton ) v;
+                    view.setColorFilter(accentColor);
+                    v.invalidate();
+                    break;
+                }
+                case MotionEvent.ACTION_UP:
+
+                    YTutils.StartURLIntent(YouTubeUrl, this);
+
+                case MotionEvent.ACTION_CANCEL: {
+                    ImageButton view = (ImageButton) v;
+                    view.clearColorFilter();
+                    view.invalidate();
+                    break;
+                }
+            }
+            return true;
+        });
+
+        playlistButton.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN: {
+                    ImageButton view = (ImageButton ) v;
+                    view.setColorFilter(accentColor);
+                    v.invalidate();
+                    break;
+                }
+                case MotionEvent.ACTION_UP:
+
+
+                case MotionEvent.ACTION_CANCEL: {
+                    ImageButton view = (ImageButton) v;
+                    view.clearColorFilter();
+                    view.invalidate();
+                    break;
+                }
+            }
+            return true;
+        });
+
+        repeatButton.setOnClickListener(v1->{
+            MainActivity.isLoop = !MainActivity.isLoop;
+            makeRepeat(MainActivity.isLoop);
+        });
+
+        navigationDown.setOnClickListener(view -> {
+            callFinish();
         });
     }
 
@@ -242,9 +365,14 @@ public class PlayerActivity2 extends AppCompatActivity {
         mainlayout.setVisibility(View.VISIBLE);
         mprogressBar.setVisibility(View.GONE);
         mainTitle.setText(MainActivity.videoTitle);
+        channelTitle.setText(MainActivity.channelTitle);
         viewCount.setText(MainActivity.viewCounts);
-        backImage.setImageBitmap(MainActivity.bitmapIcon);
-        backImage.setBlur(5);
+
+        backImage.setColorFilter(MainActivity.nColor);
+
+      //  backImage.setImageBitmap(MainActivity.bitmapIcon);
+     //   backImage.setBlur(5);
+        makeRepeat(MainActivity.isLoop);
         mainImageView.setImageBitmap(MainActivity.bitmapIcon);
         totalDuration.setText(YTutils.milliSecondsToTimer(MainActivity.total_duration));
         detectPlayback();
@@ -261,9 +389,14 @@ public class PlayerActivity2 extends AppCompatActivity {
                     .into(new CustomTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            MainActivity.bitmapIcon = resource;
-                            loadAgain();
-                            MainActivity.rebuildNotification();
+                            Palette.generateAsync(resource, new Palette.PaletteAsyncListener() {
+                                public void onGenerated(Palette palette) {
+                                    MainActivity.bitmapIcon = resource;
+                                    MainActivity.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+                                    loadAgain();
+                                    MainActivity.rebuildNotification();
+                                }
+                            });
                         }
 
                         @Override
@@ -288,8 +421,8 @@ public class PlayerActivity2 extends AppCompatActivity {
 
             YTMeta ytMeta = new YTMeta(videoID);
             if (ytMeta.getVideMeta() != null) {
-                MainActivity.videoTitle = ytMeta.getVideMeta().getTitle();
                 MainActivity.channelTitle = ytMeta.getVideMeta().getAuthor();
+                MainActivity.videoTitle = YTutils.setVideoTitle(ytMeta.getVideMeta().getTitle());
                 MainActivity.imgUrl = ytMeta.getVideMeta().getImgUrl();
             }
 
@@ -340,126 +473,15 @@ public class PlayerActivity2 extends AppCompatActivity {
         }
     }
 
-  /*  @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == 200) {
-            onClear();
-            yturls = YTutils.convertArrayToArrayList(getIntent().getStringArrayExtra("youtubelink"));
-            YouTubeUrl = yturls.get(0);
-            datasync = new getData();
-            datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
-        }
-    }*/
-
     @Override
     protected void onResume() {
         super.onResume();
         loadAgain();
     }
 
-
-   /* @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        String NewIntent = intent.getStringExtra("isNewIntent");
-        if (NewIntent==null) NewIntent="false";
-        sendActivity = intent.getStringExtra("sendActivity");
-        csvString = intent.getStringExtra("data_csv");
-        intentTitle = intent.getStringExtra("title");
-        String changePlayBack = intent.getStringExtra("changePlayback");
-        Log.e("PlayBackState",changePlayBack+"");
-        if (changePlayBack!=null && changePlayBack.equals("true")) {
-            changePlayBack(false);
-        }else if (changePlayBack!=null && changePlayBack.equals("false"))
-            changePlayBack(true);
-
-        if (intent.getData()!=null) {
-            Log.e("Firing","intent.getData()");
-            if(yturls.size()>1) {
-                // Insert to playlist and play
-                yturls.add(ytIndex,intent.getData().toString());
-                ytIndex=yturls.size()-1;
-                YouTubeUrl = intent.getData().toString();
-            }else {
-                YouTubeUrl = intent.getData().toString();
-            }
-            datasync = new getData();
-            datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
-            return;
-        }
-
-        String[] arr = intent.getStringArrayExtra("youtubelink");
-        if (arr!=null && !NewIntent.equals("true")) {
-            Log.e("Firing","arr!=null");
-            ytIndex = intent.getIntExtra("playfromIndex", 0);
-            yturls = YTutils.convertArrayToArrayList(arr);
-            YouTubeUrl = yturls.get(ytIndex);
-            datasync = new getData();
-            datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
-            return;
-        }
-        CheckIntent(intent);
-        String action = intent.getStringExtra("DO");
-        Log.e("PRINTING_RESULT", "Code: " + action);
-        if (action == null) return;
-        switch (action) {
-            case "play":
-                changePlayBack(!isplaying);
-                break;
-            case "next":
-                playNext();
-                break;
-            case "previous":
-                playPrevious();
-                break;
-            case "add":
-                YTutils.addToPlayList(this, YouTubeUrl, total_duration / 1000);
-                break;
-            case "focus":
-                Log.e("FocusWindow","true");
-                this.getCurrentFocus();
-                break;
-        }
-    }
-*/
-  /*  boolean CheckIntent(Intent incoming) {
-        if (Intent.ACTION_SEND.equals(incoming.getAction())
-                && incoming.getType() != null && "text/plain".equals(incoming.getType())) {
-            Log.e("Firing","checkIntent");
-            String ytLink = incoming.getStringExtra(Intent.EXTRA_TEXT);
-            Log.e("IntentYTLink",ytLink+"");
-            if (YTutils.isValidID(ytLink)){
-                yturls = new ArrayList<>();
-                yturls.add(ytLink);
-                ytIndex=0;
-                YouTubeUrl = ytLink;
-                datasync = new getData();
-                datasync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, YTutils.getVideoID(YouTubeUrl));
-                return true;
-            }else if (ytLink.contains("open.spotify.com")&&ytLink.contains("/track/")) {
-                new makeData(ytLink).execute();
-                return true;
-            }else {
-                YTutils.showAlert(PlayerActivity2.this,"Callback Error",
-                        "The requested url is not a valid YouTube url", true);
-                return true;
-            }
-        }
-        return false;
-    }*/
-
-
-
-
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        /*if (isSameActivity()) {
-            startActivity(new Intent(this, MainActivity.class));
-        }else
-        {
-            super.onBackPressed();
-        }*/
     }
 
     @Override
@@ -468,7 +490,7 @@ public class PlayerActivity2 extends AppCompatActivity {
         super.onDestroy();
     }
 
-    @Override
+    /*@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.player_menu, menu);
         return true;
@@ -495,14 +517,14 @@ public class PlayerActivity2 extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
-    @Override
+   /* @Override
     public boolean onSupportNavigateUp() {
         Log.e("OnSupportFinished","called");
         callFinish();
         return false;
-    }
+    }*/
 
     public static void detectPlayback() {
         if (MainActivity.isplaying)
@@ -525,29 +547,40 @@ public class PlayerActivity2 extends AppCompatActivity {
     }
 
     public static void makePlay() {
-        playFab.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_play));
+        playFab.setImageDrawable(activity.getResources().getDrawable(R.drawable.play));
     }
 
     public static void makePause() {
-        playFab.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_pause));
+        playFab.setImageDrawable(activity.getResources().getDrawable(R.drawable.pause));
+    }
+
+    public static void makeRepeat(boolean value) {
+        if (value)
+            repeatButton.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_repeat_true));
+        else
+            repeatButton.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_repeat));
     }
 
     private void getAllViews() {
-        progressBar = findViewById(R.id.progress_circular);
-        warningText = findViewById(R.id.warningText);
-        downloadButton = findViewById(R.id.downloadlayout);
+        navigationDown = findViewById(R.id.navigation_down);
         mprogressBar = findViewById(R.id.mainprogress);
         mainTitle = findViewById(R.id.maintitle);
         viewCount = findViewById(R.id.mainviews);
         currentDuration = findViewById(R.id.currentDur);
         totalDuration = findViewById(R.id.totalDur);
         mainImageView = findViewById(R.id.mainImage);
-        previousFab = findViewById(R.id.rewindButton);
-        playFab = findViewById(R.id.play_pause_button);
-        nextFab = findViewById(R.id.forwardButton);
         indicatorSeekBar = findViewById(R.id.seekBar);
         mainlayout = findViewById(R.id.mainlayout);
         backImage = findViewById(R.id.background_image);
+        channelTitle = findViewById(R.id.channelTitle);
+        youTubeButton = findViewById(R.id.youtube_IButton);
+
+        previousFab = findViewById(R.id.previous_IButton);
+        playFab = findViewById(R.id.playPause_IButton);
+        nextFab = findViewById(R.id.forward_IButton);
+        repeatButton = findViewById(R.id.repeat_IButton);
+        downloadButton = findViewById(R.id.download_IButton);
+        playlistButton = findViewById(R.id.currentPlaylist_IButton);
     }
 
     void callFinish() {
@@ -557,7 +590,6 @@ public class PlayerActivity2 extends AppCompatActivity {
         i.putExtra("yturl",YouTubeUrl);
         i.putExtra("is_playing",toput);
         i.putExtra("b_title",mainTitle.getText().toString());
-       // Log.e("sendActivity",sendActivity+"");
         i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(i);
     }
@@ -566,14 +598,14 @@ public class PlayerActivity2 extends AppCompatActivity {
         if (mInterstitialAd.isLoaded()) {
             mInterstitialAd.show();
         } else {
-            Log.e("TAG", "The interstitial wasn't loaded yet.");
+            Log.e("PlayerActivity", "The interstitial wasn't loaded yet.");
         }
     }
 
     void LoadAd() {
         //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712, Use ca-app-pub-1763645001743174/8453566324
         mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-1763645001743174/8453566324");
+        mInterstitialAd.setAdUnitId("ca-app-pub-xxx1763645001743174/8453566324");
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
     }

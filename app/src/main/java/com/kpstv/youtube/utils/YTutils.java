@@ -43,6 +43,7 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 import com.kpstv.youtube.BuildConfig;
+import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 
@@ -78,6 +79,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -240,6 +243,19 @@ public class YTutils {
         });
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    public static String setVideoTitle(String title) {
+        Log.e("VideoTitle",title);
+        String t = title;
+        if (t.contains("-")) {
+            t = t.split("-")[1].trim();
+            MainActivity.channelTitle = title.split("-")[0];
+        } // (Mark orision)
+        if (t.contains("(")) {
+            t = t.split("\\(")[0].trim();
+        }
+        return t;
     }
 
     public static void Vibrate(Context context) {

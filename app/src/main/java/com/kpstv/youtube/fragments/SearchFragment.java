@@ -51,7 +51,7 @@ import java.util.ArrayList;
 public class SearchFragment extends Fragment {
 
     View v;
-    RecyclerView recyclerView; Fragment discoverFrag;
+    RecyclerView recyclerView; Fragment discoverFrag, SearchFrag;
     static RecyclerView.LayoutManager layoutManager;
     SearchAdapter adapter; boolean networkCreated; ArrayList<String> images;
     ArrayList<SearchModel> models; RelativeLayout progresslayout;
@@ -168,10 +168,24 @@ public class SearchFragment extends Fragment {
                     Toast.makeText(activity, getString(R.string.error), Toast.LENGTH_SHORT).show();
                     return;
                 }
-                Intent intent = new Intent(activity,SearchActivity.class);
+               /* Intent intent = new Intent(activity,SearchActivity.class);
                 intent.putExtra("data_csv",SpotifyViralCSV);
                 activity.startActivity(intent);
-                activity.overridePendingTransition(R.anim.right_enter,R.anim.left_exit);
+                activity.overridePendingTransition(R.anim.right_enter,R.anim.left_exit);*/
+
+                FrameLayout layout = activity.findViewById(R.id.fragment_container);
+                if (layout!=null) {
+                    SearchFrag = new SFragment();
+                    Bundle args = new Bundle();
+                    args.putString("data_csv",SpotifyViralCSV);
+                    SearchFrag.setArguments(args);
+                    FragmentManager manager = getActivity().getSupportFragmentManager();
+                    FragmentTransaction ft = manager.beginTransaction();
+                    ft.setCustomAnimations(android.R.anim.fade_in,
+                            android.R.anim.fade_out);
+                    ft.replace(R.id.fragment_container, SearchFrag);
+                    ft.commit();
+                }
             });
 
             moreTrend.setOnClickListener(v -> {

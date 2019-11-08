@@ -89,6 +89,11 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
     }
 
     @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
+
+    @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent,
                                            int viewType) {
         View view = LayoutInflater.from(parent.getContext())

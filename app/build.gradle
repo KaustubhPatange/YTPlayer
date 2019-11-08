@@ -35,6 +35,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads:17.1.2'
     implementation 'com.github.spyhunter99:super-tooltip-aar:4.0.2'
     implementation 'cat.ereza:customactivityoncrash:2.2.0'
+    implementation 'com.android.support:palette-v7:28.0.0'
     implementation 'com.gongwen:swipeback:1.0.2'
     implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     implementation 'com.android.support:appcompat-v7:28.0.0'

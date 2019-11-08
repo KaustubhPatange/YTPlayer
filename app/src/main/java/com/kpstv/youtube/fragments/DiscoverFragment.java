@@ -19,11 +19,13 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.kpstv.youtube.HistoryBottomSheet;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.DiscoverAdapter;
+import com.kpstv.youtube.adapters.DiscoverAdapter2;
 import com.kpstv.youtube.models.DiscoverModel;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTSearch;
@@ -72,7 +74,7 @@ public class DiscoverFragment extends Fragment {
             toolbar.setNavigationOnClickListener(view -> MainActivity.loadSearchFrag());
 
             activity = getActivity();
-            
+
             preferences = activity.getSharedPreferences("appSettings",Context.MODE_PRIVATE);
             if (preferences!=null) {
                 region = preferences.getString("pref_select_region","global");
@@ -88,7 +90,7 @@ public class DiscoverFragment extends Fragment {
             directItems = new ArrayList<>();
 
             Bundle args = getArguments();
-     //       checkIntent(intent);
+            //       checkIntent(intent);
             csvString = args.getString("data_csv");
             intentTitle = args.getString("title");
 
@@ -110,7 +112,7 @@ public class DiscoverFragment extends Fragment {
                 toolbar.setTitle(intentTitle+" ("+ csvlines.size() +")");
             }
             new loadInitialData().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            
+
             networkCreated = true;
         }
         return v;
@@ -157,12 +159,35 @@ public class DiscoverFragment extends Fragment {
             mLayoutManager = new LinearLayoutManager(activity);
             mRecyclerView.setLayoutManager(mLayoutManager);
             mAdapter = new DiscoverAdapter(activity, discoverModels, mRecyclerView,
-                    recyclerItemLongListener,csvString,intentTitle);
+                    recyclerItemLongListener,csvString,intentTitle,totalItems);
             mRecyclerView.setAdapter(mAdapter);
 
 
             mRecyclerView.setVisibility(View.VISIBLE);
-            mAdapter.setOnLoadMoreListener(() -> {
+            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                    Log.e("Size_Comparison","Discover Size: "+discoverModels.size()+", Total Items: "+totalItems);
+                    if (mAdapter.getLoaded() || discoverModels.size() >= totalItems) return;
+                    int visibleItemCount = mLayoutManager.getChildCount();
+                    int totalItemCount = mLayoutManager.getItemCount();
+                    int pastVisibleItems = mLayoutManager.findFirstVisibleItemPosition();
+                    if (pastVisibleItems + visibleItemCount >= totalItemCount) {
+
+                        mAdapter.setLoading();
+
+                        handler.postDelayed(() -> {
+                            loadTask = new loadFurtherData();
+                            loadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                        }, 1000);
+                    }
+
+                }
+            });
+            /*
+            mRecyclerView.addOnScrollListener(scrollListener);*/
+           /* mAdapter.setOnLoadMoreListener(() -> {
                 try {
                     Log.e("SizeofArray",csvlines.size()+"");
                     if (csvlines.isEmpty()&&directItems.isEmpty())
@@ -171,23 +196,20 @@ public class DiscoverFragment extends Fragment {
                     discoverModels.add(null);
                     mAdapter.notifyItemInserted(discoverModels.size() - 1);
 
-                    handler.postDelayed(() -> {
-                        loadTask = new loadFurtherData();
-                        loadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                    }, 2000);
                 }catch (Exception ignored){}
-            });
+            });*/
+
             super.onPostExecute(aVoid);
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             HttpHandler handler = new HttpHandler();
-            if (intentTitle.contains("Viral")) {
-                {
-                    csvString = handler.makeServiceCall("https://spotifycharts.com/viral/"+region+"/daily/latest/download");
-                }
-            }else
+            if (intentTitle.contains("Viral"))
+            {
+                csvString = handler.makeServiceCall("https://spotifycharts.com/viral/"+region+"/daily/latest/download");
+            }
+            else
             {
                 csvString = handler.makeServiceCall("https://spotifycharts.com/regional/"+region+"/daily/latest/download");
             }
@@ -222,14 +244,14 @@ public class DiscoverFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            mAdapter.notifyDataSetChanged();
             mAdapter.setLoaded();
+            mAdapter.notifyDataSetChanged();
             super.onPostExecute(aVoid);
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            discoverModels.remove(discoverModels.size() - 1);
+         //   discoverModels.remove(discoverModels.size() - 1);
             if (isdirectData)
                 CommonLoad_direct();
             else
@@ -244,15 +266,18 @@ public class DiscoverFragment extends Fragment {
                 CommonLoad();
                 return;
             }
-            for (int i=0;i<10;i++) {
-                String[] infos = directItems.get(i).split(",");
+            int default_load = 10;
+            if (directItems.size()<=9)
+                default_load = directItems.size();
+            for (int i=0;i<default_load;i++) {
+                String[] infos = directItems.get(i).split("\\|");
                 String videoID =infos[2];
                 discoverModels.add(new DiscoverModel(
                         infos[0],infos[1],YTutils.getImageUrlID(videoID),
                         YTutils.getYtUrl(videoID)
                 ));
             }
-            directItems.subList(0,10).clear();
+            directItems.subList(0,default_load).clear();
         }else CommonLoad();
     }
 
@@ -277,11 +302,11 @@ public class DiscoverFragment extends Fragment {
 
             final String videoId = ytSearch.getVideoIDs().get(0);
             String imgurl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
-            if (!main.contains(title+","))
+            if (!main.startsWith(title+"|"))
             {
-                builder.append("\n").append(title).append(",").append(author).append(",")
+                builder.append("\n").append(title).append("|").append(author).append("|")
                         .append(videoId);
-                Log.e("AddedItem",title);
+                Log.e("AddedItem",title+", YTUrl: "+ytSearch.getVideoIDs().get(0)+"");
             }
             discoverModels.add(new DiscoverModel(
                     title,author,imgurl,"https://www.youtube.com/watch?v="+videoId

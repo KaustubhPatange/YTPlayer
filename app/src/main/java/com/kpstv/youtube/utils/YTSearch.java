@@ -23,7 +23,9 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Base64;
 
 public class YTSearch {
 
@@ -31,14 +33,14 @@ public class YTSearch {
 
     public YTSearch(String query) {
 
-        String tosearch = query.replace(" ","+")
+       /* String tosearch = query.replace(" ","+")
                 .replace("&#039;","'")
                 .replace("&#038;","%26")
                 .replace(",","%2");
-
+*/
         videoIDs = new ArrayList<>();
         try {
-            String url = "https://www.youtube.com/results?search_query="+tosearch;
+            String url = "https://www.youtube.com/results?search_query="+ URLEncoder.encode(query);
             URLConnection connection = (new URL(url)).openConnection();
             connection.connect();
             InputStream in = connection.getInputStream();

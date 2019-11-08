@@ -12,11 +12,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.StrictMode;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
@@ -24,9 +26,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.graphics.Palette;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -66,6 +71,7 @@ import com.kpstv.youtube.fragments.HistoryFragment;
 import com.kpstv.youtube.fragments.NCFragment;
 import com.kpstv.youtube.fragments.OPlaylistFragment;
 import com.kpstv.youtube.fragments.PlaylistFragment;
+import com.kpstv.youtube.fragments.SFragment;
 import com.kpstv.youtube.fragments.SearchFragment;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.receivers.SongBroadCast;
@@ -224,6 +230,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             }
         }*/
 
+
         fragmentManager = getSupportFragmentManager();
         HistoryFrag = new HistoryFragment();
         SearchFrag = new SearchFragment();
@@ -270,6 +277,10 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
 
     @Override
     public void onBackPressed() {
+        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof SFragment) {
+            loadFragment(SearchFrag);
+            return;
+        }
         if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof DiscoverFragment) {
             loadFragment(SearchFrag);
             return;
@@ -489,7 +500,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     static boolean isLoop=false;
     static Handler mHandler = new Handler();
     static long total_duration = 0;
-    static int total_seconds;
+    static int total_seconds; static int nColor;
     static ArrayList<String> yturls;
     static int ytIndex = 0;
 
@@ -505,7 +516,13 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                     .into(new CustomTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            bitmapIcon = resource;
+                            Palette.generateAsync(resource, new Palette.PaletteAsyncListener() {
+                                public void onGenerated(Palette palette) {
+                                    bitmapIcon = resource;
+                                    nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+                                }
+                            });
+
                         }
 
                         @Override
@@ -554,8 +571,8 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                 @Override
                 protected void onExtractionComplete(SparseArray<YtFile> ytFiles, VideoMeta videoMeta) {
                     if (videoTitle.isEmpty() && videoMeta.getTitle() != null) {
-                        videoTitle = videoMeta.getTitle();
                         channelTitle = videoMeta.getAuthor();
+                        videoTitle = YTutils.setVideoTitle(videoMeta.getTitle());
                     }
                 }
             }.execute(YTutils.getYtUrl(videoID));
@@ -569,8 +586,8 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
 
             YTMeta ytMeta = new YTMeta(videoID);
             if (ytMeta.getVideMeta() != null) {
-                videoTitle = ytMeta.getVideMeta().getTitle();
                 channelTitle = ytMeta.getVideMeta().getAuthor();
+                videoTitle = YTutils.setVideoTitle(ytMeta.getVideMeta().getTitle());
                 imgUrl = ytMeta.getVideMeta().getImgUrl();
             }
 
@@ -659,6 +676,12 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     }
 
     private static void continueinMainThread(String link) {
+
+        // Let's hold up here... and see how I modify the videoTitle
+        /*if (videoTitle.contains("(") && videoTitle.contains(")")) {
+            videoTitle.replaceFirst("\\(*.?\\)","");
+        }*/
+
         player.stop();
         player.release();
         mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(link));
@@ -756,7 +779,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                 .addAction(icon, "Pause", pausePendingIntent)
                 .addAction(R.drawable.ic_next_notify, "Next", nextPendingIntent)
                 .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
-                        .setShowActionsInCompactView(1))
+                        .setShowActionsInCompactView(0,1,2))
                 .setContentTitle(videoTitle)
                 .setOngoing(setgoing)
                 .setSound(null)
@@ -1052,7 +1075,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = getString(R.string.channel_name);
             String description = getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_LOW;
+            int importance = NotificationManager.IMPORTANCE_HIGH;
             notificationChannel = new NotificationChannel("channel_01", name, importance);
             notificationChannel.setDescription(description);
             notificationManager = getSystemService(NotificationManager.class);
