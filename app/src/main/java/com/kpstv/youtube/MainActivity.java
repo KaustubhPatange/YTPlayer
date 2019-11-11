@@ -73,6 +73,7 @@ import com.kpstv.youtube.fragments.OPlaylistFragment;
 import com.kpstv.youtube.fragments.PlaylistFragment;
 import com.kpstv.youtube.fragments.SFragment;
 import com.kpstv.youtube.fragments.SearchFragment;
+import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.receivers.SongBroadCast;
 import com.kpstv.youtube.utils.HttpHandler;
@@ -137,6 +138,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
 
     static String[] apikeys = new String[]{"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw", "AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
 
+    public static ArrayList<NPlayModel> nPlayModels;
     public static ExoPlayer player;
     public static MediaSource mediaSource;
     public static DefaultDataSourceFactory dataSourceFactory;
@@ -166,6 +168,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
 
         ytConfigs = new ArrayList<>();
         yturls = new ArrayList<>();
+        nPlayModels = new ArrayList<>();
 
         // Remove this code afterwards...
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -270,6 +273,17 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             LoadVideo.cancel(true);
         }
         yturls.addAll(Arrays.asList(ytUrls));
+        videoID = YTutils.getVideoID(yturls.get(position));
+        LoadVideo = new loadVideo();
+        LoadVideo.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videoID);
+    }
+
+    public static void ChangeVideo(int position) {
+        if (LoadVideo !=null && LoadVideo.getStatus() == AsyncTask.Status.RUNNING)
+        {
+            player.stop(); player.release();
+            LoadVideo.cancel(true);
+        }
         videoID = YTutils.getVideoID(yturls.get(position));
         LoadVideo = new loadVideo();
         LoadVideo.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videoID);
@@ -501,7 +515,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     static Handler mHandler = new Handler();
     static long total_duration = 0;
     static int total_seconds; static int nColor;
-    static ArrayList<String> yturls;
+    public static ArrayList<String> yturls;
     static int ytIndex = 0;
 
     static class loadVideo extends AsyncTask<String,String,Void> {
@@ -773,7 +787,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         }
         builder = new NotificationCompat.Builder(activity, "channel_01")
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setPriority(Notification.PRIORITY_LOW)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setSmallIcon(R.drawable.ic_music)
                 .addAction(R.drawable.ic_previous_notify, "Previous", prevPendingIntent)
                 .addAction(icon, "Pause", pausePendingIntent)
@@ -788,6 +802,38 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                 .setLargeIcon(bitmapIcon);
 
         notificationManagerCompat.notify(1, builder.build());
+    }
+
+    public void createNotification() {
+
+        /** Next song Listener */
+        Intent newintent = new Intent(this, SongBroadCast.class);
+        newintent.setAction("com.kpstv.youtube.ACTION_NEXT");
+        nextPendingIntent = PendingIntent.getBroadcast(this, 1, newintent, 0);
+        /** Previous song Listener */
+        newintent = new Intent(this, SongBroadCast.class);
+        newintent.setAction("com.kpstv.youtube.ACTION_PREVIOUS");
+        prevPendingIntent = PendingIntent.getBroadcast(this, 2, newintent, 0);
+        /** Play or Pause listener */
+        newintent = new Intent(this, SongBroadCast.class);
+        newintent.setAction("com.kpstv.youtube.ACTION_PLAY");
+        pausePendingIntent = PendingIntent.getBroadcast(this, 3, newintent, 0);
+        /** Focus on Click Listener */
+        newintent = new Intent(MainActivity.this, MainActivity.class);
+        newintent.putExtra("DO", "focus");
+        clickPendingIntent = PendingIntent.getActivity(this, 4, newintent, 0);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            notificationChannel = new NotificationChannel("channel_01", name, importance);
+            notificationChannel.setDescription(description);
+            notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        notificationManagerCompat = NotificationManagerCompat.from(this);
     }
 
     public static void changePlayBack(boolean isplay) {
@@ -1041,71 +1087,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
 
     }
 
-    public void createNotification() {
 
-        /** Next song Listener */
-        Intent newintent = new Intent(this, SongBroadCast.class);
-        newintent.setAction("com.kpstv.youtube.ACTION_NEXT");
-        nextPendingIntent = PendingIntent.getBroadcast(this, 1, newintent, 0);
-        /** Previous song Listener */
-        newintent = new Intent(this, SongBroadCast.class);
-        newintent.setAction("com.kpstv.youtube.ACTION_PREVIOUS");
-        prevPendingIntent = PendingIntent.getBroadcast(this, 2, newintent, 0);
-        /** Play or Pause listener */
-        newintent = new Intent(this, SongBroadCast.class);
-        newintent.setAction("com.kpstv.youtube.ACTION_PLAY");
-        pausePendingIntent = PendingIntent.getBroadcast(this, 3, newintent, 0);
-       /* *//*
-        Intent newintent = new Intent(MainActivity.this, MainActivity.class);
-        newintent.putExtra("DO", "next");
-        nextPendingIntent = PendingIntent.getActivity(this, 1, newintent, 0);
-        *//** Previous song Listener *//*
-        newintent = new Intent(MainActivity.this, MainActivity.class);
-        newintent.putExtra("DO", "previous");
-        prevPendingIntent = PendingIntent.getActivity(this, 2, newintent, 0);
-        *//** Play or Pause listener *//*
-        newintent = new Intent(MainActivity.this, MainActivity.class);
-        newintent.putExtra("DO", "play");
-        pausePendingIntent = PendingIntent.getActivity(this, 0, newintent, 0);
-        *//** Focus on Click Listener */
-        newintent = new Intent(MainActivity.this, MainActivity.class);
-        newintent.putExtra("DO", "focus");
-        clickPendingIntent = PendingIntent.getActivity(this, 4, newintent, 0);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.channel_name);
-            String description = getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-            notificationChannel = new NotificationChannel("channel_01", name, importance);
-            notificationChannel.setDescription(description);
-            notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(notificationChannel);
-        }
-
-        notificationManagerCompat = NotificationManagerCompat.from(this);
-
-       /* builder = new NotificationCompat.Builder(this, "channel_01")
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setSmallIcon(R.drawable.ic_music)
-                .addAction(R.drawable.ic_previous_notify, "Previous", prevPendingIntent)
-                .addAction(R.drawable.ic_play_notify, "Pause", pausePendingIntent)
-                .addAction(R.drawable.ic_next_notify, "Next", nextPendingIntent)
-                .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
-                        .setShowActionsInCompactView(1))
-                .setContentTitle("Wonderful music")
-                .setContentText("My Awesome Band")
-                .setLargeIcon(albumArtBitmap)
-                .build();*/
-
-        /*builder = new NotificationCompat.Builder(this, "channel_01")
-                .setSmallIcon(R.drawable.ic_music)
-                .setContentTitle("YTApp")
-                .setContent(collpaseView)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setCustomBigContentView(expandedView);*/
-
-       // notification = builder.build();
-    }
 
    /* private void setListener() {
         // Play or Pause listener

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="EqualizerView">
+        <attr name="barColor" format="color" />
+        <attr name="barCount" format="integer" />
+        <attr name="barWidth" format="dimension" />
+
+        <attr name="marginLeft" format="dimension" />
+        <attr name="marginRight" format="dimension" />
+
+        <attr name="animationDuration" format="integer" />
+        <attr name="animationValueCount" format="integer" />
+
+        <attr name="runInBatterySaveMode" format="boolean" />
+    </declare-styleable>
+
+</resources>

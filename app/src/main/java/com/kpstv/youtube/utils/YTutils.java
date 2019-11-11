@@ -249,13 +249,32 @@ public class YTutils {
         Log.e("VideoTitle",title);
         String t = title;
         if (t.contains("-")) {
-            t = t.split("-")[1].trim();
+            t = t.split("\\-")[1].trim();
             MainActivity.channelTitle = title.split("-")[0];
         } // (Mark orision)
         if (t.contains("(")) {
             t = t.split("\\(")[0].trim();
         }
         return t;
+    }
+    public static String getVideoTitle(String title) {
+        String t = title;
+        if (t.contains("-")) {
+            t = t.split("\\-")[1].trim();
+        }
+        if (t.contains("(")) {
+            t = t.split("\\(")[0].trim();
+        }
+        return t;
+    }
+
+    public static String getChannelTitle(String title, String defaulttitle) {
+        if (title.contains("-")) {
+            String t = title;
+            t = t.split("\\-")[0].trim();
+            return t;
+        }else
+        return defaulttitle;
     }
 
     public static void Vibrate(Context context) {
@@ -351,6 +370,11 @@ public class YTutils {
             stringBuilder.append(strArray.get(i)).append("\n");
         }
         return stringBuilder.toString();
+    }
+    public static String[] convertListToArrayMethod(ArrayList<String> strArray) {
+        String[] arr = new String[strArray.size()];
+        arr = strArray.toArray(arr);
+        return arr;
     }
     public static String getTodayDate() {
         Date c = Calendar.getInstance().getTime();

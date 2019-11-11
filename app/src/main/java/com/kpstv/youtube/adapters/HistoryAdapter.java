@@ -181,7 +181,12 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
                 intent.putExtra("youtubelink",new String[]{ ytUrl });
                 con.startActivity(intent);
                 activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);*/
-                MainActivity.PlayVideo(new String[]{ ytUrl });
+
+               String[] arr = new String[dataSet.size()];
+               for (int i = 0; i<arr.length;i++) {
+                   arr[i] = dataSet.get(i).split("\\|")[0];
+               }
+               MainActivity.PlayVideo(arr,pos);
             });
 
             viewHolder.dateText.setText(toput);

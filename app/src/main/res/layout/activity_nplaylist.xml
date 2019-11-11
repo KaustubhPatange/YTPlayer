@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="@color/black"
+    android:layout_height="match_parent"
+    tools:context=".NPlaylistActivity">
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"/>
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+      <LinearLayout
+          android:orientation="vertical"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+          <LinearLayout
+              android:padding="20dp"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+              <TextView
+                  android:textColor="@color/white"
+                  android:textStyle="bold"
+                  android:fontFamily="@font/dmsans_font"
+                  android:textSize="17sp"
+                  android:text="Now Playing"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"/>
+
+              <android.support.constraint.ConstraintLayout
+                  android:layout_marginTop="10dp"
+                  android:paddingTop="10dp"
+                  android:paddingBottom="10dp"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content">
+
+                  <ImageView
+                      android:id="@+id/cImage"
+                      android:layout_width="80dp"
+                      android:layout_height="45dp"
+                      android:scaleType="fitXY"
+                      app:layout_constraintStart_toStartOf="parent"
+                      app:layout_constraintBottom_toBottomOf="parent"
+                      app:layout_constraintTop_toTopOf="parent" />
+
+                  <TextView
+                      android:layout_marginStart="10dp"
+                      android:id="@+id/cTitle"
+                      android:layout_width="0dp"
+                      android:layout_height="wrap_content"
+                      android:text="Title"
+                      android:textSize="16sp"
+                      android:textColor="@color/white"
+                      app:layout_constraintBottom_toTopOf="@id/cAuthor"
+                      app:layout_constraintStart_toEndOf="@+id/cImage"
+                      app:layout_constraintTop_toTopOf="parent" />
+
+                  <TextView
+                      android:layout_marginStart="10dp"
+                      android:id="@+id/cAuthor"
+                      android:layout_width="0dp"
+                      android:layout_height="wrap_content"
+                      android:text="Subtitle"
+                      app:layout_constraintBottom_toBottomOf="parent"
+                      app:layout_constraintStart_toEndOf="@+id/cImage"
+                      app:layout_constraintTop_toBottomOf="@id/cTitle" />
+
+              </android.support.constraint.ConstraintLayout>
+
+              <TextView
+                  android:layout_marginTop="15dp"
+                  android:textColor="@color/white"
+                  android:textStyle="bold"
+                  android:fontFamily="@font/dmsans_font"
+                  android:textSize="17sp"
+                  android:text="Next Song"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"/>
+          </LinearLayout>
+          <android.support.v7.widget.RecyclerView
+              android:id="@+id/my_recycler_view"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"/>
+      </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+</android.support.design.widget.CoordinatorLayout>

@@ -120,7 +120,7 @@ import at.huber.youtubeExtractor.YtFile;
 public class PlayerActivity2 extends AppCompatActivity {
 
     static String YouTubeUrl;
-    static BlurImageView backImage;
+    static ImageView backImage;
 
     String[] apikeys = new String[]{"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw", "AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
 
@@ -340,6 +340,7 @@ public class PlayerActivity2 extends AppCompatActivity {
                 }
                 case MotionEvent.ACTION_UP:
 
+                    startActivity(new Intent(this,NPlaylistActivity.class));
 
                 case MotionEvent.ACTION_CANCEL: {
                     ImageButton view = (ImageButton) v;

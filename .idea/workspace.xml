@@ -17,19 +17,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="33265882-d67f-474e-9221-1e9885c51f09" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Backup.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/DiscoverAdapter2.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/SFragment.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/circular_shape.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/gradient_bg.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_cast.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_cast_connected.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_eye.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_file_download.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_repeat.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_repeat_true.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_player_new.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/demo_layout.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/NPlaylistActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/NPlayAdapter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/NPlayModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/EqualizerView.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/ItemMoveCallback.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/anim/pop_up.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_menu.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_nplaylist.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/nplaylist_item.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/menu/nplaymenu.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/values/attrs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.circleci/config.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.circleci/config.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileChanges/last-build.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileChanges/last-build.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileContent/annotation-processors.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileContent/annotation-processors.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileContent/fileContent.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileContent/fileContent.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.lock" afterDir="false" />
@@ -42,25 +44,360 @@
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/cache.properties" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/cache.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/vcsWorkingDirs/gc.properties" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/vcsWorkingDirs/gc.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/assetWizardSettings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/assetWizardSettings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/render.experimental.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/render.experimental.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/runConfigurations.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LICENSE" beforeDir="false" afterPath="$PROJECT_DIR$/LICENSE" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/YTApp.iml" beforeDir="false" afterPath="$PROJECT_DIR$/YTApp.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/YTPlayer.iml" beforeDir="false" afterPath="$PROJECT_DIR$/YTPlayer.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/app/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/proguard-rules.pro" beforeDir="false" afterPath="$PROJECT_DIR$/app/proguard-rules.pro" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/androidTest/java/com/kpstv/youtube/ExampleInstrumentedTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/androidTest/java/com/kpstv/youtube/ExampleInstrumentedTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/ic_launcher-web.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/ic_launcher-web.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/CPlaylistActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/CPlaylistActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Dialogs/FileSaveDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Dialogs/FileSaveDialog.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ErrorActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ErrorActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/HistoryBottomSheet.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/HistoryBottomSheet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/IntroActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/IntroActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity2.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity2.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/Constants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/MarkerView.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/MarkerView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/SamplePlayer.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/SamplePlayer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/SongMetadataReader.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/SongMetadataReader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/WaveformView.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/WaveformView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/soundfile/MP4Header.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/soundfile/MP4Header.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/soundfile/SoundFile.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/soundfile/SoundFile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/soundfile/WAVHeader.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Ringdroid/soundfile/WAVHeader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/RingdroidEditActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/RingdroidEditActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/SearchActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/SearchActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/SettingsActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/SettingsActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/SplashActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/SplashActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Views/BubbleTextGetter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Views/BubbleTextGetter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Views/FastScroller.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Views/FastScroller.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/DiscoverAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/DiscoverAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/DiscoverAdapter2.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/DiscoverAdapter2.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/HistoryAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/HistoryAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/PlaylistAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/PlaylistAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SearchAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SearchAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SongAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SongAdapter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/DiscoverFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/DiscoverFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/HistoryFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/HistoryFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/NCFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/NCFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/OPlaylistFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/OPlaylistFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/PlaylistFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/PlaylistFragment.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/SearchFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/SearchFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/SettingsFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/SettingsFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/ContactsModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/ContactsModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/DiscoverModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/DiscoverModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/MetaModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/MetaModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/PlaylistModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/PlaylistModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/SearchModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/SearchModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/SongsModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/SongsModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/YTConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/YTConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/receivers/SongBroadCast.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/receivers/SongBroadCast.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/EXPlayer.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/EXPlayer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/HttpHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/HttpHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/Mp4Cutter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/Mp4Cutter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/OnLoadMoreListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/OnLoadMoreListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/PositionClickListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/PositionClickListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/SpotifyPlaylist.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/SpotifyPlaylist.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/SpotifyTrack.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/SpotifyTrack.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTLength.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTLength.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTMeta.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTMeta.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTSearch.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTSearch.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTStatistics.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTStatistics.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/CipherManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/CipherManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/ExtractorException.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/ExtractorException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/MainActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/YoutubeStreamExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/YoutubeStreamExtractor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/model/PlayerResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/model/PlayerResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/model/Response.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/model/Response.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/model/YoutubeMedia.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/model/YoutubeMedia.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/model/YoutubeMeta.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/model/YoutubeMeta.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/utils/ContextUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/utils/ContextUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/utils/HTTPUtility.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/utils/HTTPUtility.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/utils/LogUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/utils/LogUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/utils/RegexUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/utils/RegexUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/utils/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/utils/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/anim/left_exit.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/anim/left_exit.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/anim/right_enter.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/anim/right_enter.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/anim/slide_down.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/anim/slide_down.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/anim/slide_up.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/anim/slide_up.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable-v23/splash_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable-v23/splash_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/add_button_shape.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/add_button_shape.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/button_back.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/button_back.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/chip_shape.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/chip_shape.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/chip_shape1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/chip_shape1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/content_save.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/content_save.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/discover_shape.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/discover_shape.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/discover_shape_click.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/discover_shape_click.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/download_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/download_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/end_dragger.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/end_dragger.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/end_dragger_selected.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/end_dragger_selected.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/error_back.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/error_back.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/history_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/history_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_add.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_add.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_add_notify.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_add_notify.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_arrow_back.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_arrow_back.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_arrow_down.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_arrow_down.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_arrow_up.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_arrow_up.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_chart_up.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_chart_up.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_check.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_check.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_clipboard.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_clipboard.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_close.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_close.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_connection_error.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_connection_error.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_create.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_create.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_download.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_download.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_facebook.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_facebook.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_github.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_github.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_history.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_history.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_launcher_foreground.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_launcher_foreground.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_location.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_location.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_log.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_log.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_more.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_more.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_music.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_music.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_next.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_next.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_next_notify.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_next_notify.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_pause.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_pause.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_pause_circle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_pause_circle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_pause_notify.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_pause_notify.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_play.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_play.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_play_circle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_play_circle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_play_notify.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_play_notify.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_playlist.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_playlist.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_playlist_add.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_playlist_add.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_previous.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_previous.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_previous_notify.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_previous_notify.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_pulse.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_pulse.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_remove.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_remove.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_search.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_search.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_send.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_send.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_share.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_share.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_skip_next.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_skip_next.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_skip_previous.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_skip_previous.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_timer.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_timer.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_touch.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_touch.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_warning.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_warning.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_web.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_whatsapp.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_whatsapp.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ic_youtube.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_youtube.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/icon_pulse.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/icon_pulse.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/intro1.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/intro1.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/intro2.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/intro2.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/pause.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/pause.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/play.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/play.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/playlist_oval.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/playlist_oval.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/recyclerview_fastscroller_bubble.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/recyclerview_fastscroller_bubble.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/recyclerview_fastscroller_handle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/recyclerview_fastscroller_handle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/restart.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/restart.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/ripple.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ripple.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/settings_shape.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/settings_shape.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/skip_backward.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/skip_backward.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/skip_forward.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/skip_forward.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/start_dragger.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/start_dragger.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/start_dragger_selected.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/start_dragger_selected.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/trending_shape.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/trending_shape.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/font/dmsans.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/font/dmsans.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/font/dmsans_font.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/font/dmsans_font.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_create_playlist.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_create_playlist.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_error.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_error.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_intro.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_intro.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_intro_1920.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_intro_1920.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_intro_2000.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_intro_2000.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_item.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_item.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_player.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_player.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_player_new.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_player_new.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_search.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_search.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/alert_merger.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/alert_merger.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/editor.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/edittextalert.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/edittextalert.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/file_save.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/file_save.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_discover.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_discover.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_history.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_history.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_nc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_nc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_oplaylist.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_oplaylist.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_playlist.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_playlist.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_search.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_search.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/history_bottom_sheet.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/history_bottom_sheet.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/history_item.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/history_item.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/history_tip.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/history_tip.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/notification_layout.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/notification_layout.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/notification_layout_small.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/notification_layout_small.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/playlist_item.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/playlist_item.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/progress_item.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/progress_item.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/record_audio.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/record_audio.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/recyclerview_fastscroller.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/recyclerview_fastscroller.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/search_item.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/search_item.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/search_tip.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/search_tip.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/splash_lollipop.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/splash_lollipop.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/bottom_navigation.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/bottom_navigation.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/create_playlist_menu.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/create_playlist_menu.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/edit_options.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/edit_options.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/error_menu.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/error_menu.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/history_menu.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/history_menu.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/player_menu.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/player_menu.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/playlist_context.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/playlist_context.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher_round.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher_round.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_launcher_round.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_launcher_round.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/arrays.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/arrays.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/dimens.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/dimens.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/launcher.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/launcher.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/styles.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/styles.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/xml/settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/xml/settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/test/java/com/kpstv/youtube/ExampleUnitTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/test/java/com/kpstv/youtube/ExampleUnitTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/contact_process.php" beforeDir="false" afterPath="$PROJECT_DIR$/contact_process.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/_about.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/_about.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/_about.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/css/_about.css.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/_feature.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/_feature.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/_feature.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/css/_feature.css.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/_footer.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/_footer.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/_footer.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/css/_footer.css.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/_price.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/_price.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/_price.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/css/_price.css.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/_service.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/_service.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/_service.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/css/_service.css.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/_testimonials.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/_testimonials.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/_testimonials.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/css/_testimonials.css.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/_video.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/_video.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/_video.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/css/_video.css.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/bootstrap.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/bootstrap.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/breadcrumb.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/breadcrumb.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/breadcrumb.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/css/breadcrumb.css.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/changes.txt" beforeDir="false" afterPath="$PROJECT_DIR$/css/changes.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/font-awesome.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/font-awesome.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/responsive.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/responsive.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/style.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/css/style.css.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/elements.html" beforeDir="false" afterPath="$PROJECT_DIR$/elements.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/FontAwesome.otf" beforeDir="false" afterPath="$PROJECT_DIR$/fonts/FontAwesome.otf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/fontawesome-webfont.eot" beforeDir="false" afterPath="$PROJECT_DIR$/fonts/fontawesome-webfont.eot" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/fontawesome-webfont.svg" beforeDir="false" afterPath="$PROJECT_DIR$/fonts/fontawesome-webfont.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/fontawesome-webfont.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/fonts/fontawesome-webfont.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/fontawesome-webfont.woff" beforeDir="false" afterPath="$PROJECT_DIR$/fonts/fontawesome-webfont.woff" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/fontawesome-webfont.woff2" beforeDir="false" afterPath="$PROJECT_DIR$/fonts/fontawesome-webfont.woff2" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew.bat" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/banner/banner-2.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/img/banner/banner-2.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/banner/banner.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/img/banner/banner.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/banner/home-banner.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/img/banner/home-banner.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/banner/mobile.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/banner/mobile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/banner/right-mobile.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/banner/right-mobile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/favicon.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/favicon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/feature/feature-0.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/feature/feature-0.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/feature/feature-1.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/feature/feature-1.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/feature/feature-2.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/feature/feature-2.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/feature/feature-3.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/feature/feature-3.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/feature/feature-4.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/feature/feature-4.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/icon-white.svg" beforeDir="false" afterPath="$PROJECT_DIR$/img/icon-white.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/icon.svg" beforeDir="false" afterPath="$PROJECT_DIR$/img/icon.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/icon/f-icon_1.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/icon/f-icon_1.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/icon/f-icon_2.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/icon/f-icon_2.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/icon/f-icon_3.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/icon/f-icon_3.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/icon/f-icon_4.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/icon/f-icon_4.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/logo.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/logo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/video-1.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/video-1.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/isoparser-1.9.39/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/isoparser-1.9.39/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/isoparser-1.9.39/isoparser-1.9.39.iml" beforeDir="false" afterPath="$PROJECT_DIR$/isoparser-1.9.39/isoparser-1.9.39.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/isoparser-1.9.39/isoparser-1.9.39.jar" beforeDir="false" afterPath="$PROJECT_DIR$/isoparser-1.9.39/isoparser-1.9.39.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/bootstrap.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/bootstrap.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/contact.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/contact.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/custom.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/custom.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/gmaps.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/gmaps.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/jquery-3.2.1.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/jquery-3.2.1.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/jquery.ajaxchimp.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/jquery.ajaxchimp.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/jquery.form.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/jquery.form.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/jquery.validate.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/jquery.validate.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/mail-script.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/mail-script.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/popper.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/popper.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/stellar.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/stellar.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/theme.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/theme.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prepros-6.config" beforeDir="false" afterPath="$PROJECT_DIR$/prepros-6.config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scss/_blog.scss" beforeDir="false" afterPath="$PROJECT_DIR$/scss/_blog.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scss/_button.scss" beforeDir="false" afterPath="$PROJECT_DIR$/scss/_button.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scss/_contact.scss" beforeDir="false" afterPath="$PROJECT_DIR$/scss/_contact.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scss/_elements.scss" beforeDir="false" afterPath="$PROJECT_DIR$/scss/_elements.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scss/_feature.scss" beforeDir="false" afterPath="$PROJECT_DIR$/scss/_feature.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scss/_footer.scss" beforeDir="false" afterPath="$PROJECT_DIR$/scss/_footer.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scss/_header.scss" beforeDir="false" afterPath="$PROJECT_DIR$/scss/_header.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scss/_predefine.scss" beforeDir="false" afterPath="$PROJECT_DIR$/scss/_predefine.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scss/_price.scss" beforeDir="false" afterPath="$PROJECT_DIR$/scss/_price.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scss/_testimonials.scss" beforeDir="false" afterPath="$PROJECT_DIR$/scss/_testimonials.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scss/_variables.scss" beforeDir="false" afterPath="$PROJECT_DIR$/scss/_variables.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scss/_video.scss" beforeDir="false" afterPath="$PROJECT_DIR$/scss/_video.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scss/breadcrumb.scss" beforeDir="false" afterPath="$PROJECT_DIR$/scss/breadcrumb.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scss/style.scss" beforeDir="false" afterPath="$PROJECT_DIR$/scss/style.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/update.json" beforeDir="false" afterPath="$PROJECT_DIR$/update.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/animate-css/animate.css" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/animate-css/animate.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/animate-css/wow.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/animate-css/wow.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/bootstrap-datepicker/bootstrap-datetimepicker.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/bootstrap-datepicker/bootstrap-datetimepicker.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/bootstrap-datepicker/bootstrap-datetimepicker.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/bootstrap-datepicker/bootstrap-datetimepicker.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/bootstrap-datepicker/bootstrap-select.css" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/bootstrap-datepicker/bootstrap-select.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/bootstrap-datepicker/bootstrap-select.js" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/bootstrap-datepicker/bootstrap-select.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/counter-up/jquery.counterup.js" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/counter-up/jquery.counterup.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/counter-up/jquery.waypoints.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/counter-up/jquery.waypoints.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/isotope/imagesloaded.pkgd.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/isotope/imagesloaded.pkgd.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/isotope/isotope-min.js" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/isotope/isotope-min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/jquery-ui/jquery-ui.css" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/jquery-ui/jquery-ui.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/jquery-ui/jquery-ui.js" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/jquery-ui/jquery-ui.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/lightbox/simpleLightbox.css" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/lightbox/simpleLightbox.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/lightbox/simpleLightbox.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/lightbox/simpleLightbox.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/linericon/fonts/Linearicons-Free.eot" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/linericon/fonts/Linearicons-Free.eot" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/linericon/fonts/Linearicons-Free.svg" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/linericon/fonts/Linearicons-Free.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/linericon/fonts/Linearicons-Free.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/linericon/fonts/Linearicons-Free.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/linericon/fonts/Linearicons-Free.woff" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/linericon/fonts/Linearicons-Free.woff" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/linericon/fonts/Linearicons-Free.woff2" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/linericon/fonts/Linearicons-Free.woff2" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/linericon/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/linericon/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/nice-select/css/nice-select.css" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/nice-select/css/nice-select.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/nice-select/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/nice-select/css/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/nice-select/js/jquery.nice-select.js" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/nice-select/js/jquery.nice-select.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/nice-select/js/jquery.nice-select.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/nice-select/js/jquery.nice-select.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/owl-carousel/assets/ajax-loader.gif" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/owl-carousel/assets/ajax-loader.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/owl-carousel/assets/animated.css" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/owl-carousel/assets/animated.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/owl-carousel/assets/owl.carousel.css" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/owl-carousel/assets/owl.carousel.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/owl-carousel/owl.carousel.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/owl-carousel/owl.carousel.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/owl-carousel/owl.carousel.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/owl-carousel/owl.carousel.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/popup/jquery.magnific-popup.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/popup/jquery.magnific-popup.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendors/popup/magnific-popup.css" beforeDir="false" afterPath="$PROJECT_DIR$/vendors/popup/magnific-popup.css" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -82,7 +419,12 @@
       <state>
         <projects_view>
           <tree_state>
-            <expand />
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="YTPlayer" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
             <select />
           </tree_state>
         </projects_view>
@@ -92,12 +434,54 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_player_new.xml">
+        <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_nplaylist.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="251">
-              <caret line="284" column="32" selection-start-line="284" selection-start-column="32" selection-end-line="284" selection-end-column="32" />
+            <state relative-caret-position="198">
+              <caret line="11" column="45" selection-start-line="11" selection-start-column="45" selection-end-line="11" selection-end-column="45" />
+            </state>
+          </provider>
+          <provider editor-type-id="android-designer2" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/nplaylist_item.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="270">
+              <caret line="15" column="32" selection-start-line="15" selection-start-column="32" selection-end-line="15" selection-end-column="32" />
+            </state>
+          </provider>
+          <provider editor-type-id="android-designer2" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/build.gradle">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1098">
+              <caret line="61" column="85" selection-start-line="61" selection-start-column="85" selection-end-line="61" selection-end-column="85" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/NPlaylistActivity.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-475">
+              <caret line="144" column="9" selection-start-line="144" selection-start-column="9" selection-end-line="144" selection-end-column="9" />
               <folding>
-                <element signature="e#2008#2048#0" expanded="true" />
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/res/menu/nplaymenu.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="72">
+              <caret line="4" column="40" selection-start-line="4" selection-start-column="27" selection-end-line="4" selection-end-column="40" />
+              <folding>
+                <element signature="e#226#239#0" expanded="true" />
+                <element signature="e#358#373#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -105,43 +489,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/res/values/styles.xml">
+        <entry file="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="8" column="12" selection-start-line="8" selection-start-column="12" selection-end-line="8" selection-end-column="12" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="85" lean-forward="true" selection-start-line="85" selection-end-line="85" />
-            </state>
-          </provider>
-          <provider editor-type-id="android-manifest" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity2.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="208">
-              <caret line="288" column="30" lean-forward="true" selection-start-line="288" selection-start-column="30" selection-end-line="288" selection-end-column="30" />
-              <folding>
-                <element signature="e#23052#27026#0" />
-                <element signature="e#27032#32941#0" />
-                <element signature="e#32947#34482#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/res/values/colors.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="72">
-              <caret line="4" column="37" selection-start-line="4" selection-start-column="31" selection-end-line="4" selection-end-column="37" />
+            <state relative-caret-position="667">
+              <caret line="93" column="40" selection-start-line="93" selection-start-column="40" selection-end-line="93" selection-end-column="40" />
             </state>
           </provider>
         </entry>
@@ -149,8 +500,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="622">
-              <caret line="523" column="31" lean-forward="true" selection-start-line="518" selection-start-column="28" selection-end-line="523" selection-end-column="31" />
+            <state relative-caret-position="664">
+              <caret line="517" column="42" selection-start-line="517" selection-start-column="36" selection-end-line="517" selection-end-column="42" />
             </state>
           </provider>
         </entry>
@@ -158,33 +509,29 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="388">
-              <caret line="253" column="27" lean-forward="true" selection-start-line="253" selection-start-column="27" selection-end-line="253" selection-end-column="27" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_player.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="313">
-              <caret line="26" column="45" selection-start-line="26" selection-start-column="29" selection-end-line="26" selection-end-column="45" />
+            <state relative-caret-position="502">
+              <caret line="274" column="21" selection-start-line="274" selection-start-column="21" selection-end-line="274" selection-end-column="21" />
               <folding>
-                <element signature="e#4378#5811#0" />
+                <element signature="e#4183#4184#0" expanded="true" />
+                <element signature="e#4246#4247#0" expanded="true" />
               </folding>
             </state>
           </provider>
-          <provider editor-type-id="android-designer2" />
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/demo_layout.xml">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/NPlayAdapter.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="54">
-              <caret line="3" column="35" lean-forward="true" selection-start-line="3" selection-start-column="35" selection-end-line="3" selection-end-column="35" />
+            <state relative-caret-position="566">
+              <caret line="80" column="45" selection-start-line="80" selection-start-column="45" selection-end-line="80" selection-end-column="45" />
+              <folding>
+                <element signature="e#6383#6384#0" expanded="true" />
+                <element signature="e#6424#6425#0" expanded="true" />
+                <element signature="e#6822#6823#0" expanded="true" />
+                <element signature="e#6860#6861#0" expanded="true" />
+              </folding>
             </state>
           </provider>
-          <provider editor-type-id="android-designer2" />
         </entry>
       </file>
     </leaf>
@@ -194,35 +541,13 @@
       <list>
         <option value="layoutResourceFile" />
         <option value="Class" />
+        <option value="valueResourceFile" />
         <option value="resourceFile" />
       </list>
     </option>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>loadAga</find>
-      <find>videoTitle =</find>
-      <find>title =</find>
-      <find>rebuildN</find>
-      <find>Hold up</find>
-      <find>VideoTitle =</find>
-      <find>getallVi</find>
-      <find>youTubeButton</find>
-      <find>downloadButton</find>
-      <find>repeatButton</find>
-      <find>isLoopOnce</find>
-      <find>static</find>
-      <find>static void make</find>
-      <find>loop</find>
-      <find>makerepwat</find>
-      <find>\(*.?\)</find>
-      <find>isloop</find>
-      <find>setVideo</find>
-      <find>channelTitle =</find>
-      <find>isLoop</find>
-      <find>toolbar</find>
-      <find>SetNaviga</find>
-      <find>Navigati</find>
       <find>getAllV</find>
       <find>Navigat</find>
       <find>=</find>
@@ -230,6 +555,29 @@
       <find>previo</find>
       <find>previousFab</find>
       <find>PlayerButto</find>
+      <find>rebuild</find>
+      <find>channel</find>
+      <find>name</find>
+      <find>nColor =</find>
+      <find>dataSet</find>
+      <find>urlset</find>
+      <find>videoID</find>
+      <find>yturls.add</find>
+      <find>NPlaye</find>
+      <find>toolbar</find>
+      <find>Navi</find>
+      <find>onSupport</find>
+      <find>setDispla</find>
+      <find>onMove</find>
+      <find>setVideo</find>
+      <find>Glide</find>
+      <find>PlayVideo</find>
+      <find>boo</find>
+      <find>duration</find>
+      <find>yturls</find>
+      <find>yturls.clear</find>
+      <find>ytConfigs</find>
+      <find>action_share</find>
     </findStrings>
     <replaceStrings>
       <replace>com.kpstv.demo</replace>
@@ -249,17 +597,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/utils/ContextUtils.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ytextractor/YoutubeStreamExtractor.java" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_history.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/history_tip.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_search.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/search_tip.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/HistoryFragment.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/PlaylistAdapter.java" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/notification_layout_small.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/EXPlayer.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/drawable/ic_pause_notify.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/drawable/ic_play_notify.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SearchAdapter.java" />
@@ -268,7 +605,6 @@
         <option value="$PROJECT_DIR$/app/src/main/res/drawable/ic_previous_notify.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/drawable/ic_next_notify.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/SplashActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/splash_lollipop.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/SearchFragment.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTSearch.java" />
@@ -276,34 +612,48 @@
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/EndlessRecyclerViewScrollListener.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/DiscoverAdapter2.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/history_item.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/HistoryAdapter.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/drawable/gradient_bg.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_player.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/drawable/circular_shape.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/demo_layout.xml" />
-        <option value="$PROJECT_DIR$/app/build.gradle" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/DiscoverFragment.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/DiscoverAdapter.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Backup.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/drawable/ic_repeat_one.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/receivers/SongBroadCast.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/drawable/default_button.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/drawable/default_button_pressed.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/drawable/default_button_selector.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java" />
-        <option value="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/values/styles.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/drawable/ibutton_selector.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/HistoryAdapter.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/SplashActivity.java" />
+        <option value="$PROJECT_DIR$/app/src/main/res/anim/pop_up.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/ItemMoveCallback.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/NPAdapter.java" />
+        <option value="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_player_new.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity2.java" />
+        <option value="$PROJECT_DIR$/build.gradle" />
+        <option value="$PROJECT_DIR$/app/build.gradle" />
+        <option value="$PROJECT_DIR$/app/src/main/res/values/attrs.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/EqualizerView.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/NPlayModel.java" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_nplaylist.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java" />
+        <option value="$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/res/menu/nplaymenu.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/NPlayAdapter.java" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/nplaylist_item.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/NPlaylistActivity.java" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="298" />
-    <option name="y" value="42" />
+    <option name="x" value="220" />
+    <option name="y" value="61" />
     <option name="width" value="1510" />
     <option name="height" value="978" />
   </component>
@@ -315,9 +665,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
-      <pane id="ProjectPane" />
       <pane id="Scope" />
+      <pane id="ProjectPane" />
+      <pane id="PackagesPane" />
       <pane id="AndroidView" />
     </panes>
   </component>
@@ -331,11 +681,14 @@
     <property name="ExportApk.SignV1" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="android.sdk.path" value="$USER_HOME$/Android/Sdk" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../YTSAPP_new" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="not.eligible.for.single.variant.sync" value="true" />
-    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
   </component>
   <component name="RecentsManager">
+    <key name="android.template.packageName">
+      <recent name="com.kpstv.youtube" />
+    </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="com.kpstv.youtube.adapters" />
       <recent name="com.kpstv.youtube" />
@@ -451,10 +804,9 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="298" y="42" width="1510" height="978" extended-state="0" />
-    <editor active="true" />
+    <frame x="220" y="61" width="1510" height="978" extended-state="0" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49710983" weight="0.2249657" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49710983" weight="0.22876713" />
       <window_info id="Structure" order="1" sideWeight="0.50289017" side_tool="true" weight="0.24889217" />
       <window_info id="Designer" order="2" />
       <window_info id="Build Variants" order="3" side_tool="true" />
@@ -469,177 +821,60 @@
       <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="4" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="5" />
-      <window_info anchor="bottom" id="Build" order="6" weight="0.32541567" />
+      <window_info anchor="bottom" id="Build" order="6" weight="0.32511738" />
       <window_info anchor="bottom" id="Android Profiler" order="7" />
       <window_info anchor="bottom" id="Event Log" order="8" side_tool="true" />
       <window_info anchor="bottom" id="Logcat" order="9" />
       <window_info anchor="bottom" id="Version Control" order="10" weight="0.32897863" />
       <window_info anchor="bottom" id="Terminal" order="11" />
-      <window_info anchor="bottom" id="Run" order="12" weight="0.32897863" />
+      <window_info anchor="bottom" id="Run" order="12" weight="0.3286385" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Capture Analysis" order="3" />
       <window_info anchor="right" id="Device File Explorer" order="4" side_tool="true" />
-      <window_info anchor="right" id="Assistant" order="5" weight="0.32900137" />
+      <window_info anchor="right" id="Assistant" order="5" weight="0.27123287" />
       <window_info anchor="right" id="Gradle" order="6" weight="0.32945207" />
       <window_info anchor="right" id="Palette&#9;" order="7" />
       <window_info anchor="right" id="Theme Preview" order="8" />
-      <window_info anchor="right" id="Preview" order="9" weight="0.41083676" />
+      <window_info anchor="right" id="Preview" order="9" weight="0.36232877" />
     </layout>
+    <layout-to-restore>
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49710983" weight="0.22876713" />
+      <window_info id="Structure" order="1" sideWeight="0.50289017" side_tool="true" weight="0.24889217" />
+      <window_info id="Designer" order="2" />
+      <window_info id="Build Variants" order="3" side_tool="true" />
+      <window_info id="Image Layers" order="4" />
+      <window_info id="Favorites" order="5" side_tool="true" />
+      <window_info id="Captures" order="6" side_tool="true" weight="0.25" />
+      <window_info id="Capture Tool" order="7" />
+      <window_info id="Resources Explorer" order="8" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32897863" />
+      <window_info anchor="bottom" id="Debug" order="2" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="4" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="5" />
+      <window_info anchor="bottom" id="Build" order="6" weight="0.32511738" />
+      <window_info anchor="bottom" id="Android Profiler" order="7" />
+      <window_info anchor="bottom" id="Event Log" order="8" side_tool="true" />
+      <window_info anchor="bottom" id="Logcat" order="9" />
+      <window_info anchor="bottom" id="Version Control" order="10" weight="0.32897863" />
+      <window_info anchor="bottom" id="Terminal" order="11" />
+      <window_info active="true" anchor="bottom" id="Run" order="12" visible="true" weight="0.3286385" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Capture Analysis" order="3" />
+      <window_info anchor="right" id="Device File Explorer" order="4" side_tool="true" />
+      <window_info anchor="right" id="Assistant" order="5" weight="0.27123287" />
+      <window_info anchor="right" id="Gradle" order="6" weight="0.32945207" />
+      <window_info anchor="right" id="Palette&#9;" order="7" />
+      <window_info anchor="right" id="Theme Preview" order="8" />
+      <window_info anchor="right" id="Preview" order="9" weight="0.36232877" />
+    </layout-to-restore>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_skip_previous.xml">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_play_notify.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="2" column="24" selection-start-line="2" selection-start-column="24" selection-end-line="2" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SearchAdapter.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="546">
-          <caret line="109" column="72" selection-start-line="109" selection-start-column="72" selection-end-line="109" selection-end-column="72" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SongAdapter.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="428">
-          <caret line="194" column="41" selection-start-line="194" selection-start-column="41" selection-end-line="194" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/OPlaylistFragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="130" column="46" selection-start-line="130" selection-start-column="46" selection-end-line="130" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_previous_notify.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="1" column="23" selection-start-line="1" selection-start-column="19" selection-end-line="1" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_next_notify.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="8" column="29" lean-forward="true" selection-start-line="8" selection-start-column="29" selection-end-line="8" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="358">
-          <caret line="68" column="41" lean-forward="true" selection-start-line="68" selection-start-column="41" selection-end-line="68" selection-end-column="41" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/icon_pulse.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="7" column="32" selection-start-line="7" selection-start-column="32" selection-end-line="7" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/receivers/SongBroadCast.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="648">
-          <caret line="59" column="24" selection-start-line="59" selection-start-column="24" selection-end-line="59" selection-end-column="24" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/splash_lollipop.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="13" column="15" lean-forward="true" selection-start-line="13" selection-start-column="15" selection-end-line="13" selection-end-column="15" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="1" lean-forward="true" selection-start-line="1" selection-end-line="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/SplashActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="24" column="41" selection-start-line="24" selection-start-column="41" selection-end-line="24" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/button_back.xml">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_arrow_back.xml">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/SearchActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="468">
-          <caret line="60" column="37" selection-start-line="60" selection-start-column="37" selection-end-line="60" selection-end-column="37" />
-          <folding>
-            <element signature="class#spotifySearch#0;class#SearchActivity#0" />
-            <element signature="class#normalSearch#0;class#SearchActivity#0" />
-            <element signature="class#getVirals#0;class#SearchActivity#0" />
-            <element signature="method#MakeSpotifyList#0;class#SearchActivity#0" />
-            <element signature="method#MakeList#0;class#SearchActivity#0" />
-            <element signature="method#showAlert#0;class#SearchActivity#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/SearchFragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2124">
-          <caret line="164" selection-start-line="164" selection-end-line="164" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_search.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="576">
-          <caret line="32" column="34" selection-start-line="32" selection-start-column="34" selection-end-line="32" selection-end-column="34" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTSearch.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="33" column="35" selection-start-line="33" selection-start-column="35" selection-end-line="33" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/SFragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="802">
-          <caret line="93" column="25" lean-forward="true" selection-start-line="93" selection-start-column="25" selection-end-line="93" selection-end-column="25" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="class#spotifySearch#0;class#SFragment#0" />
-            <element signature="class#normalSearch#0;class#SFragment#0" />
-            <element signature="class#getVirals#0;class#SFragment#0" />
-            <element signature="method#MakeSpotifyList#0;class#SFragment#0" />
-            <element signature="method#MakeList#0;class#SFragment#0" />
-            <element signature="method#showAlert#0;class#SFragment#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_pulse.xml">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -670,17 +905,6 @@
       </provider>
       <provider editor-type-id="android-designer2" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/HistoryAdapter.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="442">
-          <caret line="92" column="24" selection-start-line="92" selection-start-column="24" selection-end-line="92" selection-end-column="24" />
-          <folding>
-            <element signature="e#3196#3197#0" expanded="true" />
-            <element signature="e#3227#3228#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/isoparser-1.9.39/build.gradle">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -695,13 +919,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="72">
           <caret line="4" column="36" selection-start-line="4" selection-start-column="36" selection-end-line="4" selection-end-column="36" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="223">
-          <caret line="59" column="41" lean-forward="true" selection-start-line="59" selection-start-column="41" selection-end-line="59" selection-end-column="41" />
         </state>
       </provider>
     </entry>
@@ -724,38 +941,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/demo_layout.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
-          <caret line="3" column="35" lean-forward="true" selection-start-line="3" selection-start-column="35" selection-end-line="3" selection-end-column="35" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer2" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="140" column="52" selection-start-line="140" selection-start-column="52" selection-end-line="140" selection-end-column="52" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Backup.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="317">
           <caret line="114" column="28" selection-start-line="114" selection-start-column="28" selection-end-line="114" selection-end-column="28" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_player.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="313">
-          <caret line="26" column="45" selection-start-line="26" selection-start-column="29" selection-end-line="26" selection-end-column="45" />
-          <folding>
-            <element signature="e#4378#5811#0" />
-          </folding>
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer2" />
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_repeat.xml">
       <provider selected="true" editor-type-id="text-editor">
@@ -771,59 +962,14 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/default_button_pressed.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="72">
-          <caret line="4" column="8" lean-forward="true" selection-start-line="4" selection-start-column="8" selection-end-line="4" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/default_button.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
-          <caret line="3" column="4" lean-forward="true" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/default_button_selector.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="2" column="8" selection-start-line="2" selection-start-column="8" selection-end-line="2" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/default_button_pressed.xml" />
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/default_button.xml" />
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/default_button_selector.xml" />
     <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_arrow_down.xml">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="388">
-          <caret line="253" column="27" lean-forward="true" selection-start-line="253" selection-start-column="27" selection-end-line="253" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="85" lean-forward="true" selection-start-line="85" selection-end-line="85" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-manifest" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="622">
-          <caret line="523" column="31" lean-forward="true" selection-start-line="518" selection-start-column="28" selection-end-line="523" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Android/Sdk/platforms/android-28/data/res/values/colors.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="738">
-          <caret line="41" column="17" selection-start-line="41" selection-start-column="17" selection-end-line="41" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/Android/Sdk/platforms/android-28/data/res/values/colors.xml" />
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/ibutton_selector.xml" />
     <entry file="file://$PROJECT_DIR$/app/src/main/res/values/colors.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="72">
@@ -831,39 +977,268 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/values/styles.xml">
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_player.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="8" column="12" selection-start-line="8" selection-start-column="12" selection-end-line="8" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/ibutton_selector.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="15" column="40" selection-start-line="15" selection-start-column="40" selection-end-line="15" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_player_new.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="251">
-          <caret line="284" column="32" selection-start-line="284" selection-start-column="32" selection-end-line="284" selection-end-column="32" />
+        <state relative-caret-position="468">
+          <caret line="26" column="45" selection-start-line="26" selection-start-column="29" selection-end-line="26" selection-end-column="45" />
           <folding>
-            <element signature="e#2008#2048#0" expanded="true" />
+            <element signature="e#4378#5811#0" />
           </folding>
         </state>
       </provider>
       <provider editor-type-id="android-designer2" />
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/demo_layout.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="3" column="35" selection-start-line="3" selection-start-column="35" selection-end-line="3" selection-end-column="35" />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/HistoryAdapter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="250">
+          <caret line="184" column="40" selection-start-line="184" selection-start-column="40" selection-end-line="184" selection-end-column="40" />
+          <folding>
+            <element signature="e#3196#3197#0" expanded="true" />
+            <element signature="e#3227#3228#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/SplashActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="414">
+          <caret line="34" column="21" lean-forward="true" selection-start-line="32" selection-start-column="11" selection-end-line="34" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/anim/pop_up.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="6" column="27" lean-forward="true" selection-start-line="6" selection-start-column="27" selection-end-line="6" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/values/styles.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="242">
+          <caret line="31" column="37" selection-start-line="31" selection-start-column="17" selection-end-line="31" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SongAdapter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="288">
+          <caret line="91" column="47" selection-start-line="91" selection-start-column="47" selection-end-line="91" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/ItemMoveCallback.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="372">
+          <caret line="43" column="20" lean-forward="true" selection-start-line="43" selection-start-column="20" selection-end-line="43" selection-end-column="20" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#362#363#0" expanded="true" />
+            <element signature="e#396#397#0" expanded="true" />
+            <element signature="e#457#458#0" expanded="true" />
+            <element signature="e#484#485#0" expanded="true" />
+            <element signature="e#545#546#0" expanded="true" />
+            <element signature="e#573#574#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SearchAdapter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="49" column="37" selection-start-line="49" selection-start-column="37" selection-end-line="49" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_item.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="21" column="39" selection-start-line="21" selection-start-column="39" selection-end-line="21" selection-end-column="39" />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="7" column="5" lean-forward="true" selection-start-line="7" selection-start-column="5" selection-end-line="7" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/values/attrs.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="11" column="22" selection-start-line="11" selection-start-column="22" selection-end-line="11" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/EqualizerView.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="358">
+          <caret line="322" column="36" selection-start-line="322" selection-start-column="16" selection-end-line="322" selection-end-column="36" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_player_new.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="954">
+          <caret line="53" column="18" selection-start-line="53" selection-start-column="18" selection-end-line="53" selection-end-column="18" />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
+      <provider editor-type-id="android-manifest" />
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="11" column="32" selection-start-line="11" selection-start-column="32" selection-end-line="11" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1098">
+          <caret line="61" column="85" selection-start-line="61" selection-start-column="85" selection-end-line="61" selection-end-column="85" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/MetaModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="36">
+          <caret line="2" column="13" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/NPlayModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="234">
+          <caret line="13" column="33" selection-start-line="13" selection-start-column="33" selection-end-line="13" selection-end-column="33" />
+          <folding>
+            <element signature="e#329#330#0" expanded="true" />
+            <element signature="e#357#358#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity2.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="208">
-          <caret line="288" column="30" lean-forward="true" selection-start-line="288" selection-start-column="30" selection-end-line="288" selection-end-column="30" />
+        <state relative-caret-position="630">
+          <caret line="186" column="13" lean-forward="true" selection-start-line="180" selection-start-column="4" selection-end-line="186" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/YTConfig.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="6" column="79" lean-forward="true" selection-start-line="6" selection-start-column="79" selection-end-line="6" selection-end-column="79" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="502">
+          <caret line="274" column="21" selection-start-line="274" selection-start-column="21" selection-end-line="274" selection-end-column="21" />
           <folding>
-            <element signature="e#23052#27026#0" />
-            <element signature="e#27032#32941#0" />
-            <element signature="e#32947#34482#0" />
+            <element signature="e#4183#4184#0" expanded="true" />
+            <element signature="e#4246#4247#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/menu/player_menu.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret selection-end-line="23" selection-end-column="7" />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="667">
+          <caret line="93" column="40" selection-start-line="93" selection-start-column="40" selection-end-line="93" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="358">
+          <caret line="1041" column="79" lean-forward="true" selection-start-line="1038" selection-start-column="9" selection-end-line="1041" selection-end-column="79" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/PlaylistAdapter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="260">
+          <caret line="77" column="51" selection-start-line="77" selection-start-column="44" selection-end-line="77" selection-end-column="51" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/menu/nplaymenu.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="72">
+          <caret line="4" column="40" selection-start-line="4" selection-start-column="27" selection-end-line="4" selection-end-column="40" />
+          <folding>
+            <element signature="e#226#239#0" expanded="true" />
+            <element signature="e#358#373#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_nplaylist.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="11" column="45" selection-start-line="11" selection-start-column="45" selection-end-line="11" selection-end-column="45" />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/NPlayAdapter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="566">
+          <caret line="80" column="45" selection-start-line="80" selection-start-column="45" selection-end-line="80" selection-end-column="45" />
+          <folding>
+            <element signature="e#6383#6384#0" expanded="true" />
+            <element signature="e#6424#6425#0" expanded="true" />
+            <element signature="e#6822#6823#0" expanded="true" />
+            <element signature="e#6860#6861#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/nplaylist_item.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="15" column="32" selection-start-line="15" selection-start-column="32" selection-end-line="15" selection-end-column="32" />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="664">
+          <caret line="517" column="42" selection-start-line="517" selection-start-column="36" selection-end-line="517" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/NPlaylistActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-475">
+          <caret line="144" column="9" selection-start-line="144" selection-start-column="9" selection-end-line="144" selection-end-column="9" />
+          <folding>
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>

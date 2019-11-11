@@ -131,7 +131,7 @@ import at.huber.youtubeExtractor.YtFile;
 public class PlayerActivity extends AppCompatActivity {
 
     String YouTubeUrl;
-    BlurImageView backImage;
+    ImageView backImage;
     NotificationManagerCompat notificationManagerCompat;
     NotificationManager notificationManager;
     NotificationChannel notificationChannel;
@@ -615,7 +615,6 @@ public class PlayerActivity extends AppCompatActivity {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                             backImage.setImageBitmap(resource);
-                            backImage.setBlur(5);
                             mainImageView.setImageBitmap(resource);
 
                             collpaseView.setImageViewBitmap(R.id.nImage, resource);
