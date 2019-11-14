@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -17,6 +18,7 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity2;
+import com.kpstv.youtube.R;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
@@ -71,13 +73,18 @@ public class SongBroadCast extends BroadcastReceiver {
                     .into(new CustomTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            MainActivity.bitmapIcon = resource;
-                            MainActivity.rebuildNotification();
-                            try {
-                                PlayerActivity2.loadAgain();
-                            }catch (Exception e) {
-                                Log.e("PlayerActivity","is_still_null");
-                            }
+                            Palette.generateAsync(resource, new Palette.PaletteAsyncListener() {
+                                public void onGenerated(Palette palette) {
+                                    MainActivity.nColor = palette.getVibrantColor(context.getResources().getColor(R.color.light_white));
+                                    MainActivity.bitmapIcon = resource;
+                                    MainActivity.rebuildNotification();
+                                    try {
+                                        PlayerActivity2.loadAgain();
+                                    }catch (Exception e) {
+                                        Log.e("PlayerActivity","is_still_null");
+                                    }
+                                }
+                            });
                         }
 
                         @Override

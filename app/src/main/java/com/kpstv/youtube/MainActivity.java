@@ -284,6 +284,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             player.stop(); player.release();
             LoadVideo.cancel(true);
         }
+        ytIndex = position;
         videoID = YTutils.getVideoID(yturls.get(position));
         LoadVideo = new loadVideo();
         LoadVideo.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videoID);
@@ -514,9 +515,9 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     static boolean isLoop=false;
     static Handler mHandler = new Handler();
     static long total_duration = 0;
-    static int total_seconds; static int nColor;
+    static int total_seconds; public static int nColor;
     public static ArrayList<String> yturls;
-    static int ytIndex = 0;
+    public static int ytIndex = 0;
 
     static class loadVideo extends AsyncTask<String,String,Void> {
 

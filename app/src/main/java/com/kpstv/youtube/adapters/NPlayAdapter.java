@@ -3,14 +3,17 @@ package com.kpstv.youtube.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -25,8 +28,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.kpstv.youtube.MainActivity;
+import com.kpstv.youtube.NPlaylistActivity;
 import com.kpstv.youtube.PlayerActivity2;
 import com.kpstv.youtube.R;
+import com.kpstv.youtube.helper.ItemTouchHelperAdapter;
+import com.kpstv.youtube.helper.ItemTouchHelperViewHolder;
+import com.kpstv.youtube.helper.OnStartDragListener;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.models.SearchModel;
@@ -37,21 +44,53 @@ import com.kpstv.youtube.utils.YTutils;
 import org.mozilla.javascript.tools.jsc.Main;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
-public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder> {
+public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder> implements ItemTouchHelperAdapter {
 
     private ArrayList<NPlayModel> models;
     Context con;
-    OnLongClickListener onlonglistener;
-    OnMoreButtonClick onmoreclick;
     OnClickListener onClickListener;
     OnCheckBoxListener onCheckBoxListener;
+    private OnStartDragListener mDragStartListener;
     int accentColor;
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
+    @Override
+    public boolean onItemMove(int fromPosition, int toPosition) {
+        Collections.swap(models, fromPosition, toPosition);
+        notifyItemMoved(fromPosition, toPosition);
+        return true;
+    }
+
+    @Override
+    public void onItemDismiss(int position) {
+
+    }
+
+    @Override
+    public boolean onItemMoved(int fromPosition, int toPosition) {
+        Log.e("onItemMoved","true");
+        MainActivity.nPlayModels = models;
+      //  Collections.swap(MainActivity.yturls,fromPosition,toPosition);
+        MainActivity.yturls.clear();
+        StringBuilder builder = new StringBuilder();
+        for (int i=0;i<models.size();i++){
+            MainActivity.yturls.add(models.get(i).getUrl());
+            if (models.get(i).is_playing()) {
+                MainActivity.ytIndex = i;
+            }
+            models.get(i).set_selected(false);
+            builder.append(YTutils.getVideoTitle(models.get(i).getModel().getVideMeta().getTitle())).append("\n");
+        }
+        Log.e("ItemState","\n"+builder.toString());
+        notifyDataSetChanged();
+        return true;
+    }
+
+    public static class MyViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
 
         TextView titleText, authorText;
-        ImageButton moreButton, moveButton;
+        ImageButton moveButton;
         ConstraintLayout layout;
         CheckBox checkBox; EqualizerView equalizerView;
 
@@ -59,18 +98,41 @@ public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder
             super(itemView);
             this.titleText = itemView.findViewById(R.id.aTitle);
             this.authorText = itemView.findViewById(R.id.aAuthor);
-            this.moreButton = itemView.findViewById(R.id.aMoreButton);
             this.moveButton = itemView.findViewById(R.id.aMoveButton);
             this.layout = itemView.findViewById(R.id.mainlayout);
             this.checkBox = itemView.findViewById(R.id.aCheckBox);
             this.equalizerView = itemView.findViewById(R.id.equalizer);
+
+            itemView.setOnLongClickListener(view -> {
+                // Blank listener
+                return true;
+            });
+        }
+
+        @Override
+        public void onItemSelected() {
+            itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        @Override
+        public void onItemClear() {
+            itemView.setBackgroundColor(0);
+        }
+
+        @Override
+        public void onItemMoved(int from, int to) {
+           // NPlaylistActivity.performSwap(from,to);
+            Log.e("ItemSwappedComplete","from: "+from+", to: "+to);
         }
 
     }
 
-    public NPlayAdapter(ArrayList<NPlayModel> data, Context context) {
+
+
+    public NPlayAdapter(ArrayList<NPlayModel> data, Context context, OnStartDragListener dragStartListener) {
         this.con = context;
         this.models = data;
+        this.mDragStartListener = dragStartListener;
         accentColor = ContextCompat.getColor(con,R.color.colorAccent);
     }
 
@@ -104,6 +166,16 @@ public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder
 
         YTMeta meta = nPlayModel.getModel();
         if (meta.getVideMeta()!=null) {
+
+            holder.moveButton.setOnTouchListener((v, event) -> {
+                if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
+                  try {
+                      mDragStartListener.onStartDrag(holder);
+                  }catch (Exception e){e.printStackTrace();}
+                }
+                return false;
+            });
+
             holder.titleText.setText(YTutils.getVideoTitle(meta.getVideMeta().getTitle()));
             holder.authorText.setText(YTutils.getChannelTitle(meta.getVideMeta().getTitle(),meta.getVideMeta().getAuthor()));
 
@@ -111,57 +183,19 @@ public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder
                 onCheckBoxListener.OnSingleClicked(holder.checkBox,listPosition,nPlayModel,holder);
             });
 
-            holder.layout.setOnLongClickListener(v1->{
-                onlonglistener.onLongClicked(holder.layout,listPosition,nPlayModel,holder);
-                return true;
-            });
-
             holder.layout.setOnClickListener(v1->{
                 onClickListener.OnSingleClicked(holder.layout,listPosition,nPlayModel,holder);
-            });
-
-            holder.moreButton.setOnTouchListener((v, motionEvent) -> {
-                switch (motionEvent.getAction()) {
-                    case MotionEvent.ACTION_DOWN: {
-                        ImageButton view = (ImageButton ) v;
-                        view.setColorFilter(accentColor);
-                        v.invalidate();
-                        break;
-                    }
-                    case MotionEvent.ACTION_UP:
-
-                        onmoreclick.OnMoreButtonClicked(holder.moreButton,listPosition,nPlayModel,holder);
-
-                    case MotionEvent.ACTION_CANCEL: {
-                        ImageButton view = (ImageButton) v;
-                        view.clearColorFilter();
-                        view.invalidate();
-                        break;
-                    }
-                }
-                return true;
             });
         }
 
         if (listPosition+1==MainActivity.yturls.size()) {
             MainActivity.nPlayModels = models;
-            Log.e("Datahasbeenset","true");
         }
-
-       //  new getData(con,nPlayModel,holder,listPosition).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override
     public int getItemCount() {
         return models.size();
-    }
-
-    public interface OnLongClickListener {
-        void onLongClicked(View view, int position, NPlayModel model, NPlayAdapter.MyViewHolder holder);
-    }
-
-    public interface OnMoreButtonClick {
-        void OnMoreButtonClicked(View view,  int position, NPlayModel model, NPlayAdapter.MyViewHolder holder);
     }
 
     public interface OnClickListener {
@@ -175,14 +209,9 @@ public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder
     public void setOnCheckClickListener(OnCheckBoxListener listener) {
         onCheckBoxListener = listener;
     }
-    public void setOnLongClickListener(OnLongClickListener listener) {
-        onlonglistener = listener;
-    }
+
     public void setOnSingleClickListener(OnClickListener listener) {
         onClickListener = listener;
-    }
-    public void setOnMoreClickListener(OnMoreButtonClick listener) {
-        onmoreclick = listener;
     }
 }
 

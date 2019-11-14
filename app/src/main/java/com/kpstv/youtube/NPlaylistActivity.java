@@ -1,12 +1,15 @@
 package com.kpstv.youtube;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
@@ -15,12 +18,15 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +34,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.kpstv.youtube.adapters.NPlayAdapter;
+import com.kpstv.youtube.helper.OnStartDragListener;
+import com.kpstv.youtube.helper.SimpleItemTouchHelperCallback;
 import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.utils.EqualizerView;
 import com.kpstv.youtube.utils.YTMeta;
@@ -38,19 +46,27 @@ import org.mozilla.javascript.tools.jsc.Main;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class NPlaylistActivity extends AppCompatActivity {
+public class NPlaylistActivity extends AppCompatActivity  implements OnStartDragListener {
 
     Toolbar toolbar;
 
     NPlayAdapter adapter;
     ArrayList<NPlayModel> models;
     TextView cTitle,cAuthor;
+    TextView removeFromQueue;
     RecyclerView recyclerView;
     ImageView cImageView;
-    LinearLayoutManager manager;
+    RelativeLayout relativeLayout;
+    LinearLayoutManager manager; ArrayList<String> checklist = new ArrayList<>();
+    private ItemTouchHelper mItemTouchHelper;
+    int whitecolor,accentcolor; private Handler handler = new Handler();
+    private Runnable runnable; ItemTouchHelper.Callback callback;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,7 +77,11 @@ public class NPlaylistActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(" ");
 
+        whitecolor = ContextCompat.getColor(this,R.color.white);
+        accentcolor = ContextCompat.getColor(this,R.color.colorAccent);
         cTitle = findViewById(R.id.cTitle);
+        relativeLayout = findViewById(R.id.relativeLayout);
+        removeFromQueue = findViewById(R.id.removeFromQueue);
         cAuthor = findViewById(R.id.cAuthor);
         recyclerView = findViewById(R.id.my_recycler_view);
         cImageView = findViewById(R.id.cImage);
@@ -77,16 +97,18 @@ public class NPlaylistActivity extends AppCompatActivity {
 
         manager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(manager);
+        recyclerView.setHasFixedSize(true);
 
         // Set Data and set which one is playing right now...
 
-        adapter = new NPlayAdapter(models,NPlaylistActivity.this);
+        adapter = new NPlayAdapter(models,NPlaylistActivity.this, this);
 
         setAdapterClicks();
 
         recyclerView.setAdapter(adapter);
 
         if (MainActivity.yturls.size()>0) {
+            models.clear();
             // Check for old data....
             if (MainActivity.nPlayModels.size()>0 && MainActivity.yturls.size() == MainActivity.nPlayModels.size()) {
                 boolean sameData=true;
@@ -115,16 +137,111 @@ public class NPlaylistActivity extends AppCompatActivity {
                 new getData(url,this).execute();
             }
         }
+
+        removeFromQueue.setOnTouchListener((v, motionEvent) -> {
+            switch (motionEvent.getAction()) {
+                case MotionEvent.ACTION_DOWN: {
+                    TextView view = (TextView ) v;
+                    view.setTextColor(whitecolor);
+                    v.invalidate();
+                    break;
+                }
+                case MotionEvent.ACTION_UP:
+
+                    if (checklist.size()>0) {
+                        Integer[] pos = new Integer[checklist.size()];
+                        int j=-1;
+                        // Multi-remove
+                        for (int i=0;i<checklist.size();i++) {
+                            String val = checklist.get(i);
+                            pos[++j] = Integer.parseInt(val.split("=")[1]);
+                            Log.e("ItemSetChanged","position: "+j+", "+checklist.get(i)+", name: "+
+                                    models.get(pos[j]).getModel().getVideMeta().getTitle());
+                        }
+                        // Reversing list...
+                        Arrays.sort(pos, Collections.reverseOrder());
+                        for (int c : pos) {
+                            removeItem(c);
+                        }
+                        reloadAdapter();
+
+                        checklist.clear();
+                        setCheckedCallbacks();
+
+                    }
+
+                case MotionEvent.ACTION_CANCEL: {
+                    TextView view = (TextView) v;
+                    view.setTextColor(accentcolor);
+                    view.invalidate();
+                    break;
+                }
+            }
+            return true;
+        });
+
+        recyclerView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                //Blank...
+                return false;
+            }
+        });
+
+        recyclerView.setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View view, DragEvent dragEvent) {
+
+                return false;
+            }
+        });
+
+
+        handler = new Handler();
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!MainActivity.videoTitle.equals(cTitle.getText().toString())) {
+                    cTitle.setText(MainActivity.videoTitle);
+                }
+                if  (!MainActivity.channelTitle.equals(cAuthor.getText().toString())) {
+                    cAuthor.setText(MainActivity.channelTitle);
+                    cImageView.setImageBitmap(MainActivity.bitmapIcon);
+
+                    for (NPlayModel model : models) {
+                        if (YTutils.getVideoID(model.getUrl()).equals(MainActivity.videoID)) {
+                            model.set_playing(true);
+                        }else model.set_playing(false);
+                    }
+
+                    adapter.notifyDataSetChanged();
+                }
+
+                handler.postDelayed(this, 2000);
+            }
+        };
+
+        handler.postDelayed(runnable, 2000);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     void reloadAdapter() {
         models = MainActivity.nPlayModels;
-        adapter = new NPlayAdapter(models,this);
+        adapter = new NPlayAdapter(models,this, this);
         setAdapterClicks();
         recyclerView.setAdapter(adapter);
     }
 
     void setAdapterClicks() {
+
+        callback = new SimpleItemTouchHelperCallback(adapter);
+        mItemTouchHelper = new ItemTouchHelper(callback);
+        mItemTouchHelper.attachToRecyclerView(recyclerView);
+
         adapter.setOnSingleClickListener((view, position ,model, holder) -> {
             // Remove current queue song and make it current...
             for(int i=0;i<models.size();i++) {
@@ -140,75 +257,33 @@ public class NPlaylistActivity extends AppCompatActivity {
         adapter.setOnCheckClickListener((view, position, model, holder) -> {
             CheckBox checkBox = (CheckBox) view;
             if (checkBox.isChecked()) {
-                models.get(position).set_selected(true);
-            }else models.get(position).set_selected(false);
-            adapter.notifyItemChanged(position);
-        });
-
-        adapter.setOnLongClickListener((view, position ,model, holder) -> {
-            setPopUPMenu(view,model,position);
-        });
-
-        adapter.setOnMoreClickListener((view, position , model, holder) -> {
-          setPopUPMenu(view,model,position);
+                checklist.add("value="+position);
+                setCheckedCallbacks();
+            }else{
+                checklist.remove("value="+position);
+                setCheckedCallbacks();
+            }
         });
     }
 
-    void setPopUPMenu(View view, NPlayModel model, int position) {
-        PopupMenu popupMenu = new PopupMenu(this,view);
-        popupMenu.inflate(R.menu.nplaymenu);
-        popupMenu.show();
-        popupMenu.setOnMenuItemClickListener(menuItem -> {
-            switch (menuItem.getItemId()) {
-                case R.id.action_remove:
-                    Log.e("Determining","true");
-                    int i=0;
-                    for (NPlayModel model1 : models) {
-                        if (model1.is_selected()) {
-                            i++;
-                        }
-                    }
-                    Log.e("TotalItemChecked",i+" Item checked");
-                    if (i>1) {
-                        Integer[] pos = new Integer[i];
-                        int j=-1;
-                        // Multi-remove
-                        for (i=0;i<models.size();i++) {
-                             if (models.get(i).is_selected()) {
-                                 pos[++j] = i;
-                                 Log.e("CheckDetected","position: " + i);
-                            }
-                        }
-                        // Reversing list...
-                        Arrays.sort(pos, Collections.reverseOrder());
-                        for (int c : pos) {
-                            Log.e("RemovingItem","position: " + c+", "+YTutils.getVideoTitle(
-                                    models.get(c).getModel().getVideMeta().getTitle()
-                            ));
-                            removeItem(c);
-                        }
-                        reloadAdapter();
-                        return true;
-                    }else {
-                        // Single-remove
-                        removeItem(position);
-                        reloadAdapter();
-                        return true;
-                    }
-                case R.id.action_share:
-                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                    shareIntent.setType("text/plain");
-                    shareIntent.putExtra(Intent.EXTRA_TEXT, "Listen to this "+ model.getUrl());
-                    startActivity(Intent.createChooser(shareIntent, "Share using..."));
-                    break;
-            }
-            return false;
-        });
+
+    void setCheckedCallbacks() {
+        if (checklist.size()>0) {
+            relativeLayout.setVisibility(View.VISIBLE);
+        }else relativeLayout.setVisibility(View.GONE);
     }
 
     void removeItem(int position) {
+      //  models.remove(position);
         MainActivity.nPlayModels.remove(position);
         MainActivity.yturls.remove(position);
+    }
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        mItemTouchHelper.startDrag(viewHolder);
+        checklist.clear();
+        setCheckedCallbacks();
     }
 
     class getData extends AsyncTask<Void,Void,Void> {
@@ -234,7 +309,7 @@ public class NPlaylistActivity extends AppCompatActivity {
             if (meta.getVideMeta()!=null) {
                 String title = YTutils.getVideoTitle(meta.getVideMeta().getTitle());
                 if (title.equals(MainActivity.videoTitle)) {
-                    Log.e("NPlaylistActivity",MainActivity.videoTitle+", "+title);
+                    Log.e("NPlaylistActivity",MainActivity.videoTitle + ", " + title);
                     models.add(new NPlayModel(url,meta,true));
                 }else
                     models.add(new NPlayModel(url,meta,false));
