@@ -57,8 +57,10 @@ public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder
 
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
-        Collections.swap(models, fromPosition, toPosition);
-        notifyItemMoved(fromPosition, toPosition);
+       try {
+           Collections.swap(models, fromPosition, toPosition);
+           notifyItemMoved(fromPosition, toPosition);
+       }catch (Exception e){e.printStackTrace();}
         return true;
     }
 

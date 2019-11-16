@@ -1,6 +1,8 @@
 package com.kpstv.youtube;
 
 import android.Manifest;
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -31,6 +33,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
@@ -44,6 +47,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -53,6 +58,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.coremedia.iso.boxes.Container;
@@ -69,6 +75,7 @@ import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
 import com.jgabrielfreitas.core.BlurImageView;
+import com.kpstv.youtube.adapters.PlayerAdapter;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.SpotifyTrack;
@@ -122,7 +129,7 @@ public class PlayerActivity2 extends AppCompatActivity {
     static String YouTubeUrl;
     static ImageView backImage;
 
-    String[] apikeys = new String[]{"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw", "AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
+    static String[] apikeys = new String[]{"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw", "AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
 
     static ConstraintLayout mainlayout;
 
@@ -133,6 +140,9 @@ public class PlayerActivity2 extends AppCompatActivity {
     static ImageButton previousFab, playFab, nextFab, repeatButton, downloadButton, playlistButton, youTubeButton;
 
     ImageButton navigationDown;
+
+    static ViewPager mainPager;
+    static PlayerAdapter adapter;
 
     static ImageView mainImageView;
 
@@ -147,7 +157,7 @@ public class PlayerActivity2 extends AppCompatActivity {
 
     SharedPreferences preferences;
 
-    AsyncTask<Void,Void,Void> setData;
+    static AsyncTask<Void,Void,Void> setData;
 
     int accentColor;
 
@@ -170,6 +180,8 @@ public class PlayerActivity2 extends AppCompatActivity {
       /*  Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);*/
+
+
 
         preferences = getSharedPreferences("settings", MODE_PRIVATE);
 
@@ -269,13 +281,23 @@ public class PlayerActivity2 extends AppCompatActivity {
             }
         });
 
+        mainPager.addOnPageChangeListener(mainPageListener);
+
+        adapter = new PlayerAdapter(activity,MainActivity.yturls);
+        mainPager.setAdapter(adapter);
+
         loadAgain();
 
-        mainImageView.setOnLongClickListener(v -> {
+        Palette.generateAsync(MainActivity.bitmapIcon, palette -> {
+            MainActivity.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+            backImage.setColorFilter(MainActivity.nColor);
+        });
+
+/*        mainImageView.setOnLongClickListener(v -> {
             YTutils.Vibrate(PlayerActivity2.this);
             callFinish();
             return true;
-        });
+        });*/
 
         downloadButton.setOnTouchListener(new View.OnTouchListener() {
             @RequiresApi(api = Build.VERSION_CODES.M)
@@ -362,41 +384,88 @@ public class PlayerActivity2 extends AppCompatActivity {
         });
     }
 
+
+    static ViewPager.OnPageChangeListener mainPageListener = new ViewPager.OnPageChangeListener() {
+        @Override
+        public void onPageScrolled(int i, float v, int i1) {
+
+        }
+
+        @Override
+        public void onPageSelected(int pos) {
+            try {
+                MainActivity.ChangeVideo(pos);
+                if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
+                    setData.cancel(true);
+                setData = new loadData();
+                setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int i) {
+
+        }
+    };
+
     public static void loadAgain() {
+
+        player_common();
+
+        mainPager.removeOnPageChangeListener(mainPageListener);
+        if (mainPager.getCurrentItem()!=MainActivity.ytIndex)
+        {
+            mainPager.setCurrentItem(MainActivity.ytIndex,true);
+        }
+        mainPager.addOnPageChangeListener(mainPageListener);
+
+    }
+
+    static void player_common() {
         mainlayout.setVisibility(View.VISIBLE);
         mprogressBar.setVisibility(View.GONE);
         mainTitle.setText(MainActivity.videoTitle);
         channelTitle.setText(MainActivity.channelTitle);
         viewCount.setText(MainActivity.viewCounts);
 
-        backImage.setColorFilter(MainActivity.nColor);
+        // Loading color with animation...
 
-      //  backImage.setImageBitmap(MainActivity.bitmapIcon);
-     //   backImage.setBlur(5);
+        int colorTo = MainActivity.nColor;
+        if (backImage.getTag()!=null) {
+            Log.e("Animation","I am animating bro...");
+            int colorFrom = (int) backImage.getTag();
+            ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
+            colorAnimation.setDuration(300);
+            colorAnimation.addUpdateListener(animator -> backImage.setColorFilter((int) animator.getAnimatedValue()));
+            colorAnimation.start();
+        }else backImage.setColorFilter(MainActivity.nColor);
+        backImage.setTag(colorTo);
+
+
         makeRepeat(MainActivity.isLoop);
-        mainImageView.setImageBitmap(MainActivity.bitmapIcon);
+
         totalDuration.setText(YTutils.milliSecondsToTimer(MainActivity.total_duration));
         detectPlayback();
         YouTubeUrl = YTutils.getYtUrl(MainActivity.videoID);
         updateProgressBar();
     }
 
-    class loadData extends AsyncTask<Void,Void,Void> {
+    static class loadData extends AsyncTask<Void,Void,Void> {
         @Override
         protected void onPostExecute(Void aVoid) {
             Glide.with(activity)
                     .asBitmap()
-                    .load(MainActivity.imgUrl)
+                    .load(YTutils.getImageUrl(MainActivity.yturls.get(MainActivity.ytIndex)))
                     .into(new CustomTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            Palette.generateAsync(resource, new Palette.PaletteAsyncListener() {
-                                public void onGenerated(Palette palette) {
-                                    MainActivity.bitmapIcon = resource;
-                                    MainActivity.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
-                                    loadAgain();
-                                    MainActivity.rebuildNotification();
-                                }
+                            Palette.generateAsync(resource, palette -> {
+                                MainActivity.bitmapIcon = resource;
+                                MainActivity.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+                                loadAgain();
+                                MainActivity.rebuildNotification();
                             });
                         }
 
@@ -405,7 +474,7 @@ public class PlayerActivity2 extends AppCompatActivity {
 
                         }
                     });
-            loadAgain();
+
             super.onPostExecute(aVoid);
         }
 
@@ -563,6 +632,7 @@ public class PlayerActivity2 extends AppCompatActivity {
     }
 
     private void getAllViews() {
+        mainPager = findViewById(R.id.viewPager);
         navigationDown = findViewById(R.id.navigation_down);
         mprogressBar = findViewById(R.id.mainprogress);
         mainTitle = findViewById(R.id.maintitle);

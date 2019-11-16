@@ -105,8 +105,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         urls.add(0,searchModel.getYturl());
         final String[] stringarray = YTutils.ConvertToStringArray(urls);*/
 
-        holder.titleText.setText(discoverModel.getTitle());
-        holder.AuthorText.setText(discoverModel.getAuthor());
+        holder.titleText.setText(YTutils.getVideoTitle(discoverModel.getTitle()));
+        holder.AuthorText.setText(YTutils.getChannelTitle(discoverModel.getTitle(),discoverModel.getAuthor()));
 
         Glide.with(con).load(discoverModel.getImgUrl()).addListener(new RequestListener<Drawable>() {
             @Override

@@ -2,33 +2,27 @@ package com.kpstv.youtube;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.DragEvent;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -37,18 +31,12 @@ import com.kpstv.youtube.adapters.NPlayAdapter;
 import com.kpstv.youtube.helper.OnStartDragListener;
 import com.kpstv.youtube.helper.SimpleItemTouchHelperCallback;
 import com.kpstv.youtube.models.NPlayModel;
-import com.kpstv.youtube.utils.EqualizerView;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
-
-import org.mozilla.javascript.tools.jsc.Main;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class NPlaylistActivity extends AppCompatActivity  implements OnStartDragListener {
 
@@ -107,37 +95,6 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
         recyclerView.setAdapter(adapter);
 
-        if (MainActivity.yturls.size()>0) {
-            models.clear();
-            // Check for old data....
-            if (MainActivity.nPlayModels.size()>0 && MainActivity.yturls.size() == MainActivity.nPlayModels.size()) {
-                boolean sameData=true;
-                for(int i=0;i<MainActivity.nPlayModels.size();i++) {
-                    MainActivity.nPlayModels.get(i).set_playing(false);
-                    String yturl = MainActivity.yturls.get(i);
-                    String nurl = MainActivity.nPlayModels.get(i).getUrl();
-
-                    String title = YTutils.getVideoTitle( MainActivity.nPlayModels.get(i).getModel()
-                            .getVideMeta().getTitle());
-                    if (title.equals(MainActivity.videoTitle)) {
-                        MainActivity.nPlayModels.get(i).set_playing(true);
-                    }
-
-                    if (!yturl.equals(nurl)) {
-                        sameData = false;
-                    }
-                }
-                if (sameData) {
-                    reloadAdapter();
-                    return;
-                }
-            }
-            for (String url : MainActivity.yturls)
-            {
-                new getData(url,this).execute();
-            }
-        }
-
         removeFromQueue.setOnTouchListener((v, motionEvent) -> {
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN: {
@@ -155,8 +112,6 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                         for (int i=0;i<checklist.size();i++) {
                             String val = checklist.get(i);
                             pos[++j] = Integer.parseInt(val.split("=")[1]);
-                            Log.e("ItemSetChanged","position: "+j+", "+checklist.get(i)+", name: "+
-                                    models.get(pos[j]).getModel().getVideMeta().getTitle());
                         }
                         // Reversing list...
                         Arrays.sort(pos, Collections.reverseOrder());
@@ -222,10 +177,43 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
         };
 
         handler.postDelayed(runnable, 2000);
+
+        if (MainActivity.yturls.size()>0) {
+            models.clear();
+            // Check for old data....
+            if (MainActivity.nPlayModels.size()>0 && MainActivity.yturls.size() == MainActivity.nPlayModels.size()) {
+                boolean sameData=true;
+                for(int i=0;i<MainActivity.nPlayModels.size();i++) {
+                    MainActivity.nPlayModels.get(i).set_playing(false);
+                    String yturl = MainActivity.yturls.get(i);
+                    String nurl = MainActivity.nPlayModels.get(i).getUrl();
+
+                    String title = YTutils.getVideoTitle( MainActivity.nPlayModels.get(i).getModel()
+                            .getVideMeta().getTitle());
+                    if (title.equals(MainActivity.videoTitle)) {
+                        MainActivity.nPlayModels.get(i).set_playing(true);
+                    }
+
+                    if (!yturl.equals(nurl)) {
+                        sameData = false;
+                    }
+                }
+                if (sameData) {
+                    reloadAdapter();
+                    return;
+                }
+            }
+            for (String url : MainActivity.yturls)
+            {
+                new getData(url,this).execute();
+            }
+        }
+
     }
 
     @Override
     protected void onDestroy() {
+        handler.removeCallbacks(runnable);
         super.onDestroy();
     }
 
@@ -309,8 +297,7 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
             if (meta.getVideMeta()!=null) {
                 String title = YTutils.getVideoTitle(meta.getVideMeta().getTitle());
                 if (title.equals(MainActivity.videoTitle)) {
-                    Log.e("NPlaylistActivity",MainActivity.videoTitle + ", " + title);
-                    models.add(new NPlayModel(url,meta,true));
+                   models.add(new NPlayModel(url,meta,true));
                 }else
                     models.add(new NPlayModel(url,meta,false));
             }

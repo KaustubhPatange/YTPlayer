@@ -25,7 +25,12 @@ public class YTMeta {
 
     MetaModel model;
 
+    public YTMeta(MetaModel model) {
+        this.model = model;
+    }
+
     public YTMeta(String videoID) {
+        if (videoID==null) return;
         try {
             HttpHandler handler = new HttpHandler();
             String json = handler.makeServiceCall(

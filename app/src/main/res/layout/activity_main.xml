@@ -43,78 +43,84 @@
     </LinearLayout>
 
 
+
     <LinearLayout
         android:visibility="gone"
         android:layout_above="@id/navigation"
         android:id="@+id/bottom_player"
         android:clickable="true"
-        android:background="@color/black"
         android:focusable="true"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="53dp">
-
-        <ProgressBar
-            android:id="@+id/songLayoutProgress"
-            android:visibility="gone"
+        <LinearLayout
             android:background="@color/black"
-            style="?android:attr/progressBarStyleHorizontal"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="2dp"/>
-
-        <RelativeLayout
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="49dp">
+            android:layout_height="53dp">
             <ProgressBar
-                android:layout_margin="5dp"
-                android:id="@+id/song_progress"
+                android:id="@+id/songLayoutProgress"
+                android:visibility="gone"
+                android:background="@color/black"
+                style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-            <ImageButton
-                android:visibility="gone"
-                android:id="@+id/action_maximize"
-                android:layout_marginStart="10dp"
-                android:background="@color/transparent_black"
-                android:src="@drawable/ic_arrow_up"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent" />
-            <TextView
-                android:visibility="gone"
-                android:textStyle="bold"
-                android:textColor="@color/white"
-                android:fontFamily="@font/dmsans_font"
-                android:gravity="center_vertical"
-                android:id="@+id/action_title"
-                android:layout_toEndOf="@id/action_maximize"
-                android:layout_marginStart="15dp"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit="marquee_forever"
-                android:scrollHorizontally="true"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:layout_marginEnd="56dp"
-                android:text=""
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-            <ImageButton
-                android:visibility="gone"
-                android:layout_marginEnd="10dp"
-                android:id="@+id/action_play"
-                android:layout_alignParentEnd="true"
-                android:background="@color/transparent_black"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_pause_circle"
-                android:layout_width="36dp"
-                android:layout_height="match_parent" />
-        </RelativeLayout>
+                android:layout_height="2dp"/>
 
-        <View
-            android:background="@color/colorScreen"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"/>
+            <RelativeLayout
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="49dp">
+                <ProgressBar
+                    android:layout_margin="5dp"
+                    android:id="@+id/song_progress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+                <ImageButton
+                    android:visibility="gone"
+                    android:id="@+id/action_maximize"
+                    android:layout_marginStart="10dp"
+                    android:background="@color/transparent_black"
+                    android:src="@drawable/ic_arrow_up"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+                <TextView
+                    android:visibility="gone"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/dmsans_font"
+                    android:gravity="center_vertical"
+                    android:id="@+id/action_title"
+                    android:layout_toEndOf="@id/action_maximize"
+                    android:layout_marginStart="15dp"
+                    android:singleLine="true"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:layout_marginEnd="56dp"
+                    android:text=""
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+                <ImageButton
+                    android:visibility="gone"
+                    android:layout_marginEnd="10dp"
+                    android:id="@+id/action_play"
+                    android:layout_alignParentEnd="true"
+                    android:background="@color/transparent_black"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_pause_circle"
+                    android:layout_width="36dp"
+                    android:layout_height="match_parent" />
+            </RelativeLayout>
+
+            <View
+                android:background="@color/colorScreen"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"/>
+        </LinearLayout>
+
     </LinearLayout>
 
 </RelativeLayout>

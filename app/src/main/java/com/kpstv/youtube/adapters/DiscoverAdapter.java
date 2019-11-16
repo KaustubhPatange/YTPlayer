@@ -34,10 +34,13 @@ import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.DiscoverModel;
+import com.kpstv.youtube.models.MetaModel;
+import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.models.SearchModel;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.OnLoadMoreListener;
 import com.kpstv.youtube.utils.YTLength;
+import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
 
 import org.json.JSONObject;
@@ -173,15 +176,26 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
             viewHolder.mainCard.setTag(objects);
             viewHolder.mainCard.setOnLongClickListener(longClickListener);
 
-            viewHolder.mainCard.setOnClickListener(v -> {
-                Activity activity = (Activity) con;
 
-                /*Intent intent = new Intent(con,PlayerActivity.class);
-                intent.putExtra("youtubelink",new String[]{ model.getYtUrl() });
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                con.startActivity(intent);
-                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);*/
-                MainActivity.PlayVideo(new String[]{ model.getYtUrl() });
+            viewHolder.mainCard.setOnClickListener(v -> {
+
+                // A quick smart hack... to set Playlist models directly during loading...
+
+                MainActivity.nPlayModels.clear();
+                String[] yturls = new String[discoverModels.size()];
+                for (int i=0;i<yturls.length;i++) {
+                    MetaModel metaModel = new MetaModel(
+                            discoverModels.get(i).getTitle(),
+                            discoverModels.get(i).getAuthor(),
+                            discoverModels.get(i).getImgUrl()
+                    );
+                    NPlayModel nPlayModel = new NPlayModel(
+                            discoverModels.get(i).getYtUrl(),
+                            new YTMeta(metaModel),false);
+                    MainActivity.nPlayModels.add(nPlayModel);
+                    yturls[i] = discoverModels.get(i).getYtUrl();
+                }
+                MainActivity.PlayVideo(yturls,position);
             });
 
             if (position%5==0 && position!=0 && position%10!=0) {

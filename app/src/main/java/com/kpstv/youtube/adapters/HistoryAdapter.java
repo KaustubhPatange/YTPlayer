@@ -32,6 +32,7 @@ import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.MetaModel;
+import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTLength;
 import com.kpstv.youtube.utils.YTMeta;
@@ -157,8 +158,8 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
                     return true;
                 }
             }).into(viewHolder.imageView);
-            viewHolder.titleText.setText(model.getTitle());
-            viewHolder.authorText.setText(model.getAuthor());
+            viewHolder.titleText.setText(YTutils.getVideoTitle(model.getTitle()));
+            viewHolder.authorText.setText(YTutils.getChannelTitle(model.getTitle(),model.getAuthor()));
             viewHolder.rate_percent.setText(percent);
 
             String toput = DateString;

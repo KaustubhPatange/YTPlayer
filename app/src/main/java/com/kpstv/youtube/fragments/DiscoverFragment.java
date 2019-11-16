@@ -168,7 +168,6 @@ public class DiscoverFragment extends Fragment {
                 @Override
                 public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                     super.onScrollStateChanged(recyclerView, newState);
-                    Log.e("Size_Comparison","Discover Size: "+discoverModels.size()+", Total Items: "+totalItems);
                     if (mAdapter.getLoaded() || discoverModels.size() >= totalItems) return;
                     int visibleItemCount = mLayoutManager.getChildCount();
                     int totalItemCount = mLayoutManager.getItemCount();

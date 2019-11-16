@@ -1,5 +1,7 @@
 package com.kpstv.youtube;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Notification;
@@ -38,6 +40,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -73,6 +76,7 @@ import com.kpstv.youtube.fragments.OPlaylistFragment;
 import com.kpstv.youtube.fragments.PlaylistFragment;
 import com.kpstv.youtube.fragments.SFragment;
 import com.kpstv.youtube.fragments.SearchFragment;
+import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.receivers.SongBroadCast;
@@ -95,6 +99,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.zip.GZIPInputStream;
 
 import at.huber.youtubeExtractor.Format;
 import at.huber.youtubeExtractor.VideoMeta;
@@ -223,17 +228,6 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         bottom_player.setOnClickListener(v-> openPlayer());
         actionUp.setOnClickListener(v->openPlayer());
 
-        /*// Disabling URI exposure for lame android 7.0+ who can't do by themselves.
-        if(Build.VERSION.SDK_INT>=24){
-            try{
-                Method m = StrictMode.class.getMethod("disableDeathOnFileUriExposure");
-                m.invoke(null);
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-        }*/
-
-
         fragmentManager = getSupportFragmentManager();
         HistoryFrag = new HistoryFragment();
         SearchFrag = new SearchFragment();
@@ -273,6 +267,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             LoadVideo.cancel(true);
         }
         yturls.addAll(Arrays.asList(ytUrls));
+        ytIndex = position;
         videoID = YTutils.getVideoID(yturls.get(position));
         LoadVideo = new loadVideo();
         LoadVideo.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videoID);
@@ -384,6 +379,15 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         if (getSupportFragmentManager().findFragmentById(R.id.fragment_container)
                 instanceof HistoryFragment)
         HistoryFragment.removeFromHistory(position);
+        if (yturls.size()>0) {
+            try {
+                yturls.remove(position);
+            }catch (Exception e) {e.printStackTrace();}
+        }if (nPlayModels.size()>0) {
+           try {
+               nPlayModels.remove(position);
+           }catch (Exception e){ e.printStackTrace(); }
+        }
     }
 
     @Override
@@ -405,14 +409,42 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
     }
 
+    @SuppressLint("StaticFieldLeak")
     boolean CheckIntent(Intent incoming) {
         if (Intent.ACTION_SEND.equals(incoming.getAction())
                 && incoming.getType() != null && "text/plain".equals(incoming.getType())) {
             Log.e("Firing","checkIntent");
             String ytLink = incoming.getStringExtra(Intent.EXTRA_TEXT);
             Log.e("IntentYTLink",ytLink+"");
-            if (YTutils.isValidID(ytLink)){
-                PlayVideo(new String[]{ytLink});
+            if (YTutils.isValidID(ytLink)) {
+                if (yturls.size()<=0) {
+                    PlayVideo(getYTUrls(ytLink),0);
+                }else {
+                    int insert_pos = ytIndex;
+                    if (nPlayModels.size()>0 && nPlayModels.size()==yturls.size()) {
+                        new AsyncTask<Void,Void,Void>(){
+                            YTMeta ytMeta;
+                            @Override
+                            protected void onPostExecute(Void aVoid) {
+                                if (ytMeta.getVideMeta()!=null) {
+                                    NPlayModel model = new NPlayModel(ytLink,ytMeta,false);
+                                    nPlayModels.add(insert_pos,model);
+                                }else
+                                    Toast.makeText(activity, "Unexpected parsing error occurred!", Toast.LENGTH_SHORT).show();
+                                super.onPostExecute(aVoid);
+                            }
+
+                            @Override
+                            protected Void doInBackground(Void... voids) {
+                                ytMeta = new YTMeta(YTutils.getVideoID(ytLink));
+                                return null;
+                            }
+                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    }
+                    yturls.add(insert_pos,ytLink);
+                    ChangeVideo(insert_pos);
+                }
+             //   PlayVideo(new String[]{ytLink});
                 return true;
             }else if (ytLink.contains("open.spotify.com")&&ytLink.contains("/track/")) {
                 new makeSpotifyData(ytLink).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -461,7 +493,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         }*/
     }
 
-    class getData extends AsyncTask<Void,Void,Void> {
+    /*class getData extends AsyncTask<Void,Void,Void> {
 
         String spotifyUrl,ytLink;
         ProgressDialog dialog;
@@ -498,7 +530,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             Log.e("GOTURL_Here",ytLink+"");
             return null;
         }
-    }
+    }*/
 
     /**
     * Implementing a new player within main activity itself...
@@ -690,6 +722,42 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         }).Extract(YTutils.getVideoID(yturl));
     }
 
+    static void animate_up(View view) {
+        view.setVisibility(View.VISIBLE);
+        TranslateAnimation animate = new TranslateAnimation(
+                0,                 // fromXDelta
+                0,                 // toXDelta
+                view.getHeight(),  // fromYDelta
+                0);                // toYDelta
+        animate.setDuration(500);
+        animate.setFillAfter(true);
+        view.startAnimation(animate);
+        /*view.animate()
+                .translationY(0)
+                .setDuration(300)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        view.setVisibility(VISIBLE);
+                    }
+                }).start();*/
+    }
+
+    static void animate_down(View view) {
+        view.animate()
+                .translationY(view.getHeight())
+                .alpha(0.0f)
+                .setDuration(300)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        view.setVisibility(View.GONE);
+                    }
+                }).start();
+    }
+
     private static void continueinMainThread(String link) {
 
         // Let's hold up here... and see how I modify the videoTitle
@@ -720,7 +788,6 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                         playNext();
                         break;
                     case ExoPlayer.STATE_READY:
-                        rebuildNotification();
                         actionTitle.setVisibility(VISIBLE);
                         actionTitle.setText(videoTitle);
                         loadProgress.setVisibility(View.GONE);
@@ -729,6 +796,10 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                         actionUp.setVisibility(VISIBLE);
                         total_duration = MainActivity.player.getDuration();
                         total_seconds = (int) total_duration / 1000;
+                        try {
+                            PlayerActivity2.totalDuration.setText(YTutils.milliSecondsToTimer(MainActivity.total_duration));
+                        }catch (Exception e) { Log.e("PlayerActivity","not loaded yet!"); }
+                        rebuildNotification();
                         updateProgressBar();
                         break;
                 }
@@ -882,8 +953,24 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         }
     };
 
-    static class makeSpotifyData extends AsyncTask<Void,Void,Void> {
+    static String[] getYTUrls(String to_inject_yturl) {
+        String line = preferences.getString("urls","");
+        if (line!=null && !line.isEmpty()) {
+            String[] lines = line.split(",");
+            String[] yt_urls = new String[1+lines.length];
+            yt_urls[0] = to_inject_yturl;
+            for (int i=1;i<yt_urls.length;i++)
+                yt_urls[i] = lines[i-1].split("\\|")[0];
+            return yt_urls;
+        }else {
+            String[] yt_urls = new String[1];
+            yt_urls[0] = to_inject_yturl;
+            return yt_urls;
+        }
+    }
 
+    static class makeSpotifyData extends AsyncTask<Void,Void,Void> {
+        SpotifyTrack track;
         String spotifyUrl,ytLink;
         public makeSpotifyData(String yturl) {
             this.spotifyUrl = yturl;
@@ -892,10 +979,20 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         @Override
         protected void onPostExecute(Void aVoid) {
             if (ytLink!=null) {
-                yturls.add(ytLink);
-                ytIndex=yturls.size()-1;
-                videoID = YTutils.getVideoID(ytLink);
-                PlayVideo(new String[]{ytLink});
+                if (yturls.size()<=0) {
+                    PlayVideo(getYTUrls(ytLink),0);
+                }else {
+                    int insert_index = ytIndex;
+                    if (nPlayModels.size()>0 && nPlayModels.size()==yturls.size()) {
+                        MetaModel metaModel = new MetaModel(track.getTitle(),track.getAuthor(),track.getImageUrl());
+                        NPlayModel model = new NPlayModel(ytLink,new YTMeta(metaModel),true);
+                        nPlayModels.add(insert_index,model);
+                    }
+                    yturls.add(insert_index,ytLink);
+                    ChangeVideo(insert_index);
+                }
+            }else {
+                Toast.makeText(activity, "Couldn't parse this Spotify url", Toast.LENGTH_SHORT).show();
             }
             super.onPostExecute(aVoid);
         }
@@ -909,10 +1006,8 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
 
         @Override
         protected Void doInBackground(Void... voids) {
-            Log.e("Original_URL",spotifyUrl+"");
-            SpotifyTrack track = new SpotifyTrack(YTutils.getSpotifyID(spotifyUrl));
+            track = new SpotifyTrack(YTutils.getSpotifyID(spotifyUrl));
             ytLink = track.getYtUrl();
-            Log.e("GOTURL_Here",ytLink+"");
             return null;
         }
     }
