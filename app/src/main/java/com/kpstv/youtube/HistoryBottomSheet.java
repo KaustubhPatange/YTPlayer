@@ -59,7 +59,7 @@ public class HistoryBottomSheet extends BottomSheetDialogFragment {
 
         position = getArguments().getInt("pos",0);
         Title = getArguments().getString("title");
-        ytUrl = getArguments().getString("yturl");
+        ytUrl = getArguments().getString("videoID");
         title_TextView.setText(Title);
 
         new getLength(ytUrl).execute();

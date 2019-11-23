@@ -238,7 +238,11 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         if (YTutils.isInternetAvailable())
-            loadFragment(HistoryFrag);
+        {
+            if (getYTUrls("blnk").length>1)
+                loadFragment(HistoryFrag);
+            else navigation.setSelectedItemId(R.id.navigation_search);
+        }
         else {
             loadFragment(NCFrag);
         }
@@ -285,6 +289,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         LoadVideo.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videoID);
     }
 
+    boolean doubleBackToExitPressedOnce = false;
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof SFragment) {
@@ -299,7 +304,21 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             loadFragment(PlaylistFrag);
             return;
         }
-        finish();
+
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Press back once more to exit.", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce=false;
+            }
+        }, 2000);
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -456,7 +475,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             }
         }
         return false;
-        /*ytLink = incoming.getStringExtra("yturl");
+        /*ytLink = incoming.getStringExtra("videoID");
         Log.e("YouTubeUrl",ytLink+"");
         String playerCheck = incoming.getStringExtra("is_playing");
         if (playerCheck!=null) {
@@ -497,8 +516,8 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
 
         String spotifyUrl,ytLink;
         ProgressDialog dialog;
-        public getData(String yturl) {
-            this.spotifyUrl = yturl;
+        public getData(String videoID) {
+            this.spotifyUrl = videoID;
             dialog = new ProgressDialog(MainActivity.this);
         }
 
@@ -605,7 +624,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                             YtFile ytFile = ytFiles.get(itag);
 
                             if (ytFile.getFormat().getHeight() == -1 || ytFile.getFormat().getHeight() >= 360) {
-                                addFormatToList(videoTitle, ytFile);
+                                addFormatToList(videoTitle, ytFile,channelTitle);
                             }
                         }
 
@@ -710,7 +729,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
 
                 List<YoutubeMedia> bestStream = getBestStream(adativeStream);
 
-                for(int i=0; i<bestStream.size();i++) addVideoToList(bestStream.get(i),videoTitle);
+                for(int i=0; i<bestStream.size();i++) addVideoToList(bestStream.get(i),videoTitle,channelTitle);
 
                 continueinMainThread(audioLink);
             }
@@ -810,12 +829,15 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         new saveToHistory().execute(YTutils.getYtUrl(videoID));
     }
 
-    private static void addFormatToList(final String videoTitle, final YtFile ytfile) {
+    private static void addFormatToList(final String videoTitle, final YtFile ytfile, final String channelTitle) {
         Format ytFrVideo = ytfile.getFormat();
 
-        String ytText;
+        String ytText; boolean isaudio=false;
         if (ytFrVideo.getHeight() == -1)
+        {
+            isaudio = true;
             ytText = "Audio " + ytFrVideo.getAudioBitrate() + " kbit/s";
+        }
         else {
             ytText = (ytFrVideo.getFps() == 60) ? "Video " + ytFrVideo.getHeight() + "p60" :
                     "Video " + ytFrVideo.getHeight() + "p";
@@ -825,12 +847,13 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         }
         if (ytText.contains("128 kbit/s"))
             audioLink = ytfile.getUrl();
-        ytConfigs.add(new YTConfig(ytText, ytfile.getUrl(), ytfile.getFormat().getExt(), videoTitle));
+
+        ytConfigs.add(new YTConfig(ytText, ytfile.getUrl(), ytfile.getFormat().getExt(), videoTitle, channelTitle,isaudio));
     }
 
-    private static void addVideoToList(final YoutubeMedia media, final String videoTitle) {
+    private static void addVideoToList(final YoutubeMedia media, final String videoTitle, final String channelTitle) {
 
-        String ytText;
+        String ytText;boolean isaudio=false;
         if (media.getResSize()!=null) {
             ytText = "Video "+media.getResolution();
             if (media.isVideoOnly()) {
@@ -838,6 +861,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             }
             Log.e("VideoUrlFound",media.getUrl()+"");
         }else {
+            isaudio = true;
             ytText = "Audio "+YTutils.getAvgBitRate(Integer.parseInt(media.getBitrate()))+" kbit/s";
             if (media.getCodec().contains("mp4a")){
                 audioLink = media.getUrl();
@@ -847,7 +871,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                 Log.e("AudioURLFOUND",media.getUrl()+"");
             }
         }
-        ytConfigs.add(new YTConfig(ytText, media.getUrl(), media.getExtension(), videoTitle));
+        ytConfigs.add(new YTConfig(ytText, media.getUrl(), media.getExtension(), videoTitle,channelTitle,isaudio));
     }
 
     public static void rebuildNotification() {
@@ -954,6 +978,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     };
 
     static String[] getYTUrls(String to_inject_yturl) {
+        preferences = activity.getSharedPreferences("history",MODE_PRIVATE);
         String line = preferences.getString("urls","");
         if (line!=null && !line.isEmpty()) {
             String[] lines = line.split(",");
@@ -981,7 +1006,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             if (ytLink!=null) {
                 if (yturls.size()<=0) {
                     PlayVideo(getYTUrls(ytLink),0);
-                }else {
+                } else {
                     int insert_index = ytIndex;
                     if (nPlayModels.size()>0 && nPlayModels.size()==yturls.size()) {
                         MetaModel metaModel = new MetaModel(track.getTitle(),track.getAuthor(),track.getImageUrl());

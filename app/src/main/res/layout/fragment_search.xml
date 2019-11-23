@@ -9,6 +9,7 @@
     tools:context=".fragments.SearchFragment"
     android:layout_height="match_parent">
     <LinearLayout
+        android:animateLayoutChanges="true"
         android:layout_width="match_parent"
         android:orientation="vertical"
         android:layout_height="match_parent">

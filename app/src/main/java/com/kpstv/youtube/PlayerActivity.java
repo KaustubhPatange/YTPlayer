@@ -77,8 +77,6 @@ import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
 import com.googlecode.mp4parser.authoring.tracks.AppendTrack;
-import com.gw.swipeback.SwipeBackLayout;
-import com.jgabrielfreitas.core.BlurImageView;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.Mp4Cutter;
@@ -851,7 +849,7 @@ public class PlayerActivity extends AppCompatActivity {
         }
     }
 
-    private void addVideoToList(final YoutubeMedia media, final String videoTitle) {
+   /* private void addVideoToList(final YoutubeMedia media, final String videoTitle) {
 
         String ytText;
         if (media.getResSize()!=null) {
@@ -870,7 +868,7 @@ public class PlayerActivity extends AppCompatActivity {
                 Log.e("AudioURLFOUND",media.getUrl()+"");
             }
         }
-      /*  Format ytFrVideo = ytfile.getFormat();
+      *//*  Format ytFrVideo = ytfile.getFormat();
 
         String ytText;
         if (ytFrVideo.getHeight() == -1)
@@ -883,9 +881,9 @@ public class PlayerActivity extends AppCompatActivity {
             }
         }
         if (ytText.contains("128 kbit/s"))
-            audioLink = ytfile.getUrl();*/
+            audioLink = ytfile.getUrl();*//*
         ytConfigs.add(new YTConfig(ytText, media.getUrl(), media.getExtension(), videoTitle));
-    }
+    }*/
 
     private void parseVideoNewMethod(String yturl, String videoTitle) {
         isgoing = true;
@@ -904,7 +902,7 @@ public class PlayerActivity extends AppCompatActivity {
 
                 List<YoutubeMedia> bestStream = getBestStream(adativeStream);
 
-                for(int i=0; i<bestStream.size();i++) addVideoToList(bestStream.get(i),videoTitle);
+           //     for(int i=0; i<bestStream.size();i++) addVideoToList(bestStream.get(i),videoTitle);
 
                 continueinMainThread(audioLink);
             }
@@ -1139,14 +1137,14 @@ public class PlayerActivity extends AppCompatActivity {
         }
         if (ytText.contains("128 kbit/s"))
             audioLink = ytfile.getUrl();
-        ytConfigs.add(new YTConfig(ytText, ytfile.getUrl(), ytfile.getFormat().getExt(), videoTitle));
+      //  ytConfigs.add(new YTConfig(ytText, ytfile.getUrl(), ytfile.getFormat().getExt(), videoTitle));
     }
 
     void callFinish() {
         String toput = "true";
         if (!isplaying) toput = "false";
         Intent i = new Intent(this, MainActivity.class);
-        i.putExtra("yturl",YouTubeUrl);
+        i.putExtra("videoID",YouTubeUrl);
         i.putExtra("is_playing",toput);
         i.putExtra("b_title",mainTitle.getText().toString());
         Log.e("sendActivity",sendActivity+"");

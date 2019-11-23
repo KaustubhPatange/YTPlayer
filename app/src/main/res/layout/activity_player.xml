@@ -23,12 +23,12 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <com.jgabrielfreitas.core.BlurImageView
+       <!-- <com.jgabrielfreitas.core.BlurImageView
             android:id="@+id/background_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitXY"
-            android:tint="#3F000000"/>
+            android:tint="#3F000000"/>-->
         <ProgressBar
             android:visibility="gone"
             android:id="@+id/mainprogress"

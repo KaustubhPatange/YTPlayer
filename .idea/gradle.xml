@@ -8,6 +8,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/MyID3_for_Android" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/isoparser-1.9.39" />
           </set>

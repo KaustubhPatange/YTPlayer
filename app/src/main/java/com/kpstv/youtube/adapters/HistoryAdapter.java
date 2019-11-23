@@ -112,7 +112,7 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
 
         String urlset = dataSet.get(listPosition);
 
-        new getData(holder,urlset,listPosition).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new getData(holder,urlset,listPosition).execute();
 
         if (checkForUpdates)
         {

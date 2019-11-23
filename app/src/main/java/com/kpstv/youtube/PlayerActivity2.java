@@ -5,19 +5,13 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.DownloadManager;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.PorterDuff;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -29,73 +23,54 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
-import android.support.v7.widget.Toolbar;
-import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.coremedia.iso.boxes.Container;
-import com.facebook.network.connectionclass.ConnectionClassManager;
-import com.facebook.network.connectionclass.ConnectionQuality;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
+import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
-import com.jgabrielfreitas.core.BlurImageView;
 import com.kpstv.youtube.adapters.PlayerAdapter;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.utils.HttpHandler;
-import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
-import com.kpstv.youtube.ytextractor.ExtractorException;
-import com.kpstv.youtube.ytextractor.YoutubeStreamExtractor;
-import com.kpstv.youtube.ytextractor.model.YoutubeMedia;
-import com.kpstv.youtube.ytextractor.model.YoutubeMeta;
-import com.spyhunter99.supertooltips.ToolTip;
-import com.spyhunter99.supertooltips.ToolTipManager;
+import com.tonyodev.fetch2.Fetch;
 import com.warkiz.widget.IndicatorSeekBar;
 import com.warkiz.widget.OnSeekChangeListener;
 import com.warkiz.widget.SeekParams;
 
+import org.cmc.music.common.ID3WriteException;
+import org.cmc.music.metadata.ImageData;
+import org.cmc.music.metadata.MusicMetadata;
+import org.cmc.music.metadata.MusicMetadataSet;
+import org.cmc.music.myid3.MyID3;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mozilla.javascript.tools.jsc.Main;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -103,26 +78,19 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
-import java.nio.file.FileVisitOption;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import at.huber.youtubeExtractor.Format;
-import at.huber.youtubeExtractor.VideoMeta;
-import at.huber.youtubeExtractor.YouTubeExtractor;
-import at.huber.youtubeExtractor.YtFile;
+import cafe.adriel.androidaudioconverter.AndroidAudioConverter;
+import cafe.adriel.androidaudioconverter.callback.IConvertCallback;
+import cafe.adriel.androidaudioconverter.callback.ILoadCallback;
+import cafe.adriel.androidaudioconverter.model.AudioFormat;
 
 public class PlayerActivity2 extends AppCompatActivity {
 
@@ -146,16 +114,16 @@ public class PlayerActivity2 extends AppCompatActivity {
 
     static ImageView mainImageView;
 
-    static ProgressBar mprogressBar; String audioLink;
+    static ProgressBar mprogressBar;
 
     static IndicatorSeekBar indicatorSeekBar;
     private InterstitialAd mInterstitialAd;
 
      static Handler mHandler = new Handler();
 
-    AsyncTask<String, String, String> mergeTask, cutTask;
+    AsyncTask<String, String, String> mergeTask, cutTask, mp3Task;
 
-    SharedPreferences preferences;
+    SharedPreferences preferences; boolean supportFFmpeg=false;
 
     static AsyncTask<Void,Void,Void> setData;
 
@@ -181,7 +149,16 @@ public class PlayerActivity2 extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);*/
 
-
+        AndroidAudioConverter.load(this, new ILoadCallback() {
+            @Override
+            public void onSuccess() {
+                supportFFmpeg=true;
+            }
+            @Override
+            public void onFailure(Exception error) {
+                // FFmpeg is not supported by device
+            }
+        });
 
         preferences = getSharedPreferences("settings", MODE_PRIVATE);
 
@@ -362,6 +339,7 @@ public class PlayerActivity2 extends AppCompatActivity {
                 }
                 case MotionEvent.ACTION_UP:
 
+                    if (MainActivity.yturls.size()>1)
                     startActivity(new Intent(this,NPlaylistActivity.class));
 
                 case MotionEvent.ACTION_CANCEL: {
@@ -429,6 +407,10 @@ public class PlayerActivity2 extends AppCompatActivity {
         mainTitle.setText(MainActivity.videoTitle);
         channelTitle.setText(MainActivity.channelTitle);
         viewCount.setText(MainActivity.viewCounts);
+
+        if (MainActivity.yturls.size()>1)
+            playlistButton.setEnabled(true);
+        else playlistButton.setEnabled(false);
 
         // Loading color with animation...
 
@@ -658,7 +640,7 @@ public class PlayerActivity2 extends AppCompatActivity {
         String toput = "true";
         if (!MainActivity.isplaying) toput = "false";
         Intent i = new Intent(this, MainActivity.class);
-        i.putExtra("yturl",YouTubeUrl);
+        i.putExtra("videoID",YouTubeUrl);
         i.putExtra("is_playing",toput);
         i.putExtra("b_title",mainTitle.getText().toString());
         i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -717,7 +699,7 @@ public class PlayerActivity2 extends AppCompatActivity {
             if (config.getText().length() > 55) {
                 filename = config.getTitle().substring(0, 55) + "." + config.getExt();
             } else {
-                filename = config.getTitle() + "." + config.getExt();
+                filename = config.getChannelTitle() +" - " + config.getTitle() + "." + config.getExt();
             }
             filename = filename.replaceAll("[\\\\><\"|*?%:#/]", "");
             final String fileCurrent = filename; // Using this since current filename cannot be placed as final
@@ -730,10 +712,10 @@ public class PlayerActivity2 extends AppCompatActivity {
                 alert.setPositiveButton("Yes", (dialog1, which1) -> {
                     showAd();
                     mergeTask = new MergeAudioVideo(PlayerActivity2.this,"/sdcard/Download/"+fileCurrent);
-                    mergeTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,audioLink,config.getUrl());
+                    mergeTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,MainActivity.audioLink,config.getUrl());
                 });
                 alert.setNegativeButton("No", (dialog12, which12) -> {
-                    downloadFromUrl(config.getUrl(), config.getTitle(), fileCurrent);
+                    downloadFromUrl(fileCurrent, config);
 
                     Toast.makeText(PlayerActivity2.this, "Download started",
                             Toast.LENGTH_SHORT).show();
@@ -756,15 +738,14 @@ public class PlayerActivity2 extends AppCompatActivity {
                 });
                 alert.setNeutralButton("Cancel",null);
                 alert.setNegativeButton("Normal", (dialog12, which12) -> {
-                    downloadFromUrl(config.getUrl(), config.getTitle(), fileCurrent);
-                    Toast.makeText(PlayerActivity2.this, "Download started",
-                            Toast.LENGTH_SHORT).show();
+                    downloadFromUrl(fileCurrent, config);
+
                     showAd();
                 });
                 alert.show();
                 return;
             }
-            downloadFromUrl(config.getUrl(), config.getTitle(), filename);
+            downloadFromUrl(fileCurrent, config);
 
             Toast.makeText(PlayerActivity2.this, "Download started",
                     Toast.LENGTH_SHORT).show();
@@ -774,49 +755,237 @@ public class PlayerActivity2 extends AppCompatActivity {
         dialog.show();
     }
 
-    private void downloadFromUrl(String youtubeDlUrl, String downloadTitle, String fileName) {
-        Uri uri = Uri.parse(youtubeDlUrl);
+    private Fetch fetch;
+    private void downloadFromUrl(String fileName, YTConfig config) {
+
+        if (config.isAudio() && supportFFmpeg) {
+
+            final AlertDialog.Builder alert= new AlertDialog.Builder(PlayerActivity2.this);
+            alert.setIcon( android.R.drawable.ic_dialog_info);
+            alert.setTitle("MP3 Conversion");
+            alert.setMessage("The current sample you've selected is not an mp3 stream.\n\nDo you want to convert song into mp3?");
+            alert.setPositiveButton("Yes", (dialog1, which1) -> {
+                showAd();
+
+                String targetName = fileName.split("\\.")[0]+".mp3";
+
+                mp3Task = new MP3Task(PlayerActivity2.this,targetName,config, MainActivity.videoID);
+                mp3Task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,config.getUrl());
+            });
+            alert.setNegativeButton("No", (dialog12, which12) -> {
+             //   downloadFromUrl(fileCurrent, config);
+
+                Toast.makeText(PlayerActivity2.this, "Download started",
+                        Toast.LENGTH_SHORT).show();
+                showAd();
+                downloadNormal(fileName,config);
+            });
+            alert.setNeutralButton("Cancel",null);
+            alert.show();
+        }else {
+            downloadNormal(fileName,config);
+        }
+    }
+
+    private void downloadNormal(String fileName, YTConfig config) {
+        Uri uri = Uri.parse(config.getUrl());
         DownloadManager.Request request = new DownloadManager.Request(uri);
-        request.setTitle(downloadTitle);
+        request.setTitle(config.getTitle()+" by "+config.getChannelTitle());
 
         request.allowScanningByMediaScanner();
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
-
         DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         manager.enqueue(request);
     }
 
-    public static void updateProgressBar() {
-        mHandler.postDelayed(mUpdateTimeTask, 100);
-    }
+    class MP3Task extends AsyncTask<String, String, String> {
 
-    public static Runnable mUpdateTimeTask = new Runnable() {
-        public void run() {
+        AlertDialog alertdialog;
+        View dialogView;
+        TextView tview, dtview;
+        ProgressBar bar; YTConfig config;
+        Context con; String fileLengthString="0";YTMeta ytMeta;
+        String targetName; String videoID;boolean isConverted=false;
 
-            long totalDuration = MainActivity.player.getDuration();
-            long currentDur = MainActivity.player.getCurrentPosition();
-
-            // Displaying time completed playing
-            currentDuration.setText("" + YTutils.milliSecondsToTimer(currentDur));
-
-            // Updating progress bar
-            int progress = (YTutils.getProgressPercentage(currentDur, totalDuration));
-            //Log.d("Progress", ""+progress);
-            indicatorSeekBar.setProgress(progress);
-
-            // Running this thread after 100 milliseconds
-            mHandler.postDelayed(this, 100);
+        public MP3Task(Context context, String fileName, YTConfig config, String videoID) {
+            this.con = context;
+            this.targetName = fileName;
+            this.config = config;
+            this.videoID = videoID;
         }
-    };
+
+        @Override
+        protected void onPreExecute() {
+            Log.e("ExecutingTask","true");
+            LayoutInflater inflater = getLayoutInflater();
+            dialogView = inflater.inflate(R.layout.alert_merger, null);
+            tview = dialogView.findViewById(R.id.textView);
+            dtview = dialogView.findViewById(R.id.textView_Download);
+            bar = dialogView.findViewById(R.id.progressBar);
+            AlertDialog.Builder alert = new AlertDialog.Builder(PlayerActivity2.this);
+            alert.setTitle("Download");
+            alert.setMessage("This could take a while depending upon length of audio!");
+            alert.setCancelable(false);
+            alert.setView(dialogView);
+            alert.setNegativeButton("Cancel", (dialog, which) -> {
+                mp3Task.cancel(true);
+            });
+            alertdialog = alert.create();
+            alertdialog.show();
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            tview.setText(values[1]);
+            if (Integer.parseInt(values[0])==-1) {
+                bar.setIndeterminate(true);
+                return;
+            }
+            bar.setIndeterminate(false);
+            bar.setProgress(Integer.parseInt(values[0]));
+            dtview.setText(YTutils.getSize(Long.parseLong(values[2]))+" / "+fileLengthString);
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            alertdialog.dismiss();
+            if (YTutils.getFile(Environment.DIRECTORY_DOWNLOADS+"/"+targetName).exists())
+                Toast.makeText(con, "Download Completed", Toast.LENGTH_LONG).show();
+            else Toast.makeText(con, "Download Failed", Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        protected String doInBackground(String... sUrl) {
+            try {
+
+                File mp3 = YTutils.getFile("YTPlayer/audio.mp3");
+                if (mp3.exists()) mp3.delete();
+                File f = YTutils.getFile("YTPlayer/audio.file");
+                if (f.exists()) f.delete();
+
+
+                String audioUrl = sUrl[0];
+
+                // Download audio file first...
+                URL url = new URL(audioUrl);
+                URLConnection connection = url.openConnection();
+                connection.connect();
+
+                long fileLength = connection.getContentLength();
+                fileLengthString = YTutils.getSize(fileLength);
+                File root = Environment.getExternalStorageDirectory();
+
+                DataInputStream input = new DataInputStream(url.openStream());
+                DataOutputStream output = new DataOutputStream(new FileOutputStream(
+                        root.getAbsolutePath() + "/YTPlayer/audio.file"));
+
+                byte data[] = new byte[8192];
+                long total = 0;
+                int count;
+                while ((count = input.read(data)) != -1) {
+                    total += count;
+                    publishProgress(((int) (total * 100 / fileLength)) + "",
+                            "Downloading Audio... 1/2",total+"");
+                    output.write(data, 0, count);
+                    output.flush();
+                }
+                output.flush();
+                output.close();
+                input.close();
+
+                // Convert the audio file to mp3...
+
+                publishProgress((-1) + "",
+                        "Converting to mp3... 2/2");
+                IConvertCallback callback = new IConvertCallback() {
+                    @Override
+                    public void onSuccess(File convertedFile) {
+                        isConverted=true;
+                        // We will set tag here...
+                        MusicMetadataSet src_set = null;
+                        try {
+                            src_set = new MyID3().read(convertedFile);
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                        }
+
+                        if (src_set == null)
+                        {
+                            Log.i("NULL", "NULL");
+                        }
+                        else
+                        {
+                            URL uri = null; ImageData imageData=null;
+                            try {
+                                uri = new URL(YTutils.getImageUrlID(videoID));
+                                Bitmap bitmap = BitmapFactory.decodeStream(uri.openConnection().getInputStream());
+                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                                byte[] bitmapdata = stream.toByteArray();
+                                imageData = new ImageData(bitmapdata,"image/jpeg","arun photo",1);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            File dst = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS+"/"+targetName);
+                            MusicMetadata meta = new MusicMetadata(YTutils.getVideoTitle(config.getTitle()));
+                            if (imageData!=null) {
+                                meta.addPicture(imageData);
+                            }
+
+                            meta.setAlbum(ytMeta.getVideMeta().getAuthor());
+                            meta.setArtist(YTutils.getChannelTitle(config.getTitle(),config.getChannelTitle()));
+                            try {
+                                new MyID3().write(convertedFile, dst, src_set, meta);
+                                mp3.delete();
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            } catch (ID3WriteException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Exception error) {
+                        isConverted=true;
+                        Log.e("FailedToDownload","true");
+                    }
+                };
+
+                AndroidAudioConverter.with(PlayerActivity2.this)
+                        .setFile(f)
+                        .setFormat(AudioFormat.MP3)
+                        .setCallback(callback)
+                        .convert();
+
+                ytMeta = new YTMeta(videoID);
+
+                do {
+                    if (mp3.exists()) {
+                        total = mp3.length();
+                        publishProgress(((int) (total * 100 / fileLength)) + "",
+                                "Converting... 2/2",total+"");
+                    }
+                }while (!isConverted);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
 
     class cutTask extends AsyncTask<String, String, String> {
 
         AlertDialog alertdialog;
         View dialogView;
-        TextView tview;
+        TextView tview, dtview;
         ProgressBar bar;
-        Context con;
+        Context con; String fileLengthString="0";
         String target,fileName;
 
         public cutTask(Context context, String targetfile) {
@@ -830,6 +999,7 @@ public class PlayerActivity2 extends AppCompatActivity {
             LayoutInflater inflater = getLayoutInflater();
             dialogView = inflater.inflate(R.layout.alert_merger, null);
             tview = dialogView.findViewById(R.id.textView);
+            dtview = dialogView.findViewById(R.id.textView_Download);
             bar = dialogView.findViewById(R.id.progressBar);
             AlertDialog.Builder alert = new AlertDialog.Builder(PlayerActivity2.this);
             alert.setTitle("Download");
@@ -852,6 +1022,7 @@ public class PlayerActivity2 extends AppCompatActivity {
             }
             bar.setIndeterminate(false);
             bar.setProgress(Integer.parseInt(values[0]));
+            dtview.setText(YTutils.getSize(Long.parseLong(values[2]))+" / "+fileLengthString);
         }
 
         @Override
@@ -881,19 +1052,20 @@ public class PlayerActivity2 extends AppCompatActivity {
                 connection.connect();
 
                 long fileLength = connection.getContentLength();
+                fileLengthString = YTutils.getSize(fileLength);
                 File root = Environment.getExternalStorageDirectory();
 
                 DataInputStream input = new DataInputStream(url.openStream());
                 DataOutputStream output = new DataOutputStream(new FileOutputStream(
                         root.getAbsolutePath() + "/YTPlayer/"+fileName));
 
-                byte data[] = new byte[4096];
+                byte data[] = new byte[8192];
                 long total = 0;
                 int count;
                 while ((count = input.read(data)) != -1) {
                     total += count;
                     publishProgress(((int) (total * 100 / fileLength)) + "",
-                            "Downloading Audio... 1/2");
+                            "Downloading Audio... 1/2",total+"");
                     output.write(data, 0, count);
                     output.flush();
                 }
@@ -922,8 +1094,8 @@ public class PlayerActivity2 extends AppCompatActivity {
 
         AlertDialog alertdialog;
         View dialogView;
-        TextView tview;
-        ProgressBar bar;
+        TextView tview, dtview;
+        ProgressBar bar; String fileLengthString;
         Context con;
         String target;
 
@@ -938,6 +1110,7 @@ public class PlayerActivity2 extends AppCompatActivity {
             LayoutInflater inflater = getLayoutInflater();
             dialogView = inflater.inflate(R.layout.alert_merger, null);
             tview = dialogView.findViewById(R.id.textView);
+            dtview = dialogView.findViewById(R.id.textView_Download);
             bar = dialogView.findViewById(R.id.progressBar);
             AlertDialog.Builder alert = new AlertDialog.Builder(PlayerActivity2.this);
             alert.setTitle("Merging");
@@ -963,6 +1136,7 @@ public class PlayerActivity2 extends AppCompatActivity {
                 connection.connect();
 
                 long fileLength = connection.getContentLength();
+                fileLengthString = YTutils.getSize(fileLength);
                 File root = Environment.getExternalStorageDirectory();
 
                 DataInputStream input = new DataInputStream(url.openStream());
@@ -976,7 +1150,7 @@ public class PlayerActivity2 extends AppCompatActivity {
                 while ((count = input.read(data)) != -1) {
                     total += count;
                     publishProgress(((int) (total * 100 / fileLength)) + "",
-                            "Downloading Audio... 1/3");
+                            "Downloading Audio... 1/3",total+"");
                     output.write(data, 0, count);
                     output.flush();
                 }
@@ -990,6 +1164,7 @@ public class PlayerActivity2 extends AppCompatActivity {
                 connection.connect();
 
                 fileLength = connection.getContentLength();
+                fileLengthString = YTutils.getSize(fileLength);
                 input = new DataInputStream(url.openStream());
                 output = new DataOutputStream(new FileOutputStream(
                         root.getAbsolutePath() + "/YTPlayer/video.download"));
@@ -997,7 +1172,7 @@ public class PlayerActivity2 extends AppCompatActivity {
                 total = 0;
                 while ((count = input.read(data)) != -1) {
                     total += count;
-                    publishProgress(((int) (total * 100 / fileLength)) + "", "Downloading Video... 2/3");
+                    publishProgress(((int) (total * 100 / fileLength)) + "", "Downloading Video... 2/3",total+"");
                     output.write(data, 0, count);
                     output.flush();
                 }
@@ -1024,6 +1199,7 @@ public class PlayerActivity2 extends AppCompatActivity {
             }
             bar.setIndeterminate(false);
             bar.setProgress(Integer.parseInt(values[0]));
+            dtview.setText(YTutils.getSize(Long.parseLong(values[2]))+" / "+fileLengthString);
         }
 
         @Override
@@ -1133,4 +1309,27 @@ public class PlayerActivity2 extends AppCompatActivity {
             isOpen = false;
         }
     }
+
+    public static void updateProgressBar() {
+        mHandler.postDelayed(mUpdateTimeTask, 100);
+    }
+
+    public static Runnable mUpdateTimeTask = new Runnable() {
+        public void run() {
+
+            long totalDuration = MainActivity.player.getDuration();
+            long currentDur = MainActivity.player.getCurrentPosition();
+
+            // Displaying time completed playing
+            currentDuration.setText("" + YTutils.milliSecondsToTimer(currentDur));
+
+            // Updating progress bar
+            int progress = (YTutils.getProgressPercentage(currentDur, totalDuration));
+            //Log.d("Progress", ""+progress);
+            indicatorSeekBar.setProgress(progress);
+
+            // Running this thread after 100 milliseconds
+            mHandler.postDelayed(this, 100);
+        }
+    };
 }

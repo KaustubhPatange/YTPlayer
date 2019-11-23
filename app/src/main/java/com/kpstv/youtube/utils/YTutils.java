@@ -71,6 +71,8 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
+import java.nio.channels.FileChannel;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -334,6 +336,44 @@ public class YTutils {
         return null;
     }
 
+    public static String getSize(long size) {
+
+        DecimalFormat df = new DecimalFormat("0.00");
+
+        float sizeKb = 1024.0f;
+        float sizeMb = sizeKb * sizeKb;
+        float sizeGb = sizeMb * sizeKb;
+        float sizeTerra = sizeGb * sizeKb;
+
+        if(size < sizeMb)
+            return df.format(size / sizeKb)+ " KB";
+        else if(size < sizeGb)
+            return df.format(size / sizeMb) + " MB";
+        else if(size < sizeTerra)
+            return df.format(size / sizeGb) + " GB";
+
+        return "";
+    }
+
+    public static String getSize_withoutPostFix(long size) {
+
+        DecimalFormat df = new DecimalFormat("0.00");
+
+        float sizeKb = 1024.0f;
+        float sizeMb = sizeKb * sizeKb;
+        float sizeGb = sizeMb * sizeKb;
+        float sizeTerra = sizeGb * sizeKb;
+
+        if(size < sizeMb)
+            return df.format(size / sizeKb);
+        else if(size < sizeGb)
+            return df.format(size / sizeMb);
+        else if(size < sizeTerra)
+            return df.format(size / sizeGb);
+
+        return "";
+    }
+
     public static String getViewCount(long number) {
         if (number > 1000000000) { // billion
             return number/1000000000+"B";
@@ -399,12 +439,15 @@ public class YTutils {
     }
 
     public static String getVideoID(String youtube_url) {
+        String t = youtube_url;
         if (youtube_url.contains("youtube.com")) {
-            return youtube_url.split("=")[1];
+            t = youtube_url.split("=")[1];
         }else if (youtube_url.contains("youtu.be")) {
-         return youtube_url.replace("https://youtu.be/","");
+         t = youtube_url.replace("https://youtu.be/","");
         }
-        return null;
+        if (t.contains("&"))
+            t = t.split("&")[0];
+        return t;
     }
 
     public static void StartURL(String url, Context context)
@@ -623,6 +666,22 @@ public class YTutils {
             json = handler.makeServiceCall(updateLink);
             return null;
         }
+    }
+
+    public static void moveFile(File file, File dest) throws IOException {
+        FileChannel outputChannel = null;
+        FileChannel inputChannel = null;
+        try {
+            outputChannel = new FileOutputStream(dest).getChannel();
+            inputChannel = new FileInputStream(file).getChannel();
+            inputChannel.transferTo(0, inputChannel.size(), outputChannel);
+            inputChannel.close();
+            file.delete();
+        } finally {
+            if (inputChannel != null) inputChannel.close();
+            if (outputChannel != null) outputChannel.close();
+        }
+
     }
 
     public static String milliSecondsToTimer(long milliseconds){

@@ -436,7 +436,7 @@ public class PlayerActivity2 extends AppCompatActivity {
         String toput = "true";
         if (!MainActivity.isplaying) toput = "false";
         Intent i = new Intent(this, MainActivity.class);
-        i.putExtra("yturl",YouTubeUrl);
+        i.putExtra("videoID",YouTubeUrl);
         i.putExtra("is_playing",toput);
         i.putExtra("b_title",mainTitle.getText().toString());
         // Log.e("sendActivity",sendActivity+"");
