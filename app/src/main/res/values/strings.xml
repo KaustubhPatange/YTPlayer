@@ -7,6 +7,7 @@
     <!-- TODO: Change download link -->
     <string name="updateUri">https://raw.githubusercontent.com/KaustubhPatange/YTPlayer/master/update.json</string>
     <string name="error">Not a stable connection</string>
+    <string name="shipped_ffmpeg_version">n2.4.2</string>
 
     <string name="set_default_notification">Saved!  Make this your default notification?</string>
 

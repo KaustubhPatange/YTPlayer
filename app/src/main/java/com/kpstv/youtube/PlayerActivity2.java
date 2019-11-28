@@ -43,8 +43,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.coremedia.iso.boxes.Container;
+import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.googlecode.mp4parser.authoring.Movie;
@@ -52,7 +56,9 @@ import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
 import com.kpstv.youtube.adapters.PlayerAdapter;
+import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.YTConfig;
+import com.kpstv.youtube.services.DownloadService;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
@@ -69,6 +75,7 @@ import org.cmc.music.metadata.MusicMetadataSet;
 import org.cmc.music.myid3.MyID3;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mozilla.javascript.tools.jsc.Main;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -86,11 +93,6 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
-
-import cafe.adriel.androidaudioconverter.AndroidAudioConverter;
-import cafe.adriel.androidaudioconverter.callback.IConvertCallback;
-import cafe.adriel.androidaudioconverter.callback.ILoadCallback;
-import cafe.adriel.androidaudioconverter.model.AudioFormat;
 
 public class PlayerActivity2 extends AppCompatActivity {
 
@@ -149,17 +151,6 @@ public class PlayerActivity2 extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);*/
 
-        AndroidAudioConverter.load(this, new ILoadCallback() {
-            @Override
-            public void onSuccess() {
-                supportFFmpeg=true;
-            }
-            @Override
-            public void onFailure(Exception error) {
-                // FFmpeg is not supported by device
-            }
-        });
-
         preferences = getSharedPreferences("settings", MODE_PRIVATE);
 
         setTitle("");
@@ -175,6 +166,28 @@ public class PlayerActivity2 extends AppCompatActivity {
             setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         });*/
 
+       /* FFmpeg ffmpeg = FFmpeg.getInstance(this);
+        try {
+            ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
+
+                @Override
+                public void onStart() {}
+
+                @Override
+                public void onFailure() {}
+
+                @Override
+                public void onSuccess() {
+                    supportFFmpeg=true;
+                }
+
+                @Override
+                public void onFinish() {}
+            });
+        } catch (FFmpegNotSupportedException e) {
+            // Handle if FFmpeg is not supported by device
+        }
+*/
         nextFab.setOnTouchListener((v, motionEvent) -> {
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN: {
@@ -307,6 +320,17 @@ public class PlayerActivity2 extends AppCompatActivity {
             }
         });
 
+        downloadButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if (DownloadService.pendingJobs.size()>0) {
+                    Intent intent = new Intent(PlayerActivity2.this,DownloadActivity.class);
+                    startActivity(intent);
+                }
+                return true;
+            }
+        });
+
         youTubeButton.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN: {
@@ -360,6 +384,21 @@ public class PlayerActivity2 extends AppCompatActivity {
         navigationDown.setOnClickListener(view -> {
             callFinish();
         });
+
+/*
+        AndroidAudioConverter.load(this, new ILoadCallback() {
+            @Override
+            public void onSuccess() {
+
+              supportFFmpeg=true;
+
+            }
+            @Override
+            public void onFailure(Exception error) {
+            }
+        });
+*/
+
     }
 
 
@@ -578,6 +617,13 @@ public class PlayerActivity2 extends AppCompatActivity {
         return false;
     }*/
 
+    public void startService(YTConfig model) {
+        Intent serviceIntent = new Intent(this, DownloadService.class);
+        serviceIntent.putExtra("addJob", model);
+
+        ContextCompat.startForegroundService(this, serviceIntent);
+    }
+
     public static void detectPlayback() {
         if (MainActivity.isplaying)
             makePause();
@@ -695,6 +741,8 @@ public class PlayerActivity2 extends AppCompatActivity {
 
         builder.setItems(arrays, (dialog, which) -> {
             YTConfig config = configs.get(which);
+            config.setVideoID(MainActivity.videoID);
+            config.setAudioUrl(MainActivity.audioLink);
             String filename;
             if (config.getText().length() > 55) {
                 filename = config.getTitle().substring(0, 55) + "." + config.getExt();
@@ -704,7 +752,12 @@ public class PlayerActivity2 extends AppCompatActivity {
             filename = filename.replaceAll("[\\\\><\"|*?%:#/]", "");
             final String fileCurrent = filename; // Using this since current filename cannot be placed as final
             if (arrays[which].contains("(no audio)")) {
-                int icon = android.R.drawable.ic_dialog_info;
+
+                config.setTargetName(fileCurrent.split("\\.")[0]+".mp4");
+                config.setTaskExtra("mergetask");
+                startService(config);
+
+               /* int icon = android.R.drawable.ic_dialog_info;
                 final AlertDialog.Builder alert= new AlertDialog.Builder(PlayerActivity2.this);
                 alert.setIcon(icon);
                 alert.setTitle("Merge");
@@ -722,13 +775,18 @@ public class PlayerActivity2 extends AppCompatActivity {
                     showAd();
                 });
                 alert.setNeutralButton("Cancel",null);
-                alert.show();
-                return;
+                alert.show();*/
+
             } else if (arrays[which].contains("Audio ")) {
-                int icon = android.R.drawable.ic_dialog_info;
+
+                config.setTargetName(fileCurrent.split("\\.")[0]+".mp3");
+                config.setTaskExtra("mp3task");
+                startService(config);
+
+               /* int icon = android.R.drawable.ic_dialog_info;
                 final AlertDialog.Builder alert= new AlertDialog.Builder(PlayerActivity2.this);
                 alert.setIcon(icon);
-                alert.setTitle("Trim Sample");
+                alert.setTitle("Edit Sample");
                 alert.setMessage("Do you want to download and cut sample in editor?\n\nIf so select \"Cut\" else \"Normal\" to begin usual download.");
                 alert.setPositiveButton("Cut", (dialog1, which1) -> {
                     showAd();
@@ -742,10 +800,10 @@ public class PlayerActivity2 extends AppCompatActivity {
 
                     showAd();
                 });
-                alert.show();
-                return;
-            }
-            downloadFromUrl(fileCurrent, config);
+                alert.show();*/
+
+            }else
+                downloadFromUrl(fileCurrent, config);
 
             Toast.makeText(PlayerActivity2.this, "Download started",
                     Toast.LENGTH_SHORT).show();
@@ -790,7 +848,7 @@ public class PlayerActivity2 extends AppCompatActivity {
     private void downloadNormal(String fileName, YTConfig config) {
         Uri uri = Uri.parse(config.getUrl());
         DownloadManager.Request request = new DownloadManager.Request(uri);
-        request.setTitle(config.getTitle()+" by "+config.getChannelTitle());
+        request.setTitle(config.getTitle()+" - "+config.getChannelTitle());
 
         request.allowScanningByMediaScanner();
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
@@ -859,9 +917,11 @@ public class PlayerActivity2 extends AppCompatActivity {
         protected String doInBackground(String... sUrl) {
             try {
 
-                File mp3 = YTutils.getFile("YTPlayer/audio.mp3");
+                String prefixName = config.getTitle()+"_"+config.getChannelTitle();
+
+                File mp3 = YTutils.getFile("YTPlayer/"+prefixName+".mp3");
                 if (mp3.exists()) mp3.delete();
-                File f = YTutils.getFile("YTPlayer/audio.file");
+                File f = YTutils.getFile("YTPlayer/"+prefixName+".file");
                 if (f.exists()) f.delete();
 
 
@@ -878,7 +938,7 @@ public class PlayerActivity2 extends AppCompatActivity {
 
                 DataInputStream input = new DataInputStream(url.openStream());
                 DataOutputStream output = new DataOutputStream(new FileOutputStream(
-                        root.getAbsolutePath() + "/YTPlayer/audio.file"));
+                        root.getAbsolutePath() + "/YTPlayer/"+prefixName+".file"));
 
                 byte data[] = new byte[8192];
                 long total = 0;
@@ -898,55 +958,90 @@ public class PlayerActivity2 extends AppCompatActivity {
 
                 publishProgress((-1) + "",
                         "Converting to mp3... 2/2");
-                IConvertCallback callback = new IConvertCallback() {
+
+
+              /*  FFmpeg ffmpeg = FFmpeg.getInstance(con);
+                try {
+                    String cmd[] = new String[] { "-y","-i",f.getPath(),mp3.getPath() };
+                    // to execute "ffmpeg -version" command you just need to pass "-version"
+                    ffmpeg.execute(cmd, new ExecuteBinaryResponseHandler() {
+
+                        @Override
+                        public void onStart() {}
+
+                        @Override
+                        public void onProgress(String message) {}
+
+                        @Override
+                        public void onFailure(String message) {
+                            isConverted=true;
+                            Log.e("FailedToDownload","true");
+                        }
+
+                        @Override
+                        public void onSuccess(String message) {
+                            isConverted=true;
+                            // We will set tag here...
+                            MusicMetadataSet src_set = null;
+                            try {
+                                src_set = new MyID3().read(mp3);
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+                            }
+
+                            if (src_set == null)
+                            {
+                                Log.i("NULL", "NULL");
+                            }
+                            else
+                            {
+                                URL uri = null; ImageData imageData=null;
+                                try {
+                                    uri = new URL(YTutils.getImageUrlID(videoID));
+                                    Bitmap bitmap = BitmapFactory.decodeStream(uri.openConnection().getInputStream());
+                                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                                    byte[] bitmapdata = stream.toByteArray();
+                                    imageData = new ImageData(bitmapdata,"image/jpeg","arun photo",1);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
+                                File dst = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS+"/"+targetName);
+                                MusicMetadata meta = new MusicMetadata(YTutils.getVideoTitle(config.getTitle()));
+                                if (imageData!=null) {
+                                    meta.addPicture(imageData);
+                                }
+
+                                meta.setAlbum(ytMeta.getVideMeta().getAuthor());
+                                meta.setArtist(YTutils.getChannelTitle(config.getTitle(),config.getChannelTitle()));
+                                try {
+                                    new MyID3().write(mp3, dst, src_set, meta);
+                                    mp3.delete();
+                                } catch (UnsupportedEncodingException e) {
+                                    e.printStackTrace();
+                                } catch (ID3WriteException e) {
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFinish() {}
+                    });
+                } catch (FFmpegCommandAlreadyRunningException e) {
+                    // Handle if FFmpeg is already
+                    Log.e("PlayerActivity2", "doInBackground: Already Running" );
+                    e.printStackTrace();
+                }*/
+
+
+              /*  IConvertCallback callback = new IConvertCallback() {
                     @Override
                     public void onSuccess(File convertedFile) {
-                        isConverted=true;
-                        // We will set tag here...
-                        MusicMetadataSet src_set = null;
-                        try {
-                            src_set = new MyID3().read(convertedFile);
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                        }
 
-                        if (src_set == null)
-                        {
-                            Log.i("NULL", "NULL");
-                        }
-                        else
-                        {
-                            URL uri = null; ImageData imageData=null;
-                            try {
-                                uri = new URL(YTutils.getImageUrlID(videoID));
-                                Bitmap bitmap = BitmapFactory.decodeStream(uri.openConnection().getInputStream());
-                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                                byte[] bitmapdata = stream.toByteArray();
-                                imageData = new ImageData(bitmapdata,"image/jpeg","arun photo",1);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-
-                            File dst = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS+"/"+targetName);
-                            MusicMetadata meta = new MusicMetadata(YTutils.getVideoTitle(config.getTitle()));
-                            if (imageData!=null) {
-                                meta.addPicture(imageData);
-                            }
-
-                            meta.setAlbum(ytMeta.getVideMeta().getAuthor());
-                            meta.setArtist(YTutils.getChannelTitle(config.getTitle(),config.getChannelTitle()));
-                            try {
-                                new MyID3().write(convertedFile, dst, src_set, meta);
-                                mp3.delete();
-                            } catch (UnsupportedEncodingException e) {
-                                e.printStackTrace();
-                            } catch (ID3WriteException e) {
-                                e.printStackTrace();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
                     }
 
                     @Override
@@ -954,13 +1049,13 @@ public class PlayerActivity2 extends AppCompatActivity {
                         isConverted=true;
                         Log.e("FailedToDownload","true");
                     }
-                };
+                };*/
 
-                AndroidAudioConverter.with(PlayerActivity2.this)
+               /* AndroidAudioConverter.with(PlayerActivity2.this)
                         .setFile(f)
                         .setFormat(AudioFormat.MP3)
                         .setCallback(callback)
-                        .convert();
+                        .convert();*/
 
                 ytMeta = new YTMeta(videoID);
 

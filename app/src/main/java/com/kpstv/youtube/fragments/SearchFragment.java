@@ -160,7 +160,7 @@ public class SearchFragment extends Fragment {
                 shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Share this app");
                 String shareMessage = "https://kaustubhpatange.github.io/YTPlayer";
                 shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
-                startActivity(Intent.createChooser(shareIntent, "Choose the messenger to share this App"));
+                startActivity(Intent.createChooser(shareIntent, "Choose the messenger to share this AppNotify"));
             });
 
             searchCard.setOnClickListener(v -> {

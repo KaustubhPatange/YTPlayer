@@ -267,14 +267,14 @@ public class YTutils {
         if (t.contains("(")) {
             t = t.split("\\(")[0].trim();
         }
-        return t;
+        return t.trim();
     }
 
     public static String getChannelTitle(String title, String defaulttitle) {
         if (title.contains("-")) {
             String t = title;
             t = t.split("\\-")[0].trim();
-            return t;
+            return t.trim();
         }else
         return defaulttitle;
     }

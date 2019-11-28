@@ -53,6 +53,9 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.facebook.network.connectionclass.ConnectionClassManager;
 import com.facebook.network.connectionclass.ConnectionQuality;
+import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
+import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Player;
@@ -139,17 +142,18 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     static LinearLayout bottom_player, adViewLayout;
     static ImageButton actionUp,actionPlay;static ProgressBar loadProgress,songProgress;
     static TextView actionTitle; static AdView adView;
-    static AsyncTask<String,String,Void> LoadVideo; static Activity activity;
+    static AsyncTask<String,String,Void> LoadVideo; public static Activity activity;
 
     static String[] apikeys = new String[]{"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw", "AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
 
     public static ArrayList<NPlayModel> nPlayModels;
-    public static ExoPlayer player;
+    public static ExoPlayer player;  public static boolean supportFFmpeg=false;
     public static MediaSource mediaSource;
     public static DefaultDataSourceFactory dataSourceFactory;
     public static DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
     public static TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory();
     public static TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
+    private String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -245,6 +249,31 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         }
         else {
             loadFragment(NCFrag);
+        }
+
+        try {
+            FFmpeg ffmpeg = FFmpeg.getInstance(this);
+            ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
+
+                @Override
+                public void onStart() {}
+
+                @Override
+                public void onFailure() {}
+
+                @Override
+                public void onSuccess() {
+                    supportFFmpeg=true;
+                    Log.e(TAG, "onSuccess: FFMPEG Loaded");
+                }
+
+                @Override
+                public void onFinish() {}
+            });
+        } catch (FFmpegNotSupportedException e) {
+            Log.e(TAG, "onCreate: FFMpeg not supported");
+            e.printStackTrace();
+
         }
 
     }
@@ -557,7 +586,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
 
     public static String videoTitle = "", channelTitle = "", viewCounts, imgUrl, videoID,audioLink;
     public static int likeCounts,dislikeCounts;
-    static NotificationManagerCompat notificationManagerCompat;
+    public static NotificationManagerCompat notificationManagerCompat;
     static NotificationManager notificationManager;
     static NotificationChannel notificationChannel;
     static PendingIntent prevPendingIntent,pausePendingIntent,nextPendingIntent,clickPendingIntent;

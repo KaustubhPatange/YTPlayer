@@ -33,6 +33,7 @@ import java.util.Arrays;
 
 public class HistoryFragment extends Fragment {
 
+    public static final String TAG = "HistoryFragment";
     SwipeRefreshLayout swipeRefreshLayout;
     static RecyclerView recyclerView;
     static RecyclerView.LayoutManager layoutManager;
@@ -91,6 +92,7 @@ public class HistoryFragment extends Fragment {
         int position = (int) objects[0];
         String title = (String) objects[1];
         String yturl = (String) objects[2];
+        Log.e(TAG, "YTURL: "+yturl );
         HistoryBottomSheet bottomSheet = new HistoryBottomSheet();
         Bundle bundle = new Bundle();
         bundle.putInt("pos",position);

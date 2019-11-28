@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".DownloadActivity"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"/>
+    </android.support.design.widget.AppBarLayout>
+
+
+    <LinearLayout
+        app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v4.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:animateLayoutChanges="true"
+                android:padding="20dp"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_marginBottom="10dp"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/dmsans_font"
+                    android:textSize="17sp"
+                    android:text="Current"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <include layout="@layout/download_item"/>
+
+                <TextView
+                    android:id="@+id/pendingText"
+                    android:layout_marginTop="10dp"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/dmsans_font"
+                    android:textSize="17sp"
+                    android:text=""
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <android.support.v7.widget.RecyclerView
+                    android:layout_marginTop="10dp"
+                    android:id="@+id/recyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <!-- <TextView
+                     android:layout_marginTop="20dp"
+                     android:textColor="@color/white"
+                     android:textStyle="bold"
+                     android:fontFamily="@font/dmsans_font"
+                     android:textSize="17sp"
+                     android:text="Finished"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"/>
+
+                 <android.support.v7.widget.RecyclerView
+                     android:layout_marginTop="10dp"
+                     android:id="@+id/recyclerView_completed"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"/>-->
+
+            </LinearLayout>
+
+
+        </android.support.v4.widget.NestedScrollView>
+    </LinearLayout>
+
+</android.support.design.widget.CoordinatorLayout>

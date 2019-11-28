@@ -1,8 +1,11 @@
 package com.kpstv.youtube.models;
 
-public class YTConfig {
+import java.io.Serializable;
 
-    String Text,Url,Ext,Title,ChannelTitle;
+public class YTConfig implements Serializable {
+
+    String Text,Url,Ext,Title,ChannelTitle,taskExtra;
+    String targetName, videoID, audioUrl;
     boolean audio; long length;
 
     public YTConfig(String text, String linkurl,String ext,String videoTitle, String channelTitle,boolean audio) {
@@ -13,6 +16,39 @@ public class YTConfig {
         ChannelTitle = channelTitle;
         this.audio = audio;
     }
+
+    public String getAudioUrl() {
+        return audioUrl;
+    }
+
+    public void setAudioUrl(String audioUrl) {
+        this.audioUrl = audioUrl;
+    }
+
+    public String getTargetName() {
+        return targetName;
+    }
+
+    public void setTargetName(String targetName) {
+        this.targetName = targetName;
+    }
+
+    public String getVideoID() {
+        return videoID;
+    }
+
+    public void setVideoID(String videoID) {
+        this.videoID = videoID;
+    }
+
+    public String getTaskExtra() {
+        return taskExtra;
+    }
+
+    public void setTaskExtra(String taskExtra) {
+        this.taskExtra = taskExtra;
+    }
+
     public boolean isAudio() {
         return audio;
     }

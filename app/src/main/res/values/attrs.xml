@@ -13,6 +13,8 @@
         <attr name="animationValueCount" format="integer" />
 
         <attr name="runInBatterySaveMode" format="boolean" />
+
     </declare-styleable>
+
 
 </resources>

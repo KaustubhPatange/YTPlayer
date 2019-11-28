@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ import static android.content.Context.CLIPBOARD_SERVICE;
 
 public class HistoryBottomSheet extends BottomSheetDialogFragment {
 
+    public static final String TAG = "HistoryBottomSheet";
     LinearLayout addToPlaylist, removeList, copyLink, shareButton, mainLayout, watchOnYouTube;
     String ytUrl, Title; BottomSheetListener mListener; ProgressBar progressBar;
     Activity activity; int position;
@@ -59,7 +61,8 @@ public class HistoryBottomSheet extends BottomSheetDialogFragment {
 
         position = getArguments().getInt("pos",0);
         Title = getArguments().getString("title");
-        ytUrl = getArguments().getString("videoID");
+        Log.e(TAG, "onCreateView: Title: "+Title);
+        ytUrl = getArguments().getString("yturl");
         title_TextView.setText(Title);
 
         new getLength(ytUrl).execute();
@@ -97,6 +100,8 @@ public class HistoryBottomSheet extends BottomSheetDialogFragment {
 
         public getLength(String ytUrl) {
             this.ytUrl = ytUrl;
+            Log.e(TAG, "getLength: "+ytUrl);
+
         }
 
         @Override

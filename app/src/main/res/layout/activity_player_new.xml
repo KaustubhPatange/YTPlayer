@@ -253,6 +253,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/relativeLayout2">
 
                     <ImageButton
+                        android:longClickable="true"
                         android:id="@+id/download_IButton"
                         android:layout_width="30dp"
                         android:layout_height="30dp"

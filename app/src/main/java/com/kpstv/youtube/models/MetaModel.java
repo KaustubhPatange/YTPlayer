@@ -1,6 +1,8 @@
 package com.kpstv.youtube.models;
 
-public class MetaModel {
+import java.io.Serializable;
+
+public class MetaModel implements Serializable {
     String Title, Author, ImgUrl;
 
     public MetaModel(String title, String author, String imgUrl) {
