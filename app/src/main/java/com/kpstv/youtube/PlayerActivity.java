@@ -126,6 +126,8 @@ import at.huber.youtubeExtractor.VideoMeta;
 import at.huber.youtubeExtractor.YouTubeExtractor;
 import at.huber.youtubeExtractor.YtFile;
 
+import static com.kpstv.youtube.AppSettings.API_KEYS;
+
 public class PlayerActivity extends AppCompatActivity {
 
     String YouTubeUrl;
@@ -138,7 +140,6 @@ public class PlayerActivity extends AppCompatActivity {
 
     static AsyncTask<String, String, Void> datasync;
 
-    String[] apikeys = new String[]{"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw", "AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
 
     LinearLayout downloadButton;
     static ConstraintLayout mainlayout;
@@ -687,7 +688,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         String jsonResponse(String videoID, int apinumber) {
             HttpHandler httpHandler = new HttpHandler();
-            String link = "https://www.googleapis.com/youtube/v3/videos?id=" + videoID + "&key=" + apikeys[apinumber] + "&part=statistics";
+            String link = "https://www.googleapis.com/youtube/v3/videos?id=" + videoID + "&key=" + API_KEYS[apinumber] + "&part=statistics";
             return httpHandler.makeServiceCall(link);
         }
 

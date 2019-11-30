@@ -94,12 +94,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 
-public class PlayerActivity2 extends AppCompatActivity {
+public class PlayerActivity2 extends AppCompatActivity implements AppSettings {
 
     static String YouTubeUrl;
     static ImageView backImage;
-
-    static String[] apikeys = new String[]{"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw", "AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
 
     static ConstraintLayout mainlayout;
 
@@ -121,7 +119,9 @@ public class PlayerActivity2 extends AppCompatActivity {
     static IndicatorSeekBar indicatorSeekBar;
     private InterstitialAd mInterstitialAd;
 
-     static Handler mHandler = new Handler();
+    static ImageView favouriteButton, addToPlaylist;
+
+    static Handler mHandler = new Handler();
 
     AsyncTask<String, String, String> mergeTask, cutTask, mp3Task;
 
@@ -129,7 +129,7 @@ public class PlayerActivity2 extends AppCompatActivity {
 
     static AsyncTask<Void,Void,Void> setData;
 
-    int accentColor;
+    int accentColor; static boolean isFavourite=false;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -222,31 +222,31 @@ public class PlayerActivity2 extends AppCompatActivity {
             setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         });*/
 
-       previousFab.setOnTouchListener((v, event) -> {
-           switch (event.getAction()) {
-               case MotionEvent.ACTION_DOWN: {
-                   ImageButton view = (ImageButton ) v;
-                   view.setColorFilter(accentColor);
-                   v.invalidate();
-                   break;
-               }
-               case MotionEvent.ACTION_UP:
+        previousFab.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN: {
+                    ImageButton view = (ImageButton ) v;
+                    view.setColorFilter(accentColor);
+                    v.invalidate();
+                    break;
+                }
+                case MotionEvent.ACTION_UP:
 
-                   MainActivity.playPrevious();
-                   if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
-                       setData.cancel(true);
-                   setData = new loadData();
-                   setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    MainActivity.playPrevious();
+                    if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
+                        setData.cancel(true);
+                    setData = new loadData();
+                    setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-               case MotionEvent.ACTION_CANCEL: {
-                   ImageButton view = (ImageButton) v;
-                   view.clearColorFilter();
-                   view.invalidate();
-                   break;
-               }
-           }
-           return true;
-       });
+                case MotionEvent.ACTION_CANCEL: {
+                    ImageButton view = (ImageButton) v;
+                    view.clearColorFilter();
+                    view.invalidate();
+                    break;
+                }
+            }
+            return true;
+        });
 
         indicatorSeekBar.setOnSeekChangeListener(new OnSeekChangeListener() {
             @Override
@@ -288,6 +288,65 @@ public class PlayerActivity2 extends AppCompatActivity {
             callFinish();
             return true;
         });*/
+
+
+
+        addToPlaylist.setOnTouchListener((v, motionEvent) -> {
+            switch (motionEvent.getAction()) {
+                case MotionEvent.ACTION_DOWN: {
+                    ImageView view = (ImageView ) v;
+                    view.setColorFilter(accentColor);
+                    v.invalidate();
+                    break;
+                }
+                case MotionEvent.ACTION_UP:
+
+                    if (MainActivity.total_seconds==0)
+                    {
+                        Toast.makeText(activity, "Player is still processing!", Toast.LENGTH_SHORT).show();
+                    }else
+                    YTutils.addToPlayList(activity,YTutils.getYtUrl(MainActivity.videoID),MainActivity.total_seconds);
+
+                case MotionEvent.ACTION_CANCEL: {
+                    ImageView view = (ImageView) v;
+                    view.clearColorFilter();
+                    view.invalidate();
+                    break;
+                }
+            }
+            return true;
+        });
+
+        favouriteButton.setOnTouchListener((v, motionEvent) -> {
+            switch (motionEvent.getAction()) {
+                case MotionEvent.ACTION_DOWN: {
+                    ImageView view = (ImageView ) v;
+                    view.setColorFilter(accentColor);
+                    v.invalidate();
+                    break;
+                }
+                case MotionEvent.ACTION_UP:
+
+                    if (MainActivity.total_seconds==0)
+                    {
+                        Toast.makeText(activity, "Player is still processing!", Toast.LENGTH_SHORT).show();
+                    }else{
+                        if (!isFavourite)
+                            favouriteButton.setImageDrawable(getDrawable(R.drawable.ic_favorite_full));
+                        else favouriteButton.setImageDrawable(getDrawable(R.drawable.ic_favorite));
+
+                        write_Favourite();
+                    }
+
+                case MotionEvent.ACTION_CANCEL: {
+                    ImageView view = (ImageView) v;
+                    view.clearColorFilter();
+                    view.invalidate();
+                    break;
+                }
+            }
+            return true;
+        });
 
         downloadButton.setOnTouchListener(new View.OnTouchListener() {
             @RequiresApi(api = Build.VERSION_CODES.M)
@@ -364,7 +423,7 @@ public class PlayerActivity2 extends AppCompatActivity {
                 case MotionEvent.ACTION_UP:
 
                     if (MainActivity.yturls.size()>1)
-                    startActivity(new Intent(this,NPlaylistActivity.class));
+                        startActivity(new Intent(this,NPlaylistActivity.class));
 
                 case MotionEvent.ACTION_CANCEL: {
                     ImageButton view = (ImageButton) v;
@@ -401,6 +460,33 @@ public class PlayerActivity2 extends AppCompatActivity {
 
     }
 
+    void write_Favourite() {
+        String t = YTutils.readContent(this,"favourite.csv");
+        if (t!=null && !t.contains(MainActivity.videoID)) {
+            t += "\n"+MainActivity.videoID+"|"+MainActivity.total_seconds;
+            Toast.makeText(activity, "Added to favourites!", Toast.LENGTH_SHORT).show();
+            isFavourite=true;
+        }else if (t!=null && t.contains(MainActivity.videoID)) {
+
+            String[] lines = t.split("\n|\r");
+            StringBuilder builder = new StringBuilder();
+            for (String line : lines) {
+                if (!line.contains(MainActivity.videoID) && !line.isEmpty()) {
+                    builder.append("\n").append(line);
+                }
+            }
+
+            t = builder.toString().trim();
+
+            Toast.makeText(activity, "Removed from favourites!", Toast.LENGTH_SHORT).show();
+            isFavourite=false;
+        }else {
+            t = MainActivity.videoID+"|"+MainActivity.total_seconds;
+            Toast.makeText(activity, "Added to favourites!", Toast.LENGTH_SHORT).show();
+            isFavourite=true;
+        }
+        YTutils.writeContent(PlayerActivity2.this,"favourite.csv",t.trim());
+    }
 
     static ViewPager.OnPageChangeListener mainPageListener = new ViewPager.OnPageChangeListener() {
         @Override
@@ -432,6 +518,9 @@ public class PlayerActivity2 extends AppCompatActivity {
         player_common();
 
         mainPager.removeOnPageChangeListener(mainPageListener);
+        if (mainPager.getChildCount()!=MainActivity.yturls.size()) {
+            adapter.notifyDataSetChanged();
+        }
         if (mainPager.getCurrentItem()!=MainActivity.ytIndex)
         {
             mainPager.setCurrentItem(MainActivity.ytIndex,true);
@@ -450,6 +539,15 @@ public class PlayerActivity2 extends AppCompatActivity {
         if (MainActivity.yturls.size()>1)
             playlistButton.setEnabled(true);
         else playlistButton.setEnabled(false);
+
+        String data = YTutils.readContent(activity,"favourite.csv");
+        if (data!=null && data.contains(MainActivity.videoID)) {
+            isFavourite = true;
+            favouriteButton.setImageDrawable(activity.getDrawable(R.drawable.ic_favorite_full));
+        }else {
+            isFavourite=false;
+            favouriteButton.setImageDrawable(activity.getDrawable(R.drawable.ic_favorite));
+        }
 
         // Loading color with animation...
 
@@ -472,6 +570,8 @@ public class PlayerActivity2 extends AppCompatActivity {
         YouTubeUrl = YTutils.getYtUrl(MainActivity.videoID);
         updateProgressBar();
     }
+
+    private static final String TAG = "PlayerActivity2";
 
     static class loadData extends AsyncTask<Void,Void,Void> {
         @Override
@@ -501,14 +601,21 @@ public class PlayerActivity2 extends AppCompatActivity {
 
         String jsonResponse(String videoID, int apinumber) {
             HttpHandler httpHandler = new HttpHandler();
-            String link = "https://www.googleapis.com/youtube/v3/videos?id=" + videoID + "&key=" + apikeys[apinumber] + "&part=statistics";
+            String link = "https://www.googleapis.com/youtube/v3/videos?id=" + videoID + "&key=" + API_KEYS[apinumber] + "&part=statistics";
             return httpHandler.makeServiceCall(link);
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             String videoID = MainActivity.videoID;
-            String json = jsonResponse(videoID, 0);
+
+            int i=0;
+            int apiLength = API_KEYS.length;
+            String json;
+            do {
+                json = jsonResponse(videoID, i);
+                i++;
+            }while (json.contains("\"error\":") && i<apiLength);
 
             YTMeta ytMeta = new YTMeta(videoID);
             if (ytMeta.getVideMeta() != null) {
@@ -517,16 +624,14 @@ public class PlayerActivity2 extends AppCompatActivity {
                 MainActivity.imgUrl = ytMeta.getVideMeta().getImgUrl();
             }
 
-            if (json != null && json.contains("\"error\":")) {
-                json = jsonResponse(videoID, 1);
-                if (json.contains("\"error\":")) {
-                    YTStatistics ytStatistics = new YTStatistics(videoID);
-                    MainActivity.viewCounts = ytStatistics.getViewCount();
-                    MainActivity.likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
-                    MainActivity.dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
-                    json = null;
-                }
+            if (json.contains("\"error\":")) {
+                YTStatistics ytStatistics = new YTStatistics(videoID);
+                MainActivity.viewCounts = ytStatistics.getViewCount();
+                MainActivity.likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
+                MainActivity.dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
+                json = null;
             }
+
             if (json != null) {
                 try {
                     JSONObject statistics = new JSONObject(json).getJSONArray("items")
@@ -661,6 +766,8 @@ public class PlayerActivity2 extends AppCompatActivity {
 
     private void getAllViews() {
         mainPager = findViewById(R.id.viewPager);
+        favouriteButton = findViewById(R.id.favourite_button);
+        addToPlaylist = findViewById(R.id.addPlaylist_button);
         navigationDown = findViewById(R.id.navigation_down);
         mprogressBar = findViewById(R.id.mainprogress);
         mainTitle = findViewById(R.id.maintitle);
@@ -713,7 +820,7 @@ public class PlayerActivity2 extends AppCompatActivity {
 
         LoadAd();
 
-   //     Log.e("YOUTUBEURL",YouTubeUrl);
+        //     Log.e("YOUTUBEURL",YouTubeUrl);
 
         ArrayList<String> tmplist = new ArrayList<>();
         final ArrayList<YTConfig> configs = new ArrayList<>();
@@ -831,7 +938,7 @@ public class PlayerActivity2 extends AppCompatActivity {
                 mp3Task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,config.getUrl());
             });
             alert.setNegativeButton("No", (dialog12, which12) -> {
-             //   downloadFromUrl(fileCurrent, config);
+                //   downloadFromUrl(fileCurrent, config);
 
                 Toast.makeText(PlayerActivity2.this, "Download started",
                         Toast.LENGTH_SHORT).show();
@@ -1122,7 +1229,7 @@ public class PlayerActivity2 extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String s) {
-         //   Toast.makeText(PlayerActivity.this, "Saved at /sdcard/"+target, Toast.LENGTH_LONG).show();
+            //   Toast.makeText(PlayerActivity.this, "Saved at /sdcard/"+target, Toast.LENGTH_LONG).show();
             Log.e("FileName",fileName);
             alertdialog.dismiss();
             startEditor("file:/"+YTutils.getFile("YTPlayer/"+fileName).toString());

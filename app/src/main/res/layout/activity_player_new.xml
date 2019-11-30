@@ -187,6 +187,7 @@
                 </android.support.v7.widget.CardView>-->
             </LinearLayout>
 
+
             <android.support.constraint.ConstraintLayout
                 android:id="@+id/constraintLayout3"
                 android:layout_marginStart="12dp"
@@ -197,8 +198,40 @@
                 android:layout_marginBottom="15dp"
                 app:layout_constraintBottom_toTopOf="@id/relativeLayout3">
 
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/relativeLayout"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="parent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <ImageView
+                        android:padding="2dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginEnd="10dp"
+                        android:layout_alignParentEnd="true"
+                        android:id="@+id/favourite_button"
+                        android:src="@drawable/ic_favorite"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"/>
+                    <ImageView
+                        android:layout_marginStart="15dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginEnd="15dp"
+                        android:layout_alignParentEnd="true"
+                        android:id="@+id/addPlaylist_button"
+                        android:src="@drawable/ic_playlist_add"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"/>
+                </android.support.constraint.ConstraintLayout>
+
                 <com.warkiz.widget.IndicatorSeekBar
                     android:id="@+id/seekBar"
+                    android:layout_marginTop="17dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:isb_progress="20"
@@ -208,7 +241,7 @@
                     app:isb_track_progress_color="@color/white"
                     app:layout_constraintEnd_toStartOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toBottomOf="@id/relativeLayout" />
 
                 <RelativeLayout
                     android:id="@+id/relativeLayout2"

@@ -32,6 +32,7 @@ import android.widget.Toast;
 
 import com.googlecode.mp4parser.boxes.AC3SpecificBox;
 import com.kpstv.youtube.CPlaylistActivity;
+import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.PlaylistAdapter;
 import com.kpstv.youtube.models.PlaylistModel;
@@ -66,8 +67,8 @@ public class PlaylistFragment extends Fragment {
             Toolbar toolbar = v.findViewById(R.id.toolbar);
 
             toolbar.setTitle("Playlist");
-
-            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+            toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
+            toolbar.setNavigationOnClickListener(view -> MainActivity.loadLibraryFrag());
 
             activity = getActivity();
             fragmentManager = activity.getSupportFragmentManager();

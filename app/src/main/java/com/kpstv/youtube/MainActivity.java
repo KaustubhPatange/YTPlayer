@@ -74,6 +74,7 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.kpstv.youtube.fragments.DiscoverFragment;
 import com.kpstv.youtube.fragments.HistoryFragment;
+import com.kpstv.youtube.fragments.LibraryFragment;
 import com.kpstv.youtube.fragments.NCFragment;
 import com.kpstv.youtube.fragments.OPlaylistFragment;
 import com.kpstv.youtube.fragments.PlaylistFragment;
@@ -116,7 +117,7 @@ import static com.facebook.network.connectionclass.ConnectionQuality.GOOD;
 import static com.facebook.network.connectionclass.ConnectionQuality.MODERATE;
 import static com.facebook.network.connectionclass.ConnectionQuality.POOR;
 
-public class MainActivity extends AppCompatActivity implements HistoryBottomSheet.BottomSheetListener, NCFragment.NoConnectionListener {
+public class MainActivity extends AppCompatActivity implements AppSettings, HistoryBottomSheet.BottomSheetListener, NCFragment.NoConnectionListener {
 
     // https://www.googleapis.com/youtube/v3/videos?id=BDocp-VpCwY&key=AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw&part=snippet,statistics
 
@@ -136,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     Fragment HistoryFrag;
     static Fragment SearchFrag;
     static FragmentManager fragmentManager;
-    static Fragment PlaylistFrag;
+    public static Fragment PlaylistFrag, libraryFrag, FavouriteFrag;
     Fragment NCFrag; String ytLink;
     static SharedPreferences preferences;
     static LinearLayout bottom_player, adViewLayout;
@@ -144,10 +145,8 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     static TextView actionTitle; static AdView adView;
     static AsyncTask<String,String,Void> LoadVideo; public static Activity activity;
 
-    static String[] apikeys = new String[]{"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw", "AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
-
     public static ArrayList<NPlayModel> nPlayModels;
-    public static ExoPlayer player;  public static boolean supportFFmpeg=false;
+    public static ExoPlayer player;  public static boolean supportFFmpeg=false,loadedFavFrag=false;
     public static MediaSource mediaSource;
     public static DefaultDataSourceFactory dataSourceFactory;
     public static DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
@@ -234,6 +233,8 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
 
         fragmentManager = getSupportFragmentManager();
         HistoryFrag = new HistoryFragment();
+        libraryFrag = new LibraryFragment();
+        FavouriteFrag = new OPlaylistFragment();
         SearchFrag = new SearchFragment();
         PlaylistFrag = new PlaylistFragment();
         NCFrag = new NCFragment();
@@ -243,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
 
         if (YTutils.isInternetAvailable())
         {
-            if (getYTUrls("blnk").length>1)
+            if (getYTUrls("blank").length>1)
                 loadFragment(HistoryFrag);
             else navigation.setSelectedItemId(R.id.navigation_search);
         }
@@ -329,8 +330,20 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
             loadFragment(SearchFrag);
             return;
         }
+
+        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof OPlaylistFragment && loadedFavFrag) {
+            loadedFavFrag=false;
+            loadFragment(libraryFrag);
+            return;
+        }
+
         if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof OPlaylistFragment) {
             loadFragment(PlaylistFrag);
+            return;
+        }
+
+        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof PlaylistFragment) {
+            loadFragment(libraryFrag);
             return;
         }
 
@@ -365,7 +378,8 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                     loadFragment(SearchFrag);
                     return true;
                 case R.id.navigation_playlist:
-                    loadFragment(PlaylistFrag);
+                    loadFragment(libraryFrag);
+   //                 loadFragment(PlaylistFrag);
                     return true;
             }
 
@@ -394,6 +408,12 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
     public static void loadPlayFrag() {
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, PlaylistFrag)
+                .commit();
+    }
+
+    public static void loadLibraryFrag() {
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, libraryFrag)
                 .commit();
     }
 
@@ -489,6 +509,8 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                             }
                         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     }
+                    if (yturls.contains(ytLink))
+                        yturls.remove(ytLink);
                     yturls.add(insert_pos,ytLink);
                     ChangeVideo(insert_pos);
                 }
@@ -677,27 +699,30 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
         @Override
         protected Void doInBackground(String... arg0) {
             videoID = arg0[0];
-            String json = jsonResponse(videoID, 0);
+
+            int i=0;
+            int apiLength = API_KEYS.length;
+            String json;
+            do {
+                json = jsonResponse(videoID, i);
+                i++;
+            }while (json.contains("\"error\":") && i<apiLength);
 
             YTMeta ytMeta = new YTMeta(videoID);
             if (ytMeta.getVideMeta() != null) {
-                channelTitle = ytMeta.getVideMeta().getAuthor();
-                videoTitle = YTutils.setVideoTitle(ytMeta.getVideMeta().getTitle());
-                imgUrl = ytMeta.getVideMeta().getImgUrl();
+                MainActivity.channelTitle = ytMeta.getVideMeta().getAuthor();
+                MainActivity.videoTitle = YTutils.setVideoTitle(ytMeta.getVideMeta().getTitle());
+                MainActivity.imgUrl = ytMeta.getVideMeta().getImgUrl();
             }
 
-            Log.e("ImageUrl", imgUrl + "");
-
-            if (json != null && json.contains("\"error\":")) {
-                json = jsonResponse(videoID, 1);
-                if (json.contains("\"error\":")) {
-                    YTStatistics ytStatistics = new YTStatistics(videoID);
-                    viewCounts = ytStatistics.getViewCount();
-                    likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
-                    dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
-                    json = null;
-                }
+            if (json.contains("\"error\":")) {
+                YTStatistics ytStatistics = new YTStatistics(videoID);
+                MainActivity.viewCounts = ytStatistics.getViewCount();
+                MainActivity.likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
+                MainActivity.dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
+                json = null;
             }
+
             if (json != null) {
                 try {
                     JSONObject statistics = new JSONObject(json).getJSONArray("items")
@@ -720,7 +745,7 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
 
         String jsonResponse(String videoID, int apinumber) {
             HttpHandler httpHandler = new HttpHandler();
-            String link = "https://www.googleapis.com/youtube/v3/videos?id=" + videoID + "&key=" + apikeys[apinumber] + "&part=statistics";
+            String link = "https://www.googleapis.com/youtube/v3/videos?id=" + videoID + "&key=" + API_KEYS[apinumber] + "&part=statistics";
             return httpHandler.makeServiceCall(link);
         }
 
@@ -1042,6 +1067,8 @@ public class MainActivity extends AppCompatActivity implements HistoryBottomShee
                         NPlayModel model = new NPlayModel(ytLink,new YTMeta(metaModel),true);
                         nPlayModels.add(insert_index,model);
                     }
+                    if (yturls.contains(ytLink))
+                        yturls.remove(ytLink);
                     yturls.add(insert_index,ytLink);
                     ChangeVideo(insert_index);
                 }

@@ -31,6 +31,7 @@ dependencies {
     implementation 'com.karumi:dexter:5.0.0'
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'org.mozilla:rhino:1.7R4'
+    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.3.0'
     implementation 'com.google.android.exoplayer:exoplayer:2.9.6'
     implementation 'com.google.android.gms:play-services-ads:17.1.2'
     implementation 'com.github.spyhunter99:super-tooltip-aar:4.0.2'

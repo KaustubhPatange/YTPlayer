@@ -1,18 +1,24 @@
 package com.kpstv.youtube.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.YTConfig;
+import com.kpstv.youtube.services.DownloadService;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 
 import java.util.ArrayList;
@@ -21,10 +27,12 @@ public class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.MyView
 
     ArrayList<YTConfig> models;
     Context context;
+    int accentColor;
 
     public DownloadAdapter(ArrayList<YTConfig> models, Context context) {
         this.models = models;
         this.context = context;
+        accentColor = ContextCompat.getColor(context,R.color.colorAccent);
     }
 
     @NonNull
@@ -38,9 +46,11 @@ public class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.MyView
         return myViewHolder;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder myViewHolder, final int pos) {
         final YTConfig model = models.get(pos);
+
         switch (model.getTaskExtra()) {
             case "mp3task":
                 myViewHolder.imageView.setImageDrawable(context.getDrawable(R.drawable.ic_audio_download));
@@ -49,6 +59,41 @@ public class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.MyView
                 myViewHolder.imageView.setImageDrawable(context.getDrawable(R.drawable.ic_movie_download));
                 break;
         }
+
+
+        PopupMenu popupMenu = new PopupMenu(context,myViewHolder.imageMore);
+        popupMenu.inflate(R.menu.service_menu);
+        popupMenu.setOnMenuItemClickListener(menuItem -> {
+            switch (menuItem.getItemId()) {
+                case R.id.cancel_action:
+                    DownloadService.pendingJobs.remove(model);
+                    notifyDataSetChanged();
+                    break;
+            }
+            return true;
+        });
+
+        myViewHolder.imageMore.setOnTouchListener((v, motionEvent) -> {
+            switch (motionEvent.getAction()) {
+                case MotionEvent.ACTION_DOWN: {
+                    ImageView view = (ImageView ) v;
+                    view.setColorFilter(accentColor);
+                    v.invalidate();
+                    break;
+                }
+                case MotionEvent.ACTION_UP:
+
+                    popupMenu.show();
+
+                case MotionEvent.ACTION_CANCEL: {
+                    ImageView view = (ImageView) v;
+                    view.clearColorFilter();
+                    view.invalidate();
+                    break;
+                }
+            }
+            return true;
+        });
 
         myViewHolder.titleText.setText(model.getTitle());
         myViewHolder.sizeText.setText(model.getChannelTitle());

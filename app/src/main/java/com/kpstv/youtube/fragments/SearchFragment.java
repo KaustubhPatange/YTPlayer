@@ -468,7 +468,7 @@ public class SearchFragment extends Fragment {
 
                     if (ytSearch.getVideoIDs().size()>0) {
                         final String videoId = ytSearch.getVideoIDs().get(0);
-                        String imgurl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
+                        String imgurl = YTutils.getImageUrlID(videoId);
                         images.add(imgurl);
                     }else {
                         length++;

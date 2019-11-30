@@ -121,6 +121,7 @@
     <orderEntry type="library" name="Gradle: org.jetbrains:annotations:13.0@jar" level="project" />
     <orderEntry type="library" name="Gradle: com.jakewharton:process-phoenix:2.0.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.karumi:dexter:5.0.0@aar" level="project" />
+    <orderEntry type="library" name="Gradle: net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.3.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.exoplayer:exoplayer:2.9.6@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.gms:play-services-ads:17.1.2@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.github.spyhunter99:super-tooltip-aar:4.0.2@aar" level="project" />

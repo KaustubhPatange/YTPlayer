@@ -3,7 +3,7 @@
     <string name="tandt">Terms and conditions? <a href="https://kaustubhpatange.github.io/YTPlayer">Read more</a></string>
     <string name="title_home">History</string>
     <string name="title_dashboard">Search</string>
-    <string name="title_notifications">Playlist</string>
+    <string name="title_notifications">Library</string>
     <!-- TODO: Change download link -->
     <string name="updateUri">https://raw.githubusercontent.com/KaustubhPatange/YTPlayer/master/update.json</string>
     <string name="error">Not a stable connection</string>

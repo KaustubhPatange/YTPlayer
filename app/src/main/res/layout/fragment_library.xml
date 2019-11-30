@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/background"
+    android:layout_height="match_parent"
+    tools:context=".fragments.LibraryFragment">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"/>
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
+        app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/common_recycler_layout"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <RelativeLayout
+                    android:layout_marginTop="10dp"
+                    android:layout_width="match_parent"
+                    android:orientation="horizontal"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_alignParentStart="true"
+                        android:textSize="17sp"
+                        android:textColor="@color/white"
+                        android:fontFamily="@font/dmsans_font"
+                        android:textStyle="bold"
+                        android:layout_marginStart="15dp"
+                        android:layout_width="wrap_content"
+                        android:text="Most Popular"
+                        android:layout_height="wrap_content" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/progressLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp">
+                    <ProgressBar
+                        android:layout_centerInParent="true"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </RelativeLayout>
+
+                <android.support.v7.widget.RecyclerView
+                    android:visibility="gone"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:id="@+id/my_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <View
+                    android:layout_marginTop="15dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/colorScreen"/>
+            </LinearLayout>
+
+            <!-- Local Items here -->
+
+            <android.support.v7.widget.CardView
+                android:layout_marginTop="10dp"
+                app:cardCornerRadius="5dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                app:cardUseCompatPadding="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:padding="3dp"
+                        android:id="@+id/audio_cutter_layout"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/history_background"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:layout_marginStart="10dp"
+                            android:padding="12dp"
+                            android:tint="@color/white"
+                            android:src="@drawable/ic_audio_trim"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"/>
+
+                        <TextView
+                            android:fontFamily="@font/dmsans_font"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:layout_marginStart="15dp"
+                            android:text="Audio Cutter"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:padding="3dp"
+                        android:id="@+id/local_music_layout"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/history_background"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:layout_marginStart="10dp"
+                            android:padding="10dp"
+                            android:src="@drawable/ic_local_music"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"/>
+
+                        <TextView
+                            android:fontFamily="@font/dmsans_font"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:layout_marginStart="15dp"
+                            android:text="Local Music"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:padding="3dp"
+                        android:id="@+id/playlist_layout"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/history_background"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:layout_marginStart="10dp"
+                            android:padding="10dp"
+                            android:tint="@color/white"
+                            android:src="@drawable/ic_playlist"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"/>
+
+                        <TextView
+                            android:fontFamily="@font/dmsans_font"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:layout_marginStart="15dp"
+                            android:text="Playlists"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:padding="3dp"
+                        android:id="@+id/favourite_layout"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/history_background"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:layout_marginStart="10dp"
+                            android:padding="10dp"
+                            android:tint="@color/white"
+                            android:src="@drawable/ic_audio_pulse2"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"/>
+
+                        <TextView
+                            android:fontFamily="@font/dmsans_font"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:layout_marginStart="15dp"
+                            android:text="Liked Tracks"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                    </LinearLayout>
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
+
+
+
+            <View
+                android:layout_marginTop="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/colorScreen"/>
+            <!--
+                        <TextView
+                            android:layout_marginTop="20dp"
+                            android:layout_alignParentStart="true"
+                            android:textSize="17sp"
+                            android:textColor="@color/white"
+                            android:fontFamily="@font/dmsans_font"
+                            android:textStyle="bold"
+                            android:layout_marginStart="15dp"
+                            android:layout_width="wrap_content"
+                            android:text="About"
+                            android:layout_height="wrap_content" />
+            -->
+
+            <android.support.v7.widget.CardView
+                android:layout_marginTop="10dp"
+                app:cardCornerRadius="5dp"
+                android:layout_marginBottom="15dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                app:cardUseCompatPadding="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <!-- <ImageView
+                        android:tint="@color/grey"
+                        android:padding="20dp"
+                        android:layout_width="match_parent"
+                        android:src="@drawable/ic_pulse"
+                        android:layout_height="110dp" />-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="20dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/githubImage"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_marginEnd="15dp"
+                            android:background="@drawable/history_background"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:src="@drawable/ic_github"
+                            android:tint="@color/grey" />
+
+                        <ImageView
+                            android:id="@+id/pulseWebImage"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_marginStart="20dp"
+                            android:layout_marginEnd="20dp"
+                            android:background="@drawable/history_background"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:src="@drawable/ic_pulse"
+                            android:tint="@color/grey" />
+
+                        <ImageView
+                            android:id="@+id/myWebImage"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_marginStart="15dp"
+                            android:background="@drawable/history_background"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:src="@drawable/ic_web"
+                            android:tint="@color/grey" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginBottom="15dp"
+                        android:fontFamily="@font/dmsans_font"
+                        android:text="Support me by sharing app with your friends &#38; colleagues."
+                        android:textAlignment="center"
+                        android:textColor="@color/light_white" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/colorScreen1" />
+
+                    <LinearLayout
+                        android:id="@+id/SOW_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/history_background"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:orientation="horizontal"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:src="@drawable/ic_whatsapp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_alignParentStart="true"
+                            android:layout_marginStart="15dp"
+                            android:fontFamily="@font/dmsans_font"
+                            android:gravity="center_vertical"
+                            android:text="Share on Whatsapp"
+                            android:textColor="@color/bit_light_white"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/colorScreen1" />
+
+                    <LinearLayout
+                        android:id="@+id/SOF_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/history_background"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:orientation="horizontal"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:src="@drawable/ic_facebook" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_alignParentStart="true"
+                            android:layout_marginStart="15dp"
+                            android:fontFamily="@font/dmsans_font"
+                            android:gravity="center_vertical"
+                            android:text="Share on Facebook"
+                            android:textColor="@color/bit_light_white"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+
+            <LinearLayout
+                android:layout_gravity="center"
+                android:layout_marginBottom="15dp"
+                android:id="@+id/settingsLayout"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="horizontal"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:background="@drawable/settings_shape"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp">
+                <ImageView
+                    android:layout_gravity="center_vertical"
+                    android:tint="@color/colorScreen"
+                    android:src="@drawable/ic_settings"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp" />
+                <TextView
+                    android:textSize="14sp"
+                    android:layout_marginEnd="5dp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="10dp"
+                    android:gravity="center_vertical"
+                    android:text="SETTINGS"
+                    android:textColor="@color/colorScreen"
+                    android:fontFamily="@font/dmsans_font"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+</android.support.design.widget.CoordinatorLayout>

@@ -16,6 +16,7 @@ public class PlaylistModel implements Serializable {
         // Calculation for time seconds from videoIDs
 
         for (String line : data) {
+            if (line.isEmpty()) continue;
             this.data.add(line.split("\\|")[0]);
             Timeseconds+=Integer.parseInt(line.split("\\|")[1]);
         }

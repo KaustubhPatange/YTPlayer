@@ -51,7 +51,15 @@ public class OPlaylistFragment extends Fragment {
             activity = getActivity();
 
             toolbar = v.findViewById(R.id.toolbar);
-            toolbar.setNavigationOnClickListener(v1 -> MainActivity.loadPlayFrag());
+            toolbar.setNavigationOnClickListener(v1 -> {
+                if (MainActivity.loadedFavFrag)
+                {
+                    MainActivity.loadedFavFrag=false;
+                    MainActivity.loadLibraryFrag();
+                }
+                else
+                    MainActivity.loadPlayFrag();
+            });
 
             models = new ArrayList<>();
             yturls = new ArrayList<>();

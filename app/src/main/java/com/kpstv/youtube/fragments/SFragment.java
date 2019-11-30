@@ -14,16 +14,25 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.SongAdapter;
@@ -34,11 +43,18 @@ import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
 
+import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class SFragment extends Fragment {
+public class SFragment extends Fragment implements AppSettings {
 
     public SFragment() {}
 
@@ -47,15 +63,17 @@ public class SFragment extends Fragment {
     private LinearLayoutManager mLayoutManager;
     CardView recyclerCard;
     TextView trendingText;
-    EditText searchEdit;
+    AutoCompleteTextView searchEdit;
     ProgressBar progressBar;
     static String SongList;
     private SongAdapter adapter;
     private ArrayList<DiscoverModel> discoverModels;
     private Activity activity; boolean showTrend;
     private AsyncTask<Void, Void, Void> task;
-
+    ImageView removeText;
+    AsyncTask<Void,Void,String[]> suggestionTask;
     SharedPreferences preferences; String region="global";
+    private static final String TAG = "SFragment"; boolean suppressAction=false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
@@ -75,14 +93,60 @@ public class SFragment extends Fragment {
                 region = preferences.getString("pref_select_region","global");
             }
 
+            suggestionTask = new getAdapter();
             discoverModels = new ArrayList<>();
             progressBar = v.findViewById(R.id.progressBar);
+            removeText = v.findViewById(R.id.removeText);
             trendingText = v.findViewById(R.id.trendingNow);
             searchEdit = v.findViewById(R.id.searchEditText);
             recyclerCard = v.findViewById(R.id.recyclerCard);
             recyclerView = v.findViewById(R.id.my_recycler_view);
             mLayoutManager = new LinearLayoutManager(activity);
             recyclerView.setLayoutManager(mLayoutManager);
+
+
+        /*    ArrayAdapter<String> adapter = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1,
+                    new String[]{"trap","trap Nation","trap Music","trap city","trap country"});
+            searchEdit.setAdapter(adapter);
+            searchEdit.showDropDown();*/
+
+            searchEdit.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    if (editable.toString().isEmpty())
+                        removeText.setVisibility(View.GONE);
+                    else removeText.setVisibility(View.VISIBLE);
+                    Log.e(TAG, "afterTextChanged: Working" );
+                    if (suppressAction) {
+                        suppressAction = false;
+                        return;
+                    }
+                    if (suggestionTask.getStatus()==AsyncTask.Status.RUNNING)
+                        suggestionTask.cancel(true);
+                    suggestionTask = new getAdapter();
+                    suggestionTask.execute();
+                }
+            });
+
+            removeText.setOnClickListener(view -> {
+                searchEdit.setText("");
+            });
+
+            searchEdit.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Log.e(TAG, "onItemClick: true" );
+                    suppressAction=true;
+                }
+            });
 
             searchEdit.setOnEditorActionListener(new EditText.OnEditorActionListener() {
                 @Override
@@ -127,10 +191,56 @@ public class SFragment extends Fragment {
             });
 
             task = new getVirals();
-            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            task.execute();
         }
         searchEdit.requestFocus();
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(searchEdit, InputMethodManager.SHOW_IMPLICIT);
         return v;
+    }
+
+    class getAdapter extends AsyncTask<Void,Void,String[]> {
+
+        @Override
+        protected void onPostExecute(String[] strings) {
+            if (suppressAction) {
+                suppressAction = false;
+                return;
+            }
+            Log.e(TAG, "onPostExecute: Strings Size "+strings.length);
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, strings);
+            searchEdit.setAdapter(adapter);
+            searchEdit.showDropDown();
+            super.onPostExecute(strings);
+        }
+
+        @Override
+        protected String[] doInBackground(Void... voids) {
+            if (suppressAction) {
+                suppressAction = false;
+                return new String[0];
+            }
+            HttpHandler handler = new HttpHandler();
+            String json = handler.makeServiceCall("https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&client=firefox&q="+
+                    URLEncoder.encode(searchEdit.getText().toString()));
+            if (json==null || json.isEmpty())
+                return new String[0];
+            Log.e(TAG, "doInBackground: "+json);
+            try {
+                JSONArray array = new JSONArray(json);
+                JSONArray jsonArray = array.getJSONArray(1);
+                String[] elements = new String[jsonArray.length()];
+                for (int i=0; i<jsonArray.length();i++) {
+                    elements[i] = jsonArray.getString(i);
+                }
+                return elements;
+            }catch (Exception e){
+                Log.e(TAG, "doInBackground: Error retrieving suggestion json" );
+                e.printStackTrace();
+            }
+            return new String[0];
+        }
     }
 
 
@@ -191,7 +301,7 @@ public class SFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             trendingText.setText("SEARCH RESULTS");
-            if (ytSearch.getVideoIDs().size()<=0)
+            if (ytSearch!=null && ytSearch.getVideoIDs().size()<=0)
                 trendingText.setText("NO RESULTS FOUND");
             recyclerView.setItemAnimator(new DefaultItemAnimator());
             adapter = new SongAdapter(discoverModels,activity);
@@ -202,21 +312,63 @@ public class SFragment extends Fragment {
             super.onPostExecute(aVoid);
         }
 
+        String jsonResponse(int apinumber) {
+            HttpHandler httpHandler = new HttpHandler();
+            String link = "https://www.googleapis.com/youtube/v3/search?part=id%2Csnippet&type=video&maxResults=20&q=+"+URLEncoder.encode(textToSearch)+"&key="+ API_KEYS[apinumber];
+            return httpHandler.makeServiceCall(link);
+        }
+
         @Override
         protected Void doInBackground(Void... voids) {
-            ytSearch = new YTSearch(textToSearch);
-            if (ytSearch.getVideoIDs().size()<=0) return null;
-            for (String videoID: ytSearch.getVideoIDs()) {
-                YTMeta ytMeta = new YTMeta(videoID);
-                if (ytMeta.getVideMeta()!=null) {
-                    discoverModels.add(new DiscoverModel(
-                            ytMeta.getVideMeta().getTitle(),
-                            ytMeta.getVideMeta().getAuthor(),
-                            ytMeta.getVideMeta().getImgUrl(),
-                            "https://www.youtube.com/watch?v="+videoID
-                    ));
+
+            //https://www.googleapis.com/youtube/v3/search?part=id%2Csnippet&maxResults=20&q=trap&key=[YOUR_API_KEY]'
+
+            int i=0;
+            int apiLength = API_KEYS.length;
+            String json;
+            do {
+                json = jsonResponse(i);
+                i++;
+            }while (json.contains("\"error\":") && i<apiLength);
+
+            if (json.contains("\"error\":")) {
+                ytSearch = new YTSearch(textToSearch);
+                if (ytSearch.getVideoIDs().size()<=0) return null;
+                for (String videoID: ytSearch.getVideoIDs()) {
+                    YTMeta ytMeta = new YTMeta(videoID);
+                    if (ytMeta.getVideMeta()!=null) {
+                        discoverModels.add(new DiscoverModel(
+                                ytMeta.getVideMeta().getTitle(),
+                                ytMeta.getVideMeta().getAuthor(),
+                                ytMeta.getVideMeta().getImgUrl(),
+                                "https://www.youtube.com/watch?v="+videoID
+                        ));
+                    }
+                }
+            }else {
+                /** Using YouTube Data Api... */
+                try {
+                    JSONObject obj = new JSONObject(json);
+                    JSONArray array = obj.getJSONArray("items");
+                    for (i=0;i<array.length();i++) {
+                        JSONObject object = array.getJSONObject(i);
+
+                        String videoID = object.getJSONObject("id").getString("videoId");
+
+                        JSONObject snippet = object.getJSONObject("snippet");
+                        discoverModels.add(new DiscoverModel(
+                                snippet.getString("title"),
+                                snippet.getString("channelTitle"),
+                                YTutils.getImageUrl(videoID),
+                                YTutils.getYtUrl(videoID)
+                        ));
+                    }
+                }catch (Exception e){
+                    Log.e(TAG, "doInBackground: JSON Object error" );
+                    e.printStackTrace();
                 }
             }
+
             return null;
         }
 

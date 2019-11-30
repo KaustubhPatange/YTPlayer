@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -72,6 +73,8 @@ public class ErrorActivity extends AppCompatActivity {
                 if (!editText.getText().toString().isEmpty()) {
                     message = editText.getText().toString()+"\n\n";
                 }
+                message += "------ Device Info ------\nModel: "+ Build.MODEL+"\nProduct: "+ Build.PRODUCT+"\nHardware: "+Build.HARDWARE+"\n" +
+                        "Android SDK: "+Build.VERSION.SDK_INT+"\n\n";
                 if (sendLogs.isChecked())
                 message += "------ StackTrace ------\n"+"<pre>"+crashDetails+"</pre>";
                 try {

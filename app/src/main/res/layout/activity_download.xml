@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".DownloadActivity"
+    android:background="@color/background"
     android:layout_height="match_parent">
 
     <android.support.design.widget.AppBarLayout
@@ -33,7 +34,33 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+                <LinearLayout
+                    android:id="@+id/emptyLayout"
+                    android:visibility="gone"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:src="@drawable/ic_notifications"
+                        android:layout_height="60dp"/>
+                    <TextView
+                        android:layout_marginTop="20dp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="30dp"
+                        android:layout_marginStart="30dp"
+                        android:layout_marginEnd="30dp"
+                        android:fontFamily="@font/dmsans_font"
+                        android:textAlignment="center"
+                        android:textSize="22sp"
+                        android:textColor="@color/white"
+                        android:layout_width="match_parent"
+                        android:text="Looks like download queue is empty"
+                    android:layout_height="wrap_content" />
+                </LinearLayout>
+
                 <TextView
+                    android:id="@+id/currentText"
                     android:layout_marginBottom="10dp"
                     android:textColor="@color/white"
                     android:textStyle="bold"

@@ -188,9 +188,9 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                     String yturl = MainActivity.yturls.get(i);
                     String nurl = MainActivity.nPlayModels.get(i).getUrl();
 
-                    String title = YTutils.getVideoTitle( MainActivity.nPlayModels.get(i).getModel()
-                            .getVideMeta().getTitle());
-                    if (title.equals(MainActivity.videoTitle)) {
+                    String videoID = YTutils.getVideoID_ImageUri(MainActivity.nPlayModels.get(i).getModel()
+                            .getVideMeta().getImgUrl());
+                    if (MainActivity.videoID.equals(videoID)) {
                         MainActivity.nPlayModels.get(i).set_playing(true);
                     }
 
@@ -295,8 +295,7 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
         protected Void doInBackground(Void... voids) {
             meta = new YTMeta(YTutils.getVideoID(url));
             if (meta.getVideMeta()!=null) {
-                String title = YTutils.getVideoTitle(meta.getVideMeta().getTitle());
-                if (title.equals(MainActivity.videoTitle)) {
+                if (YTutils.getVideoID_ImageUri(meta.getVideMeta().getImgUrl()).equals(MainActivity.videoID)) {
                    models.add(new NPlayModel(url,meta,true));
                 }else
                     models.add(new NPlayModel(url,meta,false));

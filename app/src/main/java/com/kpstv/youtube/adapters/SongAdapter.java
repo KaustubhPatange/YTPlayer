@@ -28,6 +28,9 @@ import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.DiscoverModel;
+import com.kpstv.youtube.models.MetaModel;
+import com.kpstv.youtube.models.NPlayModel;
+import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
 
@@ -127,7 +130,24 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                 if (discoverModel.getYtUrl()==null)
                     new layoutListener(activity,discoverModel).execute();
                 else {
-                    RunLink(discoverModel.getYtUrl(),activity);
+                 //   RunLink(discoverModel.getYtUrl(),activity);
+                    MainActivity.nPlayModels.clear();
+                    String[] yturls = new String[dataSet.size()];
+                   for (int i=0;i<dataSet.size();i++) {
+
+                       final DiscoverModel dModel = dataSet.get(i);
+                       MetaModel metaModel = new MetaModel(
+                               dModel.getTitle(),
+                               dModel.getAuthor(),
+                               dModel.getImgUrl()
+                       );
+                       NPlayModel model = new NPlayModel(dModel.getYtUrl(),new YTMeta(metaModel),false);
+
+                       MainActivity.nPlayModels.add(model);
+
+                       yturls[i] = dModel.getYtUrl();
+                   }
+                   MainActivity.PlayVideo(yturls,listPosition);
                 }
             });
             holder.mainLayout.setOnLongClickListener(v -> {

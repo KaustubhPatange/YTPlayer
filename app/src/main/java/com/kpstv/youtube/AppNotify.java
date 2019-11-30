@@ -21,7 +21,7 @@ public class AppNotify extends Application {
             NotificationChannel serviceChannel = new NotificationChannel(
                     CHANNEL_ID,
                     "Download Service",
-                    NotificationManager.IMPORTANCE_DEFAULT
+                    NotificationManager.IMPORTANCE_LOW
             );
 
             appnotification = getSystemService(NotificationManager.class);

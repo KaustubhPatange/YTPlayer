@@ -298,6 +298,7 @@ public class YTutils {
         StringBuilder sb = new StringBuilder();
         try {
             fis = activity.openFileInput(FILE_NAME);
+            if (fis==null) return null;
             InputStreamReader isr = new InputStreamReader(fis);
             BufferedReader br = new BufferedReader(isr);
 
@@ -436,6 +437,15 @@ public class YTutils {
         @SuppressLint("SimpleDateFormat") String month =  new SimpleDateFormat("MM").format(c);
         @SuppressLint("SimpleDateFormat") String year =  new SimpleDateFormat("yyyy").format(c);
         return  (Integer.parseInt(date)-1)+"-"+month+"-"+year;
+    }
+
+    public static String getVideoID_ImageUri(String imageUrl) {
+        // "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg";
+        String t = imageUrl;
+
+        t = t.split("/")[4];
+
+        return t;
     }
 
     public static String getVideoID(String youtube_url) {

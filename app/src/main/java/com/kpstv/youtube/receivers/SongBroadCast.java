@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity2;
 import com.kpstv.youtube.R;
@@ -36,9 +37,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.net.URLConnection;
 
-public class SongBroadCast extends BroadcastReceiver {
-
-    String[] apikeys = new String[]{"AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw", "AIzaSyBH8szUCt1ctKQabVeQuvWgowaKxHVjn8E"};
+public class SongBroadCast extends BroadcastReceiver implements AppSettings {
 
     AsyncTask<Void,Void,Void> setData;
 
@@ -151,14 +150,21 @@ public class SongBroadCast extends BroadcastReceiver {
 
         String jsonResponse(String videoID, int apinumber) {
             HttpHandler httpHandler = new HttpHandler();
-            String link = "https://www.googleapis.com/youtube/v3/videos?id=" + videoID + "&key=" + apikeys[apinumber] + "&part=statistics";
+            String link = "https://www.googleapis.com/youtube/v3/videos?id=" + videoID + "&key=" + API_KEYS[apinumber] + "&part=statistics";
             return httpHandler.makeServiceCall(link);
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             String videoID = MainActivity.videoID;
-            String json = jsonResponse(videoID, 0);
+
+            int i=0;
+            int apiLength = API_KEYS.length;
+            String json;
+            do {
+                json = jsonResponse(videoID, i);
+                i++;
+            }while (json.contains("\"error\":") && i<apiLength);
 
             YTMeta ytMeta = new YTMeta(videoID);
             if (ytMeta.getVideMeta() != null) {
@@ -167,16 +173,14 @@ public class SongBroadCast extends BroadcastReceiver {
                 MainActivity.imgUrl = ytMeta.getVideMeta().getImgUrl();
             }
 
-            if (json != null && json.contains("\"error\":")) {
-                json = jsonResponse(videoID, 1);
-                if (json.contains("\"error\":")) {
-                    YTStatistics ytStatistics = new YTStatistics(videoID);
-                    MainActivity.viewCounts = ytStatistics.getViewCount();
-                    MainActivity.likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
-                    MainActivity.dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
-                    json = null;
-                }
+            if (json.contains("\"error\":")) {
+                YTStatistics ytStatistics = new YTStatistics(videoID);
+                MainActivity.viewCounts = ytStatistics.getViewCount();
+                MainActivity.likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
+                MainActivity.dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
+                json = null;
             }
+
             if (json != null) {
                 try {
                     JSONObject statistics = new JSONObject(json).getJSONArray("items")

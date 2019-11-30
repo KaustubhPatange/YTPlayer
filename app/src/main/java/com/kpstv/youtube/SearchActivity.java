@@ -14,10 +14,14 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -32,7 +36,14 @@ import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
 
+import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
+
+import org.json.JSONArray;
+
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.concurrent.ExecutionException;
 
 import at.huber.youtubeExtractor.YouTubeUriExtractor;
 
@@ -42,14 +53,15 @@ public class SearchActivity extends AppCompatActivity {
     private LinearLayoutManager mLayoutManager;
     CardView recyclerCard;
     TextView trendingText;
-    EditText searchEdit;
+    AutoCompleteTextView searchEdit;
     ProgressBar progressBar;
     static String SongList;
     private SongAdapter adapter;
     private ArrayList<DiscoverModel> discoverModels;
     private Activity activity; boolean showTrend;
     private AsyncTask<Void, Void, Void> task;
-
+    private static final String TAG = "SearchActivity";
+    AsyncTask<Void,Void,String[]> suggestionTask;
     SharedPreferences preferences; String region="global";
 
     @Override
@@ -70,6 +82,7 @@ public class SearchActivity extends AppCompatActivity {
             region = preferences.getString("pref_select_region","global");
         }
 
+        //suggestionTask = new getAdapter();
         activity = this;
         discoverModels = new ArrayList<>();
         progressBar = findViewById(R.id.progressBar);
@@ -79,6 +92,50 @@ public class SearchActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.my_recycler_view);
         mLayoutManager = new LinearLayoutManager(SearchActivity.this);
         recyclerView.setLayoutManager(mLayoutManager);
+
+/*
+
+        if (suggestionTask.getStatus()==AsyncTask.Status.RUNNING)
+            suggestionTask.cancel(true);
+        suggestionTask = new getAdapter();
+        suggestionTask.execute();
+        try {
+            String[] results = suggestionTask.get();
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, R.layout.suggestion_item,R.id.txtView_Search_Item, results);
+            searchEdit.setAdapter(adapter);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+*/
+
+        searchEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                Log.e(TAG, "onTextChanged: Before Text" );
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                Log.e(TAG, "onTextChanged: Changing Text" );
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+             /*   Log.e(TAG, "afterTextChanged: Working" );
+                if (suggestionTask.getStatus()==AsyncTask.Status.RUNNING)
+                    suggestionTask.cancel(true);
+                suggestionTask = new getAdapter();
+                suggestionTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                try {
+                    String[] results = suggestionTask.get();
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, R.layout.suggestion_item,R.id.txtView_Search_Item, results);
+                    searchEdit.setAdapter(adapter);
+                    searchEdit.showDropDown();
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }*/
+            }
+        });
 
         searchEdit.setOnEditorActionListener(new EditText.OnEditorActionListener() {
             @Override
@@ -124,7 +181,12 @@ public class SearchActivity extends AppCompatActivity {
 
         task = new getVirals();
         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        UIUtil.showKeyboard(this,searchEdit);
     }
+
+
+
 
     class spotifySearch extends AsyncTask<Void,Void,Void> {
 

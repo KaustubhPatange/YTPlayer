@@ -19,6 +19,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.coremedia.iso.boxes.Container;
@@ -83,12 +84,12 @@ public class DownloadService extends Service {
     public static ArrayList<YTConfig> pendingJobs;
     public static long totalsize;
     public static long currentsize;
-    Process process; Bitmap icon;
+    public static Process process; Bitmap icon;
     public static YTConfig currentModel; long oldbytes;
     boolean isDownloaded=false;
     Context context; YTMeta ytMeta;long total=0; public static int progress;
     Notification notification,notification1; Handler handler;
-    AsyncTask<Void,Integer,Void> downloadTask;PowerManager.WakeLock wakeLock;
+    public static AsyncTask<Void,Integer,Void> downloadTask;PowerManager.WakeLock wakeLock;
 
     @Override
     public void onCreate() {
@@ -115,13 +116,14 @@ public class DownloadService extends Service {
         PendingIntent stopservicePending =
                 PendingIntent.getBroadcast(context, 5, newintent, 0);
 
+
         notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Download")
                 .addAction(R.mipmap.ic_launcher,"Cancel",stopservicePending)
                 .setContentText(pendingJobs.size()+1+" files downloading")
                 .setSmallIcon(android.R.drawable.stat_sys_download)
                 .setContentIntent(pendingIntent)
-                .setPriority(Notification.PRIORITY_MAX)
+                .setPriority(Notification.PRIORITY_LOW)
                 .build();
 
         startForeground(105, notification);
@@ -170,9 +172,9 @@ public class DownloadService extends Service {
 
             if (currentModel==null) stopSelf();
 
-            if (pendingJobs.size()>0) {
+          /*  if (pendingJobs.size()>0) {
                 Log.e(TAG, "doInBackground: Next JOB: "+pendingJobs.get(0).getTaskExtra());
-            }//else Log.e(TAG, "doInBackground: NO JOB" );
+            }//else Log.e(TAG, "doInBackground: NO JOB" );*/
 
             if (pendingJobs.size()>0 && (downloadTask!=null && downloadTask.getStatus() != AsyncTask.Status.RUNNING))
             {
@@ -263,6 +265,7 @@ public class DownloadService extends Service {
                     .setContentText(model.getTitle()+" - "+model.getChannelTitle())
                     .setSmallIcon(R.drawable.ic_check)
                     .setContentIntent(opensongService)
+                    .setPriority(Notification.PRIORITY_LOW)
                     .addAction(R.mipmap.ic_launcher,"Share",openshareService)
                     .build();
 
