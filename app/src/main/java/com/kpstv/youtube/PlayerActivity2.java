@@ -852,9 +852,9 @@ public class PlayerActivity2 extends AppCompatActivity implements AppSettings {
             config.setAudioUrl(MainActivity.audioLink);
             String filename;
             if (config.getText().length() > 55) {
-                filename = config.getTitle().substring(0, 55) + "." + config.getExt();
+                filename = config.getTitle().substring(0, 55).trim() + "." + config.getExt();
             } else {
-                filename = config.getChannelTitle() +" - " + config.getTitle() + "." + config.getExt();
+                filename = config.getChannelTitle().trim() +" - " + config.getTitle() + "." + config.getExt();
             }
             filename = filename.replaceAll("[\\\\><\"|*?%:#/]", "");
             final String fileCurrent = filename; // Using this since current filename cannot be placed as final

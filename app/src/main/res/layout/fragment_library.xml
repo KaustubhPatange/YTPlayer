@@ -124,6 +124,38 @@
 
                     <LinearLayout
                         android:padding="3dp"
+                        android:id="@+id/sleepTimer_layout"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/history_background"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/moonId"
+                            android:layout_marginStart="10dp"
+                            android:padding="12dp"
+                            android:tint="@color/white"
+                            android:src="@drawable/ic_moon"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"/>
+
+                        <TextView
+                            android:id="@+id/sleepTimer_textview"
+                            android:fontFamily="@font/dmsans_font"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:layout_marginStart="15dp"
+                            android:text="Sleep Timer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:padding="3dp"
                         android:id="@+id/local_music_layout"
                         android:clickable="true"
                         android:focusable="true"

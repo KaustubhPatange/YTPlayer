@@ -2,11 +2,18 @@ package com.kpstv.youtube.fragments;
 
 
 import android.annotation.SuppressLint;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -23,11 +30,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.hiteshsondhi88.libffmpeg.FileUtils;
 import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
+import com.kpstv.youtube.RingdroidEditActivity;
 import com.kpstv.youtube.SettingsActivity;
 import com.kpstv.youtube.adapters.SearchAdapter;
 import com.kpstv.youtube.models.PlaylistModel;
@@ -38,19 +48,27 @@ import com.kpstv.youtube.utils.YTutils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 
+import static android.app.Activity.RESULT_OK;
+
 public class LibraryFragment extends Fragment implements AppSettings {
+
     public LibraryFragment() {}
 
     View v;
     Toolbar toolbar; FragmentActivity activity;
-    LinearLayout playlistLayout, settingsLayout, favLayout,SOW,SOF;
-    ImageView githubView,pulseView,myWebView;
+    LinearLayout playlistLayout, settingsLayout, sleepLayout, audioCutterLayout, favLayout,SOW,SOF;
+    ImageView githubView,pulseView,myWebView,moonId;
     RecyclerView recyclerView; LinearLayoutManager manager;
     String region; LinearLayout commonLayout; RelativeLayout progressLayout; SearchAdapter adapter;
     SharedPreferences preferences; ArrayList<SearchModel> models;
     NestedScrollView nestedScrollView; boolean networkCheck=false;
+    TextView sleepTimerTextview;
 
     private static final String TAG = "LibraryFragment";
 
@@ -89,7 +107,11 @@ public class LibraryFragment extends Fragment implements AppSettings {
     }
 
     void getAllViews() {
+        moonId = v.findViewById(R.id.moonId);
+        sleepTimerTextview = v.findViewById(R.id.sleepTimer_textview);
         commonLayout = v.findViewById(R.id.common_recycler_layout);
+        sleepLayout = v.findViewById(R.id.sleepTimer_layout);
+        audioCutterLayout = v.findViewById(R.id.audio_cutter_layout);
         favLayout = v.findViewById(R.id.favourite_layout);
         progressLayout = v.findViewById(R.id.progressLayout);
         nestedScrollView = v.findViewById(R.id.nestedScrollView);
@@ -216,6 +238,7 @@ public class LibraryFragment extends Fragment implements AppSettings {
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+
     @Override
     public void onResume() {
         String newregion = preferences.getString("pref_select_region","global");
@@ -233,7 +256,60 @@ public class LibraryFragment extends Fragment implements AppSettings {
         super.onResume();
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case 1: // Request code for audio cutter
+                if (resultCode == RESULT_OK) {
+
+                    Uri uri = data.getData();
+                    String path = YTutils.getPath(activity,uri);
+                    startEditor("file:/"+path);
+                }
+                break;
+            case 100: //Request code for sleep Timer
+                if (!MainActivity.selectedItemText.isEmpty()) {
+                    moonId.setColorFilter(getResources().getColor(R.color.colorAccent));
+                    sleepTimerTextview.setText("Sleep Timer - "+MainActivity.selectedItemText);
+                }else {
+                    moonId.clearColorFilter();
+                    sleepTimerTextview.setText("Sleep Timer");
+                }
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    private void startEditor(String filePathUri) {
+        Intent intent = new Intent(activity, RingdroidEditActivity.class);
+        intent.putExtra("FILE_PATH", filePathUri);
+        startActivity(intent);
+    }
+
     void preClicks() {
+
+
+        sleepLayout.setOnClickListener(view -> {
+            SleepBottomSheet bottomSheet = new SleepBottomSheet();
+            bottomSheet.show(activity.getSupportFragmentManager(),MainActivity.selectedItemText);
+        });
+
+        audioCutterLayout.setOnClickListener(view -> {
+
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.setType("audio/*");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+            try {
+                startActivityForResult(
+                        Intent.createChooser(intent, "Select a File to Upload"),
+                        1);
+            } catch (android.content.ActivityNotFoundException ex) {
+                // Potentially direct the user to the Market with a Dialog
+                Toast.makeText(activity, "No file manager installed", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         favLayout.setOnClickListener(view -> {
 
@@ -312,5 +388,6 @@ public class LibraryFragment extends Fragment implements AppSettings {
             startActivity(Intent.createChooser(shareIntent, "Choose the messenger to share this AppNotify"));
         });
     }
+
 
 }

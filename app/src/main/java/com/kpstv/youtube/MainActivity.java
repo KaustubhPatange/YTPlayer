@@ -80,6 +80,7 @@ import com.kpstv.youtube.fragments.OPlaylistFragment;
 import com.kpstv.youtube.fragments.PlaylistFragment;
 import com.kpstv.youtube.fragments.SFragment;
 import com.kpstv.youtube.fragments.SearchFragment;
+import com.kpstv.youtube.fragments.SleepBottomSheet;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.models.YTConfig;
@@ -99,6 +100,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -117,7 +119,7 @@ import static com.facebook.network.connectionclass.ConnectionQuality.GOOD;
 import static com.facebook.network.connectionclass.ConnectionQuality.MODERATE;
 import static com.facebook.network.connectionclass.ConnectionQuality.POOR;
 
-public class MainActivity extends AppCompatActivity implements AppSettings, HistoryBottomSheet.BottomSheetListener, NCFragment.NoConnectionListener {
+public class MainActivity extends AppCompatActivity implements AppSettings, SleepBottomSheet.ItemClickListener, HistoryBottomSheet.BottomSheetListener, NCFragment.NoConnectionListener {
 
     // https://www.googleapis.com/youtube/v3/videos?id=BDocp-VpCwY&key=AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw&part=snippet,statistics
 
@@ -152,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Hist
     public static DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
     public static TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory();
     public static TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
-    private String TAG = "MainActivity";
+    private String TAG = "MainActivity"; public static String selectedItemText=""; public static int sleepSeconds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,6 +165,16 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Hist
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
         builder.detectFileUriExposure();
+
+
+      /*  if(Build.VERSION.SDK_INT>=24){
+            try{
+                Method m = StrictMode.class.getMethod("disableDeathOnFileUriExposure");
+                m.invoke(null);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }*/
 
         dataSourceFactory = new DefaultDataSourceFactory(MainActivity.this,
                 Util.getUserAgent(MainActivity.this,
@@ -466,6 +478,39 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Hist
         } else Toast.makeText(this, getString(R.string.error), Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void onItemClick(TextView view) {
+        selectedItemText = view.getText().toString();
+        switch (selectedItemText) {
+            case "5 minutes":
+                sleepSeconds = 5*60;
+                break;
+            case "10 minutes":
+                sleepSeconds = 10*60;
+                break;
+            case "15 minutes":
+                sleepSeconds = 15*60;
+                break;
+            case "30 minutes":
+                sleepSeconds = 30*60;
+                break;
+            case "45 minutes":
+                sleepSeconds = 45*60;
+                break;
+            case "60 minutes":
+                sleepSeconds = 60*60;
+                break;
+            case "End of track":
+                sleepSeconds = -2;
+                break;
+            case "None":
+                selectedItemText="";
+                sleepSeconds=0;
+                break;
+        }
+        libraryFrag.onActivityResult(100,0,null);
+    }
+
     void openPlayer() {
         Intent i=new Intent(MainActivity.this,PlayerActivity2.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -476,6 +521,7 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Hist
         startActivity(i);
         overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
     }
+
 
     @SuppressLint("StaticFieldLeak")
     boolean CheckIntent(Intent incoming) {
@@ -620,6 +666,7 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Hist
     static int total_seconds; public static int nColor;
     public static ArrayList<String> yturls;
     public static int ytIndex = 0;
+
 
     static class loadVideo extends AsyncTask<String,String,Void> {
 
