@@ -2,7 +2,10 @@ package com.kpstv.youtube.adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -23,6 +26,7 @@ import com.kpstv.youtube.PlayerActivity2;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.utils.YTutils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -53,26 +57,50 @@ public class PlayerAdapter extends PagerAdapter {
         View itemView = mLayoutInflater.inflate(R.layout.player_item, container, false);
 
         ImageView imageView = itemView.findViewById(R.id.mainImage);
+        ImageView imageView1 = itemView.findViewById(R.id.mainImage1);
 
-        Glide.with(context)
-                .asBitmap()
-                .load(YTutils.getImageUrl(yturls.get(position)))
-                .into(new CustomTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        Palette.generateAsync(resource, palette -> {
+        if (MainActivity.localPlayBack) {
+            File f = new File(MainActivity.yturls.get(position));
+            try {
+                MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                mmr.setDataSource(context, Uri.fromFile(f));
+
+                byte [] data = mmr.getEmbeddedPicture();
+
+                if(data != null) {
+                    imageView1.setVisibility(View.GONE);
+                    Bitmap bitmapIcon = BitmapFactory.decodeByteArray(data, 0, data.length);
+                    imageView.setImageBitmap(bitmapIcon);
+                }
+                else {
+                    imageView1.setVisibility(View.VISIBLE);
+                }
+
+            }catch (Exception e) {
+                // TODO: Do something when cannot played...
+            }
+        }else {
+            imageView1.setVisibility(View.GONE);
+            Glide.with(context)
+                    .asBitmap()
+                    .load(YTutils.getImageUrl(yturls.get(position)))
+                    .into(new CustomTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            Palette.generateAsync(resource, palette -> {
                             /*MainActivity.bitmapIcon = resource;
                             MainActivity.nColor = palette.getVibrantColor(context.getResources().getColor(R.color.light_white));*/
-                            imageView.setImageBitmap(resource);
+                                imageView.setImageBitmap(resource);
 
-                        });
-                    }
+                            });
+                        }
 
-                    @Override
-                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
 
-                    }
-                });
+                        }
+                    });
+        }
 
         container.addView(itemView);
 

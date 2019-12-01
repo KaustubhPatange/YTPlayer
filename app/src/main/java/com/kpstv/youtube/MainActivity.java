@@ -1,26 +1,22 @@
 package com.kpstv.youtube;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
-import android.media.session.MediaSession;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.StrictMode;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
@@ -29,18 +25,15 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
-import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -75,6 +68,7 @@ import com.google.android.gms.ads.MobileAds;
 import com.kpstv.youtube.fragments.DiscoverFragment;
 import com.kpstv.youtube.fragments.HistoryFragment;
 import com.kpstv.youtube.fragments.LibraryFragment;
+import com.kpstv.youtube.fragments.LocalMusicFragment;
 import com.kpstv.youtube.fragments.NCFragment;
 import com.kpstv.youtube.fragments.OPlaylistFragment;
 import com.kpstv.youtube.fragments.PlaylistFragment;
@@ -94,18 +88,15 @@ import com.kpstv.youtube.ytextractor.ExtractorException;
 import com.kpstv.youtube.ytextractor.YoutubeStreamExtractor;
 import com.kpstv.youtube.ytextractor.model.YoutubeMedia;
 import com.kpstv.youtube.ytextractor.model.YoutubeMeta;
-import com.spyhunter99.supertooltips.ToolTip;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.zip.GZIPInputStream;
 
 import at.huber.youtubeExtractor.Format;
 import at.huber.youtubeExtractor.VideoMeta;
@@ -114,10 +105,6 @@ import at.huber.youtubeExtractor.YtFile;
 import cat.ereza.customactivityoncrash.config.CaocConfig;
 
 import static android.view.View.VISIBLE;
-import static com.facebook.network.connectionclass.ConnectionQuality.EXCELLENT;
-import static com.facebook.network.connectionclass.ConnectionQuality.GOOD;
-import static com.facebook.network.connectionclass.ConnectionQuality.MODERATE;
-import static com.facebook.network.connectionclass.ConnectionQuality.POOR;
 
 public class MainActivity extends AppCompatActivity implements AppSettings, SleepBottomSheet.ItemClickListener, HistoryBottomSheet.BottomSheetListener, NCFragment.NoConnectionListener {
 
@@ -139,22 +126,23 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
     Fragment HistoryFrag;
     static Fragment SearchFrag;
     static FragmentManager fragmentManager;
-    public static Fragment PlaylistFrag, libraryFrag, FavouriteFrag;
+    public static Fragment PlaylistFrag, libraryFrag, FavouriteFrag,localMusicFrag;
     Fragment NCFrag; String ytLink;
     static SharedPreferences preferences;
     static LinearLayout bottom_player, adViewLayout;
     static ImageButton actionUp,actionPlay;static ProgressBar loadProgress,songProgress;
     static TextView actionTitle; static AdView adView;
     static AsyncTask<String,String,Void> LoadVideo; public static Activity activity;
+    static AsyncTask<Void,Void,Void> LoadOffline;
 
     public static ArrayList<NPlayModel> nPlayModels;
     public static ExoPlayer player;  public static boolean supportFFmpeg=false,loadedFavFrag=false;
-    public static MediaSource mediaSource;
+    public static MediaSource mediaSource; private static final String TAG = "MainActivity";
     public static DefaultDataSourceFactory dataSourceFactory;
     public static DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
     public static TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory();
     public static TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
-    private String TAG = "MainActivity"; public static String selectedItemText=""; public static int sleepSeconds;
+    public static String selectedItemText=""; public static int sleepSeconds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -244,6 +232,7 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
         actionUp.setOnClickListener(v->openPlayer());
 
         fragmentManager = getSupportFragmentManager();
+        localMusicFrag = new LocalMusicFragment();
         HistoryFrag = new HistoryFragment();
         libraryFrag = new LibraryFragment();
         FavouriteFrag = new OPlaylistFragment();
@@ -288,10 +277,61 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
             e.printStackTrace();
 
         }
+    }
 
+    public static void PlayVideo_Local(String[] urls) {
+        /** YTUrls here will work as path to music file...
+         *
+         *  Background task will load all the details about music
+         *  and will set it to player and respective fields.
+         */
+
+        localPlayBack=true;
+        yturls.clear();
+        if (LoadOffline !=null && LoadOffline.getStatus() == AsyncTask.Status.RUNNING)
+        {
+            player.stop(); player.release();
+            LoadOffline.cancel(true);
+        }
+        yturls.addAll(Arrays.asList(urls));
+        ytIndex = 0;
+        LoadOffline = new loadVideo_Local(urls[ytIndex]);
+        LoadOffline.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    public static void PlayVideo_Local(String[] urls,int position) {
+        /** YTUrls here will work as path to music file...
+         *
+         *  Background task will load all the details about music
+         *  and will set it to player and respective fields.
+         */
+
+        localPlayBack=true;
+        yturls.clear();
+        if (LoadOffline !=null && LoadOffline.getStatus() == AsyncTask.Status.RUNNING)
+        {
+            player.stop(); player.release();
+            LoadOffline.cancel(true);
+        }
+        yturls.addAll(Arrays.asList(urls));
+        ytIndex = position;
+        LoadOffline = new loadVideo_Local(urls[ytIndex]);
+        LoadOffline.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    public static void ChangeVideoOffline(int position) {
+        if (LoadOffline !=null && LoadOffline.getStatus() == AsyncTask.Status.RUNNING)
+        {
+            player.stop(); player.release();
+            LoadOffline.cancel(true);
+        }
+        ytIndex = position;
+        LoadOffline = new loadVideo_Local(yturls.get(ytIndex));
+        LoadOffline.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public static void PlayVideo(String[] ytUrls) {
+        localPlayBack=false;
         yturls.clear();
         if (LoadVideo !=null && LoadVideo.getStatus() == AsyncTask.Status.RUNNING)
         {
@@ -306,6 +346,7 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
     }
 
     public static void PlayVideo(String[] ytUrls, int position) {
+        localPlayBack=false;
         yturls.clear();
         if (LoadVideo !=null && LoadVideo.getStatus() == AsyncTask.Status.RUNNING)
         {
@@ -355,6 +396,11 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
         }
 
         if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof PlaylistFragment) {
+            loadFragment(libraryFrag);
+            return;
+        }
+
+        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof LocalMusicFragment) {
             loadFragment(libraryFrag);
             return;
         }
@@ -659,14 +705,77 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
     static NotificationChannel notificationChannel;
     static PendingIntent prevPendingIntent,pausePendingIntent,nextPendingIntent,clickPendingIntent;
     public static Bitmap bitmapIcon; static ArrayList<YTConfig> ytConfigs;
-    static NotificationCompat.Builder builder; public static boolean isplaying;
+    static NotificationCompat.Builder builder; public static boolean isplaying, sleepEndTrack=false,localPlayBack=false;
     static boolean isLoop=false;
     static Handler mHandler = new Handler();
     static long total_duration = 0;
-    static int total_seconds; public static int nColor;
+    public static int total_seconds; public static int nColor;
     public static ArrayList<String> yturls;
     public static int ytIndex = 0;
 
+    static class loadVideo_Local extends AsyncTask<Void,Void,Void> {
+        String filePath;
+
+        public loadVideo_Local(String filePath) {
+            this.filePath = filePath;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Palette.generateAsync(bitmapIcon, new Palette.PaletteAsyncListener() {
+                public void onGenerated(Palette palette) {
+                    nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+                    continueinMainThread("isPath:"+filePath);
+                }
+            });
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            File f = new File(filePath);
+            Uri uri = Uri.fromFile(f);
+            try {
+                MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                mmr.setDataSource(activity,uri);
+                String durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                String title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+
+                byte [] data = mmr.getEmbeddedPicture();
+
+                if(data != null)
+                    bitmapIcon = BitmapFactory.decodeByteArray(data, 0, data.length);
+                else
+                    bitmapIcon = YTutils.drawableToBitmap(ContextCompat.getDrawable(activity,R.drawable.ic_pulse));
+
+                if (artist==null) artist ="Unknown artist";
+                if (title==null) title = YTutils.getVideoTitle(f.getName());
+
+                if (title.contains("."))
+                    title = title.split("\\.")[0];
+
+                videoTitle = title;
+                channelTitle = artist;
+                likeCounts = -1; dislikeCounts = -1;
+                viewCounts = "-1";
+
+                videoID = f.getPath();
+
+                total_seconds = Integer.parseInt(durationStr);
+
+            }catch (Exception e) {
+                // TODO: Do something when cannot played...
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            commonPreExecute();
+            super.onPreExecute();
+        }
+    }
 
     static class loadVideo extends AsyncTask<String,String,Void> {
 
@@ -798,20 +907,24 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
 
         @Override
         protected void onPreExecute() {
-            adViewLayout.setVisibility(VISIBLE);
-            AdRequest adRequest = new AdRequest.Builder().build();
-            adView.loadAd(adRequest);
-            adView.setAdListener(new AdListener(){
-                @Override
-                public void onAdLoaded() {
-                    adView.setVisibility(VISIBLE);
-                    super.onAdLoaded();
-                }
-            });
-            bottom_player.setVisibility(VISIBLE);
-            onClear();
+            commonPreExecute();
             super.onPreExecute();
         }
+    }
+
+    static void commonPreExecute() {
+        adViewLayout.setVisibility(VISIBLE);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        adView.loadAd(adRequest);
+        adView.setAdListener(new AdListener(){
+            @Override
+            public void onAdLoaded() {
+                adView.setVisibility(VISIBLE);
+                super.onAdLoaded();
+            }
+        });
+        bottom_player.setVisibility(VISIBLE);
+        onClear();
     }
 
     private static void parseVideoNewMethod(String yturl, String videoTitle) {
@@ -842,51 +955,17 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
         }).Extract(YTutils.getVideoID(yturl));
     }
 
-    static void animate_up(View view) {
-        view.setVisibility(View.VISIBLE);
-        TranslateAnimation animate = new TranslateAnimation(
-                0,                 // fromXDelta
-                0,                 // toXDelta
-                view.getHeight(),  // fromYDelta
-                0);                // toYDelta
-        animate.setDuration(500);
-        animate.setFillAfter(true);
-        view.startAnimation(animate);
-        /*view.animate()
-                .translationY(0)
-                .setDuration(300)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-                        view.setVisibility(VISIBLE);
-                    }
-                }).start();*/
-    }
-
-    static void animate_down(View view) {
-        view.animate()
-                .translationY(view.getHeight())
-                .alpha(0.0f)
-                .setDuration(300)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-                        view.setVisibility(View.GONE);
-                    }
-                }).start();
-    }
-
+    static boolean dontAllowToPlay=false;
     private static void continueinMainThread(String link) {
-
-        // Let's hold up here... and see how I modify the videoTitle
-        /*if (videoTitle.contains("(") && videoTitle.contains(")")) {
-            videoTitle.replaceFirst("\\(*.?\\)","");
-        }*/
 
         player.stop();
         player.release();
+        if (link.startsWith("isPath:"))
+        {
+            link = link.split(":")[1];
+            File f = new File(link);
+            mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.fromFile(f));
+        }else
         mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(link));
         player = ExoPlayerFactory.newSimpleInstance(activity, trackSelector);
         player.prepare(mediaSource);
@@ -906,6 +985,12 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
                         makePlay();
                         isplaying = false;
                         playNext();
+                        Log.e(TAG, "onPlayerStateChanged: State Changed "+MainActivity.sleepEndTrack );
+                        if (sleepEndTrack) {
+                            Log.e(TAG, "onPlayerStateChanged: tiggered" );
+                            sleepEndTrack=false;
+                            dontAllowToPlay=true;
+                        }
                         break;
                     case ExoPlayer.STATE_READY:
                         actionTitle.setVisibility(VISIBLE);
@@ -917,16 +1002,24 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
                         total_duration = MainActivity.player.getDuration();
                         total_seconds = (int) total_duration / 1000;
                         try {
+                            PlayerActivity2.loadAgain();
                             PlayerActivity2.totalDuration.setText(YTutils.milliSecondsToTimer(MainActivity.total_duration));
                         }catch (Exception e) { Log.e("PlayerActivity","not loaded yet!"); }
                         rebuildNotification();
                         updateProgressBar();
+                        if (dontAllowToPlay)
+                        {
+                            dontAllowToPlay=false;
+                            libraryFrag.onActivityResult(101,0,null);
+                            changePlayBack(false);
+                        }
                         break;
                 }
             }
         });
 
         // Store video into history
+        if (!localPlayBack)
         new saveToHistory().execute(YTutils.getYtUrl(videoID));
     }
 
@@ -1074,6 +1167,7 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
             long currentDur = MainActivity.player.getCurrentPosition();
             int progress = (YTutils.getProgressPercentage(currentDur, totalDuration));
             songProgress.setProgress(progress);
+
             mHandler.postDelayed(this, 100);
         }
     };
@@ -1150,8 +1244,14 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
         onClear();
         videoID = YTutils.getVideoID(yturls.get(ytIndex-1));
         ytIndex--;
-        LoadVideo = new loadVideo();
-        LoadVideo.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videoID);
+        if (!localPlayBack) {
+            LoadVideo = new loadVideo();
+            LoadVideo.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videoID);
+        } else {
+            videoID = yturls.get(ytIndex);
+            LoadOffline = new loadVideo_Local(yturls.get(ytIndex));
+            LoadOffline.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
     }
 
     public static void playNext() {
@@ -1166,8 +1266,14 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
         onClear();
         videoID = YTutils.getVideoID(yturls.get(ytIndex+1));
         ytIndex++;
-        LoadVideo = new loadVideo();
-        LoadVideo.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videoID);
+        if (!localPlayBack) {
+            LoadVideo = new loadVideo();
+            LoadVideo.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videoID);
+        }else {
+            videoID = yturls.get(ytIndex);
+            LoadOffline = new loadVideo_Local(yturls.get(ytIndex));
+            LoadOffline.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
     }
 
     static void makePlay() {

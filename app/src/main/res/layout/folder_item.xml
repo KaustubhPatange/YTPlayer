@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    android:id="@+id/fConstraintLayout"
+    android:clickable="true"
+    android:focusable="true"
+    android:animateLayoutChanges="true"
+    android:background="@drawable/history_background"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="5dp"
+    android:paddingEnd="5dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:layout_marginEnd="10dp"
+        app:layout_constraintEnd_toStartOf="@id/fSongText"
+        app:layout_constraintBottom_toTopOf="@id/fPath"
+        android:id="@+id/fTitle"
+        android:layout_marginTop="3dp"
+        android:layout_marginStart="10dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/imageView1"
+        android:fontFamily="@font/dmsans_font"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:text="Folder"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:layout_marginEnd="10dp"
+        app:layout_constraintEnd_toStartOf="@id/fSongText"
+        android:layout_marginBottom="3dp"
+        android:id="@+id/fPath"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="10dp"
+        app:layout_constraintTop_toBottomOf="@id/fTitle"
+        app:layout_constraintStart_toEndOf="@id/imageView1"
+        android:fontFamily="@font/dmsans_font"
+        android:textColor="@color/light_white"
+        android:textSize="13sp"
+        android:text="/storage/emulated/0"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"/>
+
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_marginStart="7dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:tint="@color/light_white"
+        android:src="@drawable/ic_folder"
+        android:layout_width="30dp"
+        android:layout_height="30dp"/>
+
+    <ImageView
+        android:clickable="true"
+        android:focusable="true"
+        android:id="@+id/fMoreButton"
+        android:paddingEnd="5dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:tint="@color/light_white"
+        android:src="@drawable/ic_more"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"/>
+
+    <TextView
+        android:layout_marginEnd="10dp"
+        android:id="@+id/fSongText"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/fMoreButton"
+        android:fontFamily="@font/dmsans_font"
+        android:textColor="@color/light_white"
+        android:textSize="14sp"
+        android:text="102 songs"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"/>
+
+</android.support.constraint.ConstraintLayout>

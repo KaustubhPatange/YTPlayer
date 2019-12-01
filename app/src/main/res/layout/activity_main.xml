@@ -43,7 +43,6 @@
     </LinearLayout>
 
 
-
     <LinearLayout
         android:visibility="gone"
         android:layout_above="@id/navigation"

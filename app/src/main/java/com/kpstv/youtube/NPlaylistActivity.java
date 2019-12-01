@@ -3,7 +3,10 @@ package com.kpstv.youtube;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,10 +33,12 @@ import com.bumptech.glide.request.transition.Transition;
 import com.kpstv.youtube.adapters.NPlayAdapter;
 import com.kpstv.youtube.helper.OnStartDragListener;
 import com.kpstv.youtube.helper.SimpleItemTouchHelperCallback;
+import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -80,6 +85,8 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
         cTitle.setText(MainActivity.videoTitle);
         cAuthor.setText(MainActivity.channelTitle);
         cImageView.setImageBitmap(MainActivity.bitmapIcon);
+
+        commonMethodForLocal();
 
         // Set recycler view...
 
@@ -163,7 +170,18 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                     cAuthor.setText(MainActivity.channelTitle);
                     cImageView.setImageBitmap(MainActivity.bitmapIcon);
 
+                    commonMethodForLocal();
+
                     for (NPlayModel model : models) {
+
+                        /** For local playback stuff */
+                        if (MainActivity.localPlayBack) {
+                            if (MainActivity.videoID.equals(model.getUrl()))
+                                model.set_playing(true);
+                            else model.set_playing(false);
+                            continue;
+                        }
+
                         if (YTutils.getVideoID(model.getUrl()).equals(MainActivity.videoID)) {
                             model.set_playing(true);
                         }else model.set_playing(false);
@@ -188,8 +206,14 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                     String yturl = MainActivity.yturls.get(i);
                     String nurl = MainActivity.nPlayModels.get(i).getUrl();
 
-                    String videoID = YTutils.getVideoID_ImageUri(MainActivity.nPlayModels.get(i).getModel()
+                    String videoID;
+
+                    /** For local playback stuff */
+                    if (MainActivity.localPlayBack)
+                        videoID = MainActivity.nPlayModels.get(i).getUrl();
+                    else videoID = YTutils.getVideoID_ImageUri(MainActivity.nPlayModels.get(i).getModel()
                             .getVideMeta().getImgUrl());
+
                     if (MainActivity.videoID.equals(videoID)) {
                         MainActivity.nPlayModels.get(i).set_playing(true);
                     }
@@ -209,6 +233,12 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
             }
         }
 
+    }
+
+    void commonMethodForLocal() {
+        if (!MainActivity.localPlayBack) {
+            cImageView.setColorFilter(getResources().getColor(R.color.colorScreen1));
+        }else cImageView.clearColorFilter();
     }
 
     @Override
@@ -238,7 +268,11 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
             models.get(position).set_playing(true);
             String url = model.getUrl();
             new setCurrentData(url).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            MainActivity.ChangeVideo(position);
+
+            /** For local playback stuff */
+            if (!MainActivity.localPlayBack)
+                MainActivity.ChangeVideo(position);
+            else MainActivity.ChangeVideoOffline(position);
             adapter.notifyDataSetChanged();
         });
 
@@ -293,6 +327,45 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
         @Override
         protected Void doInBackground(Void... voids) {
+            if (MainActivity.localPlayBack) {
+                File f = new File(url);
+                Uri uri = Uri.fromFile(f);
+                try {
+                    MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                    mmr.setDataSource(NPlaylistActivity.this,uri);
+                    String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                    String title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+
+                    byte [] data = mmr.getEmbeddedPicture();
+
+                    Bitmap icon;
+
+                    if(data != null)
+                        icon = BitmapFactory.decodeByteArray(data, 0, data.length);
+                    else
+                        icon = YTutils.drawableToBitmap(ContextCompat.getDrawable(NPlaylistActivity.this,
+                                R.drawable.ic_pulse));
+
+                    if (artist==null) artist ="Unknown artist";
+                    if (title==null) title = YTutils.getVideoTitle(f.getName());
+
+                    if (title.contains("."))
+                        title = title.split("\\.")[0];
+
+                    MetaModel model = new MetaModel(title,artist,null);
+                    meta = new YTMeta(model);
+                    if (MainActivity.videoID.equals(url))
+                        models.add(new NPlayModel(url,meta,true));
+                    else  models.add(new NPlayModel(url,meta,false));
+
+                    models.get(models.size()-1).setIcon(icon);
+
+                }catch (Exception e) {
+                    // TODO: Do something when cannot played...
+                }
+                return null;
+            }
+
             meta = new YTMeta(YTutils.getVideoID(url));
             if (meta.getVideMeta()!=null) {
                 if (YTutils.getVideoID_ImageUri(meta.getVideMeta().getImgUrl()).equals(MainActivity.videoID)) {
@@ -326,6 +399,7 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                             public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                                 Palette.generateAsync(resource, palette -> {
                                     cImageView.setImageBitmap(resource);
+                                    commonMethodForLocal();
                                     MainActivity.bitmapIcon = resource;
                                     MainActivity.nColor = palette.getVibrantColor(NPlaylistActivity.this
                                             .getResources().getColor(R.color.light_white));

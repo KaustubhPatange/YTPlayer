@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".PlayerActivity">
+    tools:context=".PlayerActivity2">
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:background="@null"
@@ -286,10 +286,11 @@
                     app:layout_constraintTop_toBottomOf="@+id/relativeLayout2">
 
                     <ImageButton
+                        android:tint="@color/white"
                         android:longClickable="true"
                         android:id="@+id/download_IButton"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:background="@android:color/transparent"
                         android:scaleType="fitXY"
                         android:src="@drawable/ic_file_download"
@@ -365,7 +366,6 @@
                     android:src="@drawable/ic_youtube"
                     android:layout_alignParentStart="true"/>
                 <ImageButton
-                    android:tint="@color/white"
                     android:id="@+id/currentPlaylist_IButton"
                     android:layout_width="20dp"
                     android:layout_height="20dp"

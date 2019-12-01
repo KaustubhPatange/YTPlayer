@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
@@ -47,6 +48,7 @@ import com.kpstv.youtube.utils.YTutils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.mozilla.javascript.tools.jsc.Main;
 
 import java.io.File;
 import java.net.URI;
@@ -62,7 +64,8 @@ public class LibraryFragment extends Fragment implements AppSettings {
 
     View v;
     Toolbar toolbar; FragmentActivity activity;
-    LinearLayout playlistLayout, settingsLayout, sleepLayout, audioCutterLayout, favLayout,SOW,SOF;
+    LinearLayout playlistLayout, settingsLayout, sleepLayout, audioCutterLayout,
+            localMusicLayout,favLayout,SOW,SOF;
     ImageView githubView,pulseView,myWebView,moonId;
     RecyclerView recyclerView; LinearLayoutManager manager;
     String region; LinearLayout commonLayout; RelativeLayout progressLayout; SearchAdapter adapter;
@@ -89,22 +92,38 @@ public class LibraryFragment extends Fragment implements AppSettings {
 
             preClicks();
 
+
+            /** Add subsequent methods here*/
+
+
+
             if (YTutils.isInternetAvailable())
             {
-                networkCheck=true;
+                networkCheck=false;
                 setRecyclerView();
             }
             else {
+                internetHandler.postDelayed(internetTask,1000);
                 commonLayout.setVisibility(View.GONE);
             }
 
         }
 
-        if (networkCheck && YTutils.isInternetAvailable())
-            setRecyclerView();
-
         return v;
     }
+
+    Handler internetHandler = new Handler();
+    Runnable internetTask = new Runnable() {
+        @Override
+        public void run() {
+            if (YTutils.isInternetAvailable())
+            {
+                setRecyclerView();
+                return;
+            }
+            internetHandler.postDelayed(this,1000);
+        }
+    };
 
     void getAllViews() {
         moonId = v.findViewById(R.id.moonId);
@@ -112,6 +131,7 @@ public class LibraryFragment extends Fragment implements AppSettings {
         commonLayout = v.findViewById(R.id.common_recycler_layout);
         sleepLayout = v.findViewById(R.id.sleepTimer_layout);
         audioCutterLayout = v.findViewById(R.id.audio_cutter_layout);
+        localMusicLayout = v.findViewById(R.id.local_music_layout);
         favLayout = v.findViewById(R.id.favourite_layout);
         progressLayout = v.findViewById(R.id.progressLayout);
         nestedScrollView = v.findViewById(R.id.nestedScrollView);
@@ -256,30 +276,84 @@ public class LibraryFragment extends Fragment implements AppSettings {
         super.onResume();
     }
 
+    Handler mHandler = new Handler();
+
+    public Runnable sleepTimerTask = new Runnable() {
+        @Override
+        public void run() {
+            if (MainActivity.isplaying && MainActivity.sleepSeconds!=0) {
+                Log.e(TAG, "SleepTimerTask run: "+MainActivity.sleepSeconds);
+
+                if (MainActivity.sleepSeconds == -2) {
+                    MainActivity.sleepEndTrack=true;
+                    return;
+                }else MainActivity.sleepEndTrack=false;
+                MainActivity.sleepSeconds = MainActivity.sleepSeconds-1;
+
+                try {
+                    if (MainActivity.sleepSeconds%60==0) {
+                        int time = (MainActivity.sleepSeconds/60);
+                        if (time==1)
+                            sleepTimerTextview.setText("Sleep Timer - " + time +" minute");
+                        else   sleepTimerTextview.setText("Sleep Timer - " + time +" minutes");
+                    }
+                }catch (Exception e) {
+                    Log.e(TAG, "run: Failed to calculate seconds" );
+                }
+
+                if (MainActivity.sleepSeconds == 0)
+                {
+                    MainActivity.changePlayBack(false);
+                    timerWentOff();
+                }
+            }else if (MainActivity.sleepSeconds==0) return;
+            mHandler.postDelayed(this,1000);
+        }
+    };
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case 1: // Request code for audio cutter
                 if (resultCode == RESULT_OK) {
-
                     Uri uri = data.getData();
+
+                    Log.e(TAG, "onActivityResult: "+uri.toString() );
+
                     String path = YTutils.getPath(activity,uri);
+
+                    Log.e(TAG, "onActivityResult: "+path);
                     startEditor("file:/"+path);
                 }
                 break;
             case 100: //Request code for sleep Timer
                 if (!MainActivity.selectedItemText.isEmpty()) {
                     moonId.setColorFilter(getResources().getColor(R.color.colorAccent));
-                    sleepTimerTextview.setText("Sleep Timer - "+MainActivity.selectedItemText);
+                    sleepTimerTextview.setText("Sleep Timer - " + MainActivity.selectedItemText);
+
+                    if (MainActivity.sleepSeconds==-2)
+                        Toast.makeText(activity, "Pausing at End of track!", Toast.LENGTH_SHORT).show();
+                    else if (MainActivity.sleepSeconds!=0)
+                        Toast.makeText(activity, "Pausing in "+MainActivity.selectedItemText+"!", Toast.LENGTH_SHORT).show();
+
+                    mHandler.postDelayed(sleepTimerTask,1000);
                 }else {
-                    moonId.clearColorFilter();
-                    sleepTimerTextview.setText("Sleep Timer");
+                    timerWentOff();
                 }
+                break;
+            case 101: //Request code to change sleep Timer Text
+                timerWentOff();
                 break;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    void timerWentOff() {
+        moonId.clearColorFilter();
+        sleepTimerTextview.setText("Sleep Timer");
+        MainActivity.selectedItemText="";
+        Toast.makeText(activity, "Timer went off!", Toast.LENGTH_SHORT).show();
+    }
 
     private void startEditor(String filePathUri) {
         Intent intent = new Intent(activity, RingdroidEditActivity.class);
@@ -289,6 +363,14 @@ public class LibraryFragment extends Fragment implements AppSettings {
 
     void preClicks() {
 
+        localMusicLayout.setOnClickListener(view -> {
+            FragmentManager manager = getActivity().getSupportFragmentManager();
+            FragmentTransaction ft = manager.beginTransaction();
+            ft.setCustomAnimations(android.R.anim.fade_in,
+                    android.R.anim.fade_out);
+            ft.replace(R.id.fragment_container, MainActivity.localMusicFrag);
+            ft.commit();
+        });
 
         sleepLayout.setOnClickListener(view -> {
             SleepBottomSheet bottomSheet = new SleepBottomSheet();

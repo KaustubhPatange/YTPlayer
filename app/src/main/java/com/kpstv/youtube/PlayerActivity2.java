@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -68,11 +69,6 @@ import com.warkiz.widget.IndicatorSeekBar;
 import com.warkiz.widget.OnSeekChangeListener;
 import com.warkiz.widget.SeekParams;
 
-import org.cmc.music.common.ID3WriteException;
-import org.cmc.music.metadata.ImageData;
-import org.cmc.music.metadata.MusicMetadata;
-import org.cmc.music.metadata.MusicMetadataSet;
-import org.cmc.music.myid3.MyID3;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mozilla.javascript.tools.jsc.Main;
@@ -97,7 +93,7 @@ import java.util.ArrayList;
 public class PlayerActivity2 extends AppCompatActivity implements AppSettings {
 
     static String YouTubeUrl;
-    static ImageView backImage;
+    static ImageView backImage, viewImage;
 
     static ConstraintLayout mainlayout;
 
@@ -361,12 +357,17 @@ public class PlayerActivity2 extends AppCompatActivity implements AppSettings {
                     }
                     case MotionEvent.ACTION_UP:
 
-                        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                                != PackageManager.PERMISSION_GRANTED) {
-                            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                    100);
-                            return false;
-                        } else showListDialog();
+                        /** For local playback stuff */
+                        if (MainActivity.localPlayBack) {
+                            if (MainActivity.yturls.size()>1)
+                                startActivity(new Intent(activity,NPlaylistActivity.class));
+                        }else {
+                            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                    != PackageManager.PERMISSION_GRANTED) {
+                                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                        100);
+                            } else showListDialog();
+                        }
 
                     case MotionEvent.ACTION_CANCEL: {
                         ImageButton view = (ImageButton) v;
@@ -497,10 +498,17 @@ public class PlayerActivity2 extends AppCompatActivity implements AppSettings {
         @Override
         public void onPageSelected(int pos) {
             try {
-                MainActivity.ChangeVideo(pos);
+                Log.e(TAG, "onPageSelected: "+MainActivity.yturls.get(pos) );
+                if (MainActivity.localPlayBack)
+                    MainActivity.ChangeVideoOffline(pos);
+                else
+                    MainActivity.ChangeVideo(pos);
                 if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                     setData.cancel(true);
-                setData = new loadData();
+                if (!MainActivity.localPlayBack)
+                    setData = new loadData();
+                else
+                    setData = new loadData_Offline(MainActivity.yturls.get(pos));
                 setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }catch (Exception e){
                 e.printStackTrace();
@@ -534,20 +542,42 @@ public class PlayerActivity2 extends AppCompatActivity implements AppSettings {
         mprogressBar.setVisibility(View.GONE);
         mainTitle.setText(MainActivity.videoTitle);
         channelTitle.setText(MainActivity.channelTitle);
-        viewCount.setText(MainActivity.viewCounts);
+        if (!MainActivity.localPlayBack)
+        {
+            viewCount.setVisibility(View.VISIBLE);
+            viewCount.setText(MainActivity.viewCounts);
+            viewImage.setVisibility(View.VISIBLE);
+            favouriteButton.setVisibility(View.VISIBLE);
+            addToPlaylist.setVisibility(View.VISIBLE);
+            downloadButton.setImageDrawable(ContextCompat.getDrawable(activity,R.drawable.ic_file_download));
+            youTubeButton.setVisibility(View.VISIBLE);
+            playlistButton.setVisibility(View.VISIBLE);
+
+            YouTubeUrl = YTutils.getYtUrl(MainActivity.videoID);
+
+            String data = YTutils.readContent(activity,"favourite.csv");
+            if (data!=null && data.contains(MainActivity.videoID)) {
+                isFavourite = true;
+                favouriteButton.setImageDrawable(activity.getDrawable(R.drawable.ic_favorite_full));
+            }else {
+                isFavourite=false;
+                favouriteButton.setImageDrawable(activity.getDrawable(R.drawable.ic_favorite));
+            }
+        }else {
+            viewCount.setVisibility(View.GONE);
+            viewImage.setVisibility(View.GONE);
+            favouriteButton.setVisibility(View.GONE);
+            addToPlaylist.setVisibility(View.GONE);
+
+            downloadButton.setImageDrawable(ContextCompat.getDrawable(activity,R.drawable.ic_playlist));
+
+            youTubeButton.setVisibility(View.GONE);
+            playlistButton.setVisibility(View.GONE);
+        }
 
         if (MainActivity.yturls.size()>1)
             playlistButton.setEnabled(true);
         else playlistButton.setEnabled(false);
-
-        String data = YTutils.readContent(activity,"favourite.csv");
-        if (data!=null && data.contains(MainActivity.videoID)) {
-            isFavourite = true;
-            favouriteButton.setImageDrawable(activity.getDrawable(R.drawable.ic_favorite_full));
-        }else {
-            isFavourite=false;
-            favouriteButton.setImageDrawable(activity.getDrawable(R.drawable.ic_favorite));
-        }
 
         // Loading color with animation...
 
@@ -562,16 +592,69 @@ public class PlayerActivity2 extends AppCompatActivity implements AppSettings {
         }else backImage.setColorFilter(MainActivity.nColor);
         backImage.setTag(colorTo);
 
-
         makeRepeat(MainActivity.isLoop);
 
         totalDuration.setText(YTutils.milliSecondsToTimer(MainActivity.total_duration));
         detectPlayback();
-        YouTubeUrl = YTutils.getYtUrl(MainActivity.videoID);
         updateProgressBar();
     }
 
     private static final String TAG = "PlayerActivity2";
+
+    static class loadData_Offline extends AsyncTask<Void,Void,Void> {
+        String filePath;
+
+        public loadData_Offline(String filePath) {
+            this.filePath = filePath;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Palette.generateAsync(MainActivity.bitmapIcon, palette -> {
+                MainActivity.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+                loadAgain();
+                MainActivity.rebuildNotification();
+            });
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            File f = new File(filePath);
+            Uri uri = Uri.fromFile(f);
+            try {
+                MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                mmr.setDataSource(activity,uri);
+                String durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                String title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+
+                byte [] data = mmr.getEmbeddedPicture();
+
+                if(data != null)
+                    MainActivity.bitmapIcon = BitmapFactory.decodeByteArray(data, 0, data.length);
+                else
+                    MainActivity.bitmapIcon = YTutils.drawableToBitmap(ContextCompat.getDrawable(activity,R.drawable.ic_pulse));
+
+                if (artist==null) artist ="Unknown artist";
+                if (title==null) title = YTutils.getVideoTitle(f.getName());
+
+                if (title.contains("."))
+                    title = title.split("\\.")[0];
+
+                MainActivity.videoTitle = title;
+                MainActivity.channelTitle = artist;
+                MainActivity.likeCounts = -1; MainActivity.dislikeCounts = -1;
+                MainActivity.viewCounts = "-1";
+
+                MainActivity.total_seconds = Integer.parseInt(durationStr);
+
+            }catch (Exception e) {
+                // TODO: Do something when cannot played...
+            }
+            return null;
+        }
+    }
 
     static class loadData extends AsyncTask<Void,Void,Void> {
         @Override
@@ -765,6 +848,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppSettings {
     }
 
     private void getAllViews() {
+        viewImage = findViewById(R.id.imageView3);
         mainPager = findViewById(R.id.viewPager);
         favouriteButton = findViewById(R.id.favourite_button);
         addToPlaylist = findViewById(R.id.addPlaylist_button);

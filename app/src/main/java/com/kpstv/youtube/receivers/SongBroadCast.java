@@ -5,7 +5,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
@@ -49,14 +51,26 @@ public class SongBroadCast extends BroadcastReceiver implements AppSettings {
                 MainActivity.playNext();
                 if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                     setData.cancel(true);
-                setData = new loadData(context);
+
+                /** For local playback stuff */
+                if (MainActivity.localPlayBack)
+                    setData = new loadData_Offline(context);
+                else
+                    setData = new loadData(context);
+
                 setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 break;
             case "com.kpstv.youtube.ACTION_PREVIOUS":
                 MainActivity.playPrevious();
                 if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                     setData.cancel(true);
-                setData = new loadData(context);
+
+                /** For local playback stuff */
+                if (MainActivity.localPlayBack)
+                    setData = new loadData_Offline(context);
+                else
+                    setData = new loadData(context);
+
                 setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 break;
             case "com.kpstv.youtube.ACTION_PLAY":
@@ -109,6 +123,66 @@ public class SongBroadCast extends BroadcastReceiver implements AppSettings {
         return type;
     }
 
+    class loadData_Offline extends AsyncTask<Void,Void,Void> {
+        Context context;
+
+        public loadData_Offline(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Palette.generateAsync(MainActivity.bitmapIcon, new Palette.PaletteAsyncListener() {
+                public void onGenerated(Palette palette) {
+                    MainActivity.nColor = palette.getVibrantColor(context.getResources().getColor(R.color.light_white));
+                    MainActivity.rebuildNotification();
+                    try {
+                        PlayerActivity2.loadAgain();
+                    }catch (Exception e) {
+                        Log.e("PlayerActivity","is_still_null");
+                    }
+                }
+            });
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            File f = new File(MainActivity.videoID);
+            Uri uri = Uri.fromFile(f);
+            try {
+                MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                mmr.setDataSource(context,uri);
+                String durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                String title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+
+                byte [] data = mmr.getEmbeddedPicture();
+
+                if(data != null)
+                    MainActivity.bitmapIcon = BitmapFactory.decodeByteArray(data, 0, data.length);
+                else
+                    MainActivity.bitmapIcon = YTutils.drawableToBitmap(ContextCompat.getDrawable(context,R.drawable.ic_pulse));
+
+                if (artist==null) artist ="Unknown artist";
+                if (title==null) title = YTutils.getVideoTitle(f.getName());
+
+                if (title.contains("."))
+                    title = title.split("\\.")[0];
+
+                MainActivity.videoTitle = title;
+                MainActivity.channelTitle = artist;
+                MainActivity.likeCounts = -1; MainActivity.dislikeCounts = -1;
+                MainActivity.viewCounts = "-1";
+
+                MainActivity.total_seconds = Integer.parseInt(durationStr);
+
+            }catch (Exception e) {
+                // TODO: Do something when cannot played...
+            }
+            return null;
+        }
+    }
 
     class loadData extends AsyncTask<Void,Void,Void> {
 

@@ -73,18 +73,14 @@ public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder
     public boolean onItemMoved(int fromPosition, int toPosition) {
         Log.e("onItemMoved","true");
         MainActivity.nPlayModels = models;
-      //  Collections.swap(MainActivity.yturls,fromPosition,toPosition);
         MainActivity.yturls.clear();
-        StringBuilder builder = new StringBuilder();
         for (int i=0;i<models.size();i++){
             MainActivity.yturls.add(models.get(i).getUrl());
             if (models.get(i).is_playing()) {
                 MainActivity.ytIndex = i;
             }
             models.get(i).set_selected(false);
-            builder.append(YTutils.getVideoTitle(models.get(i).getModel().getVideMeta().getTitle())).append("\n");
         }
-        Log.e("ItemState","\n"+builder.toString());
         notifyDataSetChanged();
         return true;
     }
@@ -104,11 +100,6 @@ public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder
             this.layout = itemView.findViewById(R.id.mainlayout);
             this.checkBox = itemView.findViewById(R.id.aCheckBox);
             this.equalizerView = itemView.findViewById(R.id.equalizer);
-
-            itemView.setOnLongClickListener(view -> {
-                // Blank listener
-                return true;
-            });
         }
 
         @Override
@@ -179,7 +170,11 @@ public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder
             });
 
             holder.titleText.setText(YTutils.getVideoTitle(meta.getVideMeta().getTitle()));
-            holder.authorText.setText(YTutils.getChannelTitle(meta.getVideMeta().getTitle(),meta.getVideMeta().getAuthor()));
+
+            /** For local playback stuff */
+            if (!MainActivity.localPlayBack)
+                holder.authorText.setText(YTutils.getChannelTitle(meta.getVideMeta().getTitle(),meta.getVideMeta().getAuthor()));
+            else holder.authorText.setText(meta.getVideMeta().getAuthor());
 
             holder.checkBox.setOnClickListener(view -> {
                 onCheckBoxListener.OnSingleClicked(holder.checkBox,listPosition,nPlayModel,holder);

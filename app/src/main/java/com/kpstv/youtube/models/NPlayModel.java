@@ -1,5 +1,7 @@
 package com.kpstv.youtube.models;
 
+import android.graphics.Bitmap;
+
 import com.kpstv.youtube.utils.YTMeta;
 
 public class NPlayModel {
@@ -7,11 +9,20 @@ public class NPlayModel {
     String url;
     boolean selected=false;
     boolean playing=false;
+    Bitmap icon;
 
     public NPlayModel(String url, YTMeta model, boolean isplaying) {
         this.url = url;
         this.model = model;
         this.playing = isplaying;
+    }
+
+    public Bitmap getIcon() {
+        return icon;
+    }
+
+    public void setIcon(Bitmap icon) {
+        this.icon = icon;
     }
 
     public YTMeta getModel() {
