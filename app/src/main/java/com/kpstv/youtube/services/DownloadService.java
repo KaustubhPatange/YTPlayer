@@ -247,7 +247,7 @@ public class DownloadService extends Service {
             String filePath = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS+"/"+model.getTargetName()).getPath();
 
             Intent openSong = new Intent(context, SongBroadCast.class);
-            openSong.setAction("com.kpstv.youtube.OPEN_SHARE");
+            openSong.setAction("com.kpstv.youtube.OPEN_SONG");
             openSong.putExtra("filePath",filePath);
 
             Intent openShare = new Intent(context, SongBroadCast.class);
@@ -309,7 +309,8 @@ public class DownloadService extends Service {
 
                         currentModel = model;
                         String prefixName = (model.getTitle().trim()+"_"+model.getChannelTitle().trim())
-                                .replace( " ","_");
+                                .replace( " ","_").replace("]","").replace("[","")
+                                .replace("{","").replace("}","").replace("/","");
                         //prefixName = "audio";
                         File mp3 = YTutils.getFile("YTPlayer/"+prefixName+".mp3");
                         if (mp3.exists()) mp3.delete();
@@ -399,6 +400,11 @@ public class DownloadService extends Service {
                             Util.destroyProcess(process);
                         }
 
+                      /*  String mp3Size = YTutils.getSize(mp3.length()).split(" ")[1];
+                        String fLength = YTutils.getSize(f.length()).split(" ")[1];
+                        if (!mp3Size.equals(fLength))
+                            return null;*/
+
                         Log.e(TAG, "onSuccess: ONCompleted" );
                         MusicMetadataSet src_set = null;
                         try {
@@ -420,7 +426,7 @@ public class DownloadService extends Service {
                                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                                 byte[] bitmapdata = stream.toByteArray();
-                                imageData = new ImageData(bitmapdata,"image/jpeg","arun photo",1);
+                                imageData = new ImageData(bitmapdata,"image/jpeg","background",1);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }

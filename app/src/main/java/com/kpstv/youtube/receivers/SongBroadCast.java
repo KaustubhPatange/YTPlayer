@@ -42,7 +42,7 @@ import java.net.URLConnection;
 public class SongBroadCast extends BroadcastReceiver implements AppSettings {
 
     AsyncTask<Void,Void,Void> setData;
-
+    private static final String TAG = "SongBroadCast";
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
@@ -82,14 +82,20 @@ public class SongBroadCast extends BroadcastReceiver implements AppSettings {
                 context.stopService(serviceIntent);
                 break;
             case "com.kpstv.youtube.OPEN_SONG":
+                Log.e(TAG, "onReceive: triggered" );
                 //TODO: Change this OPEN_SONG reciever to in-built player if possible
                 try {
                     Uri uri = Uri.parse(intent.getStringExtra("filePath"));
-                    File f = new File(uri.getPath());
+                    String mime = context.getContentResolver().getType(uri);
+
+                    // Open file with user selected app
                     Intent i = new Intent();
-                    i.setAction(android.content.Intent.ACTION_VIEW);
-                    i.setDataAndType(uri,getMimeType(f.getAbsolutePath()));
+                    i.setAction(Intent.ACTION_VIEW);
+                    i.setDataAndType(uri, mime);
+                    i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(i);
+                   // ContextCompat.startActivity(context,i,null);
                 }catch (Exception e){
                     e.printStackTrace();
                     Toast.makeText(context, "Error: "+e.getMessage(), Toast.LENGTH_SHORT).show();

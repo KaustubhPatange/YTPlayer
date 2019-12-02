@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.OFModel;
+import com.kpstv.youtube.utils.YTutils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,11 +29,18 @@ public class OFAdapter extends RecyclerView.Adapter<OFAdapter.OFHolder> {
     ArrayList<OFModel> models;
     LongClickListener longClickListener;
     SingleClickListener singleClickListener;
-    int accentcolor;
+    int accentcolor; boolean localMusic=false;
 
     public OFAdapter(Context context, ArrayList<OFModel> models) {
         this.context = context;
         this.models = models;
+        accentcolor = ContextCompat.getColor(context,R.color.colorAccent);
+    }
+
+    public OFAdapter(Context context, ArrayList<OFModel> models,boolean localMusic) {
+        this.context = context;
+        this.models = models;
+        this.localMusic = localMusic;
         accentcolor = ContextCompat.getColor(context,R.color.colorAccent);
     }
 
@@ -41,17 +49,7 @@ public class OFAdapter extends RecyclerView.Adapter<OFAdapter.OFHolder> {
     public void onBindViewHolder(@NonNull OFHolder ofHolder, int i) {
         final OFModel ofModel = models.get(i);
 
-        ofHolder.Title.setText(ofModel.getTitle());
-
         File f = new File(ofModel.getPath());
-
-        ofHolder.Path.setText(f.getParent());
-
-        int count = ofModel.getSongCount();
-
-        if (count==1) {
-            ofHolder.SongText.setText("1 song");
-        }else ofHolder.SongText.setText(count+" songs");
 
         ofHolder.constraintLayout.setOnClickListener(view -> {
             singleClickListener.onSingleClick(view,ofModel,i);
@@ -83,6 +81,22 @@ public class OFAdapter extends RecyclerView.Adapter<OFAdapter.OFHolder> {
             longClickListener.onLongClick(view,ofModel,i);
             return true;
         });
+
+        if (localMusic) {
+            ofHolder.mainImage.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_play));
+            ofHolder.Title.setText(f.getName().split("\\.")[0]);
+            ofHolder.Path.setText(ofModel.getTitle());
+            ofHolder.SongText.setText(YTutils.getDuration(ofModel.getSongCount()*1000));
+        }else {
+            ofHolder.Title.setText(ofModel.getTitle());
+            ofHolder.Path.setText(f.getParent());
+            int count = ofModel.getSongCount();
+
+            if (count==1) {
+                ofHolder.SongText.setText("1 song");
+            }else ofHolder.SongText.setText(count+" songs");
+        }
+
     }
 
 
@@ -120,7 +134,7 @@ public class OFAdapter extends RecyclerView.Adapter<OFAdapter.OFHolder> {
     public static class OFHolder extends RecyclerView.ViewHolder {
 
         TextView Title,Path,SongText;
-        ImageView MoreButton;
+        ImageView MoreButton,mainImage;
         ConstraintLayout constraintLayout;
 
         public OFHolder(@NonNull View itemView) {
@@ -129,6 +143,7 @@ public class OFAdapter extends RecyclerView.Adapter<OFAdapter.OFHolder> {
             Title = itemView.findViewById(R.id.fTitle);
             Path = itemView.findViewById(R.id.fPath);
             SongText = itemView.findViewById(R.id.fSongText);
+            mainImage = itemView.findViewById(R.id.imageView1);
             MoreButton = itemView.findViewById(R.id.fMoreButton);
             Title = itemView.findViewById(R.id.fTitle);
         }

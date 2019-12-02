@@ -16,6 +16,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -50,6 +52,7 @@ public class LocalMusicFragment extends Fragment {
     LinearLayoutManager manager; LinearLayout noLayout;
     OFAdapter adapter; ArrayList<OFModel> models;
     AsyncTask<Void,String,Void> loadTask;
+    Fragment localFrag;
     private static final String TAG = "LocalMusicFragment";
 
     @Override
@@ -119,7 +122,16 @@ public class LocalMusicFragment extends Fragment {
         adapter.setSingleClickListener(new OFAdapter.SingleClickListener() {
             @Override
             public void onSingleClick(View v, OFModel model, int position) {
-
+                Bundle args = new Bundle();
+                args.putSerializable("model",model);
+                args.putString("isLocalMusic","true");
+                localFrag = new OPlaylistFragment();
+                localFrag.setArguments(args);
+                FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
+                ft.setCustomAnimations(android.R.anim.fade_in,
+                        android.R.anim.fade_out);
+                ft.replace(R.id.fragment_container, localFrag,"localMusic");
+                ft.commit();
             }
         });
 
@@ -297,6 +309,9 @@ public class LocalMusicFragment extends Fragment {
 
                        int s = Integer.parseInt(durationStr)/1000;
                        seconds+=s;
+                       if (artist.contains("|"))
+                           artist = artist.replace("|","");
+                       if (album.contains("|")) album = album.replace("|","");
                        localFileBuilder.append("\n").append(f.getPath()).append("|").append(artist).append("|")
                                .append(album).append("|").append(s);
                    }catch (Exception e) {

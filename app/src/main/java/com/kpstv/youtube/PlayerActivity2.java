@@ -197,7 +197,9 @@ public class PlayerActivity2 extends AppCompatActivity implements AppSettings {
                     MainActivity.playNext();
                     if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                         setData.cancel(true);
-                    setData = new loadData();
+                    if (!MainActivity.localPlayBack)
+                        setData = new loadData();
+                    else setData = new loadData_Offline(MainActivity.videoID);
                     setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                 case MotionEvent.ACTION_CANCEL: {
@@ -631,11 +633,6 @@ public class PlayerActivity2 extends AppCompatActivity implements AppSettings {
 
                 byte [] data = mmr.getEmbeddedPicture();
 
-                if(data != null)
-                    MainActivity.bitmapIcon = BitmapFactory.decodeByteArray(data, 0, data.length);
-                else
-                    MainActivity.bitmapIcon = YTutils.drawableToBitmap(ContextCompat.getDrawable(activity,R.drawable.ic_pulse));
-
                 if (artist==null) artist ="Unknown artist";
                 if (title==null) title = YTutils.getVideoTitle(f.getName());
 
@@ -823,13 +820,10 @@ public class PlayerActivity2 extends AppCompatActivity implements AppSettings {
         Log.e("PlayingState", "Playing State: " + MainActivity.isplaying + ", isPlay:" + isplay);
         if (isplay) {
             makePause();
-            MainActivity.player.setPlayWhenReady(true);
         } else {
             makePlay();
-            MainActivity.player.setPlayWhenReady(false);
         }
         Log.e("CurrentDur", MainActivity.player.getCurrentPosition() + "");
-        MainActivity.isplaying = isplay;
     }
 
     public static void makePlay() {

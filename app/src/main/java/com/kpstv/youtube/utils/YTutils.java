@@ -310,8 +310,14 @@ public class YTutils {
         StringBuilder sb = new StringBuilder();
         try {
             if (FILE_NAME.contains("/")) {
-                fis = new FileInputStream(new File(FILE_NAME));
-            }else fis = activity.openFileInput(FILE_NAME);
+                File f = new File(FILE_NAME);
+                if (!f.exists()) return null;
+                fis = new FileInputStream(f);
+            }else{
+                File f = new File(activity.getFilesDir(),FILE_NAME);
+                if (!f.exists()) return null;
+                fis = activity.openFileInput(FILE_NAME);
+            }
             if (fis==null) return null;
             InputStreamReader isr = new InputStreamReader(fis);
             BufferedReader br = new BufferedReader(isr);
@@ -787,11 +793,11 @@ public class YTutils {
         }
     }
 
-    public static String getDuration(int number) {
+    public static String getDuration(long number) {
         String returnstring="";
-        int no = number/1000;
-        int mins = no/60;
-        int seconds = no%60;
+        long no = number/1000;
+        long mins = no/60;
+        long seconds = no%60;
         if (mins>9)
             returnstring+=mins;
         else  returnstring+="0"+mins;

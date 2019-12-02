@@ -22,6 +22,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
@@ -125,11 +126,11 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
 
     Fragment HistoryFrag;
     static Fragment SearchFrag;
-    static FragmentManager fragmentManager;
+    public static FragmentManager fragmentManager;
     public static Fragment PlaylistFrag, libraryFrag, FavouriteFrag,localMusicFrag;
     Fragment NCFrag; String ytLink;
     static SharedPreferences preferences;
-    static LinearLayout bottom_player, adViewLayout;
+    public static LinearLayout bottom_player, adViewLayout;
     static ImageButton actionUp,actionPlay;static ProgressBar loadProgress,songProgress;
     static TextView actionTitle; static AdView adView;
     static AsyncTask<String,String,Void> LoadVideo; public static Activity activity;
@@ -375,32 +376,39 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
     boolean doubleBackToExitPressedOnce = false;
     @Override
     public void onBackPressed() {
-        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof SFragment) {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+
+        if (fragment instanceof SFragment) {
             loadFragment(SearchFrag);
             return;
         }
-        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof DiscoverFragment) {
+        if (fragment instanceof DiscoverFragment) {
             loadFragment(SearchFrag);
             return;
         }
 
-        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof OPlaylistFragment && loadedFavFrag) {
+        if (fragment instanceof OPlaylistFragment && fragment.getTag()!=null && fragment.getTag().equals("localMusic")) {
+            loadFragment(localMusicFrag);
+            return;
+        }
+
+        if (fragment instanceof OPlaylistFragment && loadedFavFrag) {
             loadedFavFrag=false;
             loadFragment(libraryFrag);
             return;
         }
 
-        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof OPlaylistFragment) {
+        if (fragment instanceof OPlaylistFragment) {
             loadFragment(PlaylistFrag);
             return;
         }
 
-        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof PlaylistFragment) {
+        if (fragment instanceof PlaylistFragment) {
             loadFragment(libraryFrag);
             return;
         }
 
-        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof LocalMusicFragment) {
+        if (fragment instanceof LocalMusicFragment) {
             loadFragment(libraryFrag);
             return;
         }
@@ -445,11 +453,11 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
         }
     };
 
-    public boolean loadFragment(Fragment fragment) {
+    public static boolean loadFragment(Fragment fragment) {
         if (fragment != null) {
             Log.e("LoadingFragment","");
 
-            getSupportFragmentManager()
+            fragmentManager
                     .beginTransaction()
                     .replace(R.id.fragment_container, fragment)
                     .commit();
@@ -472,6 +480,12 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
     public static void loadLibraryFrag() {
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, libraryFrag)
+                .commit();
+    }
+
+    public static void loadLocalMusicFrag() {
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, localMusicFrag)
                 .commit();
     }
 
@@ -1142,7 +1156,7 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
         rebuildNotification();
     }
 
-    static void onClear() {
+    public static void onClear() {
         loadProgress.setVisibility(VISIBLE);
         actionTitle.setVisibility(View.GONE);
         songProgress.setVisibility(View.GONE);
