@@ -736,12 +736,16 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            Palette.generateAsync(bitmapIcon, new Palette.PaletteAsyncListener() {
-                public void onGenerated(Palette palette) {
-                    nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
-                    continueinMainThread("isPath:"+filePath);
-                }
-            });
+          try {
+              Palette.generateAsync(bitmapIcon, new Palette.PaletteAsyncListener() {
+                  public void onGenerated(Palette palette) {
+                      nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+                      continueinMainThread("isPath:"+filePath);
+                  }
+              });
+          }catch (Exception e){
+              Log.e(TAG, "onPostExecute: "+e.getMessage());
+          }
             super.onPostExecute(aVoid);
         }
 

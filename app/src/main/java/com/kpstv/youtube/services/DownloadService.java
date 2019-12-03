@@ -436,7 +436,6 @@ public class DownloadService extends Service {
                             if (imageData!=null) {
                                 meta.addPicture(imageData);
                             }
-
                             meta.setAlbum(ytMeta.getVideMeta().getAuthor());
                             meta.setArtist(YTutils.getChannelTitle(model.getTitle(),model.getChannelTitle()));
                             try {

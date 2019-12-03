@@ -385,7 +385,7 @@ public class LibraryFragment extends Fragment implements AppSettings {
 
             try {
                 startActivityForResult(
-                        Intent.createChooser(intent, "Select a File to Upload"),
+                        Intent.createChooser(intent, "Select an audio file"),
                         1);
             } catch (android.content.ActivityNotFoundException ex) {
                 // Potentially direct the user to the Market with a Dialog

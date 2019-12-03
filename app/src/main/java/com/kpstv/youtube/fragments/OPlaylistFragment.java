@@ -3,6 +3,7 @@ package com.kpstv.youtube.fragments;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
@@ -30,6 +31,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kpstv.youtube.EditTagActivity;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.OFAdapter;
@@ -275,6 +277,18 @@ public class OPlaylistFragment extends Fragment {
                                 insertPosition(model,MainActivity.yturls.size(),true);
                                 break;
                             case R.id.action_edit_tag:
+                                if (MainActivity.videoID!=null && MainActivity.videoID.equals(model.getPath())) {
+                                    Toast.makeText(activity, "Cannot edit tags when playing", Toast.LENGTH_SHORT).show();
+                                    return false;
+                                }
+                                String extension = model.getPath().split("\\.")[1].toLowerCase();
+                                if (extension.equals("mp3")) {
+                                    Intent intent = new Intent(activity, EditTagActivity.class);
+                                    intent.putExtra("model",model);
+                                    startActivity(intent);
+                                }else {
+                                    Toast.makeText(activity, "Could not edit tags for ."+extension+" file type", Toast.LENGTH_SHORT).show();
+                                }
 
                                 break;
                             case R.id.action_share:

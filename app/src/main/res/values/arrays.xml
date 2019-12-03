@@ -4,6 +4,89 @@
 
     </array>
 
+    <string-array name="autocomplete_genre">
+        <item>Blues</item>
+        <item>Classic Rock</item>
+        <item>Country</item>
+        <item>Dance</item>
+        <item>Disco</item>
+        <item>Funk</item>
+        <item>Grunge</item>
+        <item>Hip-Hop</item>
+        <item>Jazz</item>
+        <item>Metal</item>
+        <item>New Age</item>
+        <item>Oldies</item>
+        <item>Other</item>
+        <item>Pop</item>
+        <item>R&amp;B</item>
+        <item>Rap</item>
+        <item>Reggae</item>
+        <item>Rock</item>
+        <item>Techno</item>
+        <item>Industrial</item>
+        <item>Alternative</item>
+        <item>Ska</item>
+        <item>Death Metal</item>
+        <item>Pranks</item>
+        <item>Soundtrack</item>
+        <item>Euro-Techno</item>
+        <item>Ambient</item>
+        <item>Trip-Hop</item>
+        <item>Vocal</item>
+        <item>Jazz+Funk</item>
+        <item>Fusion</item>
+        <item>Trance</item>
+        <item>Classical</item>
+        <item>Instrumental</item>
+        <item>Acid</item>
+        <item>House</item>
+        <item>Game</item>
+        <item>Sound Clip</item>
+        <item>Gospel</item>
+        <item>Noise</item>
+        <item>AlternRock</item>
+        <item>Bass</item>
+        <item>Soul</item>
+        <item>Punk</item>
+        <item>Space</item>
+        <item>Meditative</item>
+        <item>Instrumental Pop</item>
+        <item>Instrumental Rock</item>
+        <item>Ethnic</item>
+        <item>Gothic</item>
+        <item>Darkwave</item>
+        <item>Techno-Industrial</item>
+        <item>Electronic</item>
+        <item>Pop-Folk</item>
+        <item>Eurodance</item>
+        <item>Dream</item>
+        <item>Southern Rock</item>
+        <item>Comedy</item>
+        <item>Cult</item>
+        <item>Gangsta</item>
+        <item>Top 40</item>
+        <item>Christian Rap</item>
+        <item>Pop/Funk</item>
+        <item>Jungle</item>
+        <item>Native American</item>
+        <item>Cabaret</item>
+        <item>New Wave</item>
+        <item>Psychadelic</item>
+        <item>Rave</item>
+        <item>Showtunes</item>
+        <item>Trailer</item>
+        <item>Lo-Fi</item>
+        <item>Tirbal</item>
+        <item>Acid Punk</item>
+        <item>Acid Jazz</item>
+        <item>Polka</item>
+        <item>Retro</item>
+        <item>Musical</item>
+        <item>Rock &amp; Roll</item>
+        <item>Hard Rock</item>
+    </string-array>
+
     <string-array name="pref_region_entries">
         <item>Global (Default)</item>
         <item>United States</item>
@@ -37,6 +120,7 @@
         <item>South Africa</item>
         <item>Thailand</item>
     </string-array>
+
     <string-array name="pref_region_values">
         <item>global</item>
         <item>us</item>
