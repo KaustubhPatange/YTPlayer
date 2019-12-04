@@ -28,6 +28,10 @@ public class OFModel implements Serializable {
         return path;
     }
 
+    public void setSongCount(int count) {
+        songCount = count;
+    }
+
     public int getSongCount() {
         return songCount;
     }

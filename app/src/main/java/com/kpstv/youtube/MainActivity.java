@@ -595,6 +595,12 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
                     PlayVideo(getYTUrls(ytLink),0);
                 }else {
                     int insert_pos = ytIndex;
+                    if (localPlayBack) {
+                        Log.e(TAG, "CheckIntent: Running this one" );
+                        localPlayBack=false;
+                        PlayVideo(getYTUrls(ytLink),0);
+                        return true;
+                    }
                     if (nPlayModels.size()>0 && nPlayModels.size()==yturls.size()) {
                         new AsyncTask<Void,Void,Void>(){
                             YTMeta ytMeta;
@@ -602,6 +608,13 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
                             protected void onPostExecute(Void aVoid) {
                                 if (ytMeta.getVideMeta()!=null) {
                                     NPlayModel model = new NPlayModel(ytLink,ytMeta,false);
+                                    for (NPlayModel model1 : nPlayModels) {
+                                        if (model1.getUrl().equals(model.getUrl()))
+                                        {
+                                            nPlayModels.remove(model1);
+                                            break;
+                                        }
+                                    }
                                     nPlayModels.add(insert_pos,model);
                                 }else
                                     Toast.makeText(activity, "Unexpected parsing error occurred!", Toast.LENGTH_SHORT).show();
@@ -620,7 +633,6 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
                     yturls.add(insert_pos,ytLink);
                     ChangeVideo(insert_pos);
                 }
-             //   PlayVideo(new String[]{ytLink});
                 return true;
             }else if (ytLink.contains("open.spotify.com")&&ytLink.contains("/track/")) {
                 new makeSpotifyData(ytLink).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -1195,11 +1207,28 @@ public class MainActivity extends AppCompatActivity implements AppSettings, Slee
         String line = preferences.getString("urls","");
         if (line!=null && !line.isEmpty()) {
             String[] lines = line.split(",");
-            String[] yt_urls = new String[1+lines.length];
-            yt_urls[0] = to_inject_yturl;
-            for (int i=1;i<yt_urls.length;i++)
-                yt_urls[i] = lines[i-1].split("\\|")[0];
-            return yt_urls;
+
+            ArrayList<String> arrayList = new ArrayList<>();
+
+        //    String[] yt_urls = new String[1+lines.length];
+            Log.e(TAG, "getYTUrls: Injected uri 0: "+to_inject_yturl );
+            arrayList.add(to_inject_yturl);
+         //   yt_urls[0] = to_inject_yturl;
+            int i=1;
+            for(String l: lines) {
+                l = l.split("\\|")[0];
+                if (l.isEmpty()) continue;
+                if (YTutils.getVideoID(l).equals(YTutils.getVideoID(to_inject_yturl))) continue;
+                arrayList.add(l);
+            //    yt_urls[i] = l;
+                Log.e(TAG, "getYTUrls: Injected uri "+i+": "+l);
+//                i++;
+            }
+            nPlayModels.clear();
+
+            /*for (int i=1;i<yt_urls.length;i++)
+                yt_urls[i] = lines[i-1].split("\\|")[0];*/
+            return YTutils.convertListToArrayMethod(arrayList);
         }else {
             String[] yt_urls = new String[1];
             yt_urls[0] = to_inject_yturl;

@@ -19,6 +19,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -58,6 +59,7 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
     private ItemTouchHelper mItemTouchHelper;
     int whitecolor,accentcolor; private Handler handler = new Handler();
     private Runnable runnable; ItemTouchHelper.Callback callback;
+    private static final String TAG = "NPlaylistActivity";
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -85,8 +87,6 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
         cTitle.setText(MainActivity.videoTitle);
         cAuthor.setText(MainActivity.channelTitle);
         cImageView.setImageBitmap(MainActivity.bitmapIcon);
-
-        commonMethodForLocal();
 
         // Set recycler view...
 
@@ -170,12 +170,12 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                     cAuthor.setText(MainActivity.channelTitle);
                     cImageView.setImageBitmap(MainActivity.bitmapIcon);
 
-                    commonMethodForLocal();
-
                     for (NPlayModel model : models) {
 
                         /** For local playback stuff */
                         if (MainActivity.localPlayBack) {
+                            //TODO: Remove this color filter when you find a suitable offline image
+                            cImageView.setColorFilter(ContextCompat.getColor(NPlaylistActivity.this,R.color.black));
                             if (MainActivity.videoID.equals(model.getUrl()))
                                 model.set_playing(true);
                             else model.set_playing(false);
@@ -235,11 +235,6 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
     }
 
-    void commonMethodForLocal() {
-        if (!MainActivity.localPlayBack) {
-            cImageView.setColorFilter(getResources().getColor(R.color.colorScreen1));
-        }else cImageView.clearColorFilter();
-    }
 
     @Override
     protected void onDestroy() {
@@ -366,6 +361,8 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                 return null;
             }
 
+            Log.e(TAG, "doInBackground: NPlayListActivity: "+url );
+
             meta = new YTMeta(YTutils.getVideoID(url));
             if (meta.getVideMeta()!=null) {
                 if (YTutils.getVideoID_ImageUri(meta.getVideMeta().getImgUrl()).equals(MainActivity.videoID)) {
@@ -399,7 +396,7 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                             public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                                 Palette.generateAsync(resource, palette -> {
                                     cImageView.setImageBitmap(resource);
-                                    commonMethodForLocal();
+
                                     MainActivity.bitmapIcon = resource;
                                     MainActivity.nColor = palette.getVibrantColor(NPlaylistActivity.this
                                             .getResources().getColor(R.color.light_white));

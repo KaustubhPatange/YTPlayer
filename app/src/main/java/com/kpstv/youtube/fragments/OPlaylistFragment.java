@@ -222,6 +222,7 @@ public class OPlaylistFragment extends Fragment {
 
     class getData_Offline extends AsyncTask<Void,Void,Void> {
         String filePath;
+        int seconds=0;
 
         public getData_Offline(String filePath) {
             this.filePath = filePath;
@@ -239,6 +240,8 @@ public class OPlaylistFragment extends Fragment {
                 progressBar.setVisibility(View.GONE);
                 songText.setText("TRACKS");
                 songText.setVisibility(View.VISIBLE);
+
+                TimeText.setText(String.format("  %s", YTutils.milliSecondsToTimer(seconds * 1000)));
 
                 ofadapter = new OFAdapter(activity,ofModels,true);
                 recyclerView.setAdapter(ofadapter);
@@ -308,6 +311,15 @@ public class OPlaylistFragment extends Fragment {
                                 builder.setTitle("Confirm deletion")
                                         .setMessage("Are you sure you want to delete?")
                                         .setPositiveButton("OK", (dialog, which) -> {
+
+                                            boolean isDeleted = f.delete();
+                                            if (!isDeleted) {
+                                                Toast.makeText(activity, "Unable to delete media!", Toast.LENGTH_SHORT).show();
+                                                return;
+                                            }
+
+                                            boolean wasOnlyFile=false;
+
                                             if (MainActivity.yturls.size()>0) {
                                                 int index = MainActivity.yturls.indexOf(model.getPath());
                                                 if (index<position)
@@ -336,18 +348,63 @@ public class OPlaylistFragment extends Fragment {
                                             String name=ofModel.getPath().replace("/","_")+".csv";
                                             File toSave = new File(activity.getFilesDir(),"locals/"+name);
                                             String data = YTutils.readContent(activity,toSave.getPath());
-                                            String[] items = data.split("\n|\r");
-                                            if (items.length>0) {
+                                            String[] items = data.trim().split("\n|\r");
+                                            Log.e(TAG, "onPostExecute: "+items.length);
+                                            if (items.length==1) {
+                                                Log.e(TAG, "onPostExecute: This is only file in dir");
+                                                wasOnlyFile=true;
+                                            }
+                                            if (items.length>0 && !wasOnlyFile) {
                                                 StringBuilder builder1 = new StringBuilder();
                                                 for (int i=0;i<items.length;i++) {
                                                     if (!items[i].contains(model.getPath()))
                                                         builder1.append("\n").append(items[i]);
                                                 }
-                                                YTutils.writeContent(activity,toSave.getPath(),builder1.toString());
+                                                YTutils.writeContent(activity,toSave.getPath(),builder1.toString().trim());
+                                            }else if (wasOnlyFile) {
+                                                {
+                                                    Log.e(TAG, "onPostExecute: OnFile deleted" );
+                                                    YTutils.writeContent(activity,toSave.getPath(),"");
+                                                }
                                             }else
                                                 Toast.makeText(activity, "Something went wrong!", Toast.LENGTH_SHORT).show();
-                                            f.delete();
-                                            ofadapter.notifyItemRemoved(position);
+
+                                            // Modify fileList csv file...
+                                            String parent = new File(model.getPath()).getParent();
+                                            Log.e(TAG, "onPostExecute: File modify: "+parent);
+
+                                            data = YTutils.readContent(activity,"fileList.csv");
+                                            if (items.length>0) {
+                                                StringBuilder builder1 = new StringBuilder();
+                                                items = data.split("\n|\r");
+                                                for (String line: items) {
+                                                    if (line.isEmpty()) continue;
+
+                                                    if (line.contains(parent)) {
+                                                        Log.e(TAG, "onPostExecute: Found parent");
+                                                        long dur = model.getDuration();
+                                                        long total = ofModel.getDuration();
+
+                                                        ofModel.setDuration(total-dur);
+                                                        ofModel.setSongCount(ofModel.getSongCount()-1);
+
+                                                        if (!wasOnlyFile) {
+                                                            builder1.append("\n").append(parent)
+                                                                    .append("|").append(ofModel.getSongCount())
+                                                                    .append("|").append(ofModel.getDuration());
+                                                        }
+
+                                                    }else {
+                                                        builder1.append("\n").append(line);
+                                                    }
+                                                }
+                                                YTutils.writeContent(activity,"fileList.csv",builder1.toString().trim());
+                                            }
+
+                                            ofadapter.notifyDataSetChanged();
+
+                                            if (wasOnlyFile)
+                                                activity.onBackPressed();
 
                                         }).setNegativeButton("Cancel", (dialog, which) -> {
                                 }).show();
@@ -424,6 +481,7 @@ public class OPlaylistFragment extends Fragment {
                     String fullLocaltion = line.split("\\|")[0];
                     String artist = line.split("\\|")[1];
                     int s = Integer.parseInt(line.split("\\|")[3]);
+                    seconds += s;
                     yturls.add(fullLocaltion);
                     ofModels.add(new OFModel(
                             artist,fullLocaltion,s

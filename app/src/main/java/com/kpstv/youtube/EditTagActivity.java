@@ -15,6 +15,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -71,7 +73,11 @@ public class EditTagActivity extends AppCompatActivity {
         OFModel model = (OFModel) intent.getSerializableExtra("model");
 
         setSupportActionBar(toolbar);
-        toolbar.inflateMenu(R.menu.local_popup_menu);
+
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
+        toolbar.setNavigationOnClickListener(view -> {
+            finish();
+        });
 
         appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             boolean isShow = true;
@@ -156,21 +162,6 @@ public class EditTagActivity extends AppCompatActivity {
                     getResources().getStringArray(R.array.autocomplete_genre));
             eGenre.setAdapter(adapter);
 
-            mainImage.setOnClickListener(view -> {
-                Intent intent1 = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                intent1.setType("image/*");
-                intent1.addCategory(Intent.CATEGORY_OPENABLE);
-
-                try {
-                    startActivityForResult(
-                            Intent.createChooser(intent1, "Select an image file"),
-                            1);
-                } catch (android.content.ActivityNotFoundException ex) {
-                    // Potentially direct the user to the Market with a Dialog
-                    Toast.makeText(this, "No file manager installed", Toast.LENGTH_SHORT).show();
-                }
-            });
-
             eGenre.setOnTouchListener((view, motionEvent) -> {
                 eGenre.requestFocus();
                 UIUtil.showKeyboard(EditTagActivity.this,eGenre);
@@ -229,6 +220,37 @@ public class EditTagActivity extends AppCompatActivity {
             });
 
         }else Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.tag_menu,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId()==R.id.action_edit_image) {
+            Intent intent1 = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent1.setType("image/*");
+            intent1.addCategory(Intent.CATEGORY_OPENABLE);
+
+            try {
+                startActivityForResult(
+                        Intent.createChooser(intent1, "Select an image file"),
+                        1);
+            } catch (android.content.ActivityNotFoundException ex) {
+                // Potentially direct the user to the Market with a Dialog
+                Toast.makeText(this, "No file manager installed", Toast.LENGTH_SHORT).show();
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return super.onSupportNavigateUp();
     }
 
     @Override

@@ -91,7 +91,7 @@ public class SongBroadCast extends BroadcastReceiver implements AppSettings {
                     // Open file with user selected app
                     Intent i = new Intent();
                     i.setAction(Intent.ACTION_VIEW);
-                    i.setDataAndType(uri, mime);
+                    i.setDataAndType(uri, "audio/*");
                     i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(i);

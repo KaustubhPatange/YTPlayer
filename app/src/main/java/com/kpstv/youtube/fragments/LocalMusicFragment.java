@@ -117,6 +117,12 @@ public class LocalMusicFragment extends Fragment {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+    @Override
+    public void onResume() {
+        loadTask = new loadSaveData(false);
+        loadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        super.onResume();
+    }
 
     void registerAdapterClicks() {
         adapter.setSingleClickListener(new OFAdapter.SingleClickListener() {
