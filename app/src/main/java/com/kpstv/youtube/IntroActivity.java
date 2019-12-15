@@ -36,6 +36,8 @@ public class IntroActivity extends AppCompatActivity {
         SharedPreferences preferences = getSharedPreferences("settings",MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("intro",true);
+        editor.putInt("sort_order",0);
+        editor.putInt("sort_type",2);
         editor.apply();
 
         LinearLayout buttonLayout = findViewById(R.id.buttonLayout);

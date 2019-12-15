@@ -3,7 +3,6 @@ package com.kpstv.youtube.fragments;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -32,7 +31,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.kpstv.youtube.AppSettings;
+import com.kpstv.youtube.AppInterface;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.SongAdapter;
@@ -43,18 +42,15 @@ import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
 
-import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class SFragment extends Fragment implements AppSettings {
+public class SFragment extends Fragment implements AppInterface {
 
     public SFragment() {}
 

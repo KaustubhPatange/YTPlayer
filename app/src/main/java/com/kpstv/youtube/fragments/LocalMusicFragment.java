@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Date;
 
 
 public class LocalMusicFragment extends Fragment {
@@ -118,10 +119,11 @@ public class LocalMusicFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        loadTask = new loadSaveData(false);
-        loadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        super.onResume();
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode== 110) {
+            loadTask = new loadSaveData(false);
+            loadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
     }
 
     void registerAdapterClicks() {
@@ -172,7 +174,45 @@ public class LocalMusicFragment extends Fragment {
                                     Toast.makeText(activity, "Could not play songs!", Toast.LENGTH_SHORT).show();
                                 break;
                             case R.id.action_delete:
+                                final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                                builder.setIcon(android.R.drawable.stat_sys_warning)
+                                        .setTitle("Delete")
+                                        .setMessage("Are you sure? This can't be undone.")
+                                        .setNegativeButton("Cancel",null)
+                                        .setPositiveButton("Yes",(dialogInterface, i) -> {
+                                            /*File csv = new File(model.getPath()); /storage/emulated/0/Download
+                                            Log.e(TAG, "onMenuItemClick: "+csv.getPath());*/
+                                            File folder = new File(model.getPath());
+                                            if (MainActivity.yturls.size()>0 && MainActivity.yturls.get(0).contains(model.getPath())) {
+                                                Toast.makeText(activity, "Folder is in use for playing song!", Toast.LENGTH_LONG).show();
+                                                return;
+                                            }
+                                            YTutils.deleteRecursive(folder);
+                                            File csv = new File(activity.getFilesDir(),
+                                                    "/locals/"+model.getPath().replace("/","_")+".csv");
+                                            csv.delete();
 
+                                            Log.e(TAG, "onMenuItemClick: "+csv.getPath());
+
+                                            String data = YTutils.readContent(activity,"fileList.csv");
+                                            String[] items = data.trim().split("\n|\r");
+                                            StringBuilder sb = new StringBuilder();
+                                            if (items.length>0) {
+                                                for (i=0;i<items.length;i++) {
+                                                    if (items[i].isEmpty()) continue;
+                                                    if (items[i].contains(model.getPath())) continue;
+                                                    sb.append("\n").append(items[i]);
+                                                }
+                                                YTutils.writeContent(activity,"fileList.csv",sb.toString());
+                                                models.remove(position);
+                                                adapter.notifyDataSetChanged();
+                                            }else {
+                                                Toast.makeText(activity, "Something went wrong!", Toast.LENGTH_SHORT).show();
+                                                activity.onBackPressed();
+                                            }
+
+                                        });
+                                builder.create().show();
                                 break;
                         }
                         return true;
@@ -226,6 +266,13 @@ public class LocalMusicFragment extends Fragment {
                 alert.setNegativeButton("Cancel", (dialogInterface, i) -> {
                     alertdialog.dismiss();
                     loadTask.cancel(true);
+                    models.clear();
+                    adapter.notifyDataSetChanged();
+                    try {
+                        File f = activity.getFilesDir();
+                        f.delete();
+                        f.mkdir();
+                    }catch (Exception ignored){}
                     Toast.makeText(activity, "Scanning interrupted!", Toast.LENGTH_SHORT).show();
                 });
                 alertdialog = alert.create();
@@ -297,8 +344,8 @@ public class LocalMusicFragment extends Fragment {
             });
             if (files.length>0) {
 
-                /** Parsing Media Length...
-                 * */
+                /** Parsing Media Length... */
+
                 StringBuilder localFileBuilder = new StringBuilder();
                 long seconds = 0;
                 for (File f : files) {
@@ -319,7 +366,7 @@ public class LocalMusicFragment extends Fragment {
                            artist = artist.replace("|","");
                        if (album.contains("|")) album = album.replace("|","");
                        localFileBuilder.append("\n").append(f.getPath()).append("|").append(artist).append("|")
-                               .append(album).append("|").append(s);
+                               .append(album).append("|").append(s).append("|").append(YTutils.getDate(new Date(f.lastModified())));
                    }catch (Exception e) {
                        Log.e(TAG, "searchRecursive: "+uri.toString());
                    }

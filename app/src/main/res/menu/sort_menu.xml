@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:title="Sort order" android:id="@+id/action_sort">
+        <menu>
+            <group android:id="@+id/grp1" android:checkableBehavior="single">
+                <item android:id="@+id/action_alphabet"
+                    android:title="Alphabetical"
+                    app:showAsAction="never"/>
+                <item android:id="@+id/action_dateAdded"
+                    android:title="Date added"
+                    app:showAsAction="never"/>
+                <item android:id="@+id/action_fileName"
+                    android:title="File name"
+                    android:checked="true"
+                    app:showAsAction="never"/>
+                <item android:id="@+id/action_duration"
+                    android:title="Duration"
+                    app:showAsAction="never"/>
+            </group>
+            <group android:id="@+id/grp2" android:checkableBehavior="single">
+                <item android:id="@+id/action_ascending"
+                    android:checked="true"
+                    android:title="Ascending"
+                    app:showAsAction="never"/>
+                <item android:id="@+id/action_descending"
+                    android:title="Descending"
+                    app:showAsAction="never"/>
+            </group>
+
+        </menu>
+    </item>
+</menu>

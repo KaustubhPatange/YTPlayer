@@ -2,19 +2,13 @@ package com.kpstv.youtube.fragments;
 
 
 import android.annotation.SuppressLint;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -29,13 +23,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.hiteshsondhi88.libffmpeg.FileUtils;
-import com.kpstv.youtube.AppSettings;
+import com.kpstv.youtube.AppInterface;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.RingdroidEditActivity;
@@ -48,17 +40,12 @@ import com.kpstv.youtube.utils.YTutils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.mozilla.javascript.tools.jsc.Main;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 
 import static android.app.Activity.RESULT_OK;
 
-public class LibraryFragment extends Fragment implements AppSettings {
+public class LibraryFragment extends Fragment implements AppInterface {
 
     public LibraryFragment() {}
 

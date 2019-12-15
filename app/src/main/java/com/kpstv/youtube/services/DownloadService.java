@@ -332,6 +332,7 @@ public class DownloadService extends Service {
                                         totalsize = progress1.totalBytes;
                                     }
                                     currentsize = progress1.currentBytes;
+                                    publishProgress(((int) (currentsize * 100 / totalsize)));
                                 })
                                 .start(new OnDownloadListener() {
                                     @Override
@@ -503,6 +504,7 @@ public class DownloadService extends Service {
                                         PRDownloader.download(audioUrl,YTutils.getFile("YTPlayer").getPath(),"audio.download")
                                                 .build()
                                                 .setOnProgressListener(progress1 -> {
+                                                    currentsize = oldbytes+progress1.currentBytes;
                                                     publishProgress((int) ((progress1.currentBytes + oldbytes) * 100 / totalsize));
                                                 })
                                                 .start(new OnDownloadListener() {
@@ -536,51 +538,6 @@ public class DownloadService extends Service {
                         do {} while (!isDownloaded);
 
                         Log.e(TAG, "doInBackground: Task Finished" );
-
-                        /*DataInputStream input = new DataInputStream(url.openStream());
-                        DataOutputStream output = new DataOutputStream(new FileOutputStream(
-                                root.getAbsolutePath() + "/YTPlayer/audio.download"));
-
-
-                        byte data[] = new byte[4096];
-                        long total = 0;
-                        int count;
-                        while ((count = input.read(data)) != -1) {
-                            total += count;
-                            currentsize = total;
-                            publishProgress(((int) (total * 100 / fileLength)));
-                            output.write(data, 0, count);
-                            output.flush();
-                        }
-                        output.flush();
-                        output.close();
-                        input.close();*/
-
-                        /** Download video file second... */
-
-                      /*  input = new DataInputStream(url1.openStream());
-                        output = new DataOutputStream(new FileOutputStream(
-                                root.getAbsolutePath() + "/YTPlayer/video.download"));
-
-                        while ((count = input.read(data)) != -1) {
-                            total += count;
-                            currentsize = total;
-                            publishProgress(((int) (total * 100 / fileLength)));
-                            output.write(data, 0, count);
-                            output.flush();
-                        }
-                        output.flush();
-                        output.close();
-                        input.close();
-
-                        *//** Merging audio and video third *//*
-                        publishProgress((-1));
-                        mux("/sdcard/YTPlayer/video.download","/sdcard/YTPlayer/audio.download",
-                                YTutils.getFile(Environment.DIRECTORY_DOWNLOADS+"/"+model.getTargetName()).getPath());
-
-                        checkforpending();
-
-                        Log.e(TAG, "doInBackground: Task Finished" );*/
 
                     } catch (Exception e) {
                         e.printStackTrace();

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class OFModel implements Serializable {
     String title,path;
-    int songCount; long duration;
+    int songCount; long duration, date;
 
     public OFModel(String title, String path, int songCount) {
         this.title = title;
@@ -30,6 +30,14 @@ public class OFModel implements Serializable {
 
     public void setSongCount(int count) {
         songCount = count;
+    }
+
+    public long getDate() {
+        return date;
+    }
+
+    public void setDate(long date) {
+        this.date = date;
     }
 
     public int getSongCount() {

@@ -1,9 +1,14 @@
 package com.kpstv.youtube.fragments;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
@@ -18,19 +23,25 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.MenuCompat;
+import android.support.v7.widget.AppCompatSeekBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.EditTagActivity;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
@@ -41,6 +52,8 @@ import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.models.OFModel;
 import com.kpstv.youtube.models.PlaylistModel;
+import com.kpstv.youtube.utils.SortOrder;
+import com.kpstv.youtube.utils.SortType;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
 
@@ -49,6 +62,8 @@ import org.mozilla.javascript.tools.jsc.Main;
 import java.io.File;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class OPlaylistFragment extends Fragment {
 
@@ -62,6 +77,7 @@ public class OPlaylistFragment extends Fragment {
     TextView TitleText,SongCountText,TimeText,songText,pathLocation;
     ProgressBar progressBar; PlaylistModel playlistModel; OFModel ofModel;
     FloatingActionButton playFab; boolean localMusic=false;
+    SharedPreferences preferences; File mainFile;
     OFAdapter ofadapter;
     ArrayList<OFModel> ofModels;
     private static final String TAG = "OPlayListFragment";
@@ -91,6 +107,11 @@ public class OPlaylistFragment extends Fragment {
             progressBar = v.findViewById(R.id.progressBar);
             layoutManager = new LinearLayoutManager(activity);
             recyclerView.setLayoutManager(layoutManager);
+
+            preferences = activity.getSharedPreferences("settings", Context.MODE_PRIVATE);
+
+            AppSettings.sortOrder = SortOrder.values()[preferences.getInt("sort_order",0)];
+            AppSettings.sortType = SortType.values()[preferences.getInt("sort_type",2)];
 
             final CollapsingToolbarLayout collapsingToolbarLayout = v.findViewById(R.id.toolbar_layout);
             AppBarLayout appBarLayout = v.findViewById(R.id.app_bar);
@@ -137,9 +158,9 @@ public class OPlaylistFragment extends Fragment {
                 localMusic = true;
                 ofModel = (OFModel) args.getSerializable("model");
                 String location = ofModel.getPath();
-                File f = new File(activity.getFilesDir(),"locals/"+location.replace("/","_")+".csv");
-                Log.e(TAG, "onCreateView: "+f.getPath());
-                if (f.exists()) {
+                mainFile = new File(activity.getFilesDir(),"locals/"+location.replace("/","_")+".csv");
+                Log.e(TAG, "onCreateView: "+mainFile.getPath());
+                if (mainFile.exists()) {
                     Log.e(TAG, "onCreateView: In File Exist bro" );
                     oImageView.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_folder));
                     int song = ofModel.getSongCount();
@@ -153,8 +174,11 @@ public class OPlaylistFragment extends Fragment {
                     Log.e(TAG, "onCreateView: "+ofModel.getDuration());
                     TimeText.setText(String.format("  %s", YTutils.milliSecondsToTimer(ofModel.getDuration() * 1000)));
                     Log.e(TAG, "onCreateView: In localMusic" );
-                    new getData_Offline(f.getPath()).execute();
+
+                  //  new getData_Offline(mainFile.getPath()).execute();
+
                 }else{
+                    localMusic = false;
                     Log.e(TAG, "onCreateView: Not File Exist bro" );
                     Toast.makeText(MainActivity.activity, "Rescan library to scan songs", Toast.LENGTH_SHORT).show();
                 }
@@ -196,12 +220,90 @@ public class OPlaylistFragment extends Fragment {
                 else
                     MainActivity.loadPlayFrag();
             });
-            
+
+            if (localMusic) {
+                toolbar.inflateMenu(R.menu.sort_menu);
+                toolbar.getMenu().getItem(0).getSubMenu()
+                        .getItem(AppSettings.sortType.ordinal()).setChecked(true);
+                toolbar.getMenu().getItem(0).getSubMenu()
+                        .getItem(4+AppSettings.sortOrder.ordinal()).setChecked(true);
+
+                Log.e(TAG, "onCreateView: Sort Order: "+AppSettings.sortType.ordinal()+ toolbar.getMenu().getItem(0).getSubMenu()
+                        .getItem(4+AppSettings.sortOrder.ordinal()).getTitle());
+                MenuCompat.setGroupDividerEnabled(toolbar.getMenu(),true);
+                toolbar.setOnMenuItemClickListener(menuItem -> {
+                    if (menuItem.getItemId()==R.id.action_sort) return true;
+                    menuItem.setChecked(true);
+                    switch (menuItem.getItemId()) {
+                        case R.id.action_alphabet:
+                            AppSettings.sortType = SortType.alphabetical;
+                            break;
+                        case R.id.action_dateAdded:
+                            AppSettings.sortType = SortType.date_added;
+                            break;
+                        case R.id.action_fileName:
+                            AppSettings.sortType = SortType.file_name;
+                            break;
+                        case R.id.action_duration:
+                            AppSettings.sortType = SortType.duration;
+                            break;
+                        case R.id.action_ascending:
+                            AppSettings.sortOrder = SortOrder.ascending;
+                            break;
+                        case R.id.action_descending:
+                            AppSettings.sortOrder = SortOrder.descending;
+                            break;
+                    }
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putInt("sort_order",AppSettings.sortOrder.ordinal());
+                    editor.putInt("sort_type",AppSettings.sortType.ordinal());
+                    Log.e(TAG, "onCreateView: " + AppSettings.sortType.ordinal());
+                    editor.apply();
+                    new getData_Offline(mainFile.getPath()).execute();
+                    return true;
+                });
+            }
+
             isnetworkCreated = true;
         }
         return v;
     }
 
+    @Override
+    public Animation onCreateAnimation(int transit, boolean enter, int nextAnim) {
+
+        Log.e(TAG, "onCreateAnimation: Enter: "+enter );
+
+        if (enter) {
+            final int animatorId = android.R.anim.fade_in;
+            final Animation anim = AnimationUtils.loadAnimation(getActivity(), animatorId);
+            if (anim==null) return null;
+            anim.setAnimationListener(new Animation.AnimationListener() {
+
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    Log.d(TAG, "Animation started.");
+                    // additional functionality
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+                    Log.d(TAG, "Animation repeating.");
+                    // additional functionality
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    Log.d(TAG, "Animation ended.");
+                    if (localMusic)
+                        new getData_Offline(mainFile.getPath()).execute();
+                }
+            });
+
+            return anim;
+        }
+        return super.onCreateAnimation(transit,enter,nextAnim);
+    }
 
     private View.OnClickListener recyclerItemListener = view -> {
         int position = (int)view.getTag();
@@ -230,7 +332,9 @@ public class OPlaylistFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
+            ofModels.clear();
             progressBar.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
             super.onPreExecute();
         }
 
@@ -403,6 +507,8 @@ public class OPlaylistFragment extends Fragment {
 
                                             ofadapter.notifyDataSetChanged();
 
+                                            MainActivity.localMusicFrag.onActivityResult(110,8,null);
+
                                             if (wasOnlyFile)
                                                 activity.onBackPressed();
 
@@ -479,13 +585,41 @@ public class OPlaylistFragment extends Fragment {
                 for (String line: items) {
                     if (line.isEmpty()) continue;
                     String fullLocaltion = line.split("\\|")[0];
+                    if (!new File(fullLocaltion).exists()) continue;
                     String artist = line.split("\\|")[1];
                     int s = Integer.parseInt(line.split("\\|")[3]);
+                    long date = Long.parseLong(line.split("\\|")[4]);
                     seconds += s;
                     yturls.add(fullLocaltion);
-                    ofModels.add(new OFModel(
-                            artist,fullLocaltion,s
-                    ));
+                    OFModel model = new OFModel(artist,fullLocaltion,s);
+                    model.setDuration(s);
+                    model.setDate(date);
+                    ofModels.add(model);
+                }
+
+                /** Sorting of list will be done here*/
+
+                switch (AppSettings.sortType) {
+                    case alphabetical:
+                        Collections.sort(ofModels, (t1, t2) -> {
+                            String t1_string = new File(t1.getPath()).getName();
+                            String t2_string = new File(t2.getPath()).getName();
+                            return t1_string.compareToIgnoreCase(t2_string);
+                        });
+                        break;
+                    case date_added:
+                        Collections.sort(ofModels, (t1, t2) -> Long.compare(t2.getDate(),t1.getDate()));
+                        break;
+                    case duration:
+                        Collections.sort(ofModels, (t1, t2) -> Long.compare(t1.getDuration(),t2.getDuration()));
+                        break;
+                }
+                if (AppSettings.sortOrder == SortOrder.descending) {
+                    Collections.reverse(ofModels);
+                }
+                yturls.clear();
+                for (OFModel model: ofModels) {
+                    yturls.add(model.getPath());
                 }
             }
             return null;

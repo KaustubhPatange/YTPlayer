@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -44,12 +43,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.coremedia.iso.boxes.Container;
-import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
-import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.googlecode.mp4parser.authoring.Movie;
@@ -57,7 +50,6 @@ import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
 import com.kpstv.youtube.adapters.PlayerAdapter;
-import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.services.DownloadService;
 import com.kpstv.youtube.utils.HttpHandler;
@@ -71,9 +63,7 @@ import com.warkiz.widget.SeekParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mozilla.javascript.tools.jsc.Main;
 
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -81,8 +71,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.BufferOverflowException;
@@ -90,7 +78,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 
-public class PlayerActivity2 extends AppCompatActivity implements AppSettings {
+public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     static String YouTubeUrl;
     static ImageView backImage, viewImage;

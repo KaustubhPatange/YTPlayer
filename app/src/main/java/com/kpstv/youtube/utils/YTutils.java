@@ -443,7 +443,11 @@ public class YTutils {
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         return df.format(c);
     }
-
+    public static String getDate(Date c) {
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+        return df.format(c);
+    }
     public static String getTodayDate_Time() {
         Date c = Calendar.getInstance().getTime();
         @SuppressLint("SimpleDateFormat")
@@ -478,6 +482,14 @@ public class YTutils {
         if (t.contains("&"))
             t = t.split("&")[0];
         return t;
+    }
+
+    public static void deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles())
+                deleteRecursive(child);
+
+        fileOrDirectory.delete();
     }
 
     public static void StartURL(String url, Context context)

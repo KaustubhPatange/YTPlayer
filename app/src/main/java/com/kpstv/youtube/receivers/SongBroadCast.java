@@ -1,6 +1,5 @@
 package com.kpstv.youtube.receivers;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,14 +15,13 @@ import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
-import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.kpstv.youtube.AppSettings;
+import com.kpstv.youtube.AppInterface;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity2;
 import com.kpstv.youtube.R;
@@ -39,7 +37,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.net.URLConnection;
 
-public class SongBroadCast extends BroadcastReceiver implements AppSettings {
+public class SongBroadCast extends BroadcastReceiver implements AppInterface {
 
     AsyncTask<Void,Void,Void> setData;
     private static final String TAG = "SongBroadCast";
