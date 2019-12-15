@@ -76,6 +76,13 @@ public class LocalMusicFragment extends Fragment {
                         loadTask = new loadSaveData(true);
                         loadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                         break;
+                    case R.id.action_search:
+                        FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
+                        ft.setCustomAnimations(android.R.anim.fade_in,
+                                android.R.anim.fade_out);
+                        ft.replace(R.id.fragment_container, MainActivity.localSearchFrag);
+                        ft.commit();
+                        break;
                 }
                 return true;
             });

@@ -1,43 +1,273 @@
 package com.kpstv.youtube.fragments;
 
 
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
+import com.kpstv.youtube.adapters.OFAdapter;
+import com.kpstv.youtube.models.OFModel;
+import com.kpstv.youtube.utils.YTutils;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
+
+import java.io.File;
+import java.util.ArrayList;
 
 public class LocalSearchFragment extends Fragment {
     public LocalSearchFragment() {}
 
     View v;
-    @BindView(R.id.searchEditText) AutoCompleteTextView searchEditText;
-    @BindView(R.id.removeText) ImageView closeButton;
-    @BindView(R.id.toolbar) Toolbar toolbar;
-    @BindView(R.id.progressBar) ProgressBar progressBar;
-    @BindView(R.id.songText) TextView songText;
-    @BindView(R.id.my_recycler_view) RecyclerView recyclerView;
+    AutoCompleteTextView searchEditText;
+    ImageView closeButton;
+    Toolbar toolbar;
+    ProgressBar progressBar;
+    TextView songText;
+    TextView tooManyText, noResultText;
+    TextView artistText;
+    RecyclerView recyclerView;
+    RecyclerView artistRecyclerView;
+
+    FragmentActivity activity;
+    ArrayList<OFModel> ofModels; ArrayList<String> yturls;
+    LinearLayoutManager linearLayoutManager;
+    GridLayoutManager gridLayoutManager;
+    AsyncTask<Void,Void,Void> searchTask;
+    OFAdapter ofAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (v==null) {
             v = inflater.inflate(R.layout.fragment_local_search, container, false);
-            ButterKnife.bind(v);
 
+            activity = getActivity();
 
+            getAllViews();
+
+            toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
+            toolbar.setNavigationOnClickListener(v -> {
+                activity.onBackPressed();
+            });
+
+            ofModels = new ArrayList<>();
+            yturls = new ArrayList<>();
+            linearLayoutManager = new LinearLayoutManager(activity);
+            recyclerView.setLayoutManager(linearLayoutManager);
+
+            gridLayoutManager = new GridLayoutManager(activity,3);
+            artistRecyclerView.setLayoutManager(gridLayoutManager);
+
+            closeButton.setOnClickListener(view -> {
+                searchEditText.setText("");
+            });
+
+            searchEditText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    if (editable.toString().isEmpty()) {
+                        closeButton.setVisibility(View.GONE);
+                        preExeuteMethod();
+                        progressBar.setVisibility(View.GONE);
+                        return;
+                    }else {
+                        closeButton.setVisibility(View.VISIBLE);
+                    }
+                    if (searchTask!=null && searchTask.getStatus() == AsyncTask.Status.RUNNING) {
+                        searchTask.cancel(true);
+                    }
+                    searchTask = new SearchTask(editable.toString());
+                    searchTask.execute();
+                }
+            });
         }
+        searchEditText.requestFocus();
+        UIUtil.showKeyboard(activity,searchEditText);
         return v;
+    }
+
+    void PlayMusic_Offline(int position) {
+        if (yturls.size()==0) return;
+        String[] files =YTutils.ConvertToStringArray(yturls);
+        MainActivity.PlayVideo_Local(files,position);
+    }
+
+    class SearchTask extends AsyncTask<Void,Void,Void> {
+        String text;
+
+        public SearchTask(String text) {
+            this.text = text;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if (ofModels.size()>0) {
+                if (ofModels.size()>100) {
+                    tooManyText.setVisibility(View.VISIBLE);
+                }else {
+                    ofAdapter = new OFAdapter(activity, ofModels, true);
+                    /** Set onclicks for adapter */
+                    setAdapterClicks();
+                    artistText.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    recyclerView.setAdapter(ofAdapter);
+                }
+            }else {
+                noResultText.setVisibility(View.VISIBLE);
+            }
+            progressBar.setVisibility(View.GONE);
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            /** Get all the files from local folder*/
+
+            File local = new File(activity.getFilesDir(),"locals");
+            if (local.list().length>0) {
+                for (File file : local.listFiles()) {
+                    String data = YTutils.readContent(activity,file.getPath());
+                    if (data.isEmpty()) continue;
+                    String[] items = data.split("\n|\r");
+                    if (items.length>0) {
+                        for (String line : items) {
+                            if (line.isEmpty()) continue;
+
+                            /** Filter file with the list */
+
+                            /** Filter for song recyclerView */
+                            if (line.toLowerCase().contains(text)) {
+                                String[] childs = line.split("\\|");
+                                OFModel model = new OFModel(childs[1],childs[0],Integer.parseInt(childs[3]));
+                                model.setDuration(Long.parseLong(childs[3]));
+                                model.setDate(Long.parseLong(childs[4]));
+                                yturls.add(childs[0]);
+                                ofModels.add(model);
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        void setAdapterClicks() {
+            ofAdapter.setSingleClickListener((v1, model, position) -> {
+                PlayMusic_Offline(position);
+            });
+
+            ofAdapter.setLongClickListener((v1, model, position) -> {
+                PopupMenu popupMenu = new PopupMenu(activity,v1);
+                popupMenu.inflate(R.menu.local_popup_menu2);
+                popupMenu.setOnMenuItemClickListener(menuItem -> {
+                    switch (menuItem.getItemId()) {
+                        case R.id.action_play:
+                            PlayMusic_Offline(position);
+                            break;
+                        case R.id.action_play_next:
+                            if (MainActivity.yturls.size()==0) {
+                                PlayMusic_Offline(position);
+                            }else {
+                                insertPosition(model,position,false);
+                            }
+                            break;
+                        case R.id.action_add_queue:
+                            if (MainActivity.yturls.size()==0) {
+                                PlayMusic_Offline(position);
+                            }else {
+                                insertPosition(model,position,true);
+                            }
+                            break;
+                        case R.id.action_share:
+                            File f = new File(model.getPath());
+                            YTutils.shareFile(MainActivity.activity,f);
+                            break;
+                    }
+                    return true;
+                });
+                popupMenu.show();
+            });
+        }
+
+        void insertPosition(OFModel model, int position,boolean addToLast) {
+            if (MainActivity.videoID.equals(model.getPath())) {
+                Toast.makeText(activity, "Song is already playing!", Toast.LENGTH_SHORT).show();
+            }else if (MainActivity.localPlayBack) {
+                if (addToLast) {
+                    MainActivity.yturls.remove(model.getPath());
+                    MainActivity.yturls.add(model.getPath());
+                }else {
+                    int index = MainActivity.yturls.indexOf(MainActivity.videoID);
+                    MainActivity.yturls.remove(model.getPath());
+                    MainActivity.yturls.add(index+1,model.getPath());
+                }
+                Toast.makeText(activity, "Song added to queue", Toast.LENGTH_SHORT).show();
+            }else {
+                PlayMusic_Offline(position);
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            preExeuteMethod();
+            super.onPreExecute();
+        }
+    }
+
+    void preExeuteMethod() {
+        noResultText.setVisibility(View.GONE);
+        tooManyText.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
+        songText.setVisibility(View.GONE);
+        artistRecyclerView.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.GONE);
+        artistText.setVisibility(View.GONE);
+        ofModels.clear();
+        yturls.clear();
+        if (ofAdapter!=null)
+            ofAdapter.notifyDataSetChanged();
+    }
+
+    void getAllViews() {
+        searchEditText = v.findViewById(R.id.searchEditText);
+        closeButton = v.findViewById(R.id.removeText);
+        toolbar = v.findViewById(R.id.toolbar);
+        progressBar = v.findViewById(R.id.progressBar);
+        noResultText = v.findViewById(R.id.noResultText);
+        songText = v.findViewById(R.id.songText);
+        tooManyText = v.findViewById(R.id.tooManyText);
+        artistText = v.findViewById(R.id.artistText);
+        recyclerView = v.findViewById(R.id.my_recycler_view);
+        artistRecyclerView = v.findViewById(R.id.artist_recyclerView);
     }
 
 }

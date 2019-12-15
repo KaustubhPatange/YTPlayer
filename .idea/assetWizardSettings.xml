@@ -23,7 +23,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/home/kp/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/image/ic_edit_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/home/kp/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/action/ic_search_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -34,8 +34,8 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="ffffff" />
-                            <entry key="outputName" value="ic_edit" />
-                            <entry key="sourceFile" value="$USER_HOME$/Pictures/svgs/moon.svg" />
+                            <entry key="outputName" value="ic_search_white" />
+                            <entry key="sourceFile" value="$USER_HOME$/Pictures/user.svg" />
                           </map>
                         </option>
                       </PersistentState>

@@ -30,6 +30,7 @@ import android.os.Vibrator;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.customtabs.CustomTabsIntent;
+import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -77,6 +78,7 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -448,6 +450,25 @@ public class YTutils {
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         return df.format(c);
     }
+
+    /*public static String getArtistImage(String query) {
+        // https://www.googleapis.com/youtube/v3/search?part=snippet&q=Ashley%20O&type=channel&key=[YOUR_API_KEY]
+        HttpHandler handler
+    }*/
+
+    public static void shareFile(Activity context, File f) {
+        try {
+            Uri uri = Uri.fromFile(f);
+            ShareCompat.IntentBuilder.from(context)
+                    .setStream(uri)
+                    .setType(URLConnection.guessContentTypeFromName(f.getName()))
+                    .startChooser();
+        }catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(context, "Error: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public static String getTodayDate_Time() {
         Date c = Calendar.getInstance().getTime();
         @SuppressLint("SimpleDateFormat")

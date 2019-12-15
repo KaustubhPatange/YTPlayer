@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/action_search"
         android:title="Search"
-        android:iconTint="@color/white"
-        android:icon="@drawable/ic_search"
+        android:icon="@drawable/ic_search_white"
         app:showAsAction="always"/>
     <item android:id="@+id/action_rescan"
         android:title="Rescan library"

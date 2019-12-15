@@ -69,6 +69,7 @@ import com.kpstv.youtube.fragments.DiscoverFragment;
 import com.kpstv.youtube.fragments.HistoryFragment;
 import com.kpstv.youtube.fragments.LibraryFragment;
 import com.kpstv.youtube.fragments.LocalMusicFragment;
+import com.kpstv.youtube.fragments.LocalSearchFragment;
 import com.kpstv.youtube.fragments.NCFragment;
 import com.kpstv.youtube.fragments.OPlaylistFragment;
 import com.kpstv.youtube.fragments.PlaylistFragment;
@@ -127,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     Fragment HistoryFrag;
     static Fragment SearchFrag;
     public static FragmentManager fragmentManager;
-    public static Fragment PlaylistFrag, libraryFrag, FavouriteFrag,localMusicFrag;
+    public static Fragment PlaylistFrag, libraryFrag, FavouriteFrag,localMusicFrag, localSearchFrag;
     Fragment NCFrag; String ytLink;
     static SharedPreferences preferences;
     public static LinearLayout bottom_player, adViewLayout;
@@ -234,6 +235,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
         fragmentManager = getSupportFragmentManager();
         localMusicFrag = new LocalMusicFragment();
+        localSearchFrag = new LocalSearchFragment();
         HistoryFrag = new HistoryFragment();
         libraryFrag = new LibraryFragment();
         FavouriteFrag = new OPlaylistFragment();
@@ -388,6 +390,11 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         }
         if (fragment instanceof DiscoverFragment) {
             loadFragment(SearchFrag);
+            return;
+        }
+
+        if (fragment instanceof LocalSearchFragment) {
+            loadFragment(localMusicFrag);
             return;
         }
 

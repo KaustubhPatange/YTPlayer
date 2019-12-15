@@ -27,6 +27,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -292,6 +293,10 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
     void removeItem(int position) {
       //  models.remove(position);
+        if (MainActivity.videoID.equals(MainActivity.yturls.get(position))) {
+            Toast.makeText(this, "Cannot remove currently playing song!", Toast.LENGTH_SHORT).show();
+            return;
+        }
         MainActivity.nPlayModels.remove(position);
         MainActivity.yturls.remove(position);
     }

@@ -399,16 +399,7 @@ public class OPlaylistFragment extends Fragment {
 
                                 break;
                             case R.id.action_share:
-                                try {
-                                  Uri uri = Uri.fromFile(f);
-                                    ShareCompat.IntentBuilder.from(MainActivity.activity)
-                                            .setStream(uri)
-                                            .setType(URLConnection.guessContentTypeFromName(f.getName()))
-                                            .startChooser();
-                                }catch (Exception e){
-                                    e.printStackTrace();
-                                    Toast.makeText(activity, "Error: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                                }
+                                YTutils.shareFile(MainActivity.activity,f);
                                 break;
                             case R.id.action_delete:
                                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
