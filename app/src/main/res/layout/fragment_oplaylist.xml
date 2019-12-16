@@ -109,8 +109,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <TextView
-                android:id="@+id/songText"
                 android:visibility="gone"
+                android:id="@+id/albumText"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/light_white"
+                android:text="ALBUMS"
+                android:layout_margin="10dp"
+                android:textStyle="bold"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <android.support.v7.widget.RecyclerView
+                android:visibility="gone"
+                android:layout_margin="3dp"
+                android:id="@+id/album_recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/songText"
                 android:layout_marginTop="2dp"
                 android:textColor="@color/light_white"
                 android:text="SONGS"

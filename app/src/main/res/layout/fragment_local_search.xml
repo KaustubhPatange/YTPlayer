@@ -133,9 +133,32 @@
 
             <android.support.v7.widget.RecyclerView
                 android:visibility="gone"
+                android:layout_marginStart="3dp"
+                android:layout_marginEnd="3dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginBottom="5dp"
                 android:id="@+id/artist_recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/albumText"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/light_white"
+                android:text="ALBUM"
+                android:layout_margin="10dp"
+                android:textStyle="bold"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <android.support.v7.widget.RecyclerView
+                android:visibility="gone"
+                android:layout_marginStart="3dp"
+                android:layout_marginEnd="3dp"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="5dp"
+                android:id="@+id/album_recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 

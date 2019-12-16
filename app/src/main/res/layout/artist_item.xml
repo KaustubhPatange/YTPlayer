@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView
     android:id="@+id/cardView"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
@@ -15,6 +18,7 @@
         android:layout_height="wrap_content">
 
         <ImageView
+            android:scaleType="centerCrop"
             android:src="@drawable/ic_user"
             android:id="@+id/aImage"
             android:layout_width="125dp"
@@ -44,15 +48,30 @@
             android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
             app:layout_constraintTop_toBottomOf="@id/aTitle"
+            android:id="@+id/aAlbumText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/aMoreButton"
+            android:text="4 albums"
+            android:textSize="13sp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintTop_toBottomOf="@id/aAlbumText"
             android:id="@+id/aSongCount"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/aMoreButton"
-            android:text="4 song"
+            android:text="4 songs"
             android:textSize="13sp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"/>
 
         <ImageView
+            android:paddingEnd="2dp"
             android:id="@+id/aMoreButton"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/aImage"

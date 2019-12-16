@@ -29,7 +29,7 @@ import java.util.Base64;
 
 public class YTSearch {
 
-    ArrayList<String> videoIDs; String TAG = "YTSearchThread";
+    ArrayList<String> videoIDs,channelImages; String TAG = "YTSearchThread";
 
     public YTSearch(String query) {
 
@@ -39,6 +39,7 @@ public class YTSearch {
                 .replace(",","%2");
 */
         videoIDs = new ArrayList<>();
+        channelImages = new ArrayList<>();
         try {
             String url = "https://www.youtube.com/results?search_query="+ URLEncoder.encode(query);
             URLConnection connection = (new URL(url)).openConnection();
@@ -54,6 +55,11 @@ public class YTSearch {
                 if (line.contains("src=\"https://i.ytimg.com"))
                 {
                     videoIDs.add(line.split("/")[4]);
+                }
+                if (line.contains("src=\"//yt3.ggpht.com") || line.contains("src=\"//lh3.googleusercontent.com")) {
+                    String link = "https:"+line.replace("<img src=\"","").trim()
+                            .replace("\">","");
+                    channelImages.add(link);
                 }
             }
           //  YTutils.Write(builder.toString(),YTutils.getFile("Documents/search.txt"));

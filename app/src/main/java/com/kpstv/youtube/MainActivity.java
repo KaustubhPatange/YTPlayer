@@ -384,6 +384,11 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public void onBackPressed() {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
 
+        if (getSupportFragmentManager().getBackStackEntryCount()>0) {
+            getSupportFragmentManager().popBackStack();
+            return;
+        }
+
         if (fragment instanceof SFragment) {
             loadFragment(SearchFrag);
             return;
@@ -423,6 +428,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             loadFragment(libraryFrag);
             return;
         }
+
 
         if (doubleBackToExitPressedOnce) {
             super.onBackPressed();
@@ -492,6 +498,13 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, libraryFrag)
                 .commit();
+    }
+
+    public static void loadPreviousFrag() {
+        if (fragmentManager.getBackStackEntryCount()>0) {
+            fragmentManager.popBackStack();
+        }else
+            activity.onBackPressed();
     }
 
     public static void loadLocalMusicFrag() {

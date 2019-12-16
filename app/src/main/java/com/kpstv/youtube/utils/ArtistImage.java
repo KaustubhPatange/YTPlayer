@@ -1,5 +1,6 @@
 package com.kpstv.youtube.utils;
 
+import android.net.Uri;
 import android.util.Log;
 
 import com.kpstv.youtube.AppInterface;
@@ -14,10 +15,18 @@ public class ArtistImage implements AppInterface {
     private static final String TAG = "ArtistImage";
     String imageLocation = null;
 
+    public String getImageUri() {
+        return imageLocation;
+    }
+
     public ArtistImage(String query) {
         this.query = query;
 
-        int i=0;
+        YTSearch ytSearch = new YTSearch(URLEncoder.encode(query)+" channel");
+        if (ytSearch.channelImages.size()>0) {
+            imageLocation = ytSearch.channelImages.get(0);
+        }
+       /* int i=0;
         int apiLength = API_KEYS.length;
         String json;
         do {
@@ -31,9 +40,8 @@ public class ArtistImage implements AppInterface {
                 JSONArray array = jsonObject.getJSONArray("items");
                 imageLocation = array.getJSONObject(0).getJSONObject("snippet")
                         .getJSONObject("thumbnails").getJSONObject("medium").getString("url");
-                Log.e(TAG, "ArtistImage: "+imageLocation);
             }catch (Exception e) {}
-        }
+        }*/
     }
 
     String jsonResponse(int apinumber) {

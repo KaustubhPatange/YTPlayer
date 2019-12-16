@@ -77,6 +77,7 @@ public class LocalMusicFragment extends Fragment {
                         loadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                         break;
                     case R.id.action_search:
+                        MainActivity.localSearchFrag = new LocalSearchFragment();
                         FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
                         ft.setCustomAnimations(android.R.anim.fade_in,
                                 android.R.anim.fade_out);
@@ -372,8 +373,8 @@ public class LocalMusicFragment extends Fragment {
                        if (artist.contains("|"))
                            artist = artist.replace("|","");
                        if (album.contains("|")) album = album.replace("|","");
-                       localFileBuilder.append("\n").append(f.getPath()).append("|").append(artist).append("|")
-                               .append(album).append("|").append(s).append("|").append(YTutils.getDate(new Date(f.lastModified())));
+                       localFileBuilder.append("\n").append(f.getPath().trim()).append("|").append(artist.trim()).append("|")
+                               .append(album.trim()).append("|").append(s).append("|").append(YTutils.getDate(new Date(f.lastModified())));
                    }catch (Exception e) {
                        Log.e(TAG, "searchRecursive: "+uri.toString());
                    }
@@ -382,7 +383,7 @@ public class LocalMusicFragment extends Fragment {
                 File toSave = new File(activity.getFilesDir(),"locals/"+name);
                 YTutils.writeContent(activity,toSave.getPath(),localFileBuilder.toString());
 
-                builder.append("\n").append(root.getPath()).append("|").append(files.length).append("|").append(seconds);
+                builder.append("\n").append(root.getPath().trim()).append("|").append(files.length).append("|").append(seconds);
                 OFModel model = new OFModel(
                         root.getName(),
                         root.getPath(),

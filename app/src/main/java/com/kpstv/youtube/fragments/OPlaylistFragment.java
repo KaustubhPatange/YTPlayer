@@ -4,6 +4,7 @@ package com.kpstv.youtube.fragments;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -21,10 +22,12 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.transition.Transition;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuCompat;
 import android.support.v7.widget.AppCompatSeekBar;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -45,9 +48,12 @@ import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.EditTagActivity;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
+import com.kpstv.youtube.adapters.LocalAdapter;
 import com.kpstv.youtube.adapters.OFAdapter;
 import com.kpstv.youtube.adapters.SongAdapter;
 import com.kpstv.youtube.models.DiscoverModel;
+import com.kpstv.youtube.models.LocalModel;
+import com.kpstv.youtube.models.LocalSearchModel;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.models.OFModel;
@@ -55,6 +61,7 @@ import com.kpstv.youtube.models.PlaylistModel;
 import com.kpstv.youtube.utils.SortOrder;
 import com.kpstv.youtube.utils.SortType;
 import com.kpstv.youtube.utils.YTMeta;
+import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
 
 import org.mozilla.javascript.tools.jsc.Main;
@@ -69,21 +76,23 @@ public class OPlaylistFragment extends Fragment {
 
     View v;
     boolean isnetworkCreated; Toolbar toolbar;
-    RecyclerView recyclerView; ArrayList<String> yturls;
+    RecyclerView recyclerView,albumRecyclerView; ArrayList<String> yturls;
     SongAdapter adapter; ArrayList<DiscoverModel> models;
     FragmentActivity activity;
     RecyclerView.LayoutManager layoutManager;
     ImageView oImageView;
-    TextView TitleText,SongCountText,TimeText,songText,pathLocation;
+    TextView TitleText,SongCountText,TimeText,albumText,songText,pathLocation;
     ProgressBar progressBar; PlaylistModel playlistModel; OFModel ofModel;
-    FloatingActionButton playFab; boolean localMusic=false;
+    FloatingActionButton playFab; boolean localMusic=false,searchMusic=false;
     SharedPreferences preferences; File mainFile;
-    OFAdapter ofadapter;
-    ArrayList<OFModel> ofModels;
+    OFAdapter ofadapter; LocalModel localModel; boolean scanAlbum=false;
+    ArrayList<OFModel> ofModels; ArrayList<LocalModel> albumModels;
+    LocalAdapter albumAdaper; GridLayoutManager gridLayoutManager;
     private static final String TAG = "OPlayListFragment";
 
     public OPlaylistFragment() { }
 
+    @SuppressLint("StaticFieldLeak")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (!isnetworkCreated) {
@@ -94,10 +103,13 @@ public class OPlaylistFragment extends Fragment {
             toolbar = v.findViewById(R.id.toolbar);
 
             models = new ArrayList<>();
+            albumModels = new ArrayList<>();
             ofModels = new ArrayList<>();
             yturls = new ArrayList<>();
             recyclerView = v.findViewById(R.id.my_recycler_view);
             TitleText = v.findViewById(R.id.oTitle);
+            albumText = v.findViewById(R.id.albumText);
+            albumRecyclerView = v.findViewById(R.id.album_recyclerView);
             oImageView = v.findViewById(R.id.oImageView);
             pathLocation = v.findViewById(R.id.oPathLocation);
             SongCountText = v.findViewById(R.id.oSongText);
@@ -107,6 +119,9 @@ public class OPlaylistFragment extends Fragment {
             progressBar = v.findViewById(R.id.progressBar);
             layoutManager = new LinearLayoutManager(activity);
             recyclerView.setLayoutManager(layoutManager);
+
+            gridLayoutManager = new GridLayoutManager(activity,3);
+            albumRecyclerView.setLayoutManager(gridLayoutManager);
 
             preferences = activity.getSharedPreferences("settings", Context.MODE_PRIVATE);
 
@@ -131,8 +146,15 @@ public class OPlaylistFragment extends Fragment {
                         }else {
                             pathLocation.setVisibility(View.GONE);
                             oImageView.setVisibility(View.INVISIBLE);
-                            toolbar.setTitle(ofModel.getTitle());
-                            collapsingToolbarLayout.setTitle(ofModel.getTitle());
+                            if (localModel!=null)
+                            {
+                                toolbar.setTitle(localModel.getTitle());
+                                collapsingToolbarLayout.setTitle(localModel.getTitle());
+                            }
+                            else {
+                                toolbar.setTitle(ofModel.getTitle());
+                                collapsingToolbarLayout.setTitle(ofModel.getTitle());
+                            }
                         }
                         isShow = true;
                     } else if(isShow) {
@@ -140,6 +162,12 @@ public class OPlaylistFragment extends Fragment {
                         {
                             oImageView.setVisibility(View.VISIBLE);
                             pathLocation.setVisibility(View.VISIBLE);
+                        }
+                        if (localModel!=null) {
+                            oImageView.setVisibility(View.VISIBLE);
+                            if (scanAlbum)
+                                pathLocation.setVisibility(View.VISIBLE);
+                            else pathLocation.setVisibility(View.GONE);
                         }
                         toolbar.setTitle(" "); //careful there should a space between double quote otherwise it wont work
                         collapsingToolbarLayout.setTitle(" "); //careful there should a space between double quote otherwise it wont work
@@ -152,6 +180,7 @@ public class OPlaylistFragment extends Fragment {
 
             Bundle args = getArguments();
             String isLocal = args.getString("isLocalMusic");
+
             if (isLocal!=null && isLocal.equals("true"))
             {
                 Log.e(TAG, "onCreateView: Okay in localMusic" );
@@ -183,7 +212,32 @@ public class OPlaylistFragment extends Fragment {
                     Toast.makeText(MainActivity.activity, "Rescan library to scan songs", Toast.LENGTH_SHORT).show();
                 }
 
-            }else {
+            }else if (isLocal!=null && isLocal.equals("search")) {
+                localMusic = true; searchMusic=true;
+                localModel = (LocalModel) args.getSerializable("model");
+
+                LocalSearchModel searchModel = (LocalSearchModel)
+                        args.getSerializable("localSearchModel");
+                if (searchModel!=null && searchModel.getBitmap()!=null) {
+                    oImageView.setImageBitmap(searchModel.getBitmap());
+                }else oImageView.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_user));
+
+                if (localModel!=null){
+                    scanAlbum=false;
+                    TitleText.setText(localModel.getTitle());
+                    if (localModel.getSongList().size()>1) {
+                        SongCountText.setText(localModel.getSongList().size()+" songs");
+                    }else SongCountText.setText("1 song");
+
+                    Log.e(TAG, "onCreateView: AlbumCount: "+localModel.getAlbumCount());
+
+                    if (localModel.getAlbumCount()>0) {
+                        scanAlbum=true;
+                    }
+                   new searchTask(scanAlbum,localModel).execute();
+                }
+            }
+            else {
                 Log.e(TAG, "onCreateView: In normal OPlayFrag" );
                 playlistModel = (PlaylistModel) args.getSerializable("model");
                 ArrayList<String> videos = playlistModel.getData();
@@ -208,6 +262,10 @@ public class OPlaylistFragment extends Fragment {
             }
 
             toolbar.setNavigationOnClickListener(v1 -> {
+                if (searchMusic) {
+                    activity.onBackPressed();
+                    return;
+                }
                 if (localMusic) {
                     MainActivity.loadLocalMusicFrag();
                     return;
@@ -259,7 +317,10 @@ public class OPlaylistFragment extends Fragment {
                     editor.putInt("sort_type",AppSettings.sortType.ordinal());
                     Log.e(TAG, "onCreateView: " + AppSettings.sortType.ordinal());
                     editor.apply();
-                    new getData_Offline(mainFile.getPath()).execute();
+                    if (searchMusic)
+                        new searchTask(scanAlbum,localModel).execute();
+                    else
+                        new getData_Offline(mainFile.getPath()).execute();
                     return true;
                 });
             }
@@ -267,6 +328,237 @@ public class OPlaylistFragment extends Fragment {
             isnetworkCreated = true;
         }
         return v;
+    }
+
+    class searchTask extends AsyncTask<Void,Void,Void> {
+        int seconds=0;
+        boolean scanAlbum;
+        LocalModel model;
+        ArrayList<String> albumKey;
+        ArrayList<ArrayList<String>> albumValueList;
+
+
+        public searchTask(boolean scanAlbum, LocalModel model) {
+            this.scanAlbum = scanAlbum;
+            this.model = model;
+            albumKey = new ArrayList<>();
+            albumValueList = new ArrayList<>();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            progressBar.setVisibility(View.GONE);
+            songText.setText("TRACKS");
+            songText.setVisibility(View.VISIBLE);
+
+            TimeText.setText(String.format("  %s", YTutils.milliSecondsToTimer(seconds * 1000)));
+
+            ofadapter = new OFAdapter(activity,ofModels,true);
+            recyclerView.setAdapter(ofadapter);
+            recyclerView.setVisibility(View.VISIBLE);
+
+            if (scanAlbum) {
+                pathLocation.setVisibility(View.VISIBLE);
+                int s = albumKey.size();
+                if (s==1)
+                    pathLocation.setText("1 album");
+                else pathLocation.setText(s+ " albums");
+            }
+
+            playFab.setOnClickListener(v -> PlayMusic_Offline(0));
+
+            /** Set Adapter Clicks */
+
+            ofadapter.setSingleClickListener((v1, model1, position) -> PlayMusic_Offline(position));
+
+            ofadapter.setLongClickListener((v1, model1, position) -> {
+                PopupMenu popupMenu = new PopupMenu(activity,v1);
+                popupMenu.inflate(R.menu.local_popup_menu2);
+                popupMenu.setOnMenuItemClickListener(menuItem -> {
+                    switch (menuItem.getItemId()) {
+                        case R.id.action_play:
+                            PlayMusic_Offline(position);
+                            break;
+                        case R.id.action_play_next:
+                            if (MainActivity.yturls.size()==0) {
+                                PlayMusic_Offline(position);
+                            }else {
+                                insertPosition(model1,position,false);
+                            }
+                            break;
+                        case R.id.action_add_queue:
+                            if (MainActivity.yturls.size()==0) {
+                                PlayMusic_Offline(position);
+                            }else {
+                                insertPosition(model1,position,true);
+                            }
+                            break;
+                        case R.id.action_share:
+                            File f = new File(model1.getPath());
+                            YTutils.shareFile(MainActivity.activity,f);
+                            break;
+                    }
+                    return true;
+                });
+                popupMenu.show();
+            });
+
+            if (scanAlbum && albumModels.size()>0) {
+                albumText.setVisibility(View.VISIBLE);
+
+                albumAdaper = new LocalAdapter(activity,albumModels,true);
+                albumRecyclerView.setVisibility(View.VISIBLE);
+                albumRecyclerView.setAdapter(albumAdaper);
+
+                albumAdaper.setSingleClickListener((view, model1, position) -> {
+                    Bundle args = new Bundle();
+                    args.putSerializable("model",model1);
+                    args.putString("isLocalMusic","search");
+
+                    OPlaylistFragment fragment = new OPlaylistFragment();
+                    fragment.setArguments(args);
+                    FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
+                    ft.setCustomAnimations(android.R.anim.fade_in,
+                            android.R.anim.fade_out);
+                    ft.addToBackStack(null).replace(R.id.fragment_container, fragment,"localMusic");
+                    ft.commit();
+                });
+
+                albumAdaper.setLongClickListener((view, model1, position) -> {
+                    PopupMenu popupMenu = new PopupMenu(activity,view);
+                    popupMenu.inflate(R.menu.local_popup_menu3);
+                    popupMenu.setOnMenuItemClickListener(menuItem -> {
+                        switch (menuItem.getItemId()){
+                            case R.id.action_play:
+                                albumPlay(localModel);
+                                break;
+                            case R.id.action_add_queue:
+                                if (MainActivity.yturls.isEmpty()) {
+                                    albumPlay(localModel);
+                                }else {
+                                    AddItems(localModel);
+                                }
+                                break;
+                        }
+                        return true;
+                    });
+                    popupMenu.show();
+                });
+            }
+            super.onPostExecute(aVoid);
+        }
+
+        void AddItems(LocalModel localModel) {
+            boolean someThingAdded=false;
+            for (String line : localModel.getSongList()) {
+                if (line.isEmpty()) continue;
+                String filePath = line.split("\\|")[0];
+                if (!MainActivity.videoID.equals(filePath)) {
+                    if (!MainActivity.yturls.contains(filePath))
+                    {
+                        someThingAdded=true;
+                        MainActivity.yturls.add(filePath);
+                    }
+                }
+            }
+            if (someThingAdded)
+                Toast.makeText(activity, "Current playlist updated!", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(activity, "No new song to add!", Toast.LENGTH_SHORT).show();
+        }
+
+        void albumPlay(LocalModel localModel) {
+            ArrayList<String> urls = new ArrayList<>();
+            for (String path : localModel.getSongList()) {
+                if (path.isEmpty()) continue;
+                urls.add(path.split("\\|")[0]);
+            }
+            MainActivity.PlayVideo_Local(YTutils.convertListToArrayMethod(urls));
+        }
+
+        void insertPosition(OFModel model, int position,boolean addToLast) {
+            if (MainActivity.videoID.equals(model.getPath())) {
+                Toast.makeText(activity, "Song is already playing!", Toast.LENGTH_SHORT).show();
+            }else if (MainActivity.localPlayBack) {
+                if (addToLast) {
+                    MainActivity.yturls.remove(model.getPath());
+                    MainActivity.yturls.add(model.getPath());
+                }else {
+                    int index = MainActivity.yturls.indexOf(MainActivity.videoID);
+                    MainActivity.yturls.remove(model.getPath());
+                    MainActivity.yturls.add(index+1,model.getPath());
+                }
+                Toast.makeText(activity, "Song added to queue", Toast.LENGTH_SHORT).show();
+            }else {
+                PlayMusic_Offline(position);
+            }
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            /** Normal Displaying models */
+            for (String line: model.getSongList()) {
+                String[] childs = line.split("\\|");
+                int s = Integer.parseInt(childs[3]);
+                seconds +=s;
+                OFModel model = new OFModel(
+                        childs[1],childs[0],s
+                );
+                yturls.add(childs[0]);
+                model.setDuration(s);
+                model.setDate(Long.parseLong(childs[4]));
+                ofModels.add(model);
+            }
+
+            /** Search for albums*/
+            if (!scanAlbum) return null;
+            File local = new File(activity.getFilesDir(),"locals");
+            for (File file: local.listFiles()) {
+                String data = YTutils.readContent(activity,file.getPath());
+                if (data.isEmpty()) continue;
+                if (!data.contains(localModel.getTitle())) continue;
+                Log.e(TAG, "doInBackground: Album: data" );
+                String[] lines = data.split("\n|\r");
+                for (String line : lines) {
+                    if (line.isEmpty()) continue;
+                    if (line.contains("|"+localModel.getTitle().trim()+"|")) {
+                        String[] childs = line.split("\\|");
+                        String album = childs[2];
+                        Log.e(TAG, "doInBackground: Album: Found it "+album);
+                        if (albumKey.contains(album)) {
+                            int index = albumKey.indexOf(album);
+                            albumValueList.get(index).add(line);
+                        }else {
+                            albumKey.add(album);
+                            ArrayList<String> strings = new ArrayList<>();
+                            strings.add(line);
+                            albumValueList.add(strings);
+                        }
+                    }
+                }
+            }
+            Log.e(TAG, "doInBackground: AlbumScan: "+albumKey.size() );
+            if (albumKey.size()>0) {
+                for (int i=0;i<albumKey.size();i++) {
+                    albumModels.add(new LocalModel(albumKey.get(i),albumValueList.get(i),0));
+                }
+            }
+
+            /** Sorting data */
+            automateSorting();
+
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progressBar.setVisibility(View.VISIBLE);
+            albumModels.clear();
+            if (albumAdaper!=null) albumAdaper.notifyDataSetChanged();
+            ofModels.clear();
+            if (ofadapter!=null) ofadapter.notifyDataSetChanged();
+            super.onPreExecute();
+        }
     }
 
     @Override
@@ -295,7 +587,7 @@ public class OPlaylistFragment extends Fragment {
                 @Override
                 public void onAnimationEnd(Animation animation) {
                     Log.d(TAG, "Animation ended.");
-                    if (localMusic)
+                    if (localMusic && !searchMusic)
                         new getData_Offline(mainFile.getPath()).execute();
                 }
             });
@@ -590,30 +882,34 @@ public class OPlaylistFragment extends Fragment {
 
                 /** Sorting of list will be done here*/
 
-                switch (AppSettings.sortType) {
-                    case alphabetical:
-                        Collections.sort(ofModels, (t1, t2) -> {
-                            String t1_string = new File(t1.getPath()).getName();
-                            String t2_string = new File(t2.getPath()).getName();
-                            return t1_string.compareToIgnoreCase(t2_string);
-                        });
-                        break;
-                    case date_added:
-                        Collections.sort(ofModels, (t1, t2) -> Long.compare(t2.getDate(),t1.getDate()));
-                        break;
-                    case duration:
-                        Collections.sort(ofModels, (t1, t2) -> Long.compare(t1.getDuration(),t2.getDuration()));
-                        break;
-                }
-                if (AppSettings.sortOrder == SortOrder.descending) {
-                    Collections.reverse(ofModels);
-                }
-                yturls.clear();
-                for (OFModel model: ofModels) {
-                    yturls.add(model.getPath());
-                }
+                automateSorting();
             }
             return null;
+        }
+    }
+
+    void automateSorting() {
+        switch (AppSettings.sortType) {
+            case alphabetical:
+                Collections.sort(ofModels, (t1, t2) -> {
+                    String t1_string = new File(t1.getPath()).getName();
+                    String t2_string = new File(t2.getPath()).getName();
+                    return t1_string.compareToIgnoreCase(t2_string);
+                });
+                break;
+            case date_added:
+                Collections.sort(ofModels, (t1, t2) -> Long.compare(t2.getDate(),t1.getDate()));
+                break;
+            case duration:
+                Collections.sort(ofModels, (t1, t2) -> Long.compare(t1.getDuration(),t2.getDuration()));
+                break;
+        }
+        if (AppSettings.sortOrder == SortOrder.descending) {
+            Collections.reverse(ofModels);
+        }
+        yturls.clear();
+        for (OFModel model: ofModels) {
+            yturls.add(model.getPath());
         }
     }
 
