@@ -1,39 +1,34 @@
 package com.kpstv.youtube.fragments;
 
 
-import android.animation.Animator;
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.transition.Transition;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuCompat;
-import android.support.v7.widget.AppCompatSeekBar;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -44,6 +39,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.EditTagActivity;
 import com.kpstv.youtube.MainActivity;
@@ -53,24 +51,23 @@ import com.kpstv.youtube.adapters.OFAdapter;
 import com.kpstv.youtube.adapters.SongAdapter;
 import com.kpstv.youtube.models.DiscoverModel;
 import com.kpstv.youtube.models.LocalModel;
-import com.kpstv.youtube.models.LocalSearchModel;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.models.OFModel;
 import com.kpstv.youtube.models.PlaylistModel;
+import com.kpstv.youtube.utils.AppBarStateChangeListener;
 import com.kpstv.youtube.utils.SortOrder;
 import com.kpstv.youtube.utils.SortType;
 import com.kpstv.youtube.utils.YTMeta;
-import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
 
-import org.mozilla.javascript.tools.jsc.Main;
-
 import java.io.File;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
+
+import static com.kpstv.youtube.utils.AppBarStateChangeListener.State.COLLAPSED;
+import static com.kpstv.youtube.utils.AppBarStateChangeListener.State.EXPANDED;
+import static com.kpstv.youtube.utils.AppBarStateChangeListener.State.IDLE;
 
 public class OPlaylistFragment extends Fragment {
 
@@ -80,7 +77,7 @@ public class OPlaylistFragment extends Fragment {
     SongAdapter adapter; ArrayList<DiscoverModel> models;
     FragmentActivity activity;
     RecyclerView.LayoutManager layoutManager;
-    ImageView oImageView;
+    ImageView oImageView; String title = "Playlist";
     TextView TitleText,SongCountText,TimeText,albumText,songText,pathLocation;
     ProgressBar progressBar; PlaylistModel playlistModel; OFModel ofModel;
     FloatingActionButton playFab; boolean localMusic=false,searchMusic=false;
@@ -89,7 +86,7 @@ public class OPlaylistFragment extends Fragment {
     ArrayList<OFModel> ofModels; ArrayList<LocalModel> albumModels;
     LocalAdapter albumAdaper; GridLayoutManager gridLayoutManager;
     private static final String TAG = "OPlayListFragment";
-
+    boolean loadComplete =false;
     public OPlaylistFragment() { }
 
     @SuppressLint("StaticFieldLeak")
@@ -130,7 +127,25 @@ public class OPlaylistFragment extends Fragment {
 
             final CollapsingToolbarLayout collapsingToolbarLayout = v.findViewById(R.id.toolbar_layout);
             AppBarLayout appBarLayout = v.findViewById(R.id.app_bar);
-            appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+
+            appBarLayout.addOnOffsetChangedListener(new AppBarStateChangeListener() {
+                @Override
+                public void onStateChanged(AppBarLayout appBarLayout, State state) {
+                    appBarLayout.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (state == COLLAPSED) {
+                                toolbar.setTitle(title);
+                                collapsingToolbarLayout.setTitle(title);
+                            } else if (state == EXPANDED || state == IDLE) {
+                                collapsingToolbarLayout.setTitle(" ");
+                                toolbar.setTitle(" ");
+                            }
+                        }
+                    });
+                }
+            });
+            /*appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
                 boolean isShow = true;
                 int scrollRange = -1;
 
@@ -139,43 +154,16 @@ public class OPlaylistFragment extends Fragment {
                     if (scrollRange == -1) {
                         scrollRange = appBarLayout.getTotalScrollRange();
                     }
-                    if (scrollRange + verticalOffset == 0) {
-                        if (playlistModel!=null) {
-                            toolbar.setTitle(playlistModel.getTitle());
-                            collapsingToolbarLayout.setTitle(playlistModel.getTitle());
-                        }else {
-                            pathLocation.setVisibility(View.GONE);
-                            oImageView.setVisibility(View.INVISIBLE);
-                            if (localModel!=null)
-                            {
-                                toolbar.setTitle(localModel.getTitle());
-                                collapsingToolbarLayout.setTitle(localModel.getTitle());
-                            }
-                            else {
-                                toolbar.setTitle(ofModel.getTitle());
-                                collapsingToolbarLayout.setTitle(ofModel.getTitle());
-                            }
-                        }
+                    if (scrollRange + verticalOffset == 0 && !isShow) {
+                        toolbarTextView.setText(title);
                         isShow = true;
                     } else if(isShow) {
-                        if (ofModel!=null)
-                        {
-                            oImageView.setVisibility(View.VISIBLE);
-                            pathLocation.setVisibility(View.VISIBLE);
-                        }
-                        if (localModel!=null) {
-                            oImageView.setVisibility(View.VISIBLE);
-                            if (scanAlbum)
-                                pathLocation.setVisibility(View.VISIBLE);
-                            else pathLocation.setVisibility(View.GONE);
-                        }
-                        toolbar.setTitle(" "); //careful there should a space between double quote otherwise it wont work
-                        collapsingToolbarLayout.setTitle(" "); //careful there should a space between double quote otherwise it wont work
+                        toolbarTextView.setText("");
                         isShow = false;
                     }
                 }
             });
-
+*/
             Log.e(TAG, "onCreateView: Above Bundles" );
 
             Bundle args = getArguments();
@@ -186,6 +174,7 @@ public class OPlaylistFragment extends Fragment {
                 Log.e(TAG, "onCreateView: Okay in localMusic" );
                 localMusic = true;
                 ofModel = (OFModel) args.getSerializable("model");
+                title = ofModel.getTitle().trim();
                 String location = ofModel.getPath();
                 mainFile = new File(activity.getFilesDir(),"locals/"+location.replace("/","_")+".csv");
                 Log.e(TAG, "onCreateView: "+mainFile.getPath());
@@ -215,12 +204,8 @@ public class OPlaylistFragment extends Fragment {
             }else if (isLocal!=null && isLocal.equals("search")) {
                 localMusic = true; searchMusic=true;
                 localModel = (LocalModel) args.getSerializable("model");
-
-                LocalSearchModel searchModel = (LocalSearchModel)
-                        args.getSerializable("localSearchModel");
-                if (searchModel!=null && searchModel.getBitmap()!=null) {
-                    oImageView.setImageBitmap(searchModel.getBitmap());
-                }else oImageView.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_user));
+                title = localModel.getTitle().trim();
+                oImageView.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_user));
 
                 if (localModel!=null){
                     scanAlbum=false;
@@ -234,12 +219,13 @@ public class OPlaylistFragment extends Fragment {
                     if (localModel.getAlbumCount()>0) {
                         scanAlbum=true;
                     }
-                   new searchTask(scanAlbum,localModel).execute();
+                   //new searchTask(scanAlbum,localModel).execute();
                 }
             }
             else {
                 Log.e(TAG, "onCreateView: In normal OPlayFrag" );
                 playlistModel = (PlaylistModel) args.getSerializable("model");
+                title = playlistModel.getTitle().trim();
                 ArrayList<String> videos = playlistModel.getData();
                 TitleText.setText(playlistModel.getTitle());
                 SongCountText.setText(String.format("%s songs", videos.size()));
@@ -325,6 +311,7 @@ public class OPlaylistFragment extends Fragment {
                 });
             }
 
+         //   collapsingToolbarLayout.setTitle(title);
             isnetworkCreated = true;
         }
         return v;
@@ -333,7 +320,7 @@ public class OPlaylistFragment extends Fragment {
     class searchTask extends AsyncTask<Void,Void,Void> {
         int seconds=0;
         boolean scanAlbum;
-        LocalModel model;
+        LocalModel model; String imageUri;
         ArrayList<String> albumKey;
         ArrayList<ArrayList<String>> albumValueList;
 
@@ -363,6 +350,32 @@ public class OPlaylistFragment extends Fragment {
                 if (s==1)
                     pathLocation.setText("1 album");
                 else pathLocation.setText(s+ " albums");
+
+                if (imageUri!=null) {
+                    Log.e(TAG, "onPostExecute: Loading data locally: "+imageUri );
+                    Glide.with(activity).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            oImageView.setImageBitmap(resource);
+                        }
+
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+                        }
+                    });
+                }
+            }else {
+                String file = ofModels.get(0).getPath();
+                Log.e(TAG, "onPostExecute: File: "+file );
+                if (file!=null) {
+                    File f = new File(file);
+                    Bitmap bmp = YTutils.getArtworkFromFile(activity,f);
+                    if (bmp!=null)
+                    {
+                        oImageView.setImageBitmap(bmp);
+                        oImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                    }
+                }
             }
 
             playFab.setOnClickListener(v -> PlayMusic_Offline(0));
@@ -410,7 +423,7 @@ public class OPlaylistFragment extends Fragment {
                 albumRecyclerView.setVisibility(View.VISIBLE);
                 albumRecyclerView.setAdapter(albumAdaper);
 
-                albumAdaper.setSingleClickListener((view, model1, position) -> {
+                albumAdaper.setSingleClickListener((view, model1,position) -> {
                     Bundle args = new Bundle();
                     args.putSerializable("model",model1);
                     args.putString("isLocalMusic","search");
@@ -510,42 +523,63 @@ public class OPlaylistFragment extends Fragment {
                 ofModels.add(model);
             }
 
+            /** Sorting data */
+            automateSorting();
+
+            int comparision=0;
             /** Search for albums*/
-            if (!scanAlbum) return null;
+            if (scanAlbum) {
+                Log.e(TAG, "doInBackground: Title: " +model.getTitle().trim());
+                imageUri = YTutils.getLocalArtworkImage(activity,model);
+            }else return null;
             File local = new File(activity.getFilesDir(),"locals");
             for (File file: local.listFiles()) {
                 String data = YTutils.readContent(activity,file.getPath());
                 if (data.isEmpty()) continue;
                 if (!data.contains(localModel.getTitle())) continue;
+                comparision++;
                 Log.e(TAG, "doInBackground: Album: data" );
                 String[] lines = data.split("\n|\r");
-                for (String line : lines) {
+                for (int i=0;i<lines.length;i++) {
+                    String line = lines[i];
                     if (line.isEmpty()) continue;
                     if (line.contains("|"+localModel.getTitle().trim()+"|")) {
+                        comparision++;
                         String[] childs = line.split("\\|");
                         String album = childs[2];
-                        Log.e(TAG, "doInBackground: Album: Found it "+album);
                         if (albumKey.contains(album)) {
                             int index = albumKey.indexOf(album);
-                            albumValueList.get(index).add(line);
+                            if (!albumValueList.get(index).contains(line))
+                                albumValueList.get(index).add(line);
                         }else {
                             albumKey.add(album);
                             ArrayList<String> strings = new ArrayList<>();
                             strings.add(line);
                             albumValueList.add(strings);
                         }
+
+                        /** This loop is for adding respective songs to album */
+                        for (int j=0;j<albumKey.size();j++) {
+                            comparision++;
+                            album = albumKey.get(j);
+                            for (int c=0;c<i;c++) {
+                                String l = lines[c];
+                                if (l.contains("|"+album+"|")&&!albumValueList.get(j).contains(l)) {
+                                    comparision++;
+                                    albumValueList.get(j).add(l);
+                                }
+                            }
+                        }
                     }
+
                 }
             }
-            Log.e(TAG, "doInBackground: AlbumScan: "+albumKey.size() );
+            Log.e(TAG, "doInBackground: AlbumScan: "+albumKey.size() +", Total Comparision: "+comparision);
             if (albumKey.size()>0) {
                 for (int i=0;i<albumKey.size();i++) {
                     albumModels.add(new LocalModel(albumKey.get(i),albumValueList.get(i),0));
                 }
             }
-
-            /** Sorting data */
-            automateSorting();
 
             return null;
         }
@@ -587,14 +621,24 @@ public class OPlaylistFragment extends Fragment {
                 @Override
                 public void onAnimationEnd(Animation animation) {
                     Log.d(TAG, "Animation ended.");
+                    if (loadComplete) return;
                     if (localMusic && !searchMusic)
                         new getData_Offline(mainFile.getPath()).execute();
+                    else if (searchMusic)
+                        new searchTask(scanAlbum,localModel).execute();
+                    loadComplete=true;
                 }
             });
 
             return anim;
         }
         return super.onCreateAnimation(transit,enter,nextAnim);
+    }
+
+    @Override
+    public void onResume() {
+        Log.e(TAG, "onResume: Triggered onResume" );
+        super.onResume();
     }
 
     private View.OnClickListener recyclerItemListener = view -> {

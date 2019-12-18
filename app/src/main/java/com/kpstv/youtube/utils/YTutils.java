@@ -14,13 +14,16 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -36,6 +39,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.os.EnvironmentCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.graphics.Palette;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -53,6 +57,7 @@ import com.kpstv.youtube.BuildConfig;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
+import com.kpstv.youtube.models.LocalModel;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,6 +71,7 @@ import org.w3c.dom.NodeList;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -451,10 +457,59 @@ public class YTutils {
         return df.format(c);
     }
 
+    public static String getLocalArtworkImage(Activity activity, LocalModel model) {
+        String data = YTutils.readContent(activity,"artistImages.csv");
+        String imageUri=null;
+        if (data!=null && !data.isEmpty()) {
+            if (data.contains(model.getTitle().trim()+"$")) {
+                String[] items = data.split("\n|\r");
+                for (String item : items) {
+                    if (item.isEmpty()) continue;
+                    if (item.contains(model.getTitle().trim()+"$")) {
+                        imageUri = item.split("\\$")[1];
+                        return imageUri;
+                    }
+                }
+            }else {
+                ArtistImage artistImage = new ArtistImage(model.getTitle().trim());
+                YTutils.writeContent(activity,"artistImages.csv",data+
+                        model.getTitle().trim()+"$"+imageUri);
+                imageUri = artistImage.getImageUri();
+            }
+        }else {
+            ArtistImage artistImage = new ArtistImage(model.getTitle().trim());
+            YTutils.writeContent(activity,"artistImages.csv",model.getTitle().trim()+"$"+imageUri);
+            imageUri = artistImage.getImageUri();
+        }
+        return imageUri;
+    }
+
+    public static Bitmap getArtworkFromFile(Activity activity, File f) {
+       try {
+           MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+           mmr.setDataSource(activity, Uri.fromFile(f));
+
+           byte[] data = mmr.getEmbeddedPicture();
+
+           if (data!=null) {
+               return BitmapFactory.decodeByteArray(data, 0, data.length);
+           }
+       }catch (Exception e){e.getMessage();}
+       return null;
+    }
+
     /*public static String getArtistImage(String query) {
         // https://www.googleapis.com/youtube/v3/search?part=snippet&q=Ashley%20O&type=channel&key=[YOUR_API_KEY]
         HttpHandler handler
     }*/
+
+    public static byte[] getByteFromBitmap(Bitmap bmp) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        byte[] byteArray = stream.toByteArray();
+        bmp.recycle();
+        return byteArray;
+    }
 
     public static void shareFile(Activity context, File f) {
         try {

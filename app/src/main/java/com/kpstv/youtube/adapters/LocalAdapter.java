@@ -53,6 +53,11 @@ public class LocalAdapter extends RecyclerView.Adapter<LocalAdapter.LocalHolder>
         return new LocalHolder(v);
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
+
     @SuppressLint("StaticFieldLeak")
     @Override
     public void onBindViewHolder(@NonNull LocalHolder localHolder, int i) {
@@ -72,6 +77,7 @@ public class LocalAdapter extends RecyclerView.Adapter<LocalAdapter.LocalHolder>
             localHolder.aSongText.setText("1 song");
         else  localHolder.aSongText.setText(model.getSongList().size()+" songs");
 
+
         localHolder.cardView.setOnClickListener(view -> singleClickListener.onSingleClick(view,model,i));
 
         localHolder.moreButton.setOnClickListener(view -> longClickListener.onLongClick(view,model,i));
@@ -90,10 +96,11 @@ public class LocalAdapter extends RecyclerView.Adapter<LocalAdapter.LocalHolder>
                             MediaMetadataRetriever mmr = new MediaMetadataRetriever();
                             mmr.setDataSource(context, Uri.fromFile(f));
 
-                            byte [] data = mmr.getEmbeddedPicture();
+                            byte[] data = mmr.getEmbeddedPicture();
 
                             if (data!=null) {
                                 Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+
                                 localHolder.aImage.setImageBitmap(bitmap);
                                 Palette.from(bitmap).generate(palette -> {
                                     int color = palette.getVibrantColor(context.getResources().getColor(R.color.background));
@@ -105,14 +112,12 @@ public class LocalAdapter extends RecyclerView.Adapter<LocalAdapter.LocalHolder>
                         }
 
                     }
-                    return;
-                }
-
-                if (imageUri!=null) {
+                }else if (imageUri!=null) {
                     Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                             localHolder.aImage.setImageBitmap(resource);
+
                             Palette.from(resource).generate(palette -> {
                                 int color = palette.getVibrantColor(context.getResources().getColor(R.color.background));
                                 localHolder.cardView.setBackgroundTintList(ColorStateList.valueOf(color));
@@ -134,31 +139,7 @@ public class LocalAdapter extends RecyclerView.Adapter<LocalAdapter.LocalHolder>
                 if (isAlbumAdapter) {
                     return null;
                 }
-                String data = YTutils.readContent(context,"artistImages.csv");
-                if (data!=null && !data.isEmpty()) {
-                    if (data.contains(model.getTitle().trim()+"$")) {
-                        String[] items = data.split("\n|\r");
-                        for (String item : items) {
-                            if (item.isEmpty()) continue;
-                            if (item.contains(model.getTitle().trim()+"$")) {
-                                imageUri = item.split("\\$")[1];
-                                Log.e(TAG, model.getTitle().trim()+": Loading data locally - "+imageUri);
-                                return null;
-                            }
-                        }
-                    }else {
-                        Log.e(TAG, model.getTitle()+": In first loop" );
-                        ArtistImage artistImage = new ArtistImage(model.getTitle().trim());
-                        imageUri = artistImage.getImageUri();
-                        YTutils.writeContent(context,"artistImages.csv",data+
-                                model.getTitle().trim()+"$"+imageUri);
-                    }
-                }else {
-                    Log.e(TAG, model.getTitle()+": In second loop" );
-                    ArtistImage artistImage = new ArtistImage(model.getTitle().trim());
-                    imageUri = artistImage.getImageUri();
-                    YTutils.writeContent(context,"artistImages.csv",model.getTitle().trim()+"$"+imageUri);
-                }
+                imageUri = YTutils.getLocalArtworkImage(context,model);
                 return null;
             }
         }.execute();

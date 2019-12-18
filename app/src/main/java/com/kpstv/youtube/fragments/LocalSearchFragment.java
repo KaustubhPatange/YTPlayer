@@ -62,6 +62,8 @@ public class LocalSearchFragment extends Fragment {
     AsyncTask<Void,Void,Void> searchTask;
     OFAdapter ofAdapter; LocalAdapter localAdapter,albumAdapter;
 
+    private static final String TAG = "LocalSearchFragment";
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (v==null) {
@@ -134,18 +136,18 @@ public class LocalSearchFragment extends Fragment {
 
     class SearchTask extends AsyncTask<Void,Void,Void> {
         String text;
-        ArrayList<String> albumCount;
+        ArrayList<ArrayList<String>> albumValueCountList;
         ArrayList<String> artistKey;
         ArrayList<String> albumKey;
         ArrayList<ArrayList<String>> artistValueList;
         ArrayList<ArrayList<String>> albumValueList;
         public SearchTask(String text) {
             this.text = text;
-            albumCount = new ArrayList<>();
             albumKey = new ArrayList<>();
             albumValueList = new ArrayList<>();
             artistKey = new ArrayList<>();
             artistValueList = new ArrayList<>();
+            albumValueCountList = new ArrayList<>();
         }
 
         @Override
@@ -218,16 +220,21 @@ public class LocalSearchFragment extends Fragment {
                             String artist = line.split("\\|")[1];
                             String album = line.split("\\|")[2];
                             if (artist.toLowerCase().contains(text.toLowerCase())) {
-                                if (!albumCount.contains(album))
-                                    albumCount.add(album);
+                               /* if (!albumCount.contains(album))
+                                    albumCount.add(album);*/
                                 if (artistKey.contains(artist)) {
                                     int index = artistKey.indexOf(artist);
                                     artistValueList.get(index).add(line);
+                                    if (!albumValueCountList.get(index).contains(album))
+                                        albumValueCountList.get(index).add(album);
                                 }else {
                                     artistKey.add(artist);
                                     ArrayList<String> strings = new ArrayList<>();
                                     strings.add(line);
                                     artistValueList.add(strings);
+                                    ArrayList<String> albums = new ArrayList<>();
+                                    albums.add(album);
+                                    albumValueCountList.add(albums);
                                 }
                             }
 
@@ -254,7 +261,7 @@ public class LocalSearchFragment extends Fragment {
                 Log.e("LocalSearchFragment", "doInBackground: "+albumModels.size() );
                 if (artistKey.size()>0) {
                     for (int i=0;i<artistKey.size();i++) {
-                        artistModels.add(new LocalModel(artistKey.get(i),artistValueList.get(i),albumCount.size()));
+                        artistModels.add(new LocalModel(artistKey.get(i),artistValueList.get(i), albumValueCountList.get(i).size()));
                     }
                 }
             }
@@ -268,8 +275,53 @@ public class LocalSearchFragment extends Fragment {
 
 
             albumAdapter.setLongClickListener((view, model, position) -> {
-
+                PopupMenu popupMenu = new PopupMenu(activity,view);
+                popupMenu.inflate(R.menu.local_popup_menu3);
+                popupMenu.setOnMenuItemClickListener(menuItem -> {
+                    switch (menuItem.getItemId()){
+                        case R.id.action_play:
+                            albumPlay(model);
+                            break;
+                        case R.id.action_add_queue:
+                            if (MainActivity.yturls.isEmpty()) {
+                                albumPlay(model);
+                            }else {
+                                AddItems(model);
+                            }
+                            break;
+                    }
+                    return true;
+                });
+                popupMenu.show();
             });
+        }
+
+        void AddItems(LocalModel localModel) {
+            boolean someThingAdded=false;
+            for (String line : localModel.getSongList()) {
+                if (line.isEmpty()) continue;
+                String filePath = line.split("\\|")[0];
+                if (!MainActivity.videoID.equals(filePath)) {
+                    if (!MainActivity.yturls.contains(filePath))
+                    {
+                        someThingAdded=true;
+                        MainActivity.yturls.add(filePath);
+                    }
+                }
+            }
+            if (someThingAdded)
+                Toast.makeText(activity, "Current playlist updated!", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(activity, "No new song to add!", Toast.LENGTH_SHORT).show();
+        }
+
+        void albumPlay(LocalModel localModel) {
+            ArrayList<String> urls = new ArrayList<>();
+            for (String path : localModel.getSongList()) {
+                if (path.isEmpty()) continue;
+                urls.add(path.split("\\|")[0]);
+            }
+            MainActivity.PlayVideo_Local(YTutils.convertListToArrayMethod(urls));
         }
 
         void setAdapterClicks1() {
@@ -278,7 +330,24 @@ public class LocalSearchFragment extends Fragment {
             });
 
             localAdapter.setLongClickListener((view, model, position) -> {
-
+                PopupMenu popupMenu = new PopupMenu(activity,view);
+                popupMenu.inflate(R.menu.local_popup_menu3);
+                popupMenu.setOnMenuItemClickListener(menuItem -> {
+                    switch (menuItem.getItemId()){
+                        case R.id.action_play:
+                            albumPlay(model);
+                            break;
+                        case R.id.action_add_queue:
+                            if (MainActivity.yturls.isEmpty()) {
+                                albumPlay(model);
+                            }else {
+                                AddItems(model);
+                            }
+                            break;
+                    }
+                    return true;
+                });
+                popupMenu.show();
             });
         }
 
