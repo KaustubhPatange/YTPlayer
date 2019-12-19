@@ -19,13 +19,10 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.kpstv.youtube.HistoryBottomSheet;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.DiscoverAdapter;
-import com.kpstv.youtube.adapters.DiscoverAdapter2;
 import com.kpstv.youtube.models.DiscoverModel;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTSearch;

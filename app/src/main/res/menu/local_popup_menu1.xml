@@ -18,6 +18,14 @@
         android:title="Edit tags"
         app:showAsAction="never"/>
 
+    <item android:id="@+id/action_ringtone"
+        android:title="Set as ringtone"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/action_details"
+        android:title="Details"
+        app:showAsAction="never"/>
+
     <item android:id="@+id/action_share"
         android:title="Share"
         app:showAsAction="never"/>

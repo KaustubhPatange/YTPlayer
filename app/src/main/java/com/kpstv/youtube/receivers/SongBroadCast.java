@@ -73,6 +73,13 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                 break;
             case "com.kpstv.youtube.ACTION_PLAY":
                 MainActivity.changePlayBack(!MainActivity.isplaying);
+                try {
+                    if (MainActivity.isplaying) {
+                            PlayerActivity2.makePause();
+                        } else {
+                        PlayerActivity2.makePlay();
+                        }
+                }catch (Exception ignored){}
                 break;
             case "com.kpstv.youtube.STOP_SERVICE":
                 Log.e("SongBroadCast", "onReceive: STOP_SERVICE called" );

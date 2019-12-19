@@ -63,6 +63,7 @@ import com.warkiz.widget.SeekParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mozilla.javascript.tools.jsc.Main;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -251,7 +252,8 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
                 long progresstoSeek = YTutils.progressToTimer(seekBar.getProgress(), MainActivity.total_duration);
                 Log.e("ProgresstoSeek", progresstoSeek + "");
-                MainActivity.player.seekTo(progresstoSeek);
+                MainActivity.mMediaSessionCallback.onSeekTo(progresstoSeek);
+               // MainActivity.player.seekTo(progresstoSeek);
 
                 updateProgressBar();
             }

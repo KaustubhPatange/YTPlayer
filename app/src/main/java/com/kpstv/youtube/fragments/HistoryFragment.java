@@ -1,7 +1,6 @@
 package com.kpstv.youtube.fragments;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
@@ -23,7 +22,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.kpstv.youtube.HistoryBottomSheet;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.HistoryAdapter;
 import com.kpstv.youtube.utils.YTutils;

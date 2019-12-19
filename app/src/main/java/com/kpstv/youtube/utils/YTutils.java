@@ -24,6 +24,7 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -32,6 +33,7 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
@@ -282,7 +284,8 @@ public class YTutils {
     public static String getVideoTitle(String title) {
         String t = title;
         if (t.contains("-")) {
-            t = t.split("\\-")[1].trim();
+            if (t.split("\\-").length<3)
+                t = t.split("\\-")[1].trim();
         }
         if (t.contains("(")) {
             t = t.split("\\(")[0].trim();
@@ -290,10 +293,41 @@ public class YTutils {
         return t.trim();
     }
 
+    public static void setDefaultRingtone(Activity activity, File f) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            boolean retVal = Settings.System.canWrite(activity);
+            if(!retVal){
+                android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(activity);
+                builder.setTitle("Set ringtone");
+                builder.setMessage("Allow YTPlayer to modify audio settings");
+                builder.setNegativeButton("Cancel",null);
+                builder.setPositiveButton("OK",(dialogInterface, i) -> {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                    intent.setData(Uri.parse("package:" + activity.getPackageName()));
+                    activity.startActivity(intent);
+                });
+                android.app.AlertDialog dialog = builder.create();
+                dialog.show();
+                return;
+            }
+        }
+        Toast.makeText(activity, "New ringtone set!", Toast.LENGTH_SHORT).show();
+        setRingtone(activity,f);
+    }
+
+    static void setRingtone(Activity activity,File f) {
+        try {
+            RingtoneManager.setActualDefaultRingtoneUri(activity, RingtoneManager.TYPE_RINGTONE, Uri.fromFile(f));
+        } catch (Exception t) {
+            t.printStackTrace();
+
+        }
+    }
     public static String getChannelTitle(String title, String defaulttitle) {
         if (title.contains("-")) {
             String t = title;
-            t = t.split("\\-")[0].trim();
+            if (t.split("\\-").length<3)
+                t = t.split("\\-")[0].trim();
             return t.trim();
         }else
         return defaulttitle;
@@ -368,6 +402,25 @@ public class YTutils {
     public static String getSize(long size) {
 
         DecimalFormat df = new DecimalFormat("0.00");
+
+        float sizeKb = 1024.0f;
+        float sizeMb = sizeKb * sizeKb;
+        float sizeGb = sizeMb * sizeKb;
+        float sizeTerra = sizeGb * sizeKb;
+
+        if(size < sizeMb)
+            return df.format(size / sizeKb)+ " KB";
+        else if(size < sizeGb)
+            return df.format(size / sizeMb) + " MB";
+        else if(size < sizeTerra)
+            return df.format(size / sizeGb) + " GB";
+
+        return "";
+    }
+
+    public static String getSizeNoDecimal(long size) {
+
+        DecimalFormat df = new DecimalFormat("0");
 
         float sizeKb = 1024.0f;
         float sizeMb = sizeKb * sizeKb;
@@ -482,6 +535,19 @@ public class YTutils {
             imageUri = artistImage.getImageUri();
         }
         return imageUri;
+    }
+
+    public static String getAudioFormat(File f) {
+        String ext =  f.getPath().substring(f.getPath().lastIndexOf("."),f.getPath().length());
+        switch (ext) {
+            case ".mp3":
+                return "MPEG-1 Audio Layer 3";
+            case ".m4a":
+            case ".ogg":
+            case ".aac":
+                return "HE-AAC";
+        }
+        return null;
     }
 
     public static Bitmap getArtworkFromFile(Activity activity, File f) {

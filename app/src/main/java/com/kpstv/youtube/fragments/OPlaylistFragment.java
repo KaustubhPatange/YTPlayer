@@ -1,18 +1,23 @@
 package com.kpstv.youtube.fragments;
 
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
@@ -62,6 +67,7 @@ import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
 
 import java.io.File;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -392,6 +398,16 @@ public class OPlaylistFragment extends Fragment {
                         case R.id.action_play:
                             PlayMusic_Offline(position);
                             break;
+                        case R.id.action_ringtone:
+                            YTutils.setDefaultRingtone(activity,new File(model1.getPath()));
+                            break;
+                        case R.id.action_details:
+                            Bundle args = new Bundle();
+                            args.putString("filepath",model1.getPath());
+                            DetailsBottomSheet sheet = new DetailsBottomSheet();
+                            sheet.setArguments(args);
+                            sheet.show(activity.getSupportFragmentManager(),"");
+                            break;
                         case R.id.action_play_next:
                             if (MainActivity.yturls.size()==0) {
                                 PlayMusic_Offline(position);
@@ -710,6 +726,16 @@ public class OPlaylistFragment extends Fragment {
                                     return true;
                                 }
                                insertPosition(model,MainActivity.ytIndex+1,false);
+                                break;
+                            case R.id.action_ringtone:
+                                YTutils.setDefaultRingtone(activity,f);
+                                break;
+                            case R.id.action_details:
+                                Bundle args = new Bundle();
+                                args.putString("filepath",model.getPath());
+                                DetailsBottomSheet sheet = new DetailsBottomSheet();
+                                sheet.setArguments(args);
+                                sheet.show(activity.getSupportFragmentManager(),"");
                                 break;
                             case R.id.action_add_queue:
                                 if (MainActivity.yturls.size()==0)

@@ -378,6 +378,16 @@ public class LocalSearchFragment extends Fragment {
                         case R.id.action_play:
                             PlayMusic_Offline(position);
                             break;
+                        case R.id.action_ringtone:
+                            YTutils.setDefaultRingtone(activity,new File(model.getPath()));
+                            break;
+                        case R.id.action_details:
+                            Bundle args = new Bundle();
+                            args.putString("filepath",model.getPath());
+                            DetailsBottomSheet sheet = new DetailsBottomSheet();
+                            sheet.setArguments(args);
+                            sheet.show(activity.getSupportFragmentManager(),"");
+                            break;
                         case R.id.action_play_next:
                             if (MainActivity.yturls.size()==0) {
                                 PlayMusic_Offline(position);

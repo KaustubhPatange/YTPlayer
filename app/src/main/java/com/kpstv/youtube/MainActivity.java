@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,6 +26,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -66,6 +70,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.kpstv.youtube.fragments.DiscoverFragment;
+import com.kpstv.youtube.fragments.HistoryBottomSheet;
 import com.kpstv.youtube.fragments.HistoryFragment;
 import com.kpstv.youtube.fragments.LibraryFragment;
 import com.kpstv.youtube.fragments.LocalMusicFragment;
@@ -96,7 +101,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -145,6 +149,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory();
     public static TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
     public static String selectedItemText=""; public static int sleepSeconds;
+    private static MediaSessionCompat mediaSession;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -218,6 +223,41 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             new File(getFilesDir().toString()+"/History").delete();
         }
 
+      //  mediaSession = new MediaSessionCompat(this,"MediaSessionCompat");
+
+      /*  ComponentName mediaButtonReceiver = new ComponentName(getApplicationContext(), SongBroadCast.class);
+        mediaSession = new MediaSessionCompat(getApplicationContext(), "Tag", mediaButtonReceiver, null);
+        mediaSession.setCallback(mMediaSessionCallback);
+        mediaSession.setFlags( MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS );
+        mediaSession.setActive(true);
+
+        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        mediaButtonIntent.setClass(this, SongBroadCast.class);
+        PendingIntent pendingIntent = PendingIntent.
+                getBroadcast(this, 0, mediaButtonIntent, 0);
+        mediaSession.setMediaButtonReceiver(pendingIntent);*/
+
+        ComponentName mediaButtonReceiverComponentName = new ComponentName(
+                getApplicationContext(),
+                SongBroadCast.class);
+        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        mediaButtonIntent.setComponent(mediaButtonReceiverComponentName);
+        PendingIntent mediaButtonReceiverPendingIntent = PendingIntent.getBroadcast(
+                getApplicationContext(),
+                0,
+                mediaButtonIntent,
+                0);
+        mediaSession = new MediaSessionCompat(this,
+                "RetroMusicPlayer",
+                mediaButtonReceiverComponentName,
+                mediaButtonReceiverPendingIntent);
+        mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
+                | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
+        );
+        mediaSession.setCallback(mMediaSessionCallback);
+        mediaSession.setActive(true);
+        mediaSession.setMediaButtonReceiver(mediaButtonReceiverPendingIntent);
+
         preferences = getSharedPreferences("history",MODE_PRIVATE);
         String list = preferences.getString("urls","");
         ArrayList<String> urls = new ArrayList<>();
@@ -280,11 +320,51 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             e.printStackTrace();
 
         }
-
        /* File file = YTutils.getFile("Download/9WR9YF2.csv");
         Date lastModDate = new Date(file.lastModified());
         Log.e(TAG, "onCreate: Last modified "+lastModDate.toString());*/
     }
+
+    private static final long MEDIA_SESSION_ACTIONS = PlaybackStateCompat.ACTION_PLAY
+            | PlaybackStateCompat.ACTION_PAUSE
+            | PlaybackStateCompat.ACTION_PLAY_PAUSE
+            | PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+            | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+            | PlaybackStateCompat.ACTION_STOP
+            | PlaybackStateCompat.ACTION_SEEK_TO;
+
+    public static void updateMediaSessionPlaybackState() {
+        PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
+                .setActions(MEDIA_SESSION_ACTIONS)
+                .setState(isplaying ? PlaybackStateCompat.STATE_PLAYING : PlaybackStateCompat.STATE_PAUSED,
+                        player.getCurrentPosition(), 1);
+        mediaSession.setPlaybackState(stateBuilder.build());
+    }
+
+    public static MediaSessionCompat.Callback mMediaSessionCallback = new MediaSessionCompat.Callback() {
+
+        @Override
+        public void onPlay() {
+            super.onPlay();
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+        }
+
+        @Override
+        public void onSeekTo(long pos) {
+            Log.e(TAG, "onSeekTo: Playing"+pos );
+            player.seekTo(pos);
+            super.onSeekTo(pos);
+        }
+
+        @Override
+        public void onPlayFromMediaId(String mediaId, Bundle extras) {
+            super.onPlayFromMediaId(mediaId, extras);
+        }
+    };
 
     public static void PlayVideo_Local(String[] urls) {
         /** YTUrls here will work as path to music file...
@@ -1059,6 +1139,16 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                             PlayerActivity2.loadAgain();
                             PlayerActivity2.totalDuration.setText(YTutils.milliSecondsToTimer(MainActivity.total_duration));
                         }catch (Exception e) { Log.e("PlayerActivity","not loaded yet!"); }
+
+                        /** Setting mediaSession metadata */
+                        final MediaMetadataCompat.Builder metaData = new MediaMetadataCompat.Builder()
+                                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, channelTitle)
+                                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, channelTitle)
+                                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, videoTitle)
+                                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, player.getDuration())
+                                .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, null);
+                        mediaSession.setMetadata(metaData.build());
+
                         rebuildNotification();
                         updateProgressBar();
                         if (dontAllowToPlay)
@@ -1122,6 +1212,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         ytConfigs.add(new YTConfig(ytText, media.getUrl(), media.getExtension(), videoTitle,channelTitle,isaudio));
     }
 
+
     public static void rebuildNotification() {
         boolean setgoing = true;
         int icon = R.drawable.ic_pause_notify;
@@ -1129,6 +1220,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             icon = R.drawable.ic_play_notify;
             setgoing = false;
         }
+
         builder = new NotificationCompat.Builder(activity, "channel_01")
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -1137,7 +1229,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 .addAction(icon, "Pause", pausePendingIntent)
                 .addAction(R.drawable.ic_next_notify, "Next", nextPendingIntent)
                 .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
-                        .setShowActionsInCompactView(0,1,2))
+                        .setShowActionsInCompactView(0,1,2)
+                .setMediaSession(mediaSession.getSessionToken()))
                 .setContentTitle(videoTitle)
                 .setOngoing(setgoing)
                 .setSound(null)
@@ -1147,6 +1240,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
         notificationManagerCompat.notify(1, builder.build());
     }
+
+
 
     public void createNotification() {
 
@@ -1221,6 +1316,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             long currentDur = MainActivity.player.getCurrentPosition();
             int progress = (YTutils.getProgressPercentage(currentDur, totalDuration));
             songProgress.setProgress(progress);
+
+            updateMediaSessionPlaybackState();
+            //mMediaSessionCallback.onSeekTo(currentDur);
 
             mHandler.postDelayed(this, 100);
         }
