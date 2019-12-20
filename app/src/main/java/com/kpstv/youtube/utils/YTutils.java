@@ -399,6 +399,11 @@ public class YTutils {
         return null;
     }
 
+    public static String dividePattern(float num1, float num2, String pattern) {
+        DecimalFormat df = new DecimalFormat(pattern);
+        return df.format(num1/num2)+"";
+    }
+
     public static String getSize(long size) {
 
         DecimalFormat df = new DecimalFormat("0.00");

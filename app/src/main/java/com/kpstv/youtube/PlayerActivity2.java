@@ -104,7 +104,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
     static IndicatorSeekBar indicatorSeekBar;
     private InterstitialAd mInterstitialAd;
 
-    static ImageView favouriteButton, addToPlaylist;
+    public static ImageView favouriteButton, addToPlaylist;
 
     static Handler mHandler = new Handler();
 
@@ -114,7 +114,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     static AsyncTask<Void,Void,Void> setData;
 
-    int accentColor; static boolean isFavourite=false;
+    int accentColor;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -315,16 +315,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 }
                 case MotionEvent.ACTION_UP:
 
-                    if (MainActivity.total_seconds==0)
-                    {
-                        Toast.makeText(activity, "Player is still processing!", Toast.LENGTH_SHORT).show();
-                    }else{
-                        if (!isFavourite)
-                            favouriteButton.setImageDrawable(getDrawable(R.drawable.ic_favorite_full));
-                        else favouriteButton.setImageDrawable(getDrawable(R.drawable.ic_favorite));
-
-                        write_Favourite();
-                    }
+                   MainActivity.actionFavouriteClicked();
 
                 case MotionEvent.ACTION_CANCEL: {
                     ImageView view = (ImageView) v;
@@ -453,33 +444,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     }
 
-    void write_Favourite() {
-        String t = YTutils.readContent(this,"favourite.csv");
-        if (t!=null && !t.contains(MainActivity.videoID)) {
-            t += "\n"+MainActivity.videoID+"|"+MainActivity.total_seconds;
-            Toast.makeText(activity, "Added to favourites!", Toast.LENGTH_SHORT).show();
-            isFavourite=true;
-        }else if (t!=null && t.contains(MainActivity.videoID)) {
 
-            String[] lines = t.split("\n|\r");
-            StringBuilder builder = new StringBuilder();
-            for (String line : lines) {
-                if (!line.contains(MainActivity.videoID) && !line.isEmpty()) {
-                    builder.append("\n").append(line);
-                }
-            }
-
-            t = builder.toString().trim();
-
-            Toast.makeText(activity, "Removed from favourites!", Toast.LENGTH_SHORT).show();
-            isFavourite=false;
-        }else {
-            t = MainActivity.videoID+"|"+MainActivity.total_seconds;
-            Toast.makeText(activity, "Added to favourites!", Toast.LENGTH_SHORT).show();
-            isFavourite=true;
-        }
-        YTutils.writeContent(PlayerActivity2.this,"favourite.csv",t.trim());
-    }
 
     static ViewPager.OnPageChangeListener mainPageListener = new ViewPager.OnPageChangeListener() {
         @Override
@@ -549,10 +514,10 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
             String data = YTutils.readContent(activity,"favourite.csv");
             if (data!=null && data.contains(MainActivity.videoID)) {
-                isFavourite = true;
+                MainActivity.isFavourite = true;
                 favouriteButton.setImageDrawable(activity.getDrawable(R.drawable.ic_favorite_full));
             }else {
-                isFavourite=false;
+                MainActivity.isFavourite=false;
                 favouriteButton.setImageDrawable(activity.getDrawable(R.drawable.ic_favorite));
             }
         }else {

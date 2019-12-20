@@ -126,6 +126,37 @@
 
                     <LinearLayout
                         android:padding="3dp"
+                        android:id="@+id/equalizer_layout"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/history_background"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:layout_marginStart="10dp"
+                            android:padding="12dp"
+                            android:tint="@color/white"
+                            android:src="@drawable/ic_bands"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"/>
+
+                        <TextView
+                            android:fontFamily="@font/dmsans_font"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:layout_marginStart="15dp"
+                            android:text="Equalizer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:padding="3dp"
                         android:id="@+id/sleepTimer_layout"
                         android:clickable="true"
                         android:focusable="true"

@@ -13,10 +13,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
+import android.media.audiofx.Equalizer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -53,14 +55,24 @@ import com.facebook.network.connectionclass.ConnectionQuality;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.PlayerMessage;
+import com.google.android.exoplayer2.SeekParameters;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.analytics.AnalyticsListener;
+import com.google.android.exoplayer2.audio.AudioRendererEventListener;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
@@ -134,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static FragmentManager fragmentManager;
     public static Fragment PlaylistFrag, libraryFrag, FavouriteFrag,localMusicFrag, localSearchFrag;
     Fragment NCFrag; String ytLink;
-    static SharedPreferences preferences;
+    static SharedPreferences preferences,settingPref;
     public static LinearLayout bottom_player, adViewLayout;
     static ImageButton actionUp,actionPlay;static ProgressBar loadProgress,songProgress;
     static TextView actionTitle; static AdView adView;
@@ -142,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     static AsyncTask<Void,Void,Void> LoadOffline;
 
     public static ArrayList<NPlayModel> nPlayModels;
-    public static ExoPlayer player;  public static boolean supportFFmpeg=false,loadedFavFrag=false;
+    public static SimpleExoPlayer player;  public static boolean supportFFmpeg=false,loadedFavFrag=false;
     public static MediaSource mediaSource; private static final String TAG = "MainActivity";
     public static DefaultDataSourceFactory dataSourceFactory;
     public static DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
@@ -170,6 +182,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 e.printStackTrace();
             }
         }*/
+
+        settingPref = getSharedPreferences("settings",MODE_PRIVATE);
+        isEqualizerEnabled = settingPref.getBoolean("equalizer_enabled",false);
 
         dataSourceFactory = new DefaultDataSourceFactory(MainActivity.this,
                 Util.getUserAgent(MainActivity.this,
@@ -258,6 +273,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         mediaSession.setActive(true);
         mediaSession.setMediaButtonReceiver(mediaButtonReceiverPendingIntent);
 
+        setDefaultEqualizerValues();
+
         preferences = getSharedPreferences("history",MODE_PRIVATE);
         String list = preferences.getString("urls","");
         ArrayList<String> urls = new ArrayList<>();
@@ -323,6 +340,26 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
        /* File file = YTutils.getFile("Download/9WR9YF2.csv");
         Date lastModDate = new Date(file.lastModified());
         Log.e(TAG, "onCreate: Last modified "+lastModDate.toString());*/
+    }
+
+    void setDefaultEqualizerValues() {
+        boolean isSet = settingPref.getBoolean("equalizer_default",false);
+        if (!isSet) {
+            SharedPreferences.Editor editor = settingPref.edit();
+            int sessionId = player.getAudioComponent().getAudioSessionId();
+            mEqualizer = new Equalizer(1000,sessionId);
+            short numberFrequencyBands = mEqualizer.getNumberOfBands();
+            final short lowerEqualizerBandLevel = mEqualizer.getBandLevelRange()[0];
+            final short upperEqualizerBandLevel = mEqualizer.getBandLevelRange()[1];
+
+            editor.putInt("bandLength",numberFrequencyBands);
+            editor.putInt("lowerBand",lowerEqualizerBandLevel);
+            editor.putInt("higherBand",upperEqualizerBandLevel);
+            editor.putBoolean("equalizer_default",true);
+            editor.apply();
+
+            mEqualizer.release();
+        }
     }
 
     private static final long MEDIA_SESSION_ACTIONS = PlaybackStateCompat.ACTION_PLAY
@@ -833,15 +870,17 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static NotificationManagerCompat notificationManagerCompat;
     static NotificationManager notificationManager;
     static NotificationChannel notificationChannel;
-    static PendingIntent prevPendingIntent,pausePendingIntent,nextPendingIntent,clickPendingIntent;
+    static PendingIntent prevPendingIntent,pausePendingIntent,nextPendingIntent,clickPendingIntent,favouritePendingIntent;
     public static Bitmap bitmapIcon; static ArrayList<YTConfig> ytConfigs;
-    static NotificationCompat.Builder builder; public static boolean isplaying, sleepEndTrack=false,localPlayBack=false;
-    static boolean isLoop=false;
+    static NotificationCompat.Builder builder;
+    public static boolean isplaying, sleepEndTrack=false,localPlayBack=false,isFavourite=false,isEqualizerEnabled=false;
+    public static boolean isLoop=false,isEqualizerSet=false;
     static Handler mHandler = new Handler();
     static long total_duration = 0;
     public static int total_seconds; public static int nColor;
     public static ArrayList<String> yturls;
     public static int ytIndex = 0;
+    public static Equalizer mEqualizer;
 
     static class loadVideo_Local extends AsyncTask<Void,Void,Void> {
         String filePath;
@@ -1067,7 +1106,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             @Override
             public void onExtractionDone(List<YoutubeMedia> adativeStream, List<YoutubeMedia> muxedStream, YoutubeMeta meta) {
                 if (muxedStream.isEmpty()) {
-                    showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
+                    playNext();
+                    Toast.makeText(activity, videoTitle+": Couldn't get the required audio stream!", Toast.LENGTH_SHORT).show();
+                   // showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
                     return;
                 }
 
@@ -1084,9 +1125,55 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
             @Override
             public void onExtractionGoesWrong(final ExtractorException e) {
-                showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
+               // showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
+                playNext();
+                Toast.makeText(activity, videoTitle+": Couldn't get the required audio stream!", Toast.LENGTH_SHORT).show();
             }
         }).Extract(YTutils.getVideoID(yturl));
+    }
+
+    public static void actionFavouriteClicked() {
+        if (MainActivity.total_seconds==0)
+        {
+            Toast.makeText(activity, "Player is still processing!", Toast.LENGTH_SHORT).show();
+        }else{
+            try {
+                if (!MainActivity.isFavourite)
+                    PlayerActivity2.favouriteButton.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_favorite_full));
+                else PlayerActivity2.favouriteButton.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_favorite));
+            }catch (Exception ignored){}
+
+            MainActivity.write_Favourite();
+            rebuildNotification();
+        }
+    }
+
+    public static void write_Favourite() {
+        String t = YTutils.readContent(activity,"favourite.csv");
+        if (t!=null && !t.contains(MainActivity.videoID)) {
+            t += "\n"+MainActivity.videoID+"|"+MainActivity.total_seconds;
+            Toast.makeText(activity, "Added to favourites!", Toast.LENGTH_SHORT).show();
+            MainActivity.isFavourite=true;
+        }else if (t!=null && t.contains(MainActivity.videoID)) {
+
+            String[] lines = t.split("\n|\r");
+            StringBuilder builder = new StringBuilder();
+            for (String line : lines) {
+                if (!line.contains(MainActivity.videoID) && !line.isEmpty()) {
+                    builder.append("\n").append(line);
+                }
+            }
+
+            t = builder.toString().trim();
+
+            Toast.makeText(activity, "Removed from favourites!", Toast.LENGTH_SHORT).show();
+            MainActivity.isFavourite=false;
+        }else {
+            t = MainActivity.videoID+"|"+MainActivity.total_seconds;
+            Toast.makeText(activity, "Added to favourites!", Toast.LENGTH_SHORT).show();
+            MainActivity.isFavourite=true;
+        }
+        YTutils.writeContent(activity,"favourite.csv",t.trim());
     }
 
     static boolean dontAllowToPlay=false;
@@ -1140,6 +1227,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                             PlayerActivity2.totalDuration.setText(YTutils.milliSecondsToTimer(MainActivity.total_duration));
                         }catch (Exception e) { Log.e("PlayerActivity","not loaded yet!"); }
 
+                        addEqualizer();
+
                         /** Setting mediaSession metadata */
                         final MediaMetadataCompat.Builder metaData = new MediaMetadataCompat.Builder()
                                 .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, channelTitle)
@@ -1165,6 +1254,33 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         // Store video into history
         if (!localPlayBack)
         new saveToHistory().execute(YTutils.getYtUrl(videoID));
+    }
+
+    public static void addEqualizer() {
+        int audioSessionId = player.getAudioComponent().getAudioSessionId();
+        Log.e(TAG, "onAudioSessionId: AudioSessionID: "+audioSessionId );
+        mEqualizer = new Equalizer(1000, audioSessionId);
+        mEqualizer.setEnabled(isEqualizerEnabled);
+        isEqualizerSet=true;
+        int current = settingPref.getInt("position", 0);
+        if (current == 0) {
+            for (short seek_id = 0; seek_id < mEqualizer.getNumberOfBands(); seek_id++) {
+                int progressBar = settingPref.getInt("seek_" + seek_id, 1500);
+                short equalizerBandIndex = seek_id;
+                final short lowerEqualizerBandLevel = mEqualizer.getBandLevelRange()[0];
+                Log.i("seek_" + seek_id, ":" + progressBar);
+                if (progressBar != 1500) {
+                    mEqualizer.setBandLevel(equalizerBandIndex,
+                            (short) (progressBar + lowerEqualizerBandLevel));
+                } else {
+
+                    mEqualizer.setBandLevel(equalizerBandIndex,
+                            (short) (progressBar + lowerEqualizerBandLevel));
+                }
+            }
+        } else {
+            mEqualizer.usePreset((short) (current - 1));
+        }
     }
 
     private static void addFormatToList(final String videoTitle, final YtFile ytfile, final String channelTitle) {
@@ -1216,10 +1332,13 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static void rebuildNotification() {
         boolean setgoing = true;
         int icon = R.drawable.ic_pause_notify;
+        int favicon = R.drawable.ic_favorite;
         if (!isplaying) {
             icon = R.drawable.ic_play_notify;
             setgoing = false;
         }
+        if (isFavourite)
+            favicon = R.drawable.ic_favorite_full;
 
         builder = new NotificationCompat.Builder(activity, "channel_01")
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -1237,6 +1356,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 .setContentIntent(clickPendingIntent)
                 .setContentText(channelTitle)
                 .setLargeIcon(bitmapIcon);
+
+        if (!localPlayBack)
+            builder.addAction(favicon,"Favourite",favouritePendingIntent);
 
         notificationManagerCompat.notify(1, builder.build());
     }
@@ -1261,6 +1383,11 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         newintent = new Intent(MainActivity.this, MainActivity.class);
         newintent.putExtra("DO", "focus");
         clickPendingIntent = PendingIntent.getActivity(this, 4, newintent, 0);
+        /** Favourite Pending intent */
+        newintent = new Intent(this,SongBroadCast.class);
+        newintent.setAction("com.kpstv.youtube.FAVOURITE_SONG");
+        favouritePendingIntent = PendingIntent.getBroadcast(this,10,newintent,0);
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = getString(R.string.channel_name);

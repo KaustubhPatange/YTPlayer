@@ -106,6 +106,9 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                     Toast.makeText(context, "Error: "+e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
                 break;
+            case "com.kpstv.youtube.FAVOURITE_SONG":
+                MainActivity.actionFavouriteClicked();
+                break;
             case "com.kpstv.youtube.OPEN_SHARE_SONG":
                 try {
                     Uri uri = Uri.parse(intent.getStringExtra("filePath"));

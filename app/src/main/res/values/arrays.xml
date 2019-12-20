@@ -4,6 +4,20 @@
 
     </array>
 
+    <string-array name="presets">
+        <item>Normal</item>
+        <item>Classical</item>
+        <item>Dance</item>
+        <item>Flat</item>
+        <item>Folk</item>
+        <item>Heavy Metal</item>
+        <item>Hip Hop</item>
+        <item>Jazz</item>
+        <item>Pop</item>
+        <item>Rock</item>
+        <item>Custom</item>
+    </string-array>
+
     <string-array name="autocomplete_genre">
         <item>Blues</item>
         <item>Classic Rock</item>

@@ -28,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kpstv.youtube.AppInterface;
+import com.kpstv.youtube.EqualizerActivity;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.RingdroidEditActivity;
@@ -52,7 +53,7 @@ public class LibraryFragment extends Fragment implements AppInterface {
     View v;
     Toolbar toolbar; FragmentActivity activity;
     LinearLayout playlistLayout, settingsLayout, sleepLayout, audioCutterLayout,
-            localMusicLayout,favLayout,SOW,SOF;
+            localMusicLayout, equalizerLayout,favLayout,SOW,SOF;
     ImageView githubView,pulseView,myWebView,moonId;
     RecyclerView recyclerView; LinearLayoutManager manager;
     String region; LinearLayout commonLayout; RelativeLayout progressLayout; SearchAdapter adapter;
@@ -118,6 +119,7 @@ public class LibraryFragment extends Fragment implements AppInterface {
         commonLayout = v.findViewById(R.id.common_recycler_layout);
         sleepLayout = v.findViewById(R.id.sleepTimer_layout);
         audioCutterLayout = v.findViewById(R.id.audio_cutter_layout);
+        equalizerLayout = v.findViewById(R.id.equalizer_layout);
         localMusicLayout = v.findViewById(R.id.local_music_layout);
         favLayout = v.findViewById(R.id.favourite_layout);
         progressLayout = v.findViewById(R.id.progressLayout);
@@ -419,6 +421,13 @@ public class LibraryFragment extends Fragment implements AppInterface {
                     android.R.anim.fade_out);
             ft.replace(R.id.fragment_container, MainActivity.PlaylistFrag);
             ft.commit();
+        });
+
+        equalizerLayout.setOnClickListener(view -> {
+            if (!MainActivity.isEqualizerSet) {
+                Toast.makeText(activity, "Equalizer will be enable when you play a song!", Toast.LENGTH_SHORT).show();
+            }else
+            startActivity(new Intent(activity, EqualizerActivity.class));
         });
 
         settingsLayout.setOnClickListener(v->
