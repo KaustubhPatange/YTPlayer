@@ -23,12 +23,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".EqualizerActivity"></activity>
         <!-- TODO: Change Sample AdMob AppNotify ID: ca-app-pub-3940256099942544~3347511713, ca-app-pub-1763645001743174~5602018181 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-1763645001743174~5602018181" />
-
+        <activity
+            android:name=".EqualizerActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".EditTagActivity"
             android:launchMode="singleTask"

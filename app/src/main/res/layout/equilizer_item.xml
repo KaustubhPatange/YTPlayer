@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
+    android:padding="7dp"
     android:id="@+id/equalizer_layout"
     android:layout_weight="1"
     android:orientation="horizontal"

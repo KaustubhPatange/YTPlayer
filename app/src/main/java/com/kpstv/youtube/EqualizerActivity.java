@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -47,15 +48,47 @@ public class EqualizerActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        preferences = getSharedPreferences("settings",MODE_PRIVATE);
+
         setTitle("Equalizer");
 
         spinner = findViewById(R.id.preset_spinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this
-                , R.array.presets,android.R.layout.simple_spinner_item);
+
+        short m = mEqualizer.getNumberOfPresets();
+        String[] styles = new String[m];
+        for (int i=0;i<m;i++) {
+            styles[i] = mEqualizer.getPresetName((short)i);
+        }
+
+         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, styles);
+        /*ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this
+                , R.array.presets,android.R.layout.simple_spinner_item);*/
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+        int default_preset = preferences.getInt("selected_preset",0);
+        if (default_preset!=0)
+            spinner.setSelection(default_preset);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                Log.e(TAG, "onItemSelected: Selected: "+i+", Long: "+l );
+                mEqualizer.usePreset((short)i);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putInt("selected_preset",i);
+               /* for (int k=0;k<mEqualizer.getNumberOfBands();k++) {
+                    View v = mLinearLayout.view
+                    editor.putInt("seek_" + k, seekBar.getProgress());
+                }*/
+                editor.apply();
+                setLayout(false);
+                Log.e(TAG, "onItemSelected: Current Preset: "+mEqualizer.getCurrentPreset() );
+            }
 
-        preferences = getSharedPreferences("settings",MODE_PRIVATE);
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
         mLinearLayout = findViewById(R.id.linearLayout);
 
@@ -64,11 +97,12 @@ public class EqualizerActivity extends AppCompatActivity {
         if (mEqualizer==null)
             return;
 
-        setLayout();
+        setLayout(true);
 
     }
 
-    void setLayout() {
+    void setLayout(boolean loadOrSave) {
+        mLinearLayout.removeAllViews();
         short numberFrequencyBands = mEqualizer.getNumberOfBands();
 
         final short lowerEqualizerBandLevel = mEqualizer.getBandLevelRange()[0];
@@ -88,9 +122,11 @@ public class EqualizerActivity extends AppCompatActivity {
             if (bandFreq>1000)
             {
                 texttoPut = (YTutils.dividePattern(bandFreq,1000,"0.0"));
-                if (texttoPut.split(".")[1].equals("0")) {
-                   texttoPut = texttoPut.split(".")[0]+" kHz";
-                }
+                if (!texttoPut.contains(".")) {
+                    texttoPut += " kHz";
+                }else if (texttoPut.split("\\.")[1].equals("0")) {
+                   texttoPut = texttoPut.split("\\.")[0]+" kHz";
+                }else texttoPut += " kHz";
             }else if (bandFreq>10 && bandFreq<100) {
                 texttoPut = " "+bandFreq+" Hz";
             }
@@ -107,16 +143,30 @@ public class EqualizerActivity extends AppCompatActivity {
             seekBar.setMax(upperEqualizerBandLevel - lowerEqualizerBandLevel);
 
             final int seek_id = i;
-            int progressBar = preferences.getInt("seek_" + seek_id, 1500);
-            if (progressBar != 1500) {
+            int progressBar=1500;
+            if (!loadOrSave) {
+                //int centerFrequency = mEqualizer.getCenterFreq(equalizerBandIndex)/1000;
+                Log.e(TAG, "setLayout: Band: "+equalizerBandIndex+", BandLevel: "
+                + (mEqualizer.getBandLevel(equalizerBandIndex)+upperEqualizerBandLevel));
+
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putInt("seek_" + seek_id, (mEqualizer.getBandLevel(equalizerBandIndex)+upperEqualizerBandLevel));
+                editor.apply();
+                progressBar = preferences.getInt("seek_" + seek_id, 1500);
                 seekBar.setProgress(progressBar);
-                mEqualizer.setBandLevel(equalizerBandIndex,
-                        (short) (progressBar + lowerEqualizerBandLevel));
-            } else {
-                seekBar.setProgress(mEqualizer.getBandLevel(equalizerBandIndex));
-                mEqualizer.setBandLevel(equalizerBandIndex,
-                        (short) (progressBar + lowerEqualizerBandLevel));
+            }else {
+                progressBar = preferences.getInt("seek_" + seek_id, 1500);
+                if (progressBar != 1500) {
+                    seekBar.setProgress(progressBar);
+                    mEqualizer.setBandLevel(equalizerBandIndex,
+                            (short) (progressBar + lowerEqualizerBandLevel));
+                } else {
+                    seekBar.setProgress(mEqualizer.getBandLevel(equalizerBandIndex));
+                    mEqualizer.setBandLevel(equalizerBandIndex,
+                            (short) (progressBar + lowerEqualizerBandLevel));
+                }
             }
+
 
             seekBar.setOnSeekChangeListener(new OnSeekChangeListener() {
                 @Override
@@ -134,7 +184,7 @@ public class EqualizerActivity extends AppCompatActivity {
                 public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putInt("seek_" + seek_id, seekBar.getProgress());
-                    editor.putInt("position", 0);
+                   // editor.putInt("position", 0);
                     editor.apply();
                 }
             });
@@ -166,10 +216,12 @@ public class EqualizerActivity extends AppCompatActivity {
     }
 
     void setEqualizerLayout() {
+        Log.e(TAG, "setEqualizerLayout: Enabled" + MainActivity.isEqualizerEnabled);
         LinearLayout layout = findViewById(R.id.mainlayout);
         if (MainActivity.isEqualizerEnabled) {
             layout.setEnabled(true);
         }else layout.setEnabled(false);
+
     }
 
     @Override
@@ -178,6 +230,7 @@ public class EqualizerActivity extends AppCompatActivity {
         MenuItem menuItem = menu.findItem(R.id.equalizer_enabled);
         menuItem.setActionView(R.layout.switch_item);
         final Switch sw = menuItem.getActionView().findViewById(R.id.action_switch);
+        sw.setChecked(settingPref.getBoolean("equalizer_enabled",false));
         sw.setOnCheckedChangeListener((compoundButton, b) -> {
             MainActivity.isEqualizerEnabled = b;
             setEqualizerLayout();

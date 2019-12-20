@@ -1259,8 +1259,15 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static void addEqualizer() {
         int audioSessionId = player.getAudioComponent().getAudioSessionId();
         Log.e(TAG, "onAudioSessionId: AudioSessionID: "+audioSessionId );
+        if (mEqualizer!=null)
+            mEqualizer.release();
         mEqualizer = new Equalizer(1000, audioSessionId);
         mEqualizer.setEnabled(isEqualizerEnabled);
+        short s = 5;
+        mEqualizer.usePreset(s);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt("selected_preset",s);
+        editor.apply();
         isEqualizerSet=true;
         int current = settingPref.getInt("position", 0);
         if (current == 0) {
@@ -1273,13 +1280,12 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                     mEqualizer.setBandLevel(equalizerBandIndex,
                             (short) (progressBar + lowerEqualizerBandLevel));
                 } else {
-
                     mEqualizer.setBandLevel(equalizerBandIndex,
                             (short) (progressBar + lowerEqualizerBandLevel));
                 }
             }
         } else {
-            mEqualizer.usePreset((short) (current - 1));
+           // mEqualizer.usePreset((short) (current - 1));
         }
     }
 
