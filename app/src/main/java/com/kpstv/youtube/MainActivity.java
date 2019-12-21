@@ -106,10 +106,10 @@ import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
-import com.kpstv.youtube.ytextractor.ExtractorException;
-import com.kpstv.youtube.ytextractor.YoutubeStreamExtractor;
-import com.kpstv.youtube.ytextractor.model.YoutubeMedia;
-import com.kpstv.youtube.ytextractor.model.YoutubeMeta;
+import com.naveed.ytextractor.ExtractorException;
+import com.naveed.ytextractor.YoutubeStreamExtractor;
+import com.naveed.ytextractor.model.YTMedia;
+import com.naveed.ytextractor.model.YoutubeMeta;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1117,11 +1117,18 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         new YoutubeStreamExtractor(new YoutubeStreamExtractor.ExtractorListner(){
 
             @Override
-            public void onExtractionDone(List<YoutubeMedia> adativeStream, List<YoutubeMedia> muxedStream, YoutubeMeta meta) {
-                if (muxedStream.isEmpty()) {
+            public void onExtractionGoesWrong(ExtractorException e) {
+                playNext();
+                Toast.makeText(activity, videoTitle+": Couldn't get the required audio stream!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onExtractionDone(List<YTMedia> adativeStream, List<YTMedia> muxedStream, YoutubeMeta meta) {
+                Log.e(TAG, "onExtractionDone: Parsing Audio using second method" );
+                if (adativeStream.isEmpty()) {
                     playNext();
                     Toast.makeText(activity, videoTitle+": Couldn't get the required audio stream!", Toast.LENGTH_SHORT).show();
-                   // showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
+                    // showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
                     return;
                 }
 
@@ -1129,19 +1136,17 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
                 ytConfigs.clear();
 
-                List<YoutubeMedia> bestStream = getBestStream(adativeStream);
+                List<YTMedia> bestStream = getBestStream(adativeStream);
 
-                for(int i=0; i<bestStream.size();i++) addVideoToList(bestStream.get(i),videoTitle,channelTitle);
+                Log.e(TAG, "onExtractionDone: Media Size: " +adativeStream.size());
+
+                for(int i=0; i<adativeStream.size();i++) addVideoToList(adativeStream.get(i),videoTitle,channelTitle);
+
+                Log.e(TAG, "onExtractionDone: AudioLink: "+audioLink );
 
                 continueinMainThread(audioLink);
             }
 
-            @Override
-            public void onExtractionGoesWrong(final ExtractorException e) {
-               // showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
-                playNext();
-                Toast.makeText(activity, videoTitle+": Couldn't get the required audio stream!", Toast.LENGTH_SHORT).show();
-            }
         }).Extract(YTutils.getVideoID(yturl));
     }
 
@@ -1347,7 +1352,36 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         ytConfigs.add(new YTConfig(ytText, ytfile.getUrl(), ytfile.getFormat().getExt(), videoTitle, channelTitle,isaudio));
     }
 
-    private static void addVideoToList(final YoutubeMedia media, final String videoTitle, final String channelTitle) {
+    private static void addVideoToList(final YTMedia media, final String videoTitle, final String channelTitle) { ;
+
+        String ytText=""; boolean isaudio=false;
+        String ext = "m4a";
+        try {
+
+            if (media.getAudioSampleRate() != 0)
+            {
+                isaudio = true;
+                ytText = "Audio " + media.getBitrate()/1000 + " kbit/s";
+            }
+            else {
+                ext = "mp4";
+                ytText = (media.getFps() == 60) ? "Video " + media.getHeight() + "p60" :
+                        "Video " + media.getHeight() + "p";
+                if (media.getBitrate() == -1) {
+                    ytText += " (no audio)";
+                }
+            }
+            Log.e(TAG, "addVideoToList: MediaSampleRate: "+media.getAudioSampleRate() );
+        }catch (Exception e){e.printStackTrace();}
+        if (isaudio) {
+            Log.e(TAG, "addVideoToList: AudioUrlSet true" );
+            audioLink = media.getUrl();
+        }
+
+        ytConfigs.add(new YTConfig(ytText, media.getUrl(), ext, videoTitle, channelTitle,isaudio));
+    }
+
+   /* private static void addVideoToList(final YTMedia media, final String videoTitle, final String channelTitle) {
 
         String ytText;boolean isaudio=false;
         if (media.getResSize()!=null) {
@@ -1370,7 +1404,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         ytConfigs.add(new YTConfig(ytText, media.getUrl(), media.getExtension(), videoTitle,channelTitle,isaudio));
     }
 
-
+*/
     public static void rebuildNotification() {
         boolean setgoing = true;
         int icon = R.drawable.ic_pause_notify;
@@ -1638,18 +1672,49 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         }
         notificationManagerCompat.notify(1, builder.build());*/
     }
+    private static YtFile getBestStream(SparseArray<YtFile> ytFiles) {
+        ConnectionQuality connectionQuality = ConnectionQuality.MODERATE;
+        connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQuality();
+        int[] itags = new int[]{251, 141, 140, 17};
 
-    private static List<YoutubeMedia> getBestStream(List<YoutubeMedia> streams) {
-        List<YoutubeMedia> medias = new ArrayList<>();
+        if (connectionQuality != null && connectionQuality != ConnectionQuality.UNKNOWN) {
+            switch (connectionQuality) {
+                case POOR:
+                    itags = new int[]{17, 140, 251, 141};
+                    break;
+                case MODERATE:
+                    itags = new int[]{251, 141, 140, 17};
+                    break;
+                case GOOD:
+                    itags = new int[]{141, 251, 140, 17};
+                    break;
+                case EXCELLENT:
+                    itags = new int[]{141, 251, 140, 17};
+                    break;
+            }
+        }
+
+        if (ytFiles.get(itags[0]) != null) {
+            return ytFiles.get(itags[0]);
+        } else if (ytFiles.get(itags[1]) != null) {
+            return ytFiles.get(itags[1]);
+        } else if (ytFiles.get(itags[2]) != null) {
+            return ytFiles.get(itags[2]);
+        }
+        return ytFiles.get(itags[3]);
+    }
+
+    private static List<YTMedia> getBestStream(List<YTMedia> streams) {
+        List<YTMedia> medias = new ArrayList<>();
         for(int i=0; i<streams.size();i++) {
-            YoutubeMedia media = streams.get(i);
-            if (!media.isAudioOnly()) {
+            YTMedia media = streams.get(i);
+             if (media.getHeight()!=-1) {
                 int j=0;
                 while (j<streams.size()) {
-                    YoutubeMedia media1 = streams.get(j);
-                    if (media.getResolution().equals(media1.getResolution())) {
-                        int m1 = Integer.parseInt(media.getBitrate());
-                        int m2 = Integer.parseInt(media1.getBitrate());
+                    YTMedia media1 = streams.get(j);
+                    if (media.getQuality().equals(media1.getQuality())) {
+                        int m1 = media.getBitrate();
+                        int m2 = media1.getBitrate();
                         if (m2>m1) {
                             media=media1;
                         }
@@ -1708,37 +1773,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         }
     }
 
-    private static YtFile getBestStream(SparseArray<YtFile> ytFiles) {
-        ConnectionQuality connectionQuality = ConnectionQuality.MODERATE;
-        connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQuality();
-        int[] itags = new int[]{251, 141, 140, 17};
 
-        if (connectionQuality != null && connectionQuality != ConnectionQuality.UNKNOWN) {
-            switch (connectionQuality) {
-                case POOR:
-                    itags = new int[]{17, 140, 251, 141};
-                    break;
-                case MODERATE:
-                    itags = new int[]{251, 141, 140, 17};
-                    break;
-                case GOOD:
-                    itags = new int[]{141, 251, 140, 17};
-                    break;
-                case EXCELLENT:
-                    itags = new int[]{141, 251, 140, 17};
-                    break;
-            }
-        }
-
-        if (ytFiles.get(itags[0]) != null) {
-            return ytFiles.get(itags[0]);
-        } else if (ytFiles.get(itags[1]) != null) {
-            return ytFiles.get(itags[1]);
-        } else if (ytFiles.get(itags[2]) != null) {
-            return ytFiles.get(itags[2]);
-        }
-        return ytFiles.get(itags[3]);
-    }
 
     static void showAlert(String title, String message, boolean isalert) {
         int icon = android.R.drawable.ic_dialog_info;

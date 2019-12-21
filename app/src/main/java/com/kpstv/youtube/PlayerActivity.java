@@ -70,10 +70,7 @@ import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
-import com.kpstv.youtube.ytextractor.ExtractorException;
-import com.kpstv.youtube.ytextractor.YoutubeStreamExtractor;
-import com.kpstv.youtube.ytextractor.model.YoutubeMedia;
-import com.kpstv.youtube.ytextractor.model.YoutubeMeta;
+import com.naveed.ytextractor.model.YTMedia;
 import com.spyhunter99.supertooltips.ToolTip;
 import com.spyhunter99.supertooltips.ToolTipManager;
 import com.warkiz.widget.IndicatorSeekBar;
@@ -872,7 +869,7 @@ public class PlayerActivity extends AppCompatActivity {
 
     private void parseVideoNewMethod(String yturl, String videoTitle) {
         isgoing = true;
-        new YoutubeStreamExtractor(new YoutubeStreamExtractor.ExtractorListner(){
+        /*new YoutubeStreamExtractor(new YoutubeStreamExtractor.ExtractorListner(){
 
             @Override
             public void onExtractionDone(List<YoutubeMedia> adativeStream, List<YoutubeMedia> muxedStream, YoutubeMeta meta) {
@@ -896,13 +893,13 @@ public class PlayerActivity extends AppCompatActivity {
             public void onExtractionGoesWrong(final ExtractorException e) {
                 showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
             }
-        }).Extract(YTutils.getVideoID(yturl));
+        }).Extract(YTutils.getVideoID(yturl));*/
     }
 
-    private List<YoutubeMedia> getBestStream(List<YoutubeMedia> streams) {
-        List<YoutubeMedia> medias = new ArrayList<>();
-        for(int i=0; i<streams.size();i++) {
-            YoutubeMedia media = streams.get(i);
+    private List<YTMedia> getBestStream(List<YTMedia> streams) {
+        List<YTMedia> medias = new ArrayList<>();
+        /*for(int i=0; i<streams.size();i++) {
+            YTMedia media = streams.get(i);
             if (!media.isAudioOnly()) {
                 int j=0;
                 while (j<streams.size()) {
@@ -920,7 +917,7 @@ public class PlayerActivity extends AppCompatActivity {
             }else {
                 medias.add(media);
             }
-        }
+        }*/
         return medias;
     }
 
