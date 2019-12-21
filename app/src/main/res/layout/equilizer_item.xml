@@ -20,6 +20,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
     <com.warkiz.widget.IndicatorSeekBar
+        app:isb_thumb_color="@color/colorAccent"
+        app:isb_track_progress_color="@color/colorAccent"
         app:isb_show_thumb_text="false"
         app:isb_seek_smoothly="true"
         app:isb_show_indicator="none"

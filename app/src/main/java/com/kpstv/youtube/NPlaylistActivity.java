@@ -25,6 +25,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,6 +40,7 @@ import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
+import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -54,13 +56,13 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
     TextView cTitle,cAuthor;
     TextView removeFromQueue;
     RecyclerView recyclerView;
-    ImageView cImageView;
+    ImageView cImageView; CircularProgressBar progressBar;
     RelativeLayout relativeLayout;
     LinearLayoutManager manager; ArrayList<String> checklist = new ArrayList<>();
     private ItemTouchHelper mItemTouchHelper;
     int whitecolor,accentcolor; private Handler handler = new Handler();
     private Runnable runnable; ItemTouchHelper.Callback callback;
-    private static final String TAG = "NPlaylistActivity";
+    private static final String TAG = "NPlaylistActivity"; boolean preloaded=false;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -72,6 +74,8 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(" ");
+
+        progressBar = findViewById(R.id.progressBar);
 
         whitecolor = ContextCompat.getColor(this,R.color.white);
         accentcolor = ContextCompat.getColor(this,R.color.colorAccent);
@@ -190,52 +194,182 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
                     adapter.notifyDataSetChanged();
                 }
-
                 handler.postDelayed(this, 2000);
             }
         };
 
         handler.postDelayed(runnable, 2000);
 
+
+
+    }
+
+    void enabled() {
+        progressBar.setVisibility(View.VISIBLE);
+        progressBar.setProgress(0);
+        recyclerView.setVisibility(View.GONE);
+    }
+
+    void disabled() {
+        progressBar.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.VISIBLE);
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    @Override
+    protected void onStart() {
+        super.onStart();
         if (MainActivity.yturls.size()>0) {
             models.clear();
             // Check for old data....
             if (MainActivity.nPlayModels.size()>0 && MainActivity.yturls.size() == MainActivity.nPlayModels.size()) {
-                boolean sameData=true;
-                for(int i=0;i<MainActivity.nPlayModels.size();i++) {
-                    MainActivity.nPlayModels.get(i).set_playing(false);
-                    String yturl = MainActivity.yturls.get(i);
-                    String nurl = MainActivity.nPlayModels.get(i).getUrl();
 
-                    String videoID;
+                new AsyncTask<Void,Float,Void>() {
+                    boolean sameData=true;
 
-                    /** For local playback stuff */
-                    if (MainActivity.localPlayBack)
-                        videoID = MainActivity.nPlayModels.get(i).getUrl();
-                    else videoID = YTutils.getVideoID_ImageUri(MainActivity.nPlayModels.get(i).getModel()
-                            .getVideMeta().getImgUrl());
-
-                    if (MainActivity.videoID.equals(videoID)) {
-                        MainActivity.nPlayModels.get(i).set_playing(true);
+                    @Override
+                    protected void onPreExecute() {
+                        enabled();
+                        super.onPreExecute();
                     }
 
-                    if (!yturl.equals(nurl)) {
-                        sameData = false;
+                    @Override
+                    protected void onProgressUpdate(Float... values) {
+                        super.onProgressUpdate(values);
+                        progressBar.setProgress(values[0]);
                     }
-                }
-                if (sameData) {
-                    reloadAdapter();
-                    return;
-                }
-            }
-            for (String url : MainActivity.yturls)
-            {
-                new getData(url,this).execute();
-            }
-        }
+
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        final int totalSize = MainActivity.nPlayModels.size();
+                        for(int i=0;i<MainActivity.nPlayModels.size();i++) {
+                            MainActivity.nPlayModels.get(i).set_playing(false);
+                            String yturl = MainActivity.yturls.get(i);
+                            String nurl = MainActivity.nPlayModels.get(i).getUrl();
+
+                            String videoID;
+
+                            /** For local playback stuff */
+                            if (MainActivity.localPlayBack)
+                                videoID = MainActivity.nPlayModels.get(i).getUrl();
+                            else videoID = YTutils.getVideoID_ImageUri(MainActivity.nPlayModels.get(i).getModel()
+                                    .getVideMeta().getImgUrl());
+
+                            if (MainActivity.videoID.equals(videoID)) {
+                                MainActivity.nPlayModels.get(i).set_playing(true);
+                            }
+
+                            publishProgress((float)((float)i*(float)100.0/(float)(totalSize)));
+
+                            if (!yturl.equals(nurl)) {
+                                sameData = false;
+                                return null;
+                            }
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        super.onPostExecute(aVoid);
+                        disabled();
+                        if (sameData) {
+                            reloadAdapter();
+                            preloaded=true;
+                            return;
+                        }
+                        runCommonTask();
+                    }
+                }.execute();
+            }else runCommonTask();
+        }else runCommonTask();
 
     }
 
+
+    void runCommonTask() {
+        if (MainActivity.localPlayBack)
+            new getAllOfflineData(this).execute();
+        else {
+            new getData(this).execute();
+        }
+    }
+
+    class getAllOfflineData extends AsyncTask<Void,Float,Void> {
+        Context context;
+
+        public getAllOfflineData(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            enabled();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            adapter.notifyDataSetChanged();
+            disabled();
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected void onProgressUpdate(Float... values) {
+            super.onProgressUpdate(values);
+            progressBar.setProgress(values[0]);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (MainActivity.localPlayBack) {
+                int i=0;
+                final int totalSize = MainActivity.yturls.size();
+                for (String url: MainActivity.yturls) {
+                    File f = new File(url);
+                    Uri uri = Uri.fromFile(f);
+                    try {
+                        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                        mmr.setDataSource(NPlaylistActivity.this,uri);
+                        String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                        String title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+
+                        byte [] data = mmr.getEmbeddedPicture();
+
+                        Bitmap icon;
+
+                        if(data != null)
+                            icon = BitmapFactory.decodeByteArray(data, 0, data.length);
+                        else
+                            icon = YTutils.drawableToBitmap(ContextCompat.getDrawable(NPlaylistActivity.this,
+                                    R.drawable.ic_pulse));
+
+                        if (artist==null) artist ="Unknown artist";
+                        if (title==null) title = YTutils.getVideoTitle(f.getName());
+
+                        if (title.contains("."))
+                            title = title.split("\\.")[0];
+
+                        MetaModel model = new MetaModel(title,artist,null);
+                        YTMeta meta = new YTMeta(model);
+                        if (MainActivity.videoID.equals(url))
+                            models.add(new NPlayModel(url,meta,true));
+                        else  models.add(new NPlayModel(url,meta,false));
+
+                        publishProgress((float)((float)i*(float)100.0/(float)(totalSize)));
+
+                        models.get(models.size()-1).setIcon(icon);
+                        i++;
+
+                    }catch (Exception e) {
+                        // TODO: Do something when cannot played...
+                    }
+                }
+            }
+            return null;
+        }
+    }
 
     @Override
     protected void onDestroy() {
@@ -308,72 +442,51 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
         setCheckedCallbacks();
     }
 
-    class getData extends AsyncTask<Void,Void,Void> {
+    class getData extends AsyncTask<Void,Float,Void> {
 
-        String url; Context context; YTMeta meta;
+         Context context; YTMeta meta;
 
-        public getData(String url, Context context) {
-            this.url = url;
+        public getData(Context context) {
             this.context = context;
         }
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            enabled();
+        }
+
+        @Override
         protected void onPostExecute(Void aVoid) {
-            if (meta.getVideMeta()!=null) {
+            disabled();
+            if (models.size()>0) {
                 adapter.notifyDataSetChanged();
             }
             super.onPostExecute(aVoid);
         }
 
         @Override
+        protected void onProgressUpdate(Float... values) {
+            super.onProgressUpdate(values);
+            progressBar.setProgress(values[0]);
+        }
+
+        @Override
         protected Void doInBackground(Void... voids) {
-            if (MainActivity.localPlayBack) {
-                File f = new File(url);
-                Uri uri = Uri.fromFile(f);
-                try {
-                    MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-                    mmr.setDataSource(NPlaylistActivity.this,uri);
-                    String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-                    String title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+            int i=0;
+            final int totalSize = MainActivity.yturls.size();
+            for (String url: MainActivity.yturls) {
+                Log.e(TAG, "doInBackground: NPlayListActivity: " + url);
 
-                    byte [] data = mmr.getEmbeddedPicture();
-
-                    Bitmap icon;
-
-                    if(data != null)
-                        icon = BitmapFactory.decodeByteArray(data, 0, data.length);
-                    else
-                        icon = YTutils.drawableToBitmap(ContextCompat.getDrawable(NPlaylistActivity.this,
-                                R.drawable.ic_pulse));
-
-                    if (artist==null) artist ="Unknown artist";
-                    if (title==null) title = YTutils.getVideoTitle(f.getName());
-
-                    if (title.contains("."))
-                        title = title.split("\\.")[0];
-
-                    MetaModel model = new MetaModel(title,artist,null);
-                    meta = new YTMeta(model);
-                    if (MainActivity.videoID.equals(url))
-                        models.add(new NPlayModel(url,meta,true));
-                    else  models.add(new NPlayModel(url,meta,false));
-
-                    models.get(models.size()-1).setIcon(icon);
-
-                }catch (Exception e) {
-                    // TODO: Do something when cannot played...
+                meta = new YTMeta(YTutils.getVideoID(url));
+                if (meta.getVideMeta() != null) {
+                    if (YTutils.getVideoID_ImageUri(meta.getVideMeta().getImgUrl()).equals(MainActivity.videoID)) {
+                        models.add(new NPlayModel(url, meta, true));
+                    } else
+                        models.add(new NPlayModel(url, meta, false));
                 }
-                return null;
-            }
-
-            Log.e(TAG, "doInBackground: NPlayListActivity: "+url );
-
-            meta = new YTMeta(YTutils.getVideoID(url));
-            if (meta.getVideMeta()!=null) {
-                if (YTutils.getVideoID_ImageUri(meta.getVideMeta().getImgUrl()).equals(MainActivity.videoID)) {
-                   models.add(new NPlayModel(url,meta,true));
-                }else
-                    models.add(new NPlayModel(url,meta,false));
+                publishProgress((float) ((float) i * (float) 100.0 / (float) (totalSize)));
+                i++;
             }
             return null;
         }

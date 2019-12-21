@@ -4,18 +4,14 @@
 
     </array>
 
-    <string-array name="presets">
-        <item>Normal</item>
-        <item>Classical</item>
-        <item>Dance</item>
-        <item>Flat</item>
-        <item>Folk</item>
-        <item>Heavy Metal</item>
-        <item>Hip Hop</item>
-        <item>Jazz</item>
-        <item>Pop</item>
-        <item>Rock</item>
-        <item>Custom</item>
+    <string-array name="reverb_presets">
+        <item>None</item>
+        <item>Small Room</item>
+        <item>Medium Room</item>
+        <item>Large Room</item>
+        <item>Medium Hall</item>
+        <item>Large Hall</item>
+        <item>Plate</item>
     </string-array>
 
     <string-array name="autocomplete_genre">

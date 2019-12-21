@@ -109,6 +109,23 @@
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"/>
           </LinearLayout>
+         <LinearLayout
+             android:orientation="vertical"
+             android:gravity="center"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content">
+             <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                 android:id="@+id/progressBar"
+                 app:cpb_progress="20"
+                 android:layout_width="45dp"
+                 android:layout_height="45dp"
+                 app:cpb_background_progressbar_width="4dp"
+                 app:cpb_progress_direction="to_right"
+                 app:cpb_background_progressbar_color="@color/background"
+                 app:cpb_progressbar_color="@color/colorAccent"
+                 app:cpb_progressbar_width="4dp"
+                 app:cpb_round_border="false" />
+         </LinearLayout>
           <android.support.v7.widget.RecyclerView
               android:id="@+id/my_recycler_view"
               android:layout_width="match_parent"

@@ -2,15 +2,10 @@ package com.kpstv.youtube;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
-import android.media.audiofx.Equalizer;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,69 +14,71 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.googlecode.mp4parser.authoring.tracks.TextTrackImpl;
 import com.kpstv.youtube.utils.YTutils;
 import com.warkiz.widget.IndicatorSeekBar;
 import com.warkiz.widget.OnSeekChangeListener;
 import com.warkiz.widget.SeekParams;
 
-import org.w3c.dom.Text;
-
+import static com.kpstv.youtube.MainActivity.bassBoost;
+import static com.kpstv.youtube.MainActivity.loudnessEnhancer;
 import static com.kpstv.youtube.MainActivity.mEqualizer;
+import static com.kpstv.youtube.MainActivity.presetReverb;
 import static com.kpstv.youtube.MainActivity.settingPref;
+import static com.kpstv.youtube.MainActivity.virtualizer;
 
 public class EqualizerActivity extends AppCompatActivity {
 
     LinearLayout mLinearLayout;
-    Spinner spinner;
+    Spinner equalizerSpinner, reverbSpinner;
     SharedPreferences preferences;
     private static final String TAG = "EqualizerActivity";
+    private IndicatorSeekBar bassBoastSeekbar;
+    private IndicatorSeekBar virtualizerSeekbar;
+    private IndicatorSeekBar loudnessSeekbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_equalizer);
+        initViews();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        preferences = getSharedPreferences("settings",MODE_PRIVATE);
+        preferences = getSharedPreferences("settings", MODE_PRIVATE);
 
         setTitle("Equalizer");
 
-        spinner = findViewById(R.id.preset_spinner);
+        equalizerSpinner = findViewById(R.id.preset_spinner);
+        reverbSpinner = findViewById(R.id.reverb_spinner);
 
         short m = mEqualizer.getNumberOfPresets();
         String[] styles = new String[m];
-        for (int i=0;i<m;i++) {
-            styles[i] = mEqualizer.getPresetName((short)i);
+        for (int i = 0; i < m; i++) {
+            styles[i] = mEqualizer.getPresetName((short) i);
         }
 
-         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, styles);
-        /*ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this
-                , R.array.presets,android.R.layout.simple_spinner_item);*/
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        int default_preset = preferences.getInt("selected_preset",0);
-        if (default_preset!=0)
-            spinner.setSelection(default_preset);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        ArrayAdapter<String> presetAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, styles);
+        presetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        equalizerSpinner.setAdapter(presetAdapter);
+        int default_preset = preferences.getInt("selected_preset", 0);
+        if (default_preset != 0)
+            equalizerSpinner.setSelection(default_preset);
+        equalizerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.e(TAG, "onItemSelected: Selected: "+i+", Long: "+l );
-                mEqualizer.usePreset((short)i);
+                Log.e(TAG, "onItemSelected: Selected: " + i + ", Long: " + l);
+                mEqualizer.usePreset((short) i);
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.putInt("selected_preset",i);
-               /* for (int k=0;k<mEqualizer.getNumberOfBands();k++) {
-                    View v = mLinearLayout.view
-                    editor.putInt("seek_" + k, seekBar.getProgress());
-                }*/
+                editor.putInt("selected_preset", i);
                 editor.apply();
                 setLayout(false);
-                Log.e(TAG, "onItemSelected: Current Preset: "+mEqualizer.getCurrentPreset() );
+                Log.e(TAG, "onItemSelected: Current Preset: " + mEqualizer.getCurrentPreset());
             }
 
             @Override
@@ -90,15 +87,104 @@ public class EqualizerActivity extends AppCompatActivity {
             }
         });
 
+        ArrayAdapter<CharSequence> reverbAdapter = ArrayAdapter.createFromResource(this
+                , R.array.reverb_presets, android.R.layout.simple_spinner_item);
+        reverbAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        reverbSpinner.setAdapter(reverbAdapter);
+        int default_reverb = preferences.getInt("selected_reverb", 0);
+        if (default_reverb != 0) {
+            reverbSpinner.setSelection(default_reverb);
+            presetReverb.setPreset((short) default_reverb);
+        }
+        reverbSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                Log.e(TAG, "onItemSelected: Selected: " + i + ", Long: " + l);
+                presetReverb.setPreset((short) i);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putInt("selected_reverb", i);
+                editor.apply();
+                Log.e(TAG, "onItemSelected: Current Reverb: " + presetReverb.getPreset());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        bassBoastSeekbar.setMax(1000);
+        bassBoastSeekbar.setProgress(bassBoost.getRoundedStrength());
+        bassBoastSeekbar.setOnSeekChangeListener(new OnSeekChangeListener() {
+            @Override
+            public void onSeeking(SeekParams seekParams) {
+            }
+
+            @Override
+            public void onStartTrackingTouch(IndicatorSeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
+                bassBoost.setStrength((short)seekBar.getProgress());
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putInt("selected_bass", seekBar.getProgress());
+                editor.apply();
+            }
+        });
+
+        virtualizerSeekbar.setMax(1000);
+        virtualizerSeekbar.setProgress(virtualizer.getRoundedStrength());
+        virtualizerSeekbar.setOnSeekChangeListener(new OnSeekChangeListener() {
+            @Override
+            public void onSeeking(SeekParams seekParams) {
+            }
+
+            @Override
+            public void onStartTrackingTouch(IndicatorSeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
+                virtualizer.setStrength((short)seekBar.getProgress());
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putInt("selected_virtualizer", seekBar.getProgress());
+                editor.apply();
+            }
+        });
+
+        loudnessSeekbar.setMax(100);
+        loudnessSeekbar.setProgress(loudnessEnhancer.getTargetGain());
+        loudnessSeekbar.setOnSeekChangeListener(new OnSeekChangeListener() {
+            @Override
+            public void onSeeking(SeekParams seekParams) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(IndicatorSeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
+                loudnessEnhancer.setTargetGain(seekBar.getProgress());
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putInt("selected_loudness", seekBar.getProgress());
+                editor.apply();
+            }
+        });
+
         mLinearLayout = findViewById(R.id.linearLayout);
 
-        setEqualizerLayout();
-
-        if (mEqualizer==null)
+        if (mEqualizer == null)
             return;
 
         setLayout(true);
 
+        setEqualizerLayout();
     }
 
     void setLayout(boolean loadOrSave) {
@@ -111,24 +197,23 @@ public class EqualizerActivity extends AppCompatActivity {
         for (short i = 0; i < numberFrequencyBands; i++) {
             final short equalizerBandIndex = i;
 
-            Log.e(TAG, "onCreate: Adding: "+i );
+            Log.e(TAG, "onCreate: Adding: " + i);
 
             LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View equalizerLayout = inflater.inflate(R.layout.equilizer_item,null);
+            View equalizerLayout = inflater.inflate(R.layout.equilizer_item, null);
 
             TextView freqencyBand = equalizerLayout.findViewById(R.id.txt_frequencyBand);
             int bandFreq = (mEqualizer.getCenterFreq(equalizerBandIndex) / 1000);
-            String texttoPut = bandFreq+" Hz";
-            if (bandFreq>1000)
-            {
-                texttoPut = (YTutils.dividePattern(bandFreq,1000,"0.0"));
+            String texttoPut = bandFreq + " Hz";
+            if (bandFreq > 1000) {
+                texttoPut = (YTutils.dividePattern(bandFreq, 1000, "0.0"));
                 if (!texttoPut.contains(".")) {
                     texttoPut += " kHz";
-                }else if (texttoPut.split("\\.")[1].equals("0")) {
-                   texttoPut = texttoPut.split("\\.")[0]+" kHz";
-                }else texttoPut += " kHz";
-            }else if (bandFreq>10 && bandFreq<100) {
-                texttoPut = " "+bandFreq+" Hz";
+                } else if (texttoPut.split("\\.")[1].equals("0")) {
+                    texttoPut = texttoPut.split("\\.")[0] + " kHz";
+                } else texttoPut += " kHz";
+            } else if (bandFreq > 10 && bandFreq < 100) {
+                texttoPut = " " + bandFreq + " Hz";
             }
 
             freqencyBand.setText(texttoPut);
@@ -143,18 +228,18 @@ public class EqualizerActivity extends AppCompatActivity {
             seekBar.setMax(upperEqualizerBandLevel - lowerEqualizerBandLevel);
 
             final int seek_id = i;
-            int progressBar=1500;
+            int progressBar = 1500;
             if (!loadOrSave) {
                 //int centerFrequency = mEqualizer.getCenterFreq(equalizerBandIndex)/1000;
-                Log.e(TAG, "setLayout: Band: "+equalizerBandIndex+", BandLevel: "
-                + (mEqualizer.getBandLevel(equalizerBandIndex)+upperEqualizerBandLevel));
+                Log.e(TAG, "setLayout: Band: " + equalizerBandIndex + ", BandLevel: "
+                        + (mEqualizer.getBandLevel(equalizerBandIndex) + upperEqualizerBandLevel));
 
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.putInt("seek_" + seek_id, (mEqualizer.getBandLevel(equalizerBandIndex)+upperEqualizerBandLevel));
+                editor.putInt("seek_" + seek_id, (mEqualizer.getBandLevel(equalizerBandIndex) + upperEqualizerBandLevel));
                 editor.apply();
                 progressBar = preferences.getInt("seek_" + seek_id, 1500);
                 seekBar.setProgress(progressBar);
-            }else {
+            } else {
                 progressBar = preferences.getInt("seek_" + seek_id, 1500);
                 if (progressBar != 1500) {
                     seekBar.setProgress(progressBar);
@@ -184,12 +269,12 @@ public class EqualizerActivity extends AppCompatActivity {
                 public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putInt("seek_" + seek_id, seekBar.getProgress());
-                   // editor.putInt("position", 0);
+                    // editor.putInt("position", 0);
                     editor.apply();
                 }
             });
 
-            mLinearLayout.addView(equalizerLayout,new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+            mLinearLayout.addView(equalizerLayout, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT));
 
         }
@@ -200,7 +285,7 @@ public class EqualizerActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_volume:
                 AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,AudioManager.ADJUST_SAME,AudioManager.FLAG_SHOW_UI);
+                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);
                 break;
 
             /*case R.id.equalizer_enabled:
@@ -217,25 +302,52 @@ public class EqualizerActivity extends AppCompatActivity {
 
     void setEqualizerLayout() {
         Log.e(TAG, "setEqualizerLayout: Enabled" + MainActivity.isEqualizerEnabled);
-        LinearLayout layout = findViewById(R.id.mainlayout);
+        RelativeLayout layout = findViewById(R.id.mainlayout);
         if (MainActivity.isEqualizerEnabled) {
-            layout.setEnabled(true);
-        }else layout.setEnabled(false);
-
+            layout.setClickable(false);
+            reverbSpinner.setEnabled(true);
+            equalizerSpinner.setEnabled(true);
+            bassBoastSeekbar.setEnabled(true);
+            virtualizerSeekbar.setEnabled(true);
+            loudnessSeekbar.setEnabled(true);
+            bassBoost.setStrength((short)bassBoastSeekbar.getProgress());
+            virtualizer.setStrength((short)virtualizerSeekbar.getProgress());
+            loudnessEnhancer.setTargetGain(loudnessSeekbar.getProgress());
+            for (int i=0;i<mLinearLayout.getChildCount();i++) {
+                View view = mLinearLayout.getChildAt(i);
+                IndicatorSeekBar seekBar = view.findViewById(R.id.seekBar);
+                seekBar.setEnabled(true);
+            }
+        } else {
+            layout.setClickable(true);
+            reverbSpinner.setEnabled(false);
+            equalizerSpinner.setEnabled(false);
+            bassBoastSeekbar.setEnabled(false);
+            virtualizerSeekbar.setEnabled(false);
+            loudnessSeekbar.setEnabled(false);
+            bassBoost.setStrength((short)0);
+            virtualizer.setStrength((short)0);
+            loudnessEnhancer.setTargetGain(0);
+            for (int i=0;i<mLinearLayout.getChildCount();i++) {
+                View view = mLinearLayout.getChildAt(i);
+                IndicatorSeekBar seekBar = view.findViewById(R.id.seekBar);
+                seekBar.setEnabled(false);
+            }
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.equalizer_menu,menu);
+        getMenuInflater().inflate(R.menu.equalizer_menu, menu);
         MenuItem menuItem = menu.findItem(R.id.equalizer_enabled);
         menuItem.setActionView(R.layout.switch_item);
         final Switch sw = menuItem.getActionView().findViewById(R.id.action_switch);
-        sw.setChecked(settingPref.getBoolean("equalizer_enabled",false));
+        sw.setChecked(settingPref.getBoolean("equalizer_enabled", false));
         sw.setOnCheckedChangeListener((compoundButton, b) -> {
             MainActivity.isEqualizerEnabled = b;
             setEqualizerLayout();
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("equalizer_enabled",MainActivity.isEqualizerEnabled);
+            editor.putBoolean("equalizer_enabled", MainActivity.isEqualizerEnabled);
             mEqualizer.setEnabled(MainActivity.isEqualizerEnabled);
             editor.apply();
         });
@@ -246,5 +358,11 @@ public class EqualizerActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         finish();
         return true;
+    }
+
+    private void initViews() {
+        bassBoastSeekbar = findViewById(R.id.bass_boast_seekBar);
+        virtualizerSeekbar = findViewById(R.id.virtualizer_seekBar);
+        loudnessSeekbar = findViewById(R.id.loudness_seekBar);
     }
 }

@@ -13,7 +13,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
+import android.media.audiofx.BassBoost;
 import android.media.audiofx.Equalizer;
+import android.media.audiofx.LoudnessEnhancer;
+import android.media.audiofx.PresetReverb;
+import android.media.audiofx.Virtualizer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -876,7 +880,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static boolean isplaying, sleepEndTrack=false,localPlayBack=false,isFavourite=false,isEqualizerEnabled=false;
     public static boolean isLoop=false,isEqualizerSet=false;
     static Handler mHandler = new Handler();
-    static long total_duration = 0;
+    static long total_duration = 0; public static PresetReverb presetReverb;
+    public static BassBoost bassBoost; public static Virtualizer virtualizer;
+    public static LoudnessEnhancer loudnessEnhancer;
     public static int total_seconds; public static int nColor;
     public static ArrayList<String> yturls;
     public static int ytIndex = 0;
@@ -884,6 +890,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
     static class loadVideo_Local extends AsyncTask<Void,Void,Void> {
         String filePath;
+        boolean notExist=false;
 
         public loadVideo_Local(String filePath) {
             this.filePath = filePath;
@@ -891,22 +898,28 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
         @Override
         protected void onPostExecute(Void aVoid) {
-          try {
-              Palette.generateAsync(bitmapIcon, new Palette.PaletteAsyncListener() {
-                  public void onGenerated(Palette palette) {
-                      nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
-                      continueinMainThread("isPath:"+filePath);
-                  }
-              });
-          }catch (Exception e){
-              Log.e(TAG, "onPostExecute: "+e.getMessage());
-          }
+            if (notExist) {
+                playNext();
+                return;
+            }
+            try {
+                Palette.generateAsync(bitmapIcon, palette -> {
+                    nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+                    continueinMainThread("isPath:"+filePath);
+                });
+            }catch (Exception e){
+                Log.e(TAG, "onPostExecute: "+e.getMessage());
+            }
             super.onPostExecute(aVoid);
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             File f = new File(filePath);
+            if (!f.exists()) {
+                notExist=true;
+                return null;
+            }
             Uri uri = Uri.fromFile(f);
             try {
                 MediaMetadataRetriever mmr = new MediaMetadataRetriever();
@@ -938,7 +951,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 total_seconds = Integer.parseInt(durationStr);
 
             }catch (Exception e) {
-                // TODO: Do something when cannot played...
+                notExist=true;
             }
             return null;
         }
@@ -1259,15 +1272,38 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static void addEqualizer() {
         int audioSessionId = player.getAudioComponent().getAudioSessionId();
         Log.e(TAG, "onAudioSessionId: AudioSessionID: "+audioSessionId );
-        if (mEqualizer!=null)
-            mEqualizer.release();
+        if (mEqualizer!=null) mEqualizer.release();
+        if (presetReverb!=null) presetReverb.release();
+        if (bassBoost!=null) bassBoost.release();
+        if (virtualizer!=null) virtualizer.release();
+        if (loudnessEnhancer!=null) loudnessEnhancer.release();
         mEqualizer = new Equalizer(1000, audioSessionId);
         mEqualizer.setEnabled(isEqualizerEnabled);
-        short s = 5;
-        mEqualizer.usePreset(s);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putInt("selected_preset",s);
-        editor.apply();
+
+        presetReverb = new PresetReverb(0,audioSessionId);
+        presetReverb.setEnabled(isEqualizerEnabled);
+
+        bassBoost = new BassBoost(0,audioSessionId);
+        bassBoost.setEnabled(isEqualizerEnabled);
+
+        virtualizer = new Virtualizer(0,audioSessionId);
+        virtualizer.setEnabled(isEqualizerEnabled);
+
+        loudnessEnhancer = new LoudnessEnhancer(audioSessionId);
+        loudnessEnhancer.setEnabled(isEqualizerEnabled);
+
+        int default_reverb = preferences.getInt("selected_reverb", 0);
+        presetReverb.setPreset((short)default_reverb);
+
+        int default_bass = preferences.getInt("selected_bass", 0);
+        bassBoost.setStrength((short)default_bass);
+
+        int default_virtualizer = preferences.getInt("selected_virtualizer", 0);
+        virtualizer.setStrength((short)default_virtualizer);
+
+        int default_loudness = preferences.getInt("selected_loudness", 0);
+        loudnessEnhancer.setTargetGain((short)default_loudness);
+
         isEqualizerSet=true;
         int current = settingPref.getInt("position", 0);
         if (current == 0) {
