@@ -514,6 +514,21 @@ public class YTutils {
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         return df.format(c);
     }
+    public static String getTodayDate_nogaps() {
+        Date c = Calendar.getInstance().getTime();
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+        return df.format(c);
+    }
+    public static String getTomorrowDate_nogap() {
+        Date c = Calendar.getInstance().getTime();
+        @SuppressLint("SimpleDateFormat") String date = new SimpleDateFormat("dd").format(c);
+        @SuppressLint("SimpleDateFormat") String month =  new SimpleDateFormat("MM").format(c);
+        @SuppressLint("SimpleDateFormat") String year =  new SimpleDateFormat("yyyy").format(c);
+        return  year+""+month+(Integer.parseInt(date)+1);
+    }
+
+
 
     public static String getLocalArtworkImage(Activity activity, LocalModel model) {
         String data = YTutils.readContent(activity,"artistImages.csv");

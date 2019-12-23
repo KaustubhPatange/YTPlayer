@@ -3,6 +3,11 @@
     <color name="colorPrimary">#000000</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#f47600</color>
+    <color name="trend_dark1">#f47600</color>
+    <color name="trend_dark1_center">#6B3504</color>
+    <color name="trend_dark1_end">#4D0202</color>
+    <color name="trend_dark1_end1">#3C0202</color>
+    <color name="trend_dark1_end2">#350B17</color>
     <color name="colorAccentDark">#d46700</color>
     <color name="background">#1E1E1E</color>
     <color name="colorScreen">#313131</color>
@@ -15,6 +20,7 @@
     <color name="grey">#616161</color>
     <color name="black">#000000</color>
     <color name="welcomeScreen">#9fc3d3</color>
+    <color name="color2">#000000</color>
 
     <color name="transparent_black">#60000000</color>
     <color name="selection_border">#ffffff</color>

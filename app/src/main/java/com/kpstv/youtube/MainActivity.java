@@ -97,6 +97,7 @@ import com.kpstv.youtube.fragments.PlaylistFragment;
 import com.kpstv.youtube.fragments.SFragment;
 import com.kpstv.youtube.fragments.SearchFragment;
 import com.kpstv.youtube.fragments.SleepBottomSheet;
+import com.kpstv.youtube.fragments.basedOnApi.PopularFragment;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.models.YTConfig;
@@ -148,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     Fragment HistoryFrag;
     static Fragment SearchFrag;
     public static FragmentManager fragmentManager;
-    public static Fragment PlaylistFrag, libraryFrag, FavouriteFrag,localMusicFrag, localSearchFrag;
+    public static Fragment PlaylistFrag, libraryFrag, FavouriteFrag,localMusicFrag, localSearchFrag,popularFrag;
     Fragment NCFrag; String ytLink;
     static SharedPreferences preferences,settingPref;
     public static LinearLayout bottom_player, adViewLayout;
@@ -507,6 +508,11 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
         if (getSupportFragmentManager().getBackStackEntryCount()>0) {
             getSupportFragmentManager().popBackStack();
+            return;
+        }
+
+        if (fragment instanceof PopularFragment) {
+            loadFragment(SearchFrag);
             return;
         }
 

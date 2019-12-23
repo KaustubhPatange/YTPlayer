@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.NestedScrollView;
@@ -34,10 +35,12 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.SearchActivity;
 import com.kpstv.youtube.SettingsActivity;
 import com.kpstv.youtube.adapters.SearchAdapter;
+import com.kpstv.youtube.fragments.basedOnApi.PopularFragment;
 import com.kpstv.youtube.models.SearchModel;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTSearch;
@@ -55,7 +58,7 @@ public class SearchFragment extends Fragment {
     static RecyclerView.LayoutManager layoutManager;
     SearchAdapter adapter; boolean networkCreated; ArrayList<String> images;
     ArrayList<SearchModel> models; RelativeLayout progresslayout;
-    ArrayList<Drawable> drawables; Activity activity; TextView moreTrend;
+    ArrayList<Drawable> drawables; FragmentActivity activity; TextView moreTrend;
     CardView discoverViral, searchCard; boolean istrendloaded,isdiscoverloaded;
     ImageView githubView,pulseView,myWebView; LinearLayout settingsLayout;
     NestedScrollView nestedScrollView;
@@ -65,6 +68,7 @@ public class SearchFragment extends Fragment {
     SharedPreferences preferences,settingpref; String region="global";
 
     private static String SpotifyTrendsCSV, SpotifyViralCSV;
+    CardView top100Card,viral100Card;
     ToolTipManager toolTipManager;
 
     ImageView imageView1;
@@ -107,6 +111,8 @@ public class SearchFragment extends Fragment {
             images = new ArrayList<>();
 
             tipLayout = v.findViewById(R.id.search_layout);
+            top100Card = v.findViewById(R.id.top100songsCard);
+            viral100Card = v.findViewById(R.id.top100musicCard);
             searchButton = v.findViewById(R.id.search_gotButton);
             nestedScrollView = v.findViewById(R.id.nestedScrollView);
             searchCard = v.findViewById(R.id.cardView_search);
@@ -232,6 +238,27 @@ public class SearchFragment extends Fragment {
 
             });
 
+            top100Card.setOnClickListener(view -> {
+                try {
+                    MainActivity.popularFrag.onDestroy();
+                }catch (Exception e){}
+                MainActivity.popularFrag = new PopularFragment();
+                FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
+                ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                ft.replace(R.id.fragment_container, MainActivity.popularFrag,"normalTag");
+                ft.commit();
+            });
+            viral100Card.setOnClickListener(view -> {
+                try {
+                    MainActivity.popularFrag.onDestroy();
+                }catch (Exception e){}
+                MainActivity.popularFrag = new PopularFragment();
+                FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
+                ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                ft.replace(R.id.fragment_container,  MainActivity.popularFrag,"viral");
+                ft.commit();
+            });
+
             settingsLayout.setOnClickListener(v->
                     startActivity(new Intent(activity,SettingsActivity.class)));
 
@@ -253,6 +280,8 @@ public class SearchFragment extends Fragment {
         }
         return v;
     }
+
+
 
     @Override
     public void onResume() {
@@ -292,6 +321,7 @@ public class SearchFragment extends Fragment {
             imageView4.setImageDrawable(drawables.get(3));
         }
     }
+
 
     @Override
     public void onPause() {

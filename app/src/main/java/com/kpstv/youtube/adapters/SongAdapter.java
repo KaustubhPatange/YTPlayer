@@ -155,8 +155,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                     ClipboardManager clipboard = (ClipboardManager) con.getSystemService(Context.CLIPBOARD_SERVICE);
                     ClipData clip = ClipData.newPlainText("Copied Text", discoverModel.getYtUrl());
                     clipboard.setPrimaryClip(clip);
-                    YTutils.Vibrate(con);
-                    Toast.makeText(con, "Copied to clipboard!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(con, "Link copied to clipboard!", Toast.LENGTH_SHORT).show();
                 }
                 return true;
             });

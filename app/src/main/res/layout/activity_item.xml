@@ -22,6 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <TextView
+            android:textColor="@color/white"
             android:id="@+id/aTitle"
             android:layout_width="match_parent"
             android:text="Title"
