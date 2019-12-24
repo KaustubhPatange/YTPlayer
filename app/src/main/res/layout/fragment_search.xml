@@ -201,7 +201,7 @@
 
         <include layout="@layout/trend_layout"/>
 
-
+        <include layout="@layout/region_layout"/>
 
 
 

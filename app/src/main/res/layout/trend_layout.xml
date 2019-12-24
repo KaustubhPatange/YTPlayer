@@ -20,7 +20,7 @@
             android:fontFamily="@font/dmsans_font"
             android:layout_marginStart="15dp"
             android:layout_marginEnd="15dp"
-            android:text="Global Top 50"
+            android:text="Global Top 100"
             android:layout_marginTop="-3dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -39,6 +39,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:layout_marginBottom="5dp"
         android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -50,7 +51,7 @@
             android:fontFamily="@font/dmsans_font"
             android:layout_marginStart="15dp"
             android:layout_marginEnd="15dp"
-            android:text="Global Viral 50"
+            android:text="Global Viral 100"
             android:layout_marginTop="-3dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>

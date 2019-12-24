@@ -154,6 +154,7 @@
     <orderEntry type="library" name="Gradle: com.google.android.gms:play-services-basement:16.0.1@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.android.support:support-v4:28.0.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.android.support:support-media-compat:28.0.0@aar" level="project" />
+    <orderEntry type="library" name="Gradle: com.github.duanhong169:drawabletoolbox:1.0.7@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.mindorks.android:prdownloader:0.6.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.github.clans:fab:1.6.4@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.android.support:cardview-v7:28.0.0@aar" level="project" />

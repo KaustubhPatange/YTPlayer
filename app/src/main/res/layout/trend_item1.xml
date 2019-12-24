@@ -22,7 +22,7 @@
             android:layout_alignBottom="@id/view3"
             android:textStyle="bold"
             android:fontFamily="@font/dmsans_font"
-            android:textSize="20sp"
+            android:textSize="23sp"
             android:text="Top 100"
             android:textAlignment="center"
             android:layout_width="match_parent"

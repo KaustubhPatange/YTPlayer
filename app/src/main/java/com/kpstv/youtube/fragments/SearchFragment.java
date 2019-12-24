@@ -68,7 +68,7 @@ public class SearchFragment extends Fragment {
     SharedPreferences preferences,settingpref; String region="global";
 
     private static String SpotifyTrendsCSV, SpotifyViralCSV;
-    CardView top100Card,viral100Card;
+    CardView top100Card,viral100Card,mostViewedCard,mostPopularCard,weeklyPopularCard;
     ToolTipManager toolTipManager;
 
     ImageView imageView1;
@@ -84,9 +84,7 @@ public class SearchFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (!networkCreated) {
             v = inflater.inflate(R.layout.fragment_search, container, false);
 
@@ -113,6 +111,9 @@ public class SearchFragment extends Fragment {
             tipLayout = v.findViewById(R.id.search_layout);
             top100Card = v.findViewById(R.id.top100songsCard);
             viral100Card = v.findViewById(R.id.top100musicCard);
+            mostViewedCard = v.findViewById(R.id.most_viewed_card);
+            mostPopularCard = v.findViewById(R.id.most_popular_card);
+            weeklyPopularCard = v.findViewById(R.id.week_popular_card);
             searchButton = v.findViewById(R.id.search_gotButton);
             nestedScrollView = v.findViewById(R.id.nestedScrollView);
             searchCard = v.findViewById(R.id.cardView_search);
@@ -256,6 +257,36 @@ public class SearchFragment extends Fragment {
                 FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
                 ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
                 ft.replace(R.id.fragment_container,  MainActivity.popularFrag,"viral");
+                ft.commit();
+            });
+            mostViewedCard.setOnClickListener(view -> {
+                try {
+                    MainActivity.popularFrag.onDestroy();
+                }catch (Exception e){}
+                MainActivity.popularFrag = new PopularFragment();
+                FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
+                ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                ft.replace(R.id.fragment_container,  MainActivity.popularFrag,"most_viewed");
+                ft.commit();
+            });
+            mostPopularCard.setOnClickListener(view -> {
+                try {
+                    MainActivity.popularFrag.onDestroy();
+                }catch (Exception e){}
+                MainActivity.popularFrag = new PopularFragment();
+                FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
+                ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                ft.replace(R.id.fragment_container,  MainActivity.popularFrag,"most_popular");
+                ft.commit();
+            });
+            weeklyPopularCard.setOnClickListener(view -> {
+                try {
+                    MainActivity.popularFrag.onDestroy();
+                }catch (Exception e){}
+                MainActivity.popularFrag = new PopularFragment();
+                FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
+                ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                ft.replace(R.id.fragment_container,  MainActivity.popularFrag,"weekly_popular");
                 ft.commit();
             });
 

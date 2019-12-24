@@ -527,6 +527,13 @@ public class YTutils {
         @SuppressLint("SimpleDateFormat") String year =  new SimpleDateFormat("yyyy").format(c);
         return  year+""+month+(Integer.parseInt(date)+1);
     }
+    public static String getYesterday_nogap() {
+        Date c = Calendar.getInstance().getTime();
+        @SuppressLint("SimpleDateFormat") String date = new SimpleDateFormat("dd").format(c);
+        @SuppressLint("SimpleDateFormat") String month =  new SimpleDateFormat("MM").format(c);
+        @SuppressLint("SimpleDateFormat") String year =  new SimpleDateFormat("yyyy").format(c);
+        return  year+""+month+(Integer.parseInt(date)-1);
+    }
 
 
 

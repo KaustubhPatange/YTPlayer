@@ -19,7 +19,7 @@
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            android:layout_height="280dp">
+            android:layout_height="270dp">
 
             <RelativeLayout
                 android:id="@+id/relativeLayout"
@@ -34,6 +34,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="?attr/actionBarSize"/>
                     <LinearLayout
+                        android:layout_marginTop="-10dp"
                         android:gravity="center_horizontal"
                         android:id="@+id/linearLayout"
                         android:layout_width="match_parent"

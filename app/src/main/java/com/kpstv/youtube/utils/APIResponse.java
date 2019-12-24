@@ -16,8 +16,8 @@ public class APIResponse implements AppInterface {
         do {
             json = jsonResponse(url, i);
             i++;
-        }while (json.contains("\"error\":") && i<apiLength);
-        if (json.contains("\"error\":")) {
+        }while (json.contains("\"error\"") && i<apiLength);
+        if (json.contains("\"error\"")) {
             this.json= null;
         }
         this.json = json;
@@ -31,7 +31,10 @@ public class APIResponse implements AppInterface {
         HttpHandler httpHandler = new HttpHandler();
         String link = url + "&key=" + API_KEYS[apinumber];
         Log.e(TAG, "jsonResponse: "+link );
-        String json = httpHandler.makeServiceCall(link);
+        String json=null;
+        try {
+            json = httpHandler.makeServiceCall(link);
+        }catch (Exception e){}
         if (json==null) return "\"error\"";
         return json;
     }
