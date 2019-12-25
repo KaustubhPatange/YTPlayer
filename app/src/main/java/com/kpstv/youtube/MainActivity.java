@@ -35,14 +35,17 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
+import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -103,6 +106,7 @@ import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.receivers.SongBroadCast;
 import com.kpstv.youtube.utils.HttpHandler;
+import com.kpstv.youtube.utils.OnSwipeTouchListener;
 import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
@@ -151,10 +155,11 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static FragmentManager fragmentManager;
     public static Fragment PlaylistFrag, libraryFrag, FavouriteFrag,localMusicFrag, localSearchFrag,popularFrag;
     Fragment NCFrag; String ytLink;
+    public static List<String> playListItems;
     static SharedPreferences preferences,settingPref;
     public static LinearLayout bottom_player, adViewLayout;
     static ImageButton actionUp,actionPlay;static ProgressBar loadProgress,songProgress;
-    static TextView actionTitle; static AdView adView;
+    static TextView actionTitle, actionChannelTitle; static AdView adView;
     static AsyncTask<String,String,Void> LoadVideo; public static Activity activity;
     static AsyncTask<Void,Void,Void> LoadOffline;
 
@@ -166,8 +171,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory();
     public static TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
     public static String selectedItemText=""; public static int sleepSeconds;
-    private static MediaSessionCompat mediaSession;
+    private static MediaSessionCompat mediaSession; LinearLayout swipeLayout;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -202,6 +208,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         createNotification();
 
         ytConfigs = new ArrayList<>();
+        playListItems = new ArrayList<>();
         yturls = new ArrayList<>();
         nPlayModels = new ArrayList<>();
 
@@ -221,11 +228,13 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
         // Get required views...
         adView = findViewById(R.id.adView);
+        swipeLayout = findViewById(R.id.swipeLayout);
         adViewLayout = findViewById(R.id.adViewLayout);
         bottom_player = findViewById(R.id.bottom_player);
         actionPlay = findViewById(R.id.action_play);
         actionUp = findViewById(R.id.action_maximize);
         actionTitle = findViewById(R.id.action_title);
+        actionChannelTitle = findViewById(R.id.action_channelTitle);
         songProgress = findViewById(R.id.songLayoutProgress);
         loadProgress = findViewById(R.id.song_progress);
 
@@ -291,8 +300,31 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 .permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
+        swipeLayout.setOnTouchListener(new OnSwipeTouchListener(this){
+            @Override
+            public void onSwipeRight() {
+                super.onSwipeRight();
+                playPrevious();
+            }
+
+            @Override
+            public void onSwipeTop() {
+                super.onSwipeTop();
+                openPlayer();
+            }
+
+            @Override
+            public void onSwipeLeft() {
+                super.onSwipeLeft();
+                playNext();
+            }
+            public boolean onTouch(View v, MotionEvent event) {
+                return gestureDetector.onTouchEvent(event);
+            }
+        });
+
         actionPlay.setOnClickListener(v -> changePlayBack(!isplaying));
-        bottom_player.setOnClickListener(v-> openPlayer());
+       // bottom_player.setOnClickListener(v-> openPlayer());
         actionUp.setOnClickListener(v->openPlayer());
 
         fragmentManager = getSupportFragmentManager();
@@ -975,6 +1007,11 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         @Override
         protected void onPostExecute(Void aVoid) {
 
+            if (toPlayNext) {
+                playNext();
+                return;
+            }
+
             Glide.with(activity)
                     .asBitmap()
                     .load(imgUrl)
@@ -1044,9 +1081,25 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             super.onPostExecute(aVoid);
         }
 
+        boolean toPlayNext;
+
         @Override
         protected Void doInBackground(String... arg0) {
             videoID = arg0[0];
+            MainActivity.playListItems = new ArrayList<>();
+
+            if (!localPlayBack) {
+                String data = YTutils.readContent(activity,"removedList.csv");
+                if (data!=null && !data.isEmpty()) {
+                    if (data.contains(","))
+                        MainActivity.playListItems = new ArrayList<>(Arrays.asList(data.split(",")));
+                    else  MainActivity.playListItems.add(data.trim());
+                }
+                if (playListItems.contains("ytID:"+videoID)) {
+                    toPlayNext=true;
+                    return null;
+                }
+            }
 
             int i=0;
             int apiLength = API_KEYS.length;
@@ -1239,7 +1292,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                         break;
                     case ExoPlayer.STATE_READY:
                         actionTitle.setVisibility(VISIBLE);
+                        actionChannelTitle.setVisibility(VISIBLE);
                         actionTitle.setText(videoTitle);
+                        actionChannelTitle.setText(" "+ Html.fromHtml("&#8226")+" "+channelTitle);
                         loadProgress.setVisibility(View.GONE);
                         songProgress.setVisibility(VISIBLE);
                         actionPlay.setVisibility(VISIBLE);
@@ -1503,6 +1558,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static void onClear() {
         loadProgress.setVisibility(VISIBLE);
         actionTitle.setVisibility(View.GONE);
+        actionChannelTitle.setVisibility(View.GONE);
         songProgress.setVisibility(View.GONE);
         actionPlay.setVisibility(View.GONE);
         songProgress.setProgress(0);

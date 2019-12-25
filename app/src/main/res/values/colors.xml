@@ -15,7 +15,7 @@
     <color name="colorScreen1">#565555</color>
     <color name="white">#ffffff</color>
     <color name="bit_light_white">#e7e5e5</color>
-    <color name="light_white">#d1cece</color>
+    <color name="light_white">#CECBCB</color>
     <color name="dark_white">#999898</color>
     <color name="darkest_white">#7b7a7a</color>
     <color name="grey">#616161</color>

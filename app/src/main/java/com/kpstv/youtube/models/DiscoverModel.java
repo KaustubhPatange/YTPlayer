@@ -2,13 +2,21 @@ package com.kpstv.youtube.models;
 
 public class DiscoverModel {
     String Title,Author,ImgUrl,ytUrl;
-    long seconds;
+    long seconds; boolean isDisabled=false;
 
     public DiscoverModel(String title, String author, String imgUrl, String ytUrl) {
         Title = title;
         Author = author;
         ImgUrl = imgUrl;
         this.ytUrl = ytUrl;
+    }
+
+    public boolean isDisabled() {
+        return isDisabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        isDisabled = disabled;
     }
 
     public long getSeconds() {

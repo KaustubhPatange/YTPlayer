@@ -34,7 +34,9 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
+
                 android:visibility="invisible"
+                android:fontFamily="@font/dmsans_font"
                 android:textAlignment="center"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

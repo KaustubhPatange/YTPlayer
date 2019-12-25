@@ -283,6 +283,8 @@ public class YTutils {
     }
     public static String getVideoTitle(String title) {
         String t = title;
+        if (t.contains("&#39;"))
+            t = t.replace("&#39;","'");
         if (t.contains("-")) {
             if (t.split("\\-").length<3)
                 t = t.split("\\-")[1].trim();
@@ -324,6 +326,10 @@ public class YTutils {
         }
     }
     public static String getChannelTitle(String title, String defaulttitle) {
+        if (title.contains("&#39;"))
+            title = title.replace("&#39;","'");
+        if (defaulttitle.contains("-"))
+            defaulttitle = defaulttitle.split("-")[0];
         if (title.contains("-")) {
             String t = title;
             if (t.split("\\-").length<3)

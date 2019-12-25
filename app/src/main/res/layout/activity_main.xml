@@ -83,25 +83,43 @@
                     android:src="@drawable/ic_arrow_up"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent" />
-                <TextView
-                    android:visibility="gone"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    android:fontFamily="@font/dmsans_font"
-                    android:gravity="center_vertical"
-                    android:id="@+id/action_title"
+                <LinearLayout
+                    android:id="@+id/swipeLayout"
                     android:layout_toEndOf="@id/action_maximize"
-                    android:layout_marginStart="15dp"
-                    android:singleLine="true"
-                    android:ellipsize="marquee"
-                    android:marqueeRepeatLimit="marquee_forever"
-                    android:scrollHorizontally="true"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:layout_marginEnd="56dp"
-                    android:text=""
+                    android:orientation="horizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent">
+                    <TextView
+                        android:visibility="gone"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:fontFamily="@font/dmsans_font"
+                        android:gravity="center_vertical"
+                        android:id="@+id/action_title"
+                        android:layout_marginStart="15dp"
+                        android:singleLine="true"
+                        android:ellipsize="marquee"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:scrollHorizontally="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent" />
+                    <TextView
+                        android:visibility="gone"
+                        android:fontFamily="@font/dmsans_font"
+                        android:gravity="center_vertical"
+                        android:id="@+id/action_channelTitle"
+                        android:singleLine="true"
+                        android:ellipsize="marquee"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:scrollHorizontally="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:layout_marginEnd="56dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent" />
+                </LinearLayout>
                 <ImageButton
                     android:visibility="gone"
                     android:layout_marginEnd="10dp"

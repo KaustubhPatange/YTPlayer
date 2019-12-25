@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +46,7 @@ import com.kpstv.youtube.models.SearchModel;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
+import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 import com.spyhunter99.supertooltips.ToolTip;
 import com.spyhunter99.supertooltips.ToolTipManager;
 
@@ -58,13 +60,15 @@ public class SearchFragment extends Fragment {
     static RecyclerView.LayoutManager layoutManager;
     SearchAdapter adapter; boolean networkCreated; ArrayList<String> images;
     ArrayList<SearchModel> models; RelativeLayout progresslayout;
+    CircularProgressBar progressBar;
     ArrayList<Drawable> drawables; FragmentActivity activity; TextView moreTrend;
     CardView discoverViral, searchCard; boolean istrendloaded,isdiscoverloaded;
     ImageView githubView,pulseView,myWebView; LinearLayout settingsLayout;
     NestedScrollView nestedScrollView;
-    AsyncTask<Void,Void,Void> trendTask, discoverTask; boolean alertShown=false;
+    AsyncTask<Void,Float,Void> trendTask;
+    AsyncTask<Void,Void,Void> discoverTask; boolean alertShown=false;
     LinearLayout SOW,SOF;  ConstraintLayout tipLayout; LinearLayout searchButton;
-
+    ProgressBar progressBar1;
     SharedPreferences preferences,settingpref; String region="global";
 
     private static String SpotifyTrendsCSV, SpotifyViralCSV;
@@ -118,6 +122,8 @@ public class SearchFragment extends Fragment {
             nestedScrollView = v.findViewById(R.id.nestedScrollView);
             searchCard = v.findViewById(R.id.cardView_search);
             imageView1 = v.findViewById(R.id.dImage1);
+            progressBar = v.findViewById(R.id.progressBar);
+            progressBar1 = v.findViewById(R.id.progressBar1);
             moreTrend = v.findViewById(R.id.moreTrending);
             imageView2 = v.findViewById(R.id.dImage2);
             imageView3 = v.findViewById(R.id.dImage3);
@@ -359,10 +365,12 @@ public class SearchFragment extends Fragment {
         super.onPause();
     }
 
-    class getTrending extends AsyncTask<Void,Void,Void> {
+    class getTrending extends AsyncTask<Void,Float,Void> {
 
         @Override
         protected void onPreExecute() {
+            progressBar.setProgress(0);
+            progressBar1.setVisibility(View.VISIBLE);
             if (!YTutils.isInternetAvailable())
                 trendTask.cancel(true);
             super.onPreExecute();
@@ -394,6 +402,13 @@ public class SearchFragment extends Fragment {
         }
 
         @Override
+        protected void onProgressUpdate(Float... values) {
+            super.onProgressUpdate(values);
+            progressBar.setProgress(values[0]);
+            progressBar1.setVisibility(View.GONE);
+        }
+
+        @Override
         protected Void doInBackground(Void... voids) {
             if (SpotifyTrendsCSV==null) {
                 HttpHandler handler = new HttpHandler();
@@ -407,6 +422,9 @@ public class SearchFragment extends Fragment {
                 if (lines[0].contains(YTutils.getTodayDate())&&lines.length==11) {
                     for (int i=1;i<11;i++) {
                         String id = lines[i].split(",")[1];
+
+                        publishProgress((float)(i-1)*10);
+
                         models.add(new SearchModel(
                                 lines[i].split(",")[0],
                                 YTutils.getImageUrlID(id),
@@ -437,6 +455,7 @@ public class SearchFragment extends Fragment {
                        String imgurl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
 
                        Log.e("TrendingLines",line.split(",")[1].replace("\"",""));
+                       publishProgress((float)(i-2)*10);
                        models.add(0,new SearchModel(
                                title, imgurl, "https://www.youtube.com/watch?v="+videoId
                        ));

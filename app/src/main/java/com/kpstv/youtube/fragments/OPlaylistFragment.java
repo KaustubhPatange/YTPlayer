@@ -69,7 +69,9 @@ import com.kpstv.youtube.utils.YTutils;
 import java.io.File;
 import java.security.Permission;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static com.kpstv.youtube.utils.AppBarStateChangeListener.State.COLLAPSED;
 import static com.kpstv.youtube.utils.AppBarStateChangeListener.State.EXPANDED;
@@ -657,10 +659,10 @@ public class OPlaylistFragment extends Fragment {
         super.onResume();
     }
 
-    private View.OnClickListener recyclerItemListener = view -> {
+   /* private View.OnClickListener recyclerItemListener = view -> {
         int position = (int)view.getTag();
         PlayMusic(position);
-    };
+    };*/
 
     void PlayMusic(int position) {
         if (yturls.size()==0) return;
@@ -987,7 +989,7 @@ public class OPlaylistFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            adapter = new SongAdapter(models,activity,true,recyclerItemListener);
+            adapter = new SongAdapter(models,activity,true,null);
             recyclerView.setAdapter(adapter);
             progressBar.setVisibility(View.GONE);
             songText.setVisibility(View.VISIBLE);
@@ -1000,15 +1002,27 @@ public class OPlaylistFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            String data = YTutils.readContent(activity,"removedList.csv");
+            ArrayList<String> strings = new ArrayList<>();
+            if (data!=null && !data.isEmpty()) {
+                if (data.contains(","))
+                    strings = new ArrayList<>(Arrays.asList(data.split(",")));
+                else strings.add(data.trim());
+            }
             for (String yturl : yturls) {
                 YTMeta ytMeta = new YTMeta(YTutils.getVideoID(yturl));
                 if (ytMeta.getVideMeta()!=null) {
-                    models.add(new DiscoverModel(
+                    DiscoverModel discoverModel = new DiscoverModel(
                             ytMeta.getVideMeta().getTitle(),
                             ytMeta.getVideMeta().getAuthor(),
                             ytMeta.getVideMeta().getImgUrl(),
                             yturl
-                    ));
+                    );
+
+                    if (strings.contains("ytID:"+YTutils.getVideoID(yturl)))
+                        discoverModel.setDisabled(true);
+
+                    models.add(discoverModel);
                 }
             }
             return null;

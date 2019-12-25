@@ -57,6 +57,7 @@ import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -75,7 +76,7 @@ public class PopularFragment extends Fragment {
     private RecyclerView mRecyclerview;
     private LinearLayout mLinearlayout;
     private RelativeLayout mRelativelayout;
-    ProgressBar progressBar;
+    ProgressBar progressBar; ArrayList<String> strings;
     String fileName="ytend.csv";
     LinearLayoutManager manager;
     String ref = "top_100"; boolean isOther,fallinWeek;
@@ -126,6 +127,16 @@ public class PopularFragment extends Fragment {
         mToolbar.setNavigationOnClickListener(view -> MainActivity.loadSearchFrag());
 
         models = new ArrayList<>();
+        strings = new ArrayList<>();
+
+        String data = YTutils.readContent(activity,"removedList.csv");
+        if (data!=null && !data.isEmpty()) {
+            if (data.contains(","))
+                strings = new ArrayList<>(Arrays.asList(data.split(",")));
+            else
+                strings.add(data.trim());
+        }
+
         manager = new LinearLayoutManager(activity);
         mRecyclerview.setLayoutManager(manager);
         String tag = getTag();
@@ -202,7 +213,7 @@ public class PopularFragment extends Fragment {
                     }
                     Log.e(TAG, "onCreateView: Month: "+month );
                     mRelativelayout.setBackground(activity.getResources().getDrawable(R.drawable.yt_background3));
-                    url = "https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=20&order=viewCount&publishedAfter="+yearInt+"-"+month+"-"+date+"T00%3A00%3A00Z&publishedBefore="+today+"T00%3A00%3A00Z&region="+region+"&type=video&videoCategoryId=10";
+                    url = "https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&order=viewCount&publishedAfter="+yearInt+"-"+month+"-"+date+"T00%3A00%3A00Z&publishedBefore="+today+"T00%3A00%3A00Z&region="+region+"&type=video&videoCategoryId=10";
 
                     break;
                 default:
@@ -418,10 +429,14 @@ public class PopularFragment extends Fragment {
                        String title = childs[0];
                        String channelTitle = childs[1];
                        String videoId = childs[2];
-                       models.add(new DiscoverModel(
+                       DiscoverModel discoverModel = new DiscoverModel(
                                title,channelTitle,YTutils.getImageUrlID(videoId),
-                               YTutils.getYtUrl(videoId)
-                       ));
+                               YTutils.getYtUrl(videoId));
+
+                       if (strings.contains("ytID:"+videoId))
+                           discoverModel.setDisabled(true);
+
+                       models.add(discoverModel);
                        number++;
                    }catch (Exception e){
                        Log.e(TAG, "doInBackground: "+line+", "+e.getMessage() );
@@ -445,9 +460,15 @@ public class PopularFragment extends Fragment {
                        videoId = videoId.split("%")[0];
                    String title = snippet.getString("title").replace("|","");
                    String channelTitle = snippet.getString("channelTitle").replace("|","");
-                   models.add(new DiscoverModel(title,channelTitle
+
+                   DiscoverModel discoverModel = new DiscoverModel(title,channelTitle
                            ,YTutils.getImageUrlID(videoId)
-                           ,YTutils.getYtUrl(videoId)));
+                           ,YTutils.getYtUrl(videoId));
+
+                   if (strings.contains("ytID:"+videoId))
+                       discoverModel.setDisabled(true);
+
+                   models.add(discoverModel);
                    number++;
                    builder.append("$").append(title).append("|").append(channelTitle).append("|").append(videoId);
                }

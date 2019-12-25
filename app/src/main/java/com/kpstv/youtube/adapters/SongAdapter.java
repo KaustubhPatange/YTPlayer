@@ -1,6 +1,7 @@
 package com.kpstv.youtube.adapters;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ClipData;
@@ -10,12 +11,16 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +40,9 @@ import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> {
 
@@ -48,12 +56,14 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
 
         TextView titleText;
         TextView AuthorText;
-        ImageView imageView;
-        LinearLayout mainLayout;
+        ImageView imageView, removeButton;
+        ConstraintLayout mainLayout; View disabledView;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             this.titleText = itemView.findViewById(R.id.aTitle);
+            this.disabledView = itemView.findViewById(R.id.disabledView);
+            this.removeButton = itemView.findViewById(R.id.removeButton);
             this.AuthorText = itemView.findViewById(R.id.aAuthor);
             this.imageView = itemView.findViewById(R.id.aImage);
             this.mainLayout = itemView.findViewById(R.id.mainlayout);
@@ -81,7 +91,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
     public SongAdapter(ArrayList<DiscoverModel> data, Context context, boolean isOPlaylist, View.OnClickListener oplaylistListener) {
         O_PLAYLIST = isOPlaylist;
         this.dataSet = data;
-        this.playlistListener = oplaylistListener;
+      //  this.playlistListener = oplaylistListener;
         this.con = context;
         yturls = new ArrayList<>();
         for (DiscoverModel model: data)
@@ -89,8 +99,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
     }
 
     @Override
-    public MyViewHolder onCreateViewHolder(ViewGroup parent,
-                                           int viewType) {
+    public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.activity_item, parent, false);
 
@@ -98,18 +107,17 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
 
         return myViewHolder;
     }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int listPosition) {
 
         final DiscoverModel discoverModel = dataSet.get(listPosition);
-/*
-        final ArrayList<String> urls = yturls;
-        urls.remove(searchModel.getYturl());
-        urls.add(0,searchModel.getYturl());
-        final String[] stringarray = YTutils.ConvertToStringArray(urls);*/
-
-        holder.titleText.setText(YTutils.getVideoTitle(discoverModel.getTitle()));
-        holder.AuthorText.setText(YTutils.getChannelTitle(discoverModel.getTitle(),discoverModel.getAuthor()));
 
         Glide.with(con).load(discoverModel.getImgUrl()).addListener(new RequestListener<Drawable>() {
             @Override
@@ -124,54 +132,155 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             }
         }).into(holder.imageView);
 
-        if (!CP_ADAPTER && !O_PLAYLIST) {
-            holder.mainLayout.setOnClickListener(v -> {
-                Activity activity = (Activity) con;
-                if (discoverModel.getYtUrl()==null)
-                    new layoutListener(activity,discoverModel).execute();
-                else {
-                 //   RunLink(discoverModel.getYtUrl(),activity);
-                    MainActivity.nPlayModels.clear();
-                    String[] yturls = new String[dataSet.size()];
-                   for (int i=0;i<dataSet.size();i++) {
+        if (!CP_ADAPTER) {
 
-                       final DiscoverModel dModel = dataSet.get(i);
-                       MetaModel metaModel = new MetaModel(
-                               dModel.getTitle(),
-                               dModel.getAuthor(),
-                               dModel.getImgUrl()
-                       );
-                       NPlayModel model = new NPlayModel(dModel.getYtUrl(),new YTMeta(metaModel),false);
+            int greyColor = ContextCompat.getColor(con,R.color.grey);
+            int white = ContextCompat.getColor(con,R.color.white);
+            int light_white = ContextCompat.getColor(con,R.color.light_white);
+            if (discoverModel.isDisabled()) {
+                holder.removeButton.setColorFilter(ContextCompat.getColor(con,android.R.color.holo_red_dark));
+                holder.disabledView.setVisibility(View.VISIBLE);
+                holder.titleText.setTextColor(greyColor);
+                holder.AuthorText.setTextColor(greyColor);
+            }else {
+                holder.removeButton.clearColorFilter();
+                holder.disabledView.setVisibility(View.GONE);
+                holder.titleText.setTextColor(white);
+                holder.AuthorText.setTextColor(light_white);
+            }
 
-                       MainActivity.nPlayModels.add(model);
+            holder.removeButton.setOnClickListener(view -> {
+                //TODO: Update logic for soundcloud links...
 
-                       yturls[i] = dModel.getYtUrl();
-                   }
-                   MainActivity.PlayVideo(yturls,listPosition);
+                final String ytID = YTutils.getVideoID(discoverModel.getYtUrl());
+
+                if (discoverModel.isDisabled()) {
+                    dataSet.get(listPosition).setDisabled(false);
+
+                    String data = YTutils.readContent((Activity) con,"removedList.csv");
+                    if (data!=null && !data.isEmpty()) {
+                        if (data.contains(",")) {
+                            String[] items = data.split(",");
+
+                            StringBuilder builder = new StringBuilder();
+                            for (String item : items) {
+                                if (!item.contains(ytID))
+                                    builder.append(item).append(",");
+                            }
+                            String content = builder.deleteCharAt(builder.length()-1).toString();
+
+                            YTutils.writeContent((Activity)con,"removedList.csv",content.trim());
+
+                        }else YTutils.writeContent((Activity)con,"removedList.csv","");
+                    }
+
+                    notifyItemChanged(listPosition);
+                }else {
+                    dataSet.get(listPosition).setDisabled(true);
+
+                    String data = YTutils.readContent((Activity) con,"removedList.csv");
+                    if (data!=null && !data.isEmpty()) {
+                        YTutils.writeContent((Activity)con,"removedList.csv",data.trim()+",ytID:"+ytID);
+                    }else  YTutils.writeContent((Activity)con,"removedList.csv","ytID:"+ytID);
+
+                    notifyItemChanged(listPosition);
+
+                    if (MainActivity.yturls.size()>0 && !MainActivity.localPlayBack) {
+                        if (MainActivity.videoID.contains(ytID))
+                            MainActivity.playNext();
+                    }
+
+                    Toast.makeText(con, "Song is hidden in all list!", Toast.LENGTH_SHORT).show();
                 }
             });
+            holder.titleText.setText(YTutils.getVideoTitle(discoverModel.getTitle()));
+            holder.AuthorText.setText(YTutils.getChannelTitle(discoverModel.getTitle(),discoverModel.getAuthor()));
+
             holder.mainLayout.setOnLongClickListener(v -> {
-                if (discoverModel.getYtUrl()!=null) {
-                    ClipboardManager clipboard = (ClipboardManager) con.getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("Copied Text", discoverModel.getYtUrl());
-                    clipboard.setPrimaryClip(clip);
-                    Toast.makeText(con, "Link copied to clipboard!", Toast.LENGTH_SHORT).show();
-                }
+                PopupMenu popupMenu = new PopupMenu(con,v);
+                popupMenu.inflate(R.menu.song_popup_menu);
+                popupMenu.setOnMenuItemClickListener(menuItem -> {
+                    switch (menuItem.getItemId()) {
+                        case R.id.action_add_queue:
+                            if (MainActivity.yturls.size()>0 && !MainActivity.localPlayBack) {
+                                final String ytUri = YTutils.getVideoID(discoverModel.getYtUrl());
+                                boolean toAdd=true;
+                                for (String url: MainActivity.yturls) {
+                                    if (YTutils.getVideoID(url).equals(ytUri)) {
+                                        toAdd=false;
+                                        Toast.makeText(con, "Song exists in queue!", Toast.LENGTH_SHORT).show();
+                                        break;
+                                    }
+                                }
+                                if (toAdd) {
+                                    if (MainActivity.nPlayModels.size()>0 && MainActivity.nPlayModels.size()== MainActivity.yturls.size()) {
+                                        MetaModel metaModel = new MetaModel(discoverModel.getTitle()
+                                                ,discoverModel.getAuthor(),discoverModel.getImgUrl());
+                                        NPlayModel nPlayModel = new NPlayModel(discoverModel.getYtUrl(),new YTMeta(metaModel),false);
+                                        MainActivity.nPlayModels.add(nPlayModel);
+                                    }
+                                    MainActivity.yturls.add(discoverModel.getYtUrl());
+                                    Toast.makeText(con, "Song queue updated!", Toast.LENGTH_SHORT).show();
+                                }
+                            }else {
+                                holder.mainLayout.performClick();
+                            }
+                            break;
+                        case R.id.action_share:
+                            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                            shareIntent.setType("text/plain");
+                            shareIntent.putExtra(Intent.EXTRA_TEXT,discoverModel.getYtUrl());
+                            con.startActivity(Intent.createChooser(shareIntent, "Share"));
+                            break;
+                    }
+                    return true;
+                });
+                popupMenu.show();
+            /*if (discoverModel.getYtUrl()!=null) {
+                ClipboardManager clipboard = (ClipboardManager) con.getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("Copied Text", discoverModel.getYtUrl());
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(con, "Link copied to clipboard!", Toast.LENGTH_SHORT).show();
+            }*/
                 return true;
             });
+
+            holder.mainLayout.setOnClickListener(v -> {
+                if (discoverModel.isDisabled()) return;
+
+                MainActivity.nPlayModels.clear();
+                ArrayList<String> yturls = new ArrayList<>();
+
+                for (DiscoverModel dModel : dataSet) {
+
+                    MetaModel metaModel = new MetaModel(
+                            dModel.getTitle(),
+                            dModel.getAuthor(),
+                            dModel.getImgUrl()
+                    );
+                    NPlayModel nPlayModel = new NPlayModel(dModel.getYtUrl(),new YTMeta(metaModel),false);
+
+                    MainActivity.nPlayModels.add(nPlayModel);
+
+                    yturls.add(dModel.getYtUrl());
+                }
+                MainActivity.PlayVideo(YTutils.convertListToArrayMethod(yturls),listPosition);
+            });
         }
 
-        if (O_PLAYLIST) {
+       /* if (O_PLAYLIST) {
             holder.mainLayout.setTag(listPosition);
             holder.mainLayout.setOnClickListener(playlistListener);
-        }
+        }*/
 
 
         if (CP_ADAPTER) {
+            holder.removeButton.setVisibility(View.GONE);
             holder.mainLayout.setTag(listPosition);
             holder.mainLayout.setOnClickListener(cplaylistener);
         }
     }
+
 
     public class layoutListener extends AsyncTask<Void, Void, Void> {
 
