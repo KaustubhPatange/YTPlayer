@@ -104,6 +104,7 @@
     <orderEntry type="library" name="Gradle: com.google.code.gson:gson:2.8.5@jar" level="project" />
     <orderEntry type="library" name="Gradle: org.mozilla:rhino:1.7R4@jar" level="project" />
     <orderEntry type="library" name="Gradle: com.nostra13.universalimageloader:universal-image-loader:1.9.5@jar" level="project" />
+    <orderEntry type="library" name="Gradle: org.jsoup:jsoup:1.11.1@jar" level="project" />
     <orderEntry type="library" name="Gradle: com.facebook.network.connectionclass:connectionclass:1.0.1@jar" level="project" />
     <orderEntry type="library" name="Gradle: org.aspectj:aspectjrt:1.8.13@jar" level="project" />
     <orderEntry type="library" name="Gradle: com.googlecode.mp4parser:isoparser:1.1.22@jar" level="project" />

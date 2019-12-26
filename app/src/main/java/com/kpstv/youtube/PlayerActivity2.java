@@ -28,6 +28,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
+import android.text.Spanned;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -50,6 +51,8 @@ import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
 import com.kpstv.youtube.adapters.PlayerAdapter;
+import com.kpstv.youtube.fragments.LyricBottomSheet;
+import com.kpstv.youtube.models.LyricModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.services.DownloadService;
 import com.kpstv.youtube.utils.HttpHandler;
@@ -90,7 +93,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     static Activity activity;
 
-    static ImageButton previousFab, playFab, nextFab, repeatButton, downloadButton, playlistButton, youTubeButton;
+    static ImageButton previousFab, playFab, nextFab, repeatButton, downloadButton, playlistButton, youTubeButton,lyricButton;
 
     ImageButton navigationDown;
 
@@ -112,7 +115,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     SharedPreferences preferences; boolean supportFFmpeg=false;
 
-    static AsyncTask<Void,Void,Void> setData;
+    static AsyncTask<Void,Void,Void> setData; static Spanned lyricText;
 
     int accentColor;
 
@@ -132,10 +135,6 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
         accentColor = ContextCompat.getColor(this,R.color.colorAccent);
 
-      /*  Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);*/
-
         preferences = getSharedPreferences("settings", MODE_PRIVATE);
 
         setTitle("");
@@ -143,36 +142,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         getAllViews();
 
         playFab.setOnClickListener(v -> changePlayBack(!MainActivity.isplaying));
-     /*   nextFab.setOnClickListener(v -> {
-            MainActivity.playNext();
-            if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
-                setData.cancel(true);
-            setData = new loadData();
-            setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        });*/
 
-       /* FFmpeg ffmpeg = FFmpeg.getInstance(this);
-        try {
-            ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
-
-                @Override
-                public void onStart() {}
-
-                @Override
-                public void onFailure() {}
-
-                @Override
-                public void onSuccess() {
-                    supportFFmpeg=true;
-                }
-
-                @Override
-                public void onFinish() {}
-            });
-        } catch (FFmpegNotSupportedException e) {
-            // Handle if FFmpeg is not supported by device
-        }
-*/
         nextFab.setOnTouchListener((v, motionEvent) -> {
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN: {
@@ -201,14 +171,6 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             return true;
         });
 
-       /* previousFab.setOnClickListener(v -> {
-            MainActivity.playPrevious();
-            if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
-                setData.cancel(true);
-            setData = new loadData();
-            setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        });*/
-
         previousFab.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN: {
@@ -224,6 +186,32 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                         setData.cancel(true);
                     setData = new loadData();
                     setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+                case MotionEvent.ACTION_CANCEL: {
+                    ImageButton view = (ImageButton) v;
+                    view.clearColorFilter();
+                    view.invalidate();
+                    break;
+                }
+            }
+            return true;
+        });
+
+        lyricButton.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN: {
+                    ImageButton view = (ImageButton ) v;
+                    view.setColorFilter(accentColor);
+                    v.invalidate();
+                    break;
+                }
+                case MotionEvent.ACTION_UP:
+
+                    Bundle args = new Bundle();
+                    args.putSerializable("model",new LyricModel(MainActivity.videoTitle,lyricText));
+                    LyricBottomSheet bottomSheet = new LyricBottomSheet();
+                    bottomSheet.setArguments(args);
+                    bottomSheet.show(getSupportFragmentManager(),"");
 
                 case MotionEvent.ACTION_CANCEL: {
                     ImageButton view = (ImageButton) v;
@@ -270,14 +258,6 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             MainActivity.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
             backImage.setColorFilter(MainActivity.nColor);
         });
-
-/*        mainImageView.setOnLongClickListener(v -> {
-            YTutils.Vibrate(PlayerActivity2.this);
-            callFinish();
-            return true;
-        });*/
-
-
 
         addToPlaylist.setOnTouchListener((v, motionEvent) -> {
             switch (motionEvent.getAction()) {
@@ -427,24 +407,17 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         navigationDown.setOnClickListener(view -> {
             callFinish();
         });
-
-/*
-        AndroidAudioConverter.load(this, new ILoadCallback() {
-            @Override
-            public void onSuccess() {
-
-              supportFFmpeg=true;
-
-            }
-            @Override
-            public void onFailure(Exception error) {
-            }
-        });
-*/
-
     }
 
-
+    public static void setLyricData(Spanned text) {
+        if (text!=null) {
+            lyricText = text;
+            lyricButton.setVisibility(View.VISIBLE);
+        }else {
+            lyricText=null;
+            lyricButton.setVisibility(View.GONE);
+        }
+    }
 
     static ViewPager.OnPageChangeListener mainPageListener = new ViewPager.OnPageChangeListener() {
         @Override
@@ -550,6 +523,8 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         backImage.setTag(colorTo);
 
         makeRepeat(MainActivity.isLoop);
+
+        setLyricData(MainActivity.lyricText);
 
         totalDuration.setText(YTutils.milliSecondsToTimer(MainActivity.total_duration));
         detectPlayback();
@@ -799,6 +774,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
     private void getAllViews() {
         viewImage = findViewById(R.id.imageView3);
         mainPager = findViewById(R.id.viewPager);
+        lyricButton = findViewById(R.id.lyricButton);
         favouriteButton = findViewById(R.id.favourite_button);
         addToPlaylist = findViewById(R.id.addPlaylist_button);
         navigationDown = findViewById(R.id.navigation_down);

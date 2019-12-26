@@ -41,6 +41,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
 import android.text.Html;
+import android.text.Spanned;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
@@ -106,6 +107,7 @@ import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.receivers.SongBroadCast;
 import com.kpstv.youtube.utils.HttpHandler;
+import com.kpstv.youtube.utils.LyricsApi;
 import com.kpstv.youtube.utils.OnSwipeTouchListener;
 import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTMeta;
@@ -1001,6 +1003,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         }
     }
 
+    public static Spanned lyricText;
+
     static class loadVideo extends AsyncTask<String,String,Void> {
 
         @SuppressLint("StaticFieldLeak")
@@ -1011,6 +1015,17 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 playNext();
                 return;
             }
+
+            new LyricsApi(activity,videoTitle,channelTitle){
+                @Override
+                public void onLyricFound(Spanned data) {
+                    super.onLyricFound(data);
+                    lyricText = data;
+                    try {
+                        PlayerActivity2.setLyricData(lyricText);
+                    }catch (Exception e){}
+                }
+            }.executeOnExecutor(THREAD_POOL_EXECUTOR);
 
             Glide.with(activity)
                     .asBitmap()
@@ -1111,7 +1126,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
             YTMeta ytMeta = new YTMeta(videoID);
             if (ytMeta.getVideMeta() != null) {
-                MainActivity.channelTitle = ytMeta.getVideMeta().getAuthor();
+                MainActivity.channelTitle = YTutils.getChannelTitle(ytMeta.getVideMeta().getTitle(),
+                        ytMeta.getVideMeta().getAuthor());
                 MainActivity.videoTitle = YTutils.setVideoTitle(ytMeta.getVideMeta().getTitle());
                 MainActivity.imgUrl = ytMeta.getVideMeta().getImgUrl();
             }
@@ -1195,7 +1211,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
                 ytConfigs.clear();
 
-                List<YTMedia> bestStream = getBestStream(adativeStream);
+            //    List<YTMedia> bestStream = getBestStream(adativeStream);
 
                 Log.e(TAG, "onExtractionDone: Media Size: " +adativeStream.size());
 
