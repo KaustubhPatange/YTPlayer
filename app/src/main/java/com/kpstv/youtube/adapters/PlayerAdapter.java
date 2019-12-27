@@ -107,8 +107,8 @@ public class PlayerAdapter extends PagerAdapter {
         return itemView;
     }
 
-    public void getImage() {
-
+    public String getYTUrl(int position) {
+        return yturls.get(position);
     }
 
     @Override

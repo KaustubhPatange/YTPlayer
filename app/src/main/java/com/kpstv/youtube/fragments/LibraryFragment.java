@@ -43,6 +43,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -83,18 +85,19 @@ public class LibraryFragment extends Fragment implements AppInterface {
 
             /** Add subsequent methods here*/
 
-
-
-            if (YTutils.isInternetAvailable())
-            {
-                networkCheck=false;
-                setRecyclerView();
-            }
-            else {
-                internetHandler.postDelayed(internetTask,1000);
+            String data = YTutils.readContent(activity,"library.csv");
+            if (data!=null && !data.isEmpty()) {
+                if (YTutils.isInternetAvailable())
+                {
+                    networkCheck=false;
+                    setRecyclerView();
+                }
+                else {
+                    internetHandler.postDelayed(internetTask,1000);
+                    commonLayout.setVisibility(View.GONE);
+                }
+            }else
                 commonLayout.setVisibility(View.GONE);
-            }
-
         }
 
         return v;
@@ -124,7 +127,7 @@ public class LibraryFragment extends Fragment implements AppInterface {
         favLayout = v.findViewById(R.id.favourite_layout);
         progressLayout = v.findViewById(R.id.progressLayout);
         nestedScrollView = v.findViewById(R.id.nestedScrollView);
-        manager = new LinearLayoutManager(activity,LinearLayoutManager.HORIZONTAL,true);
+        manager = new LinearLayoutManager(activity,LinearLayoutManager.HORIZONTAL,false);
         recyclerView = v.findViewById(R.id.my_recycler_view);
         toolbar = v.findViewById(R.id.toolbar);
         githubView = v.findViewById(R.id.githubImage);
@@ -137,30 +140,26 @@ public class LibraryFragment extends Fragment implements AppInterface {
     }
 
 
-
     @SuppressLint("StaticFieldLeak")
     void setRecyclerView() {
             new AsyncTask<Void,Void,Void>() {
-
-                String json;
-
                 @Override
                 protected void onPostExecute(Void aVoid) {
-                    if (json.contains("\"error\":")) {
+                    if (models.size()<=0) {
                         commonLayout.setVisibility(View.GONE);
                         return;
                     }
 
-                    adapter = new SearchAdapter(models,activity);
+                    adapter = new SearchAdapter(models,activity,true);
                     recyclerView.setAdapter(adapter);
-                    recyclerView.getLayoutManager().scrollToPosition(models.size()-1);
+                  //  recyclerView.getLayoutManager().scrollToPosition(models.size()-1);
                     progressLayout.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
 
                     super.onPostExecute(aVoid);
                 }
 
-                String jsonResponse(int apinumber) {
+              /*  String jsonResponse(int apinumber) {
                     HttpHandler httpHandler = new HttpHandler();
                     String link;
                     if (region.equals("global")) {
@@ -172,12 +171,51 @@ public class LibraryFragment extends Fragment implements AppInterface {
                     }
 
                     return httpHandler.makeServiceCall(link);
-                }
+                }*/
+
+              class SortModel {
+                  String value; int key;
+                  public SortModel(int key,String value) {
+                      this.value = value;
+                      this.key = key;
+                  }
+                  public String getValue() {
+                      return value;
+                  }
+                  public int getKey() {
+                      return key;
+                  }
+              }
 
                 @Override
                 protected Void doInBackground(Void... voids) {
-                    String data = YTutils.readContent(activity,"mostPopular_"+region+".csv");
+                    String data = YTutils.readContent(activity,"library.csv");
+                    ArrayList<SortModel> sortModels = new ArrayList<>();
                     if (data!=null && !data.isEmpty()) {
+                        models.clear();
+                        String[] items = new String[1];
+                        if (!data.contains("\n"))
+                            items[0] = data;
+                        else
+                            items = data.split("\n|\r");
+                        for (String item: items) {
+                            String[] childs = item.split("\\|");
+                            int count = Integer.parseInt(childs[1]);
+                            if (count>1) {
+                                sortModels.add(new SortModel(count,item));
+                            }
+                        }
+                        /** Comparison based on no. of views (ascending) */
+                        Collections.sort(sortModels, (t1, t2) -> Integer.compare(t2.key,t1.key));
+                        for (SortModel sortModel : sortModels) {
+                            String[] childs = sortModel.getValue().split("\\|");
+                            models.add(new SearchModel(
+                                    childs[2],YTutils.getImageUrl(childs[0]),
+                                    YTutils.getYtUrl(childs[0])
+                            ));
+                        }
+                    }
+                   /* if (data!=null && !data.isEmpty()) {
                         String line = data.split("\n|\r")[0];
                         if (!line.equals(YTutils.getTodayDate()))
                         {
@@ -241,14 +279,14 @@ public class LibraryFragment extends Fragment implements AppInterface {
                                 ));
                             }
                         }
-                    }
+                    }*/
                     return null;
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
 
-    @Override
+ /*   @Override
     public void onResume() {
         String newregion = preferences.getString("pref_select_region","global");
         if (!newregion.contains(region)) {
@@ -264,7 +302,7 @@ public class LibraryFragment extends Fragment implements AppInterface {
         }
         super.onResume();
     }
-
+*/
     Handler mHandler = new Handler();
 
     public Runnable sleepTimerTask = new Runnable() {

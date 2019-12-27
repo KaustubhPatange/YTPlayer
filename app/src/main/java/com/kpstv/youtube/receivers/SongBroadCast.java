@@ -125,18 +125,6 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
         }
     }
 
-    private String getMimeType(String url)
-    {
-        String parts[]=url.split("\\.");
-        String extension=parts[parts.length-1];
-        String type = null;
-        if (extension != null) {
-            MimeTypeMap mime = MimeTypeMap.getSingleton();
-            type = mime.getMimeTypeFromExtension(extension);
-        }
-        return type;
-    }
-
     class loadData_Offline extends AsyncTask<Void,Void,Void> {
         Context context;
 
@@ -253,13 +241,14 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                 json = jsonResponse(videoID, i);
                 i++;
             }while (json.contains("\"error\":") && i<apiLength);
-
             YTMeta ytMeta = new YTMeta(videoID);
             if (ytMeta.getVideMeta() != null) {
-                MainActivity.channelTitle = ytMeta.getVideMeta().getAuthor();
+                MainActivity.channelTitle = YTutils.getChannelTitle(ytMeta.getVideMeta().getTitle(),
+                        ytMeta.getVideMeta().getAuthor());
                 MainActivity.videoTitle = YTutils.setVideoTitle(ytMeta.getVideMeta().getTitle());
                 MainActivity.imgUrl = ytMeta.getVideMeta().getImgUrl();
             }
+
 
             if (json.contains("\"error\":")) {
                 YTStatistics ytStatistics = new YTStatistics(videoID);

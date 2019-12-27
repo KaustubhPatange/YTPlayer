@@ -206,6 +206,6 @@
     <orderEntry type="library" name="Gradle: com.android.support:print:28.0.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.github.evgenyneu:js-evaluator-for-android:v4.0.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.google.firebase:firebase-database-collection:16.0.1@aar" level="project" />
-    <orderEntry type="module" module-name="YTPlayer-MyID3_for_Android" />
+    <orderEntry type="module" module-name="AndroidStudioProjects-YTPlayer-MyID3_for_Android" />
   </component>
 </module>

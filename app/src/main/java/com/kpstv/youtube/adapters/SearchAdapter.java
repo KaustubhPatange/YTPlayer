@@ -38,14 +38,16 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHolder> {
 
     private ArrayList<SearchModel> dataSet;
     private ArrayList<String> yturls;
-    Context con;
+    Context con; boolean isLibraryFrag;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -67,7 +69,17 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
         this.con = context;
         yturls = new ArrayList<>();
         for (SearchModel model: data)
+            yturls.add(model.getYturl());
+    }
+
+
+    public SearchAdapter(ArrayList<SearchModel> data, Context context, boolean isLibraryFrag) {
+        this.dataSet = data;
+        this.con = context;
+        yturls = new ArrayList<>();
+        for (SearchModel model: data)
             yturls.add(0,model.getYturl());
+        this.isLibraryFrag = isLibraryFrag;
     }
 
     @Override
@@ -100,15 +112,19 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
                     }
                 });
 
-        holder.mainCard.setOnClickListener(v -> {
-            /*Activity activity = (Activity) con;
-            Intent intent = new Intent(con,PlayerActivity.class);
-            intent.putExtra("youtubelink",YTutils.ConvertToStringArray(yturls));
-            intent.putExtra("playfromIndex",9-listPosition);
-            con.startActivity(intent);
-            activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);*/
-            MainActivity.PlayVideo(YTutils.ConvertToStringArray(yturls),9-listPosition);
-        });
+
+        if (isLibraryFrag) {
+            holder.mainCard.setOnClickListener(v -> {
+                ArrayList<String> urls = (ArrayList<String>) yturls.clone();
+                Collections.reverse(urls);
+                MainActivity.PlayVideo(YTutils.ConvertToStringArray(urls),listPosition);
+            });
+        }else {
+            holder.mainCard.setOnClickListener(v -> {
+                MainActivity.PlayVideo(YTutils.ConvertToStringArray(yturls),9-listPosition);
+            });
+        }
+
 
     }
 

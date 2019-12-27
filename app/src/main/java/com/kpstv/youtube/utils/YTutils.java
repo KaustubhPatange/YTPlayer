@@ -55,6 +55,7 @@ import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
+import com.kpstv.youtube.AppInterface;
 import com.kpstv.youtube.BuildConfig;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
@@ -112,7 +113,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import static android.content.Context.DOWNLOAD_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
 
-public class YTutils {
+public class YTutils implements AppInterface {
 
     public static String[] ConvertToStringArray(ArrayList<String> list) {
         final String[] arrays = new String[list.size()];
@@ -279,6 +280,8 @@ public class YTutils {
         if (t.contains("(")) {
             t = t.split("\\(")[0].trim();
         }
+        if (t.contains("["))
+            t = t.split("\\[")[0].trim();
         return t;
     }
     public static String getVideoTitle(String title) {
@@ -292,6 +295,8 @@ public class YTutils {
         if (t.contains("(")) {
             t = t.split("\\(")[0].trim();
         }
+        if (t.contains("["))
+            t = t.split("\\[")[0].trim();
         return t.trim();
     }
 
@@ -325,6 +330,7 @@ public class YTutils {
 
         }
     }
+
     public static String getChannelTitle(String title, String defaulttitle) {
         if (title.contains("&#39;"))
             title = title.replace("&#39;","'");
@@ -353,7 +359,7 @@ public class YTutils {
         return l;
     }
 
-    public static String readContent(Activity activity, String FILE_NAME) {
+    public static String readContent(Context activity, String FILE_NAME) {
         FileInputStream fis = null;
         StringBuilder sb = new StringBuilder();
         try {

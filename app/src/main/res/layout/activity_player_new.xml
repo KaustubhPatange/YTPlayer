@@ -336,7 +336,7 @@
                         android:src="@drawable/ic_next"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/download_IButton"
-                        app:layout_constraintStart_toEndOf="@+id/playPause_IButton"
+                        app:layout_constraintStart_toEndOf="@+id/playPause_IButton_layout"
                         app:layout_constraintTop_toTopOf="parent" />
 
 
@@ -348,20 +348,34 @@
                         android:scaleType="fitXY"
                         android:src="@drawable/ic_previous"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/playPause_IButton"
+                        app:layout_constraintEnd_toStartOf="@+id/playPause_IButton_layout"
                         app:layout_constraintStart_toEndOf="@+id/repeat_IButton"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <ImageButton
-                        android:id="@+id/playPause_IButton"
-                        android:layout_width="65dp"
-                        android:layout_height="65dp"
-                        android:background="@drawable/circular_shape"
-                        android:src="@drawable/pause"
+                    <RelativeLayout
+                        android:id="@+id/playPause_IButton_layout"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="@+id/download_IButton"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:layout_width="65dp"
+                        android:layout_height="65dp" >
+
+                        <ImageButton
+                            android:id="@+id/playPause_IButton"
+                            android:layout_width="65dp"
+                            android:layout_height="65dp"
+                            android:background="@drawable/circular_shape"
+                            android:src="@drawable/pause"
+                            />
+                        <ProgressBar
+                            android:visibility="gone"
+                            android:id="@id/progressBar"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"/>
+                    </RelativeLayout>
+
+
                 </android.support.constraint.ConstraintLayout>
 
             </android.support.constraint.ConstraintLayout>

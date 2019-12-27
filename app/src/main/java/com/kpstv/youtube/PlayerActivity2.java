@@ -21,7 +21,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
@@ -66,7 +65,6 @@ import com.warkiz.widget.SeekParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mozilla.javascript.tools.jsc.Main;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -91,11 +89,11 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     static TextView mainTitle, viewCount, currentDuration, totalDuration, channelTitle;
 
-    static Activity activity;
+    static Activity activity; public static ProgressBar progressBar;
 
     static ImageButton previousFab, playFab, nextFab, repeatButton, downloadButton, playlistButton, youTubeButton,lyricButton;
 
-    ImageButton navigationDown;
+    ImageButton navigationDown; //static VisualizerView visualizerView;
 
     static ViewPager mainPager;
     static PlayerAdapter adapter;
@@ -307,51 +305,47 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             return true;
         });
 
-        downloadButton.setOnTouchListener(new View.OnTouchListener() {
-            @RequiresApi(api = Build.VERSION_CODES.M)
-            @Override
-            public boolean onTouch(View v, MotionEvent motionEvent) {
-                switch (motionEvent.getAction()) {
-                    case MotionEvent.ACTION_DOWN: {
-                        ImageButton view = (ImageButton ) v;
-                        view.setColorFilter(accentColor);
-                        v.invalidate();
-                        break;
-                    }
-                    case MotionEvent.ACTION_UP:
+        downloadButton.setOnTouchListener((v, motionEvent) -> {
+            switch (motionEvent.getAction()) {
+                case MotionEvent.ACTION_DOWN: {
+                    ImageButton view = (ImageButton ) v;
+                    view.setColorFilter(accentColor);
+                    v.invalidate();
+                    break;
+                }
+                case MotionEvent.ACTION_UP:
 
-                        /** For local playback stuff */
-                        if (MainActivity.localPlayBack) {
-                            if (MainActivity.yturls.size()>1)
-                                startActivity(new Intent(activity,NPlaylistActivity.class));
-                        }else {
+                    /** For local playback stuff */
+                    if (MainActivity.localPlayBack) {
+                        if (MainActivity.yturls.size()>1)
+                            startActivity(new Intent(activity,NPlaylistActivity.class));
+                    }else {
+                        if (Build.VERSION.SDK_INT>Build.VERSION_CODES.M) {
                             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                                     != PackageManager.PERMISSION_GRANTED) {
                                 requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                                         100);
                             } else showListDialog();
-                        }
+                        }else showListDialog();
 
-                    case MotionEvent.ACTION_CANCEL: {
-                        ImageButton view = (ImageButton) v;
-                        view.clearColorFilter();
-                        view.invalidate();
-                        break;
                     }
+
+                case MotionEvent.ACTION_CANCEL: {
+                    ImageButton view = (ImageButton) v;
+                    view.clearColorFilter();
+                    view.invalidate();
+                    break;
                 }
-                return true;
             }
+            return true;
         });
 
-        downloadButton.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                if (DownloadService.pendingJobs.size()>0) {
-                    Intent intent = new Intent(PlayerActivity2.this,DownloadActivity.class);
-                    startActivity(intent);
-                }
-                return true;
+        downloadButton.setOnLongClickListener(view -> {
+            if (DownloadService.pendingJobs.size()>0) {
+                Intent intent = new Intent(PlayerActivity2.this,DownloadActivity.class);
+                startActivity(intent);
             }
+            return true;
         });
 
         youTubeButton.setOnTouchListener((v, event) -> {
@@ -407,6 +401,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         navigationDown.setOnClickListener(view -> {
             callFinish();
         });
+
     }
 
     public static void setLyricData(Spanned text) {
@@ -435,19 +430,40 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                     MainActivity.ChangeVideo(pos);
                 if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                     setData.cancel(true);
-                if (!MainActivity.localPlayBack)
+                if (!MainActivity.localPlayBack) {
                     setData = new loadData();
+                }
                 else
                     setData = new loadData_Offline(MainActivity.yturls.get(pos));
                 setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            }catch (Exception e){
+            }catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
+        @SuppressLint("StaticFieldLeak")
         @Override
         public void onPageScrollStateChanged(int i) {
+            /** When song is changed automatically this will keep background image...*/
+            Glide.with(activity).asBitmap()
+                    .load(YTutils.getImageUrl(MainActivity.yturls.get(MainActivity.ytIndex)))
+                    .into(new CustomTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            Palette.generateAsync(resource, palette -> {
+                                int color = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+                                MainActivity.bitmapIcon = resource;
+                                MainActivity.nColor = color;
+                                ChangeBackgroundColor(color);
+                                MainActivity.rebuildNotification();
+                            });
+                        }
 
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                        }
+                    });
         }
     };
 
@@ -464,7 +480,6 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             mainPager.setCurrentItem(MainActivity.ytIndex,true);
         }
         mainPager.addOnPageChangeListener(mainPageListener);
-
     }
 
     static void player_common() {
@@ -513,12 +528,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
         int colorTo = MainActivity.nColor;
         if (backImage.getTag()!=null) {
-            Log.e("Animation","I am animating bro...");
-            int colorFrom = (int) backImage.getTag();
-            ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-            colorAnimation.setDuration(300);
-            colorAnimation.addUpdateListener(animator -> backImage.setColorFilter((int) animator.getAnimatedValue()));
-            colorAnimation.start();
+            ChangeBackgroundColor(colorTo);
         }else backImage.setColorFilter(MainActivity.nColor);
         backImage.setTag(colorTo);
 
@@ -529,6 +539,15 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         totalDuration.setText(YTutils.milliSecondsToTimer(MainActivity.total_duration));
         detectPlayback();
         updateProgressBar();
+    }
+
+    static void ChangeBackgroundColor(int colorTo) {
+        Log.e("Animation","I am animating bro...");
+        int colorFrom = (int) backImage.getTag();
+        ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
+        colorAnimation.setDuration(300);
+        colorAnimation.addUpdateListener(animator -> backImage.setColorFilter((int) animator.getAnimatedValue()));
+        colorAnimation.start();
     }
 
     private static final String TAG = "PlayerActivity2";
@@ -629,10 +648,12 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
             YTMeta ytMeta = new YTMeta(videoID);
             if (ytMeta.getVideMeta() != null) {
-                MainActivity.channelTitle = ytMeta.getVideMeta().getAuthor();
+                MainActivity.channelTitle = YTutils.getChannelTitle(ytMeta.getVideMeta().getTitle(),
+                        ytMeta.getVideMeta().getAuthor());
                 MainActivity.videoTitle = YTutils.setVideoTitle(ytMeta.getVideMeta().getTitle());
                 MainActivity.imgUrl = ytMeta.getVideMeta().getImgUrl();
             }
+
 
             if (json.contains("\"error\":")) {
                 YTStatistics ytStatistics = new YTStatistics(videoID);
@@ -775,7 +796,9 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         viewImage = findViewById(R.id.imageView3);
         mainPager = findViewById(R.id.viewPager);
         lyricButton = findViewById(R.id.lyricButton);
+//        visualizerView = findViewById(R.id.visualizerView);
         favouriteButton = findViewById(R.id.favourite_button);
+        progressBar = findViewById(R.id.progressBar);
         addToPlaylist = findViewById(R.id.addPlaylist_button);
         navigationDown = findViewById(R.id.navigation_down);
         mprogressBar = findViewById(R.id.mainprogress);

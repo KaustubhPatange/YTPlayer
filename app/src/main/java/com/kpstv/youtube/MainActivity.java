@@ -18,11 +18,11 @@ import android.media.audiofx.Equalizer;
 import android.media.audiofx.LoudnessEnhancer;
 import android.media.audiofx.PresetReverb;
 import android.media.audiofx.Virtualizer;
+import android.media.audiofx.Visualizer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -35,7 +35,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -63,24 +62,15 @@ import com.facebook.network.connectionclass.ConnectionQuality;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
-import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.PlayerMessage;
-import com.google.android.exoplayer2.SeekParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.analytics.AnalyticsListener;
-import com.google.android.exoplayer2.audio.AudioRendererEventListener;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
@@ -772,138 +762,76 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     boolean CheckIntent(Intent incoming) {
         if (Intent.ACTION_SEND.equals(incoming.getAction())
                 && incoming.getType() != null && "text/plain".equals(incoming.getType())) {
-            Log.e("Firing","checkIntent");
             String ytLink = incoming.getStringExtra(Intent.EXTRA_TEXT);
-            Log.e("IntentYTLink",ytLink+"");
-            if (YTutils.isValidID(ytLink)) {
-                if (yturls.size()<=0) {
-                    PlayVideo(getYTUrls(ytLink),0);
-                }else {
-                    int insert_pos = ytIndex;
-                    if (localPlayBack) {
-                        Log.e(TAG, "CheckIntent: Running this one" );
-                        localPlayBack=false;
-                        PlayVideo(getYTUrls(ytLink),0);
-                        return true;
-                    }
-                    if (nPlayModels.size()>0 && nPlayModels.size()==yturls.size()) {
-                        new AsyncTask<Void,Void,Void>(){
-                            YTMeta ytMeta;
-                            @Override
-                            protected void onPostExecute(Void aVoid) {
-                                if (ytMeta.getVideMeta()!=null) {
-                                    NPlayModel model = new NPlayModel(ytLink,ytMeta,false);
-                                    for (NPlayModel model1 : nPlayModels) {
-                                        if (model1.getUrl().equals(model.getUrl()))
-                                        {
-                                            nPlayModels.remove(model1);
-                                            break;
-                                        }
-                                    }
-                                    nPlayModels.add(insert_pos,model);
-                                }else
-                                    Toast.makeText(activity, "Unexpected parsing error occurred!", Toast.LENGTH_SHORT).show();
-                                super.onPostExecute(aVoid);
-                            }
-
-                            @Override
-                            protected Void doInBackground(Void... voids) {
-                                ytMeta = new YTMeta(YTutils.getVideoID(ytLink));
-                                return null;
-                            }
-                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                    }
-                    if (yturls.contains(ytLink))
-                        yturls.remove(ytLink);
-                    yturls.add(insert_pos,ytLink);
-                    ChangeVideo(insert_pos);
-                }
-                return true;
-            }else if (ytLink.contains("open.spotify.com")&&ytLink.contains("/track/")) {
-                new makeSpotifyData(ytLink).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                return true;
-            }else {
-                YTutils.showAlert(MainActivity.this,"Callback Error",
-                        "The requested url is not a valid YouTube url", true);
-                return true;
-            }
+            commonIntentCheck(ytLink);
+        }else if (incoming.getData()!=null) {
+            String url = incoming.getData().toString();
+            commonIntentCheck(url);
         }
         return false;
-        /*ytLink = incoming.getStringExtra("videoID");
-        Log.e("YouTubeUrl",ytLink+"");
-        String playerCheck = incoming.getStringExtra("is_playing");
-        if (playerCheck!=null) {
-            bottom_player.setVisibility(View.VISIBLE);
-            actionTitle.setSelected(true);
-            actionTitle.setText(incoming.getStringExtra("b_title"));
-            bottom_player.setOnClickListener(v -> openPlayer(false,null));
-            actionUp.setOnClickListener(v -> openPlayer(false,null));
-            if (playerCheck.equals("true")) {
-                actionPlay.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause_circle));
-                actionPlay.setOnClickListener(v -> openPlayer(true,"true"));
-            }else {
-                actionPlay.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_circle));
-                actionPlay.setOnClickListener(v -> openPlayer(true,"false"));
-            }
 
-        }*/
-
-        /*if (incoming.getData()!=null) {
-            String ytLink = incoming.getData().toString();
-            Log.e("IntentYTLink",ytLink+"");
-            if (YTutils.isValidID(ytLink)){
-                Intent intent = new Intent(MainActivity.this,PlayerActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                intent.putExtra("youtubelink",new String[] {ytLink});
-                startActivityForResult(intent,200);
-                overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
-            }else if (ytLink.contains("open.spotify.com")&&ytLink.contains("/track/")) {
-                new MainActivity.getData(ytLink).execute();
-            }else {
-                YTutils.showAlert(MainActivity.this,"Callback Error",
-                        "The requested url is not a valid YouTube url", true);
-            }
-        }*/
     }
 
-    /*class getData extends AsyncTask<Void,Void,Void> {
+    @SuppressLint("StaticFieldLeak")
+    void commonIntentCheck(String ytLink) {
+        if (YTutils.isValidID(ytLink)) {
+            if (yturls.size()<=0) {
+                PlayVideo(getYTUrls(ytLink),0);
+            }else {
+                int insert_pos = ytIndex;
+                if (localPlayBack) {
+                    Log.e(TAG, "CheckIntent: Running this one" );
+                    localPlayBack=false;
+                    PlayVideo(getYTUrls(ytLink),0);
+                    return;
+                }
+                if (nPlayModels.size()>0 && nPlayModels.size()==yturls.size()) {
+                    new AsyncTask<Void,Void,Void>(){
+                        YTMeta ytMeta;
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            if (ytMeta.getVideMeta()!=null) {
+                                NPlayModel model = new NPlayModel(ytLink,ytMeta,false);
+                                for (NPlayModel model1 : nPlayModels) {
+                                    if (model1.getUrl().equals(model.getUrl()))
+                                    {
+                                        nPlayModels.remove(model1);
+                                        break;
+                                    }
+                                }
+                                nPlayModels.add(insert_pos,model);
+                            }else
+                                Toast.makeText(activity, "Unexpected parsing error occurred!", Toast.LENGTH_SHORT).show();
+                            super.onPostExecute(aVoid);
+                        }
 
-        String spotifyUrl,ytLink;
-        ProgressDialog dialog;
-        public getData(String videoID) {
-            this.spotifyUrl = videoID;
-            dialog = new ProgressDialog(MainActivity.this);
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            dialog.dismiss();
-            if (ytLink!=null) {
-                Intent intent = new Intent(MainActivity.this,PlayerActivity.class);
-                intent.putExtra("youtubelink",new String[] {ytLink});
-                startActivityForResult(intent,200);
-                overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                        @Override
+                        protected Void doInBackground(Void... voids) {
+                            ytMeta = new YTMeta(YTutils.getVideoID(ytLink));
+                            return null;
+                        }
+                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                }
+                String ytID = YTutils.getVideoID(ytLink);
+                for (String yturl: yturls) {
+                    if (YTutils.getVideoID(yturl).equals(ytID)) {
+                        yturls.remove(yturl);
+                        break;
+                    }
+                }
+                yturls.add(insert_pos,ytLink);
+                ChangeVideo(insert_pos);
             }
-            super.onPostExecute(aVoid);
+            return;
+        }else if (ytLink.contains("open.spotify.com")&&ytLink.contains("/track/")) {
+            new makeSpotifyData(ytLink).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            return;
+        }else {
+            YTutils.showAlert(MainActivity.this,"Callback Error",
+                    "The requested url is not a valid YouTube url", true);
+            return;
         }
-
-        @Override
-        protected void onPreExecute() {
-            dialog.setCancelable(false);
-            dialog.setMessage("Parsing spotify url...");
-            dialog.show();
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            Log.e("Original_URL",spotifyUrl+"");
-            SpotifyTrack track = new SpotifyTrack(YTutils.getSpotifyID(spotifyUrl));
-            ytLink = track.getYtUrl();
-            Log.e("GOTURL_Here",ytLink+"");
-            return null;
-        }
-    }*/
+    }
 
     /**
     * Implementing a new player within main activity itself...
@@ -925,7 +853,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static LoudnessEnhancer loudnessEnhancer;
     public static int total_seconds; public static int nColor;
     public static ArrayList<String> yturls;
-    public static int ytIndex = 0;
+    public static int ytIndex = 0; public static Visualizer visualizer;
     public static Equalizer mEqualizer;
 
     static class loadVideo_Local extends AsyncTask<Void,Void,Void> {
@@ -942,6 +870,10 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 playNext();
                 return;
             }
+
+            if (YTutils.isInternetAvailable())
+                setLyricData();
+
             try {
                 Palette.generateAsync(bitmapIcon, palette -> {
                     nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
@@ -1005,6 +937,19 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
     public static Spanned lyricText;
 
+    static void setLyricData() {
+        new LyricsApi(activity,videoTitle,channelTitle){
+            @Override
+            public void onLyricFound(Spanned data) {
+                super.onLyricFound(data);
+                lyricText = data;
+                try {
+                    PlayerActivity2.setLyricData(lyricText);
+                }catch (Exception e){}
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
     static class loadVideo extends AsyncTask<String,String,Void> {
 
         @SuppressLint("StaticFieldLeak")
@@ -1016,16 +961,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 return;
             }
 
-            new LyricsApi(activity,videoTitle,channelTitle){
-                @Override
-                public void onLyricFound(Spanned data) {
-                    super.onLyricFound(data);
-                    lyricText = data;
-                    try {
-                        PlayerActivity2.setLyricData(lyricText);
-                    }catch (Exception e){}
-                }
-            }.executeOnExecutor(THREAD_POOL_EXECUTOR);
+            setLyricData();
 
             Glide.with(activity)
                     .asBitmap()
@@ -1174,6 +1110,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     }
 
     static void commonPreExecute() {
+        try {
+            PlayerActivity2.progressBar.setVisibility(VISIBLE);
+        }catch (Exception ignored){}
         adViewLayout.setVisibility(VISIBLE);
         AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
@@ -1294,6 +1233,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
                 switch (playbackState) {
                     case ExoPlayer.STATE_BUFFERING:
+                        try {
+                            PlayerActivity2.progressBar.setVisibility(VISIBLE);
+                        }catch (Exception ignored){}
                         break;
                     case ExoPlayer.STATE_ENDED:
                         makePlay();
@@ -1318,6 +1260,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                         total_duration = MainActivity.player.getDuration();
                         total_seconds = (int) total_duration / 1000;
                         try {
+                            PlayerActivity2.progressBar.setVisibility(View.GONE);
                             PlayerActivity2.loadAgain();
                             PlayerActivity2.totalDuration.setText(YTutils.milliSecondsToTimer(MainActivity.total_duration));
                         }catch (Exception e) { Log.e("PlayerActivity","not loaded yet!"); }
@@ -1818,6 +1761,32 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         protected Void doInBackground(String... strings) {
             String url_link = strings[0];
             String set = preferences.getString("urls", "");
+
+            String ytID = YTutils.getVideoID(url_link);
+
+            /** A logic to calculate no of times a song is played and saved to list */
+            String data = YTutils.readContent(activity,"library.csv");
+            String insert_data = ytID+"|"+1+"|"+videoTitle+"|"+channelTitle;
+            if (data!=null && !data.isEmpty()) {
+                boolean ifExist=false;
+                if (data.contains(ytID)) {
+                    String[] items = data.split("\n|\r");
+                    for (int i=0;i<items.length;i++) {
+                        if (items[i].contains(ytID)) {
+                            ifExist=true;
+                            int count = Integer.parseInt(items[i].split("\\|")[1]);
+                            items[i] = ytID+"|"+ (++count)+"|"+videoTitle+"|"+channelTitle;
+                            String lines = YTutils.join(items,'\n');
+                            YTutils.writeContent(activity,"library.csv",lines.trim());
+                            break;
+                        }
+                    }
+                }
+                if (!ifExist) {
+                    YTutils.writeContent(activity,"library.csv",
+                            data.trim()+"\n"+insert_data);
+                }
+            }else YTutils.writeContent(activity,"library.csv",insert_data);
 
             // Get playlist
             ArrayList<String> urls = new ArrayList<>();

@@ -246,6 +246,10 @@ public class SearchFragment extends Fragment {
             });
 
             top100Card.setOnClickListener(view -> {
+                if (!YTutils.isInternetAvailable()) {
+                    Toast.makeText(activity, "No active connection is found!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 try {
                     MainActivity.popularFrag.onDestroy();
                 }catch (Exception e){}
@@ -256,6 +260,10 @@ public class SearchFragment extends Fragment {
                 ft.commit();
             });
             viral100Card.setOnClickListener(view -> {
+                if (!YTutils.isInternetAvailable()) {
+                    Toast.makeText(activity, "No active connection is found!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 try {
                     MainActivity.popularFrag.onDestroy();
                 }catch (Exception e){}
@@ -266,6 +274,10 @@ public class SearchFragment extends Fragment {
                 ft.commit();
             });
             mostViewedCard.setOnClickListener(view -> {
+                if (!YTutils.isInternetAvailable()) {
+                    Toast.makeText(activity, "No active connection is found!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 try {
                     MainActivity.popularFrag.onDestroy();
                 }catch (Exception e){}
@@ -276,6 +288,10 @@ public class SearchFragment extends Fragment {
                 ft.commit();
             });
             mostPopularCard.setOnClickListener(view -> {
+                if (!YTutils.isInternetAvailable()) {
+                    Toast.makeText(activity, "No active connection is found!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 try {
                     MainActivity.popularFrag.onDestroy();
                 }catch (Exception e){}
@@ -286,6 +302,10 @@ public class SearchFragment extends Fragment {
                 ft.commit();
             });
             weeklyPopularCard.setOnClickListener(view -> {
+                if (!YTutils.isInternetAvailable()) {
+                    Toast.makeText(activity, "No active connection is found!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 try {
                     MainActivity.popularFrag.onDestroy();
                 }catch (Exception e){}
@@ -300,7 +320,7 @@ public class SearchFragment extends Fragment {
                     startActivity(new Intent(activity,SettingsActivity.class)));
 
             if (YTutils.isInternetAvailable())
-            networkCreated = true;
+                networkCreated = true;
 
             trendTask = new getTrending();
             trendTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

@@ -119,6 +119,9 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
 
         final DiscoverModel discoverModel = dataSet.get(listPosition);
 
+        holder.titleText.setText(YTutils.getVideoTitle(discoverModel.getTitle()));
+        holder.AuthorText.setText(YTutils.getChannelTitle(discoverModel.getTitle(),discoverModel.getAuthor()));
+
         Glide.with(con).load(discoverModel.getImgUrl()).addListener(new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -193,8 +196,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                     Toast.makeText(con, "Song is hidden in all list!", Toast.LENGTH_SHORT).show();
                 }
             });
-            holder.titleText.setText(YTutils.getVideoTitle(discoverModel.getTitle()));
-            holder.AuthorText.setText(YTutils.getChannelTitle(discoverModel.getTitle(),discoverModel.getAuthor()));
 
             holder.mainLayout.setOnLongClickListener(v -> {
                 PopupMenu popupMenu = new PopupMenu(con,v);

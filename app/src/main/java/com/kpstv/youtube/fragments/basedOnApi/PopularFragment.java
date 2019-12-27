@@ -301,8 +301,12 @@ public class PopularFragment extends Fragment {
                                 if (val!=null) {
                                     int data_date =  Integer.parseInt(val.substring(val.length()-2));
                                     if (fallinWeek) {
-                                        if (data_date+7>=day)
-                                            getitFromFirebase=true;
+                                        if (data_date+7>=day) {
+                                            json = (String) dataSnapshot.child("data").getValue();
+                                            YTutils.writeContent(activity,fileName,YTutils.getTodayDate_nogaps()+"$"+json);
+                                            processAsCSV=true;
+                                            wait=true;
+                                        }
                                         else {
                                             downloadNew=true;
                                             wait=true;
