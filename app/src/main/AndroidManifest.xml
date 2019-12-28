@@ -29,6 +29,9 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-1763645001743174~5602018181" />
         <activity
+            android:name="com.spotify.sdk.android.authentication.LoginActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity
             android:name=".EqualizerActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"/>
@@ -114,7 +117,9 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".CPlaylistActivity" />
+        <activity android:name=".CPlaylistActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"/>
         <activity android:name=".SettingsActivity" />
         <activity
             android:name=".SplashActivity"

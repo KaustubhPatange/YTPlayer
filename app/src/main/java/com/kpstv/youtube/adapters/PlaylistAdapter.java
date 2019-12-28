@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +31,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
     private ArrayList<PlaylistModel> dataSet;
     private ArrayList<String> Dateset;
     Context con;
-    String pline; View.OnClickListener listener;
+    View.OnClickListener listener;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -98,52 +99,64 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
             Dateset.add(playlistModel.getDate());
         }
 
+        Log.e(TAG, "onBindViewHolder: " +playlistModel.getData().get(0) );
+
         holder.mainCard.setTag(playlistModel);
 
         holder.mainCard.setOnClickListener(listener);
 
-        String playlist_csv = YTutils.readContent((Activity) con,"playlist.csv");
-
         holder.imageMore.setOnClickListener(v -> {
-            PopupMenu popupMenu = new PopupMenu(con,v);
-            popupMenu.inflate(R.menu.playlist_context);
-            popupMenu.show();
-            popupMenu.setOnMenuItemClickListener(item -> {
-                int itemId = item.getItemId();
-                switch (itemId) {
-                    case R.id.action_open:
-                        listener.onClick(holder.mainCard);
-                        break;
-                    case R.id.action_modify:
-                        if (playlist_csv!=null&&!playlist_csv.isEmpty()) {
-                            String[] lines = playlist_csv.split("\r|\n");
-                            for(int i=0;i<lines.length;i++) {
-                                if (lines[i].contains(","+playlistModel.getTitle())) {
-                                    Intent intent = new Intent(con,CPlaylistActivity.class);
-                                    intent.putExtra("line",lines[i]);
-                                    con.startActivity(intent);
-                                }
-                            }
-                        }
+            commonMethod(holder,v,playlistModel);
+        });
 
-                        break;
-                    case R.id.action_delete:
-                        if (playlist_csv!=null&&!playlist_csv.isEmpty()) {
-                            ArrayList<String> lines = new ArrayList<>(Arrays.asList(playlist_csv.split("\r|\n")));
-                            for(int i=0;i<lines.size();i++) {
-                                if (lines.get(i).contains(","+playlistModel.getTitle())) {
-                                    dataSet.remove(i);
-                                    lines.remove(i);
-                                    YTutils.writeContent((Activity)con,"playlist.csv",
-                                            YTutils.convertListToStringMethod(lines));
-                                    PlaylistFragment.loadRecyclerAgain();
-                                }
+        holder.mainCard.setOnLongClickListener(v -> {
+            commonMethod(holder,v,playlistModel);
+            return true;
+        });
+    }
+
+    private static final String TAG = "PlaylistAdapter";
+
+    final void commonMethod(MyViewHolder holder,View v, PlaylistModel playlistModel) {
+        String playlist_csv = YTutils.readContent((Activity) con,"playlist.csv");
+        PopupMenu popupMenu = new PopupMenu(con,v);
+        popupMenu.inflate(R.menu.playlist_context);
+        popupMenu.show();
+        popupMenu.setOnMenuItemClickListener(item -> {
+            int itemId = item.getItemId();
+            switch (itemId) {
+                case R.id.action_open:
+                    listener.onClick(holder.mainCard);
+                    break;
+                case R.id.action_modify:
+                    if (playlist_csv!=null&&!playlist_csv.isEmpty()) {
+                        String[] lines = playlist_csv.split("\r|\n");
+                        for(int i=0;i<lines.length;i++) {
+                            if (lines[i].contains(","+playlistModel.getTitle())) {
+                                Intent intent = new Intent(con,CPlaylistActivity.class);
+                                intent.putExtra("line",lines[i]);
+                                con.startActivity(intent);
                             }
                         }
-                        break;
-                }
-                return false;
-            });
+                    }
+
+                    break;
+                case R.id.action_delete:
+                    if (playlist_csv!=null&&!playlist_csv.isEmpty()) {
+                        ArrayList<String> lines = new ArrayList<>(Arrays.asList(playlist_csv.split("\r|\n")));
+                        for(int i=0;i<lines.size();i++) {
+                            if (lines.get(i).contains(","+playlistModel.getTitle())) {
+                                dataSet.remove(i);
+                                lines.remove(i);
+                                YTutils.writeContent((Activity)con,"playlist.csv",
+                                        YTutils.convertListToStringMethod(lines));
+                                PlaylistFragment.loadRecyclerAgain();
+                            }
+                        }
+                    }
+                    break;
+            }
+            return false;
         });
     }
 

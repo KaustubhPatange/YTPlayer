@@ -112,11 +112,14 @@ public class PlaylistFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    private static final String TAG = "PlaylistFragment";
     private static View.OnClickListener listener = v1 -> {
         OPlayFrag = new OPlaylistFragment();
         PlaylistModel playlistModel = (PlaylistModel) v1.getTag();
+
         Bundle args = new Bundle();
         args.putSerializable("model",playlistModel);
+        Log.e(TAG, "Data1: "+playlistModel.getData().get(0) );
         OPlayFrag.setArguments(args);
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.setCustomAnimations(android.R.anim.fade_in,

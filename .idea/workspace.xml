@@ -14,6 +14,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3483fe51-8e2d-4c34-ba3d-859156321e00" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/alert_progress.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spotify-auth-release/build.gradle" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spotify-auth-release/spotify-auth-release-1.1.0.aar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileContent/fileContent.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileContent/fileContent.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.lock" afterDir="false" />
@@ -26,27 +29,27 @@
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Backup.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/Backup.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/CPlaylistActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/CPlaylistActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity2.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity2.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/PlayerAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/PlayerAdapter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SearchAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SearchAdapter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SongAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SongAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/RingdroidEditActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/RingdroidEditActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/PlaylistAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/PlaylistAdapter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/LibraryFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/LibraryFragment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/LyricBottomSheet.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/LyricBottomSheet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/SearchFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/SearchFragment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/basedOnApi/PopularFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/basedOnApi/PopularFragment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/receivers/SongBroadCast.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/receivers/SongBroadCast.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/OPlaylistFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/OPlaylistFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/PlaylistFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/PlaylistFragment.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_player_new.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_player_new.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/bottom_lyric.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/bottom_lyric.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_library.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_library.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_oplaylist.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_oplaylist.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/isoparser-1.9.39/isoparser-1.9.39.iml" beforeDir="false" afterPath="$PROJECT_DIR$/isoparser-1.9.39/isoparser-1.9.39.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -57,7 +60,7 @@
   <component name="DefaultGradleProjectSettings">
     <option name="isMigrated" value="true" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="192.168.1.102:5555" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="Pixel_2_API_27" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -83,43 +86,95 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity2.java">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/CPlaylistActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="91" column="67" selection-start-line="91" selection-start-column="56" selection-end-line="91" selection-end-column="67" />
+            <state relative-caret-position="231">
+              <caret line="148" column="56" selection-start-line="148" selection-start-column="56" selection-end-line="148" selection-end-column="56" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#20318#20319#0" expanded="true" />
-                <element signature="e#20366#20367#0" expanded="true" />
-                <element signature="e#26517#26518#0" expanded="true" />
-                <element signature="e#26554#26555#0" expanded="true" />
-                <element signature="e#60032#60033#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="380">
-              <caret line="1259" column="75" lean-forward="true" selection-start-line="1259" selection-start-column="75" selection-end-line="1259" selection-end-column="75" />
-              <folding>
-                <element signature="e#23533#23534#0" expanded="true" />
-                <element signature="e#23598#23599#0" expanded="true" />
+                <element signature="e#3684#3685#0" expanded="true" />
+                <element signature="e#3720#3721#0" expanded="true" />
+                <element signature="e#8569#12691#0" />
+                <element signature="e#13011#13012#0" expanded="true" />
+                <element signature="e#13049#13050#0" expanded="true" />
+                <element signature="e#13152#14265#0" />
+                <element signature="e#14299#15641#0" />
+                <element signature="e#15647#19129#0" />
+                <element signature="e#19187#21452#0" />
+                <element signature="e#21493#23740#0" />
+                <element signature="e#24090#25714#0" />
+                <element signature="e#25926#27468#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_player_new.xml">
-          <provider editor-type-id="android-designer2" />
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/OPlaylistFragment.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="463">
-              <caret line="371" column="53" selection-start-line="371" selection-start-column="53" selection-end-line="371" selection-end-column="53" />
+            <state relative-caret-position="917">
+              <caret line="1007" column="14" selection-start-line="1007" selection-start-column="14" selection-end-line="1007" selection-end-column="14" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/PlaylistFragment.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="71">
+              <caret line="179" column="23" selection-start-line="179" selection-start-column="16" selection-end-line="179" selection-end-column="23" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/PlaylistAdapter.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="240">
+              <caret line="101" column="41" selection-start-line="101" selection-start-column="41" selection-end-line="101" selection-end-column="41" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/PlaylistModel.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="285">
+              <caret line="20" column="47" selection-start-line="19" selection-start-column="38" selection-end-line="20" selection-end-column="47" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/Documents/AndroidStudio/DeviceExplorer/xiaomi-poco_f1-c8947c29/data/data/com.kpstv.youtube/files/playlist.csv">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <caret column="15" selection-start-column="15" selection-end-column="26" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_oplaylist.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="142">
+              <caret line="186" column="49" selection-start-line="186" selection-start-column="33" selection-end-line="186" selection-end-column="49" />
+            </state>
+          </provider>
+          <provider editor-type-id="android-designer2" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_nplaylist.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="532">
+              <caret line="127" column="24" lean-forward="true" selection-start-line="111" selection-start-column="8" selection-end-line="127" selection-end-column="24" />
+            </state>
+          </provider>
+          <provider editor-type-id="android-designer2" />
         </entry>
       </file>
     </leaf>
@@ -127,44 +182,44 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="layoutResourceFile" />
         <option value="resourceFile" />
         <option value="Class" />
+        <option value="layoutResourceFile" />
       </list>
     </option>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>visualizer</find>
-      <find>getIn</find>
-      <find>getIntent</find>
-      <find>ytLink</find>
-      <find>getVideoTit</find>
-      <find>channel</find>
-      <find>toPlayNext</find>
-      <find>activity</find>
-      <find>rebuildNo</find>
-      <find />
-      <find>loadData()</find>
-      <find>savetohis</find>
-      <find>saveToHistory</find>
-      <find>Collections.sort</find>
-      <find>common_recycler_layout</find>
-      <find>commonLayout</find>
-      <find>recyclerView</find>
-      <find>manager</find>
-      <find>manager = new</find>
-      <find>adapter = new</find>
-      <find>loadDa</find>
-      <find>loadData();</find>
-      <find>setData</find>
-      <find>Scrolled Changed</find>
-      <find>String</find>
-      <find>onPageSelected</find>
-      <find>loadData</find>
-      <find>play</find>
       <find>playPause_IButton</find>
+      <find>makePla</find>
+      <find>PlayerActivity2.progressBar</find>
+      <find>spotifyplaylist</find>
+      <find>alert</find>
+      <find>edittextalert</find>
+      <find>parseData</find>
+      <find>trackModels</find>
+      <find>commonSpotifyConnect</find>
+      <find>listener</find>
+      <find>need t</find>
+      <find>need to</find>
+      <find>alert.set</find>
+      <find>alert.setvi</find>
+      <find>spotifyPlayList</find>
+      <find>CPla</find>
+      <find>circularpro</find>
       <find>progressBar</find>
+      <find>Yt</find>
+      <find>progres</find>
+      <find>Y</find>
+      <find>Loa</find>
+      <find>circularProgressBar</find>
+      <find>yturls</find>
+      <find>playlistModel</find>
+      <find>[\d+]{3}</find>
+      <find>SPOTIFY_PLAYLIST_URI</find>
+      <find>Dan</find>
+      <find>onClick</find>
+      <find>PlayListModel</find>
     </findStrings>
     <replaceStrings>
       <replace>android:textSize=&quot;16sp&quot;</replace>
@@ -180,13 +235,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/app/src/main/res/drawable/button_background.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/drawable/button_background1.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/drawable/trend_background2.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/basedOnApi/YTFragment.java" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/yt_item.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/drawable/yt_background1.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/drawable/yt_background2.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/drawable/yt_background3.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/drawable/button_background2.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/drawable/button_background3.xml" />
@@ -204,7 +252,6 @@
         <option value="$PROJECT_DIR$/app/src/main/res/values/colors.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/menu/song_popup_menu.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_item.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/OPlaylistFragment.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_popular.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/OnSwipeTouchListener.java" />
@@ -218,25 +265,33 @@
         <option value="$PROJECT_DIR$/app/src/main/res/layout/bottom_lyric.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/LyricBottomSheet.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/VisualizerView.java" />
-        <option value="$PROJECT_DIR$/app/build.gradle" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SongAdapter.java" />
-        <option value="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/receivers/SongBroadCast.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/LibraryFragment.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SearchAdapter.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_library.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/PlayerAdapter.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity2.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_player_new.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity2.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/LibraryFragment.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java" />
+        <option value="$PROJECT_DIR$/build.gradle" />
+        <option value="$PROJECT_DIR$/app/build.gradle" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/SpotifyTrack.java" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/alert_progress.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_oplaylist.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/CPlaylistActivity.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/OPlaylistFragment.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/PlaylistAdapter.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/PlaylistFragment.java" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="115" />
-    <option name="y" value="15" />
+    <option name="x" value="126" />
+    <option name="y" value="10" />
     <option name="width" value="1750" />
     <option name="height" value="1015" />
   </component>
@@ -249,17 +304,18 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="AndroidView" />
+      <pane id="PackagesPane" />
       <pane id="Scope" />
       <pane id="ProjectPane" />
-      <pane id="PackagesPane" />
+      <pane id="AndroidView" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="android.sdk.path" value="$USER_HOME$/Android/Sdk" />
+    <property name="ignore.virus.scanning.warn.message" value="true" />
     <property name="last_directory_selection" value="$PROJECT_DIR$/app/src/main/res/drawable" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="D:/Downloads/spotify-auth-release-1.1.0.aar" />
     <property name="not.eligible.for.single.variant.sync" value="true" />
     <property name="project.structure.last.edited" value="Build Variants" />
     <property name="project.structure.proportion" value="0.17" />
@@ -284,6 +340,11 @@
       <recent name="$PROJECT_DIR$/app/src/main/java/com" />
       <recent name="$PROJECT_DIR$/app/src/main/assets" />
     </key>
+  </component>
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="{" />
+    </option>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -382,7 +443,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="92" y="12" width="1400" height="812" extended-state="0" />
+    <frame x="101" y="8" width="1400" height="812" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Captures" order="0" side_tool="true" weight="0.25" />
@@ -390,7 +451,7 @@
       <window_info content_ui="combo" id="Project" order="2" weight="0.21641791" />
       <window_info id="Structure" order="3" side_tool="true" />
       <window_info id="Favorites" order="4" side_tool="true" />
-      <window_info id="Build Variants" order="5" side_tool="true" />
+      <window_info id="Build Variants" order="5" side_tool="true" weight="0.32985073" />
       <window_info id="Image Layers" order="6" />
       <window_info id="Designer" order="7" />
       <window_info id="Resources Explorer" order="8" />
@@ -401,7 +462,7 @@
       <window_info anchor="bottom" id="TODO" order="4" weight="0.32879046" />
       <window_info anchor="bottom" id="Logcat" order="5" weight="0.32879046" />
       <window_info anchor="bottom" id="Terminal" order="6" weight="0.32794118" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5003358" side_tool="true" weight="0.3298611" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5003358" side_tool="true" weight="0.32941177" />
       <window_info anchor="bottom" id="Build" order="8" sideWeight="0.49966422" weight="0.30147058" />
       <window_info anchor="bottom" id="Run" order="9" weight="0.32352942" />
       <window_info anchor="bottom" id="Find" order="10" weight="0.32794118" />
@@ -410,8 +471,8 @@
       <window_info anchor="right" id="Palette&#9;" order="2" />
       <window_info anchor="right" id="Assistant" order="3" weight="0.21200311" />
       <window_info anchor="right" id="Gradle" order="4" weight="0.3291536" />
-      <window_info anchor="right" id="Preview" order="5" sideWeight="0.49744463" weight="0.37462687" />
-      <window_info anchor="right" id="Device File Explorer" order="6" sideWeight="0.5025554" side_tool="true" weight="0.37835822" />
+      <window_info anchor="right" id="Preview" order="5" sideWeight="0.49558824" weight="0.37462687" />
+      <window_info anchor="right" id="Device File Explorer" order="6" sideWeight="0.50441176" side_tool="true" weight="0.37462687" />
       <window_info anchor="right" id="Hierarchy" order="7" weight="0.3299373" />
     </layout>
     <layout-to-restore>
@@ -485,106 +546,6 @@
     </option>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/yt_item2.xml">
-      <provider editor-type-id="android-designer2" />
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="1" column="70" selection-start-line="1" selection-start-column="70" selection-end-line="1" selection-end-column="70" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/trend_item1.xml">
-      <provider editor-type-id="android-designer2" />
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="24" column="35" lean-forward="true" selection-start-line="24" selection-start-column="10" selection-end-line="24" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/APIResponse.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="14" column="20" selection-start-line="14" selection-start-column="20" selection-end-line="14" selection-end-column="20" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/AppInterface.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="17" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/region_layout.xml">
-      <provider editor-type-id="android-designer2" />
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="561">
-          <caret line="33" column="33" selection-start-line="33" selection-start-column="33" selection-end-line="33" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/trend_item2.xml">
-      <provider editor-type-id="android-designer2" />
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1632">
-          <caret line="96" column="40" selection-start-line="96" selection-start-column="40" selection-end-line="96" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/yt_item3.xml">
-      <provider editor-type-id="android-designer2" />
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="1" column="70" selection-start-line="1" selection-start-column="53" selection-end-line="1" selection-end-column="70" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/yt_item1.xml">
-      <provider editor-type-id="android-designer2" />
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="18" column="4" selection-start-line="18" selection-start-column="4" selection-end-line="18" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_remove_circle.xml" />
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/values/colors.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="148">
-          <caret line="14" column="46" selection-start-line="14" selection-start-column="46" selection-end-line="14" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/NPlaylistActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="145" column="13" selection-start-line="110" selection-start-column="12" selection-end-line="145" selection-end-column="13" />
-          <folding>
-            <element signature="class#getAllOfflineData#0;class#NPlaylistActivity#0" />
-            <element signature="e#16221#16222#0" expanded="true" />
-            <element signature="e#16267#16268#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/menu/song_popup_menu.xml">
-      <provider editor-type-id="android-designer2" />
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="9" column="34" selection-start-line="9" selection-start-column="34" selection-end-line="9" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/HistoryBottomSheet.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="127" column="26" selection-start-line="123" selection-start-column="16" selection-end-line="127" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/DiscoverModel.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="187">
@@ -606,37 +567,20 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_item.xml">
-      <provider editor-type-id="android-designer2" />
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="171">
           <caret line="53" column="14" lean-forward="true" selection-start-line="53" selection-start-column="14" selection-end-line="53" selection-end-column="14" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/CPlaylistActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="169" column="53" selection-start-line="169" selection-start-column="33" selection-end-line="169" selection-end-column="53" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/OPlaylistFragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="112">
-          <caret line="1004" column="74" lean-forward="true" selection-start-line="1004" selection-start-column="11" selection-end-line="1004" selection-end-column="74" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
+      <provider editor-type-id="android-designer2" />
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_popular.xml">
-      <provider editor-type-id="android-designer2" />
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="154">
           <caret line="57" column="40" selection-start-line="57" selection-start-column="40" selection-end-line="57" selection-end-column="40" />
         </state>
       </provider>
+      <provider editor-type-id="android-designer2" />
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/OnSwipeTouchListener.java">
       <provider selected="true" editor-type-id="text-editor">
@@ -649,31 +593,21 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
-      <provider editor-type-id="android-designer2" />
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="480">
           <caret line="48" column="38" selection-start-line="48" selection-start-column="25" selection-end-line="48" selection-end-column="38" />
         </state>
       </provider>
+      <provider editor-type-id="android-designer2" />
     </entry>
     <entry file="jar://$USER_HOME$/Android/Sdk/platforms/android-28/android.jar!/org/w3c/dom/Document.class" />
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/LyricsApi.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="33" column="46" selection-start-line="33" selection-start-column="46" selection-end-line="33" selection-end-column="46" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/trend_layout.xml">
-      <provider editor-type-id="android-designer2" />
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="375">
           <caret line="25" column="48" selection-start-line="25" selection-start-column="48" selection-end-line="25" selection-end-column="48" />
         </state>
       </provider>
+      <provider editor-type-id="android-designer2" />
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/LyricModel.java">
       <provider selected="true" editor-type-id="text-editor">
@@ -720,16 +654,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/MyID3_for_Android/build.gradle">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_search.xml">
-      <provider editor-type-id="android-designer2" />
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
           <caret line="214" selection-start-line="214" selection-end-line="214" />
         </state>
       </provider>
+      <provider editor-type-id="android-designer2" />
     </entry>
     <entry file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.chibde/audiovisualizer/2.2.0/356398fd6f459bc65ce6c9b4184bbd9a887aff3a/audiovisualizer-2.2.0-sources.jar!/com/chibde/visualizer/BarVisualizer.java">
       <provider selected="true" editor-type-id="text-editor">
@@ -766,21 +697,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
-      <provider editor-type-id="android-manifest" />
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="690">
-          <caret line="46" column="33" selection-start-line="46" selection-start-column="33" selection-end-line="46" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/bottom_lyric.xml">
-      <provider editor-type-id="android-designer2" />
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="675">
           <caret line="45" column="26" selection-start-line="45" selection-start-column="26" selection-end-line="45" selection-end-column="26" />
         </state>
       </provider>
+      <provider editor-type-id="android-designer2" />
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/receivers/SongBroadCast.java">
       <provider selected="true" editor-type-id="text-editor">
@@ -796,20 +719,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="780">
-          <caret line="52" column="43" selection-start-line="52" selection-start-column="43" selection-end-line="52" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="173">
-          <caret line="788" column="31" selection-start-line="788" selection-start-column="18" selection-end-line="788" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="377">
@@ -822,13 +731,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/Documents/AndroidStudio/DeviceExplorer/xiaomi-poco_f1-c8947c29/data/data/com.kpstv.youtube/files/library.csv">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" column="13" lean-forward="true" selection-start-line="2" selection-start-column="12" selection-end-line="3" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/Documents/AndroidStudio/DeviceExplorer/xiaomi-poco_f1-c8947c29/data/data/com.kpstv.youtube/files/library.csv" />
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/SearchAdapter.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="377">
@@ -836,27 +739,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/LibraryFragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="411">
-          <caret line="204" column="65" selection-start-line="204" selection-start-column="65" selection-end-line="204" selection-end-column="65" />
-          <folding>
-            <element signature="e#6978#6979#0" expanded="true" />
-            <element signature="e#7034#7035#0" expanded="true" />
-            <element signature="e#7075#7076#0" expanded="true" />
-            <element signature="e#7129#7130#0" expanded="true" />
-            <element signature="e#7083#8884#1" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_library.xml">
-      <provider editor-type-id="android-designer2" />
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="129">
           <caret line="56" column="37" selection-start-line="56" selection-start-column="37" selection-end-line="56" selection-end-column="37" />
         </state>
       </provider>
+      <provider editor-type-id="android-designer2" />
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/PlayerAdapter.java">
       <provider selected="true" editor-type-id="text-editor">
@@ -871,37 +760,207 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_player_new.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="363" column="36" selection-start-line="363" selection-start-column="36" selection-end-line="363" selection-end-column="36" />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer2" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity2.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="91" column="67" selection-start-line="91" selection-start-column="56" selection-end-line="91" selection-end-column="67" />
+        <state relative-caret-position="36">
+          <caret line="761" selection-start-line="761" selection-end-line="761" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#20318#20319#0" expanded="true" />
-            <element signature="e#20366#20367#0" expanded="true" />
-            <element signature="e#26517#26518#0" expanded="true" />
-            <element signature="e#26554#26555#0" expanded="true" />
+            <element signature="e#59974#59975#0" expanded="true" />
             <element signature="e#60032#60033#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_player_new.xml">
-      <provider editor-type-id="android-designer2" />
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/LibraryFragment.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="463">
-          <caret line="371" column="53" selection-start-line="371" selection-start-column="53" selection-end-line="371" selection-end-column="53" />
+        <state relative-caret-position="482">
+          <caret line="218" column="31" lean-forward="true" selection-start-line="218" selection-start-column="31" selection-end-line="218" selection-end-column="31" />
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/LyricsApi.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="145">
+          <caret line="52" selection-start-line="52" selection-end-line="52" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="17" column="18" selection-start-line="17" selection-start-column="18" selection-end-line="17" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MyID3_for_Android/build.gradle">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/spotify-web-api-android-0.4.1.aar/1f24e9a3f812d48dca9a75c66111ce89/jars/classes.jar!/kaaes/spotify/webapi/android/SpotifyService.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="224">
+          <caret line="120" column="107" selection-start-line="120" selection-start-column="107" selection-end-line="120" selection-end-column="107" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="375">
+          <caret line="52" column="43" selection-start-line="52" selection-start-column="43" selection-end-line="52" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/SpotifyTrack.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="37" selection-start-line="37" selection-end-line="37" />
+          <folding>
+            <element signature="method#SpotifyTrack#1;class#SpotifyTrack#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/AppData/Local/Android/Sdk/platforms/android-28/android.jar!/android/view/View.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="218">
+          <caret line="2941" column="13" selection-start-line="2941" selection-start-column="13" selection-end-line="2941" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/edittextalert.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" column="38" selection-start-line="8" selection-start-column="38" selection-end-line="8" selection-end-column="38" />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer2" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="380">
-          <caret line="1259" column="75" lean-forward="true" selection-start-line="1259" selection-start-column="75" selection-end-line="1259" selection-end-column="75" />
+        <state relative-caret-position="107">
+          <caret line="682" column="38" selection-start-line="682" selection-start-column="30" selection-end-line="682" selection-end-column="38" />
           <folding>
-            <element signature="e#23533#23534#0" expanded="true" />
-            <element signature="e#23598#23599#0" expanded="true" />
+            <element signature="e#62087#62088#0" expanded="true" />
+            <element signature="e#62145#62146#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/alert_scan_dialog.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret selection-end-line="41" selection-end-column="15" />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/PlayerActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="1300" column="71" lean-forward="true" selection-start-line="1300" selection-start-column="71" selection-end-line="1300" selection-end-column="71" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/alert_progress.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-150">
+          <caret line="8" column="3" selection-start-line="8" selection-start-column="3" selection-end-line="8" selection-end-column="3" />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="129">
+          <caret line="126" column="35" lean-forward="true" selection-start-line="126" selection-start-column="35" selection-end-line="126" selection-end-column="35" />
+        </state>
+      </provider>
+      <provider editor-type-id="android-manifest" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_nplaylist.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="532">
+          <caret line="127" column="24" lean-forward="true" selection-start-line="111" selection-start-column="8" selection-end-line="127" selection-end-column="24" />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_oplaylist.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="142">
+          <caret line="186" column="49" selection-start-line="186" selection-start-column="33" selection-end-line="186" selection-end-column="49" />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer2" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/PlaylistModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="20" column="47" selection-start-line="19" selection-start-column="38" selection-end-line="20" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Documents/AndroidStudio/DeviceExplorer/xiaomi-poco_f1-c8947c29/data/data/com.kpstv.youtube/files/playlist.csv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="15" selection-start-column="15" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/CPlaylistActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="231">
+          <caret line="148" column="56" selection-start-line="148" selection-start-column="56" selection-end-line="148" selection-end-column="56" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#3684#3685#0" expanded="true" />
+            <element signature="e#3720#3721#0" expanded="true" />
+            <element signature="e#8569#12691#0" />
+            <element signature="e#13011#13012#0" expanded="true" />
+            <element signature="e#13049#13050#0" expanded="true" />
+            <element signature="e#13152#14265#0" />
+            <element signature="e#14299#15641#0" />
+            <element signature="e#15647#19129#0" />
+            <element signature="e#19187#21452#0" />
+            <element signature="e#21493#23740#0" />
+            <element signature="e#24090#25714#0" />
+            <element signature="e#25926#27468#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/OPlaylistFragment.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="917">
+          <caret line="1007" column="14" selection-start-line="1007" selection-start-column="14" selection-end-line="1007" selection-end-column="14" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/adapters/PlaylistAdapter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="101" column="41" selection-start-line="101" selection-start-column="41" selection-end-line="101" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/PlaylistFragment.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="71">
+          <caret line="179" column="23" selection-start-line="179" selection-start-column="16" selection-end-line="179" selection-end-column="23" />
         </state>
       </provider>
     </entry>

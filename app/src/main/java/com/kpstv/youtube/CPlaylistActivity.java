@@ -1,14 +1,16 @@
 package com.kpstv.youtube;
 
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,23 +19,32 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.kpstv.youtube.adapters.SongAdapter;
 import com.kpstv.youtube.models.DiscoverModel;
 import com.kpstv.youtube.utils.HttpHandler;
-import com.kpstv.youtube.utils.SpotifyPlaylist;
 import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTLength;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
+import com.mikhaellopez.circularprogressbar.CircularProgressBar;
+import com.spotify.sdk.android.authentication.AuthenticationClient;
+import com.spotify.sdk.android.authentication.AuthenticationRequest;
+import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 
-import at.huber.youtubeExtractor.YouTubeUriExtractor;
 
 public class CPlaylistActivity extends AppCompatActivity {
     RecyclerView recyclerView; ArrayList<DiscoverModel> models;
@@ -41,6 +52,13 @@ public class CPlaylistActivity extends AppCompatActivity {
     static RecyclerView.LayoutManager layoutManager;
     String playlist_csv; String date; ProgressBar progressBar;
     LinearLayout mainLayout; int current_to_save=-1;
+
+    ArrayList<TrackModel> trackModels;
+    private static final int REQUEST_CODE = 1337;
+    private static final String REDIRECT_URI = "https://kaustubhpatange.github.io/YTPlayer";
+    public static final String CLIENT_ID = "ff0d06a6f7c943d9bb0a0e2167efaa1d";
+    private static final String TAG = "CPlaylistActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,6 +69,7 @@ public class CPlaylistActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         models = new ArrayList<>();
+        trackModels = new ArrayList<>();
         playlistText = findViewById(R.id.cPlaylistText);
         mainLayout = findViewById(R.id.createLayout);
         progressBar = findViewById(R.id.progressBar);
@@ -103,18 +122,17 @@ public class CPlaylistActivity extends AppCompatActivity {
             }
             String[] lines = pline.split(",");
             for(int i=2;i<lines.length;i++) {
-                String videoID = lines[i].split("\\|")[0];
-                YTMeta ytMeta = new YTMeta(videoID);
-                if (ytMeta.getVideMeta()!=null) {
-                    DiscoverModel model = new DiscoverModel(
-                            ytMeta.getVideMeta().getTitle(),
-                            ytMeta.getVideMeta().getAuthor(),
-                            ytMeta.getVideMeta().getImgUrl(),
-                            YTutils.getYtUrl(videoID)
-                    );
-                    model.setSeconds(Integer.parseInt(lines[i].split("\\|")[1]));
-                    models.add(model);
-                }
+                String[] childs = lines[i].split("\\|");
+                String videoID = childs[0];
+                int seconds = Integer.parseInt(childs[1]);
+                DiscoverModel model = new DiscoverModel(
+                        childs[2],
+                        childs[3],
+                        YTutils.getImageUrlID(videoID),
+                        YTutils.getYtUrl(videoID)
+                );
+                model.setSeconds(seconds);
+                models.add(model);
             }
             return null;
         }
@@ -191,28 +209,110 @@ public class CPlaylistActivity extends AppCompatActivity {
         String line = date+","+
                 title;
         for (DiscoverModel model : models) {
-            line+=","+YTutils.getVideoID(model.getYtUrl())+"|"+model.getSeconds();
+            line +=","+YTutils.getVideoID(model.getYtUrl())+"|"+model.getSeconds()+"|"+model.getTitle()+"|"+ model.getAuthor();
         }
         return line;
     }
 
+    AsyncTask<Void,String,Void> spotifyPlayList; CircularProgressBar circularProgressBar;
+    AlertDialog alertDialog; TextView titleAuthorText, currentTextView;
+    boolean toastDisplayOnce=false;
     void showAlertWithEditText1() {
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.edittextalert, null);
         final EditText edittext = dialogView.findViewById(R.id.editText);
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        edittext.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String tocheck = editable.toString();
+                if (!tocheck.isEmpty()) tocheck = URLDecoder.decode(tocheck);
+                if (tocheck.contains("open.spotify.com") &&
+                        tocheck.contains("/playlist/")) {
+                    Log.e(TAG, "afterTextChanged: Contains" );
+                    alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                    alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setVisibility(View.VISIBLE);
+                    if (!toastDisplayOnce) {
+                        toastDisplayOnce=true;
+                        Toast.makeText(CPlaylistActivity.this,
+                                "You need to connect Spotify app first", Toast.LENGTH_LONG).show();
+                    }
+                }else {
+                    Log.e(TAG, "afterTextChanged: Not Contains" );
+                    alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                    alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setVisibility(View.GONE);
+                }
+            }
+        });
+
         alert.setMessage("Enter YouTube or Spotify playlist url in the field.");
         alert.setTitle("Add Playlist");
         alert.setView(dialogView);
         alert.setPositiveButton("Add", (dialog, whichButton) -> {
             String urltosearch = edittext.getText().toString();
             if (urltosearch.contains("open.spotify.com") && urltosearch.contains("/playlist/")) {
-                new spotifyplaylist(urltosearch).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                trackModels.clear();
+
+                View v = getLayoutInflater().inflate(R.layout.alert_progress,null);
+                titleAuthorText = v.findViewById(R.id.textView);
+                currentTextView = v.findViewById(R.id.textView1);
+                circularProgressBar = v.findViewById(R.id.progressBar);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setView(v);
+                builder.setCancelable(false);
+                builder.setPositiveButton("Cancel",(dialogInterface, i) -> {
+                    if (spotifyPlayList!=null && spotifyPlayList.getStatus()== AsyncTask.Status.RUNNING) {
+                        Log.e(TAG, "showAlertWithEditText1: Stopping it" );
+                        do {spotifyPlayList.cancel(true);}while (!spotifyPlayList.isCancelled());
+                        trackModels.clear();
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+                globalAlertDialog = builder.create();
+                globalAlertDialog.show();
+                circularProgressBar.setIndeterminateMode(true);
+
+                parseData(0,0,YTutils.getSpotifyID(urltosearch));
             }else if (urltosearch.contains("youtube.com")||urltosearch.contains("youtu.be")) {
                 new youtubeplaylist(urltosearch).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }else Toast.makeText(this, "Bad search code!", Toast.LENGTH_SHORT).show();
         });
-        alert.show();
+        alert.setNeutralButton("Connect", null);
+        alertDialog = alert.create();
+        alertDialog.show();
+        alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(view -> {
+            String urltosearch =edittext.getText().toString();
+            commonSpotifyConnect(urltosearch);
+        });
+        alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setVisibility(View.GONE);
+    }
+
+    void commonSpotifyConnect(String urltosearch) {
+
+        AuthenticationRequest.Builder builder =
+                new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
+
+        builder.setScopes(new String[]{"streaming"});
+        AuthenticationRequest request = builder.build();
+
+        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+
+    }
+
+    String formatData(String text) {
+        return text.replace(",","").replace("|","");
     }
 
     void showAlertWithEditText() {
@@ -232,6 +332,36 @@ public class CPlaylistActivity extends AppCompatActivity {
             }else Toast.makeText(this, "Bad search code!", Toast.LENGTH_SHORT).show();
         });
         alert.show();
+    }
+    String accessToken=null;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE) {
+            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, data);
+
+            switch (response.getType()) {
+                // Response was successful and contains auth token
+                case TOKEN:
+                    Log.e(TAG, "onActivityResult: "+response.getAccessToken() );
+                    Log.e(TAG,"Expires in: "+response.getExpiresIn());
+
+                    alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setVisibility(View.GONE);
+                    alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+
+                    Toast.makeText(this, "Success: connected to Spotify app!", Toast.LENGTH_SHORT).show();
+
+                    accessToken = response.getAccessToken();
+
+                    break;
+
+                case ERROR:
+                    Log.e(TAG, "onActivityResult: "+response.getError() );
+                    alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setVisibility(View.VISIBLE);
+                    Toast.makeText(this, "Couldn't connect to Spotify!", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
     }
 
     class youtubeplaylist extends AsyncTask<Void,String,Void> {
@@ -288,8 +418,8 @@ public class CPlaylistActivity extends AppCompatActivity {
                         .getString("videoId");
                 YTLength ytLength = new YTLength(videoID);
                 DiscoverModel model = new DiscoverModel(
-                        object.getJSONObject("snippet").getString("title"),
-                        object.getJSONObject("snippet").getString("channelTitle"),
+                        formatData(object.getJSONObject("snippet").getString("title")),
+                        formatData(object.getJSONObject("snippet").getString("channelTitle")),
                         object.getJSONObject("snippet").getJSONObject("thumbnails")
                         .getJSONObject("medium").getString("url"),
                         YTutils.getYtUrl(videoID)
@@ -315,35 +445,81 @@ public class CPlaylistActivity extends AppCompatActivity {
         }
     }
 
+    int current=0; int total;
+    int offsetItem=0;
+    void parseData(final int totalItems,int offset, String playlistId) {
+        this.offsetItem = offset;
+        RequestQueue queue = Volley.newRequestQueue(CPlaylistActivity.this);
+        String url ="https://api.spotify.com/v1/playlists/"+playlistId+"/tracks?offset="+offset+"&limit=100&access_token="+
+                accessToken;
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                response -> {
+                    Log.e(TAG, "Response success: ");
+                    try {
+                        JSONObject object = new JSONObject(response);
+
+                        if (totalItems==0)
+                            total = Integer.parseInt(object.getString("total"));
+                        JSONArray array = object.getJSONArray("items");
+                        for (int i=0;i<array.length();i++) {
+                            current++;
+                            JSONObject track = array.getJSONObject(i).getJSONObject("track");
+                            JSONObject album = track.getJSONObject("album");
+                            JSONObject artists = track.getJSONArray("artists").getJSONObject(0);
+
+                            String title = album.getString("name");
+                            String author = artists.getString("name");
+
+                            trackModels.add(new TrackModel(title,author));
+                        }
+                        if (current<total-1) {
+                            offsetItem = current;
+                            parseData(totalItems,offsetItem+1,playlistId);
+                        }else {
+                            Log.e(TAG, "parseData: Analysis complete" );
+                            if (spotifyPlayList!=null && spotifyPlayList.getStatus()== AsyncTask.Status.RUNNING)
+                                spotifyPlayList.cancel(true);
+                            spotifyPlayList = new spotifyplaylist();
+                            spotifyPlayList.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }, error -> Log.e(TAG, "Well that didn't work"));
+
+        queue.add(stringRequest);
+    }
+
+    AlertDialog globalAlertDialog;
     class spotifyplaylist extends AsyncTask<Void,String,Void> {
-        String url;
-        ProgressDialog dialog;
-        public spotifyplaylist(String url) {
-            this.url = url;
-            dialog = new ProgressDialog(CPlaylistActivity.this);
-        }
+        public spotifyplaylist() { }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            dialog.dismiss();
+            globalAlertDialog.dismiss();
             adapter.notifyDataSetChanged();
             super.onPostExecute(aVoid);
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            SpotifyPlaylist playlist = new SpotifyPlaylist(YTutils.getSpotifyID(url));
-            ArrayList<String> songs = playlist.getSpotifyUrls();
-            if (songs!=null) {
-                for (int i=0;i<songs.size();i++) {
-                    publishProgress("Parsing song "+(i+1)+"/"+songs.size()+"...");
-                    SpotifyTrack track = new SpotifyTrack(YTutils.getSpotifyID(songs.get(i)));
-                    YTLength ytLength = new YTLength(YTutils.getVideoID(track.getYtUrl()));
-                    DiscoverModel model = new DiscoverModel(
-                            track.getTitle(),track.getAuthor(),track.getImageUrl(),track.getYtUrl()
-                    );
-                    model.setSeconds(ytLength.getSeconds());
-                    models.add(model);
+            if (trackModels.size()>0) {
+                for (int i=0;i<trackModels.size();i++) {
+                  //  publishProgress("Parsing song "+(i+1)+"/"+trackModels.size()+"...");
+                    TrackModel trackModel = trackModels.get(i);
+                    publishProgress(i+1+"",trackModels.size()+"",trackModel.getTitle(),trackModel.getAuthor());
+                    try {
+                        SpotifyTrack track = new SpotifyTrack(formatData(trackModel.getTitle()),formatData(trackModel.getAuthor()));
+                        YTLength ytLength = new YTLength(YTutils.getVideoID(track.getYtUrl()));
+                        DiscoverModel model = new DiscoverModel(
+                                track.getTitle(),track.getAuthor(),track.getImageUrl(),track.getYtUrl()
+                        );
+                        model.setSeconds(ytLength.getSeconds());
+                        models.add(model);
+                    }catch (Exception e){
+                        Log.e(TAG, "Failed: Title: "+trackModel.getTitle()+", Author: "+trackModel.getAuthor() );
+                    }
                 }
             }
             return null;
@@ -351,16 +527,37 @@ public class CPlaylistActivity extends AppCompatActivity {
 
         @Override
         protected void onProgressUpdate(String... values) {
-            dialog.setMessage(values[0]);
+            currentTextView.setText("Current song ("+values[0]+"/"+values[1]+"):");
+            titleAuthorText.setText(values[2]+" by "+values[3]);
+            int curr = Integer.parseInt(values[0]);
+            int total = Integer.parseInt(values[1]);
+
+            circularProgressBar.setProgress((float)((float)curr*100.00/(float)total));
+
             super.onProgressUpdate(values);
         }
 
         @Override
         protected void onPreExecute() {
-            dialog.setCancelable(false);
-            dialog.setMessage("Parsing playlist songs...");
-            dialog.show();
+            circularProgressBar.setIndeterminateMode(false);
+            Log.e(TAG, "onPreExecute: Track Model Size: "+trackModels.size() );
             super.onPreExecute();
+        }
+
+
+    }
+
+    class TrackModel {
+        private String title,author;
+        public TrackModel(String title, String author) {
+            this.title = title;
+            this.author = author;
+        }
+        public String getTitle() {
+            return title;
+        }
+        public String getAuthor() {
+            return author;
         }
     }
 
@@ -390,8 +587,8 @@ public class CPlaylistActivity extends AppCompatActivity {
             YTLength ytLength = new YTLength(videoID);
             if (ytMeta.getVideMeta() != null) {
                 DiscoverModel model = new DiscoverModel(
-                        ytMeta.getVideMeta().getTitle(),
-                        ytMeta.getVideMeta().getAuthor(),
+                        formatData( ytMeta.getVideMeta().getTitle()),
+                        formatData(ytMeta.getVideMeta().getAuthor()),
                         ytMeta.getVideMeta().getImgUrl(),
                         "https://www.youtube.com/watch?v=" + videoID
                 );
@@ -444,7 +641,7 @@ public class CPlaylistActivity extends AppCompatActivity {
                 YTLength ytLength = new YTLength(YTutils.getVideoID(track.getYtUrl()));
                 if (track.getTitle()!=null) {
                     DiscoverModel model = new DiscoverModel(
-                            track.getTitle(),track.getAuthor(),track.getImageUrl(),track.getYtUrl()
+                            formatData(track.getTitle()),formatData(track.getAuthor()),track.getImageUrl(),track.getYtUrl()
                     );
                     model.setSeconds(ytLength.getSeconds());
                     models.add(model);

@@ -777,6 +777,16 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         Log.e("CurrentDur", MainActivity.player.getCurrentPosition() + "");
     }
 
+    public static void hidePlayButton() {
+        playFab.setEnabled(false);
+        playFab.setColorFilter(activity.getResources().getColor(R.color.white));
+    }
+
+    public static void showPlayButton() {
+        playFab.setEnabled(true);
+        playFab.clearColorFilter();
+    }
+
     public static void makePlay() {
         playFab.setImageDrawable(activity.getResources().getDrawable(R.drawable.play));
     }

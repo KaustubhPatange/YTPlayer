@@ -1,1 +1,1 @@
-include ':app', ':isoparser-1.9.39', ':MyID3_for_Android'
+include ':app', ':isoparser-1.9.39', ':MyID3_for_Android', ':spotify-auth-release'

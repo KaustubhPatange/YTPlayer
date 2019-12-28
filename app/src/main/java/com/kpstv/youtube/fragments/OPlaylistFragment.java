@@ -87,14 +87,14 @@ public class OPlaylistFragment extends Fragment {
     RecyclerView.LayoutManager layoutManager;
     ImageView oImageView; String title = "Playlist";
     TextView TitleText,SongCountText,TimeText,albumText,songText,pathLocation;
-    ProgressBar progressBar; PlaylistModel playlistModel; OFModel ofModel;
+    PlaylistModel playlistModel; OFModel ofModel;
     FloatingActionButton playFab; boolean localMusic=false,searchMusic=false;
     SharedPreferences preferences; File mainFile;
     OFAdapter ofadapter; LocalModel localModel; boolean scanAlbum=false;
     ArrayList<OFModel> ofModels; ArrayList<LocalModel> albumModels;
     LocalAdapter albumAdaper; GridLayoutManager gridLayoutManager;
     private static final String TAG = "OPlayListFragment";
-    boolean loadComplete =false;
+    boolean loadComplete =false; ProgressBar circularProgressBar;
     public OPlaylistFragment() { }
 
     @SuppressLint("StaticFieldLeak")
@@ -116,12 +116,12 @@ public class OPlaylistFragment extends Fragment {
             albumText = v.findViewById(R.id.albumText);
             albumRecyclerView = v.findViewById(R.id.album_recyclerView);
             oImageView = v.findViewById(R.id.oImageView);
+            circularProgressBar = v.findViewById(R.id.circularProgress);
             pathLocation = v.findViewById(R.id.oPathLocation);
             SongCountText = v.findViewById(R.id.oSongText);
             TimeText = v.findViewById(R.id.oTime);
             songText = v.findViewById(R.id.songText);
             playFab = v.findViewById(R.id.oPlayFAB);
-            progressBar = v.findViewById(R.id.progressBar);
             layoutManager = new LinearLayoutManager(activity);
             recyclerView.setLayoutManager(layoutManager);
 
@@ -234,22 +234,16 @@ public class OPlaylistFragment extends Fragment {
                 Log.e(TAG, "onCreateView: In normal OPlayFrag" );
                 playlistModel = (PlaylistModel) args.getSerializable("model");
                 title = playlistModel.getTitle().trim();
-                ArrayList<String> videos = playlistModel.getData();
                 TitleText.setText(playlistModel.getTitle());
-                SongCountText.setText(String.format("%s songs", videos.size()));
+                SongCountText.setText(String.format("%s songs", playlistModel.getData().size()));
                 TimeText.setText(String.format("  %s", YTutils.milliSecondsToTimer(
                         playlistModel.getTimeseconds()*1000)));
 
 
-                if (videos.size()>0) {
-                    for (int i = 0; i < videos.size(); i++) {
-                        String videoID = videos.get(i).split("\\|")[0];
-                        yturls.add( YTutils.getYtUrl(videoID));
-                    }
-
-                    new getData().execute();
+                if (playlistModel.getData().size()>0) {
+                     new getData().execute();
                 }else {
-                    progressBar.setVisibility(View.GONE);
+                    circularProgressBar.setVisibility(View.GONE);
                     songText.setText("NO SONG DATA");
                     songText.setVisibility(View.VISIBLE);
                 }
@@ -342,7 +336,7 @@ public class OPlaylistFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            progressBar.setVisibility(View.GONE);
+            circularProgressBar.setVisibility(View.GONE);
             songText.setText("TRACKS");
             songText.setVisibility(View.VISIBLE);
 
@@ -604,7 +598,7 @@ public class OPlaylistFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            progressBar.setVisibility(View.VISIBLE);
+            circularProgressBar.setVisibility(View.VISIBLE);
             albumModels.clear();
             if (albumAdaper!=null) albumAdaper.notifyDataSetChanged();
             ofModels.clear();
@@ -687,7 +681,7 @@ public class OPlaylistFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             ofModels.clear();
-            progressBar.setVisibility(View.VISIBLE);
+            circularProgressBar.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.GONE);
             super.onPreExecute();
         }
@@ -695,7 +689,7 @@ public class OPlaylistFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             if (ofModels.size()>0) {
-                progressBar.setVisibility(View.GONE);
+                circularProgressBar.setVisibility(View.GONE);
                 songText.setText("TRACKS");
                 songText.setVisibility(View.VISIBLE);
 
@@ -987,11 +981,12 @@ public class OPlaylistFragment extends Fragment {
 
     class getData extends AsyncTask<Void,Void,Void> {
 
+
         @Override
         protected void onPostExecute(Void aVoid) {
             adapter = new SongAdapter(models,activity,true,null);
             recyclerView.setAdapter(adapter);
-            progressBar.setVisibility(View.GONE);
+            circularProgressBar.setVisibility(View.GONE);
             songText.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.VISIBLE);
 
@@ -1009,7 +1004,23 @@ public class OPlaylistFragment extends Fragment {
                     strings = new ArrayList<>(Arrays.asList(data.split(",")));
                 else strings.add(data.trim());
             }
-            for (String yturl : yturls) {
+            for (String line: playlistModel.getData()) {
+               if (!line.contains("|")) continue;
+                String[] childs = line.split("\\|");
+                String videoId = childs[0];
+                yturls.add(YTutils.getYtUrl(videoId));
+
+                DiscoverModel discoverModel = new DiscoverModel(
+                        childs[2],
+                        childs[3],
+                        YTutils.getImageUrlID(videoId),
+                        YTutils.getYtUrl(videoId)
+                );
+
+                if (strings.contains("ytID:"+videoId))
+                    discoverModel.setDisabled(true);
+            }
+           /* for (String yturl : yturls) {
                 YTMeta ytMeta = new YTMeta(YTutils.getVideoID(yturl));
                 if (ytMeta.getVideMeta()!=null) {
                     DiscoverModel discoverModel = new DiscoverModel(
@@ -1024,7 +1035,7 @@ public class OPlaylistFragment extends Fragment {
 
                     models.add(discoverModel);
                 }
-            }
+            }*/
             return null;
         }
 

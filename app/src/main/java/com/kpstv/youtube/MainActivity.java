@@ -1111,7 +1111,10 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
     static void commonPreExecute() {
         try {
-            PlayerActivity2.progressBar.setVisibility(VISIBLE);
+            if (!localPlayBack) {
+                PlayerActivity2.progressBar.setVisibility(VISIBLE);
+                PlayerActivity2.hidePlayButton();
+            }
         }catch (Exception ignored){}
         adViewLayout.setVisibility(VISIBLE);
         AdRequest adRequest = new AdRequest.Builder().build();
@@ -1234,7 +1237,10 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 switch (playbackState) {
                     case ExoPlayer.STATE_BUFFERING:
                         try {
-                            PlayerActivity2.progressBar.setVisibility(VISIBLE);
+                            if (!localPlayBack) {
+                                PlayerActivity2.progressBar.setVisibility(VISIBLE);
+                                PlayerActivity2.hidePlayButton();
+                            }
                         }catch (Exception ignored){}
                         break;
                     case ExoPlayer.STATE_ENDED:
@@ -1260,12 +1266,17 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                         total_duration = MainActivity.player.getDuration();
                         total_seconds = (int) total_duration / 1000;
                         try {
-                            PlayerActivity2.progressBar.setVisibility(View.GONE);
+                            if (!localPlayBack) {
+                                PlayerActivity2.progressBar.setVisibility(View.GONE);
+                                PlayerActivity2.showPlayButton();
+                            }
                             PlayerActivity2.loadAgain();
                             PlayerActivity2.totalDuration.setText(YTutils.milliSecondsToTimer(MainActivity.total_duration));
                         }catch (Exception e) { Log.e("PlayerActivity","not loaded yet!"); }
 
-                        addEqualizer();
+                        try {
+                            addEqualizer();
+                        }catch (Exception e) {}
 
                         /** Setting mediaSession metadata */
                         final MediaMetadataCompat.Builder metaData = new MediaMetadataCompat.Builder()

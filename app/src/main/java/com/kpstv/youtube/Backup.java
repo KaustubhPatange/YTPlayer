@@ -503,7 +503,7 @@ public class PlayerActivity2 extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(PlayerActivity2.this);
         builder.setTitle("Select Media Codec");
 
-        builder.setItems(arrays, (dialog, which) -> {
+        builder.setItems(arrays, (globalAlertDialog, which) -> {
             YTConfig config = configs.get(which);
             String filename;
             if (config.getText().length() > 55) {
@@ -562,8 +562,8 @@ public class PlayerActivity2 extends AppCompatActivity {
                     Toast.LENGTH_SHORT).show();
             showAd();
         });
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        AlertDialog globalAlertDialog = builder.create();
+        globalAlertDialog.show();
     }
 
     private void downloadFromUrl(String youtubeDlUrl, String downloadTitle, String fileName) {
@@ -621,14 +621,14 @@ public class PlayerActivity2 extends AppCompatActivity {
             Log.e("ExecutingTask","true");
             LayoutInflater inflater = getLayoutInflater();
             dialogView = inflater.inflate(R.layout.alert_merger, null);
-            tview = dialogView.findViewById(R.id.textView);
+            tview = dialogView.findViewById(R.id.titleAuthorText);
             bar = dialogView.findViewById(R.id.progressBar);
             AlertDialog.Builder alert = new AlertDialog.Builder(PlayerActivity2.this);
             alert.setTitle("Download");
             alert.setMessage("This could take a while depending upon length of audio!");
             alert.setCancelable(false);
             alert.setView(dialogView);
-            alert.setNegativeButton("Cancel", (dialog, which) -> {
+            alert.setNegativeButton("Cancel", (globalAlertDialog, which) -> {
                 cutTask.cancel(true);
             });
             alertdialog = alert.create();
@@ -731,14 +731,14 @@ public class PlayerActivity2 extends AppCompatActivity {
             Log.e("ExecutingTask","true");
             LayoutInflater inflater = getLayoutInflater();
             dialogView = inflater.inflate(R.layout.alert_merger, null);
-            tview = dialogView.findViewById(R.id.textView);
+            tview = dialogView.findViewById(R.id.titleAuthorText);
             bar = dialogView.findViewById(R.id.progressBar);
             AlertDialog.Builder alert = new AlertDialog.Builder(PlayerActivity2.this);
             alert.setTitle("Merging");
             alert.setMessage("This could take a while depending upon length of video!");
             alert.setCancelable(false);
             alert.setView(dialogView);
-            alert.setNegativeButton("Cancel", (dialog, which) -> {
+            alert.setNegativeButton("Cancel", (globalAlertDialog, which) -> {
                 mergeTask.cancel(true);
             });
             alertdialog = alert.create();

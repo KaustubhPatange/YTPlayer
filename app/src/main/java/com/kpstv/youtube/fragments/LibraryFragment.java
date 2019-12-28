@@ -205,9 +205,13 @@ public class LibraryFragment extends Fragment implements AppInterface {
                                 sortModels.add(new SortModel(count,item));
                             }
                         }
-                        /** Comparison based on no. of views (ascending) */
+                        /** Comparison based on no. of times a song has listen (ascending) */
                         Collections.sort(sortModels, (t1, t2) -> Integer.compare(t2.key,t1.key));
-                        for (SortModel sortModel : sortModels) {
+                        int number = 10;
+                        if (sortModels.size()<=10)
+                            number = sortModels.size();
+                        for (int i=0;i<number;i++) {
+                            SortModel sortModel = sortModels.get(i);
                             String[] childs = sortModel.getValue().split("\\|");
                             models.add(new SearchModel(
                                     childs[2],YTutils.getImageUrl(childs[0]),

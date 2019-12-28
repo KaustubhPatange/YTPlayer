@@ -478,7 +478,7 @@ public class RingdroidEditActivity extends AppCompatActivity implements MarkerVi
     }
 
     //
-    // Static About dialog method, also called from RingdroidSelectActivity
+    // Static About globalAlertDialog method, also called from RingdroidSelectActivity
     //
 
     public static void onAbout(final Activity activity) {
@@ -1095,10 +1095,10 @@ public class RingdroidEditActivity extends AppCompatActivity implements MarkerVi
     }
 
     /**
-     * Show a "final" alert dialog that will exit the activity
+     * Show a "final" alert globalAlertDialog that will exit the activity
      * after the user clicks on the OK button.  If an exception
      * is passed, it's assumed to be an error condition, and the
-     * dialog is presented as an error, and the stack trace is
+     * globalAlertDialog is presented as an error, and the stack trace is
      * logged.  If there's no exception, it's a success message.
      */
 
@@ -1204,7 +1204,7 @@ public class RingdroidEditActivity extends AppCompatActivity implements MarkerVi
         final int endFrame = mWaveformView.secondsToFrames(endTime);
         final int duration = (int) (endTime - startTime + 0.5);
 
-        // Create an indeterminate progress dialog
+        // Create an indeterminate progress globalAlertDialog
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         mProgressDialog.setTitle(R.string.progress_dialog_saving);
@@ -1260,7 +1260,7 @@ public class RingdroidEditActivity extends AppCompatActivity implements MarkerVi
                         // create the .wav file
                         mSoundFile.WriteWAVFile(outFile, startFrame, endFrame - startFrame);
                     } catch (Exception e) {
-                        // Creating the .wav file also failed. Stop the progress dialog, show an
+                        // Creating the .wav file also failed. Stop the progress globalAlertDialog, show an
                         // error message and exit.
                         mProgressDialog.dismiss();
                         if (outFile.exists()) {
