@@ -29,6 +29,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
@@ -609,7 +610,10 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                     }else loadFragment(NCFrag);
                     return true;
                 case R.id.navigation_search:
-                    loadFragment(SearchFrag);
+                    if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof SearchFragment)
+                        SearchFrag.onActivityResult(100,1,null);
+                    else
+                        loadFragment(SearchFrag);
                     return true;
                 case R.id.navigation_playlist:
                     loadFragment(libraryFrag);
@@ -625,10 +629,15 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         if (fragment != null) {
             Log.e("LoadingFragment","");
 
-            fragmentManager
+            FragmentTransaction ft = fragmentManager.beginTransaction();
+            ft.setCustomAnimations(R.anim.fade_in,R.anim.fade_out);
+            ft.replace(R.id.fragment_container,fragment)
+                    .commit();
+           /* fragmentManager
                     .beginTransaction()
                     .replace(R.id.fragment_container, fragment)
                     .commit();
+            fragmentManager.executePendingTransactions();*/
             return true;
         }
         return false;
@@ -649,13 +658,6 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, libraryFrag)
                 .commit();
-    }
-
-    public static void loadPreviousFrag() {
-        if (fragmentManager.getBackStackEntryCount()>0) {
-            fragmentManager.popBackStack();
-        }else
-            activity.onBackPressed();
     }
 
     public static void loadLocalMusicFrag() {

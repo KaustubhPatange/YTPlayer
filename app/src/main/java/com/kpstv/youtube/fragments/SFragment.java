@@ -191,7 +191,7 @@ public class SFragment extends Fragment implements AppInterface {
         }
         searchEdit.requestFocus();
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(searchEdit, InputMethodManager.SHOW_IMPLICIT);
+        imm.hideSoftInputFromWindow(searchEdit.getWindowToken(), 0);
         return v;
     }
 

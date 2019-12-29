@@ -56,7 +56,7 @@ import java.util.ArrayList;
 public class SearchFragment extends Fragment {
 
     View v;
-    RecyclerView recyclerView; Fragment discoverFrag, SearchFrag;
+    RecyclerView recyclerView; static Fragment discoverFrag, SearchFrag;
     static RecyclerView.LayoutManager layoutManager;
     SearchAdapter adapter; boolean networkCreated; ArrayList<String> images;
     ArrayList<SearchModel> models; RelativeLayout progresslayout;
@@ -188,16 +188,7 @@ public class SearchFragment extends Fragment {
 
                 FrameLayout layout = activity.findViewById(R.id.fragment_container);
                 if (layout!=null) {
-                    SearchFrag = new SFragment();
-                    Bundle args = new Bundle();
-                    args.putString("data_csv",SpotifyViralCSV);
-                    SearchFrag.setArguments(args);
-                    FragmentManager manager = getActivity().getSupportFragmentManager();
-                    FragmentTransaction ft = manager.beginTransaction();
-                    ft.setCustomAnimations(android.R.anim.fade_in,
-                            android.R.anim.fade_out);
-                    ft.replace(R.id.fragment_container, SearchFrag);
-                    ft.commit();
+                    loadSearchViewFrag();
                 }
             });
 
@@ -338,7 +329,26 @@ public class SearchFragment extends Fragment {
         return v;
     }
 
+    public void loadSearchViewFrag() {
+        SearchFrag = new SFragment();
+        Bundle args = new Bundle();
+        args.putString("data_csv",SpotifyViralCSV);
+        SearchFrag.setArguments(args);
+        FragmentManager manager = activity.getSupportFragmentManager();
+        FragmentTransaction ft = manager.beginTransaction();
+        ft.setCustomAnimations(android.R.anim.fade_in,
+                android.R.anim.fade_out);
+        ft.replace(R.id.fragment_container, SearchFrag);
+        ft.commit();
+    }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode==100) {
+            loadSearchViewFrag();
+        }
+    }
 
     @Override
     public void onResume() {

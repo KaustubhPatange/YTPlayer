@@ -1019,6 +1019,8 @@ public class OPlaylistFragment extends Fragment {
 
                 if (strings.contains("ytID:"+videoId))
                     discoverModel.setDisabled(true);
+
+                models.add(discoverModel);
             }
            /* for (String yturl : yturls) {
                 YTMeta ytMeta = new YTMeta(YTutils.getVideoID(yturl));

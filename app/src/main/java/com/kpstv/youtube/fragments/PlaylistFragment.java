@@ -27,6 +27,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -39,15 +40,16 @@ import com.kpstv.youtube.models.PlaylistModel;
 import com.kpstv.youtube.utils.YTutils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class PlaylistFragment extends Fragment {
 
-    View v; static FragmentActivity activity; static ProgressBar progressBar;
+    View v; FragmentActivity activity;ProgressBar progressBar;
     boolean networkCreated;static String playlist_csv;
-    static ArrayList<PlaylistModel> data; FloatingActionButton fabCreate;
-    static RecyclerView recyclerView; static PlaylistAdapter adapter;
-    static RecyclerView.LayoutManager layoutManager; static Fragment OPlayFrag;
-    NestedScrollView nestedScrollView; static FragmentManager fragmentManager;
+    ArrayList<PlaylistModel> data; FloatingActionButton fabCreate;
+    RecyclerView recyclerView; PlaylistAdapter adapter;
+    RecyclerView.LayoutManager layoutManager; Fragment OPlayFrag;
+    NestedScrollView nestedScrollView; FragmentManager fragmentManager;
 
     public PlaylistFragment() {}
 
@@ -113,44 +115,6 @@ public class PlaylistFragment extends Fragment {
     }
 
     private static final String TAG = "PlaylistFragment";
-    private static View.OnClickListener listener = v1 -> {
-        OPlayFrag = new OPlaylistFragment();
-        PlaylistModel playlistModel = (PlaylistModel) v1.getTag();
-
-        Bundle args = new Bundle();
-        args.putSerializable("model",playlistModel);
-        Log.e(TAG, "Data1: "+playlistModel.getData().get(0) );
-        OPlayFrag.setArguments(args);
-        FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft.setCustomAnimations(android.R.anim.fade_in,
-                android.R.anim.fade_out);
-        ft.replace(R.id.fragment_container, OPlayFrag);
-        ft.commit();
-    };
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int itemID = item.getItemId();
-        /*switch (itemID) {
-            case R.id.action_removeAll:
-                int icon = android.R.drawable.ic_dialog_alert;
-                new AlertDialog.Builder(activity)
-                        .setTitle("Remove All")
-                        .setMessage("Are you sure to remove all playlist?")
-                        .setPositiveButton("OK", (dialog, which) -> {
-                          YTutils.writeContent(activity,"playlist.csv","");
-                          new getData(activity).execute();
-                        })
-                        .setIcon(icon)
-                        .show();
-                break;
-        }*/
-        return super.onOptionsItemSelected(item);
-    }
-
-    public static void loadRecyclerAgain() {
-        new getData(activity).execute();
-    }
 
     @Override
     public void onResume() {
@@ -166,7 +130,66 @@ public class PlaylistFragment extends Fragment {
     }
 
 
-    static class getData extends AsyncTask<Void,Void,Void> {
+    void setAdapterClicks() {
+        adapter.setSingleClickListener((v1, model, position) -> {
+            OPlayFrag = new OPlaylistFragment();
+            Bundle args = new Bundle();
+            args.putSerializable("model",model);
+            Log.e(TAG, "Data1: "+model.getData().get(0) );
+            OPlayFrag.setArguments(args);
+            FragmentTransaction ft = fragmentManager.beginTransaction();
+            ft.setCustomAnimations(android.R.anim.fade_in,
+                    android.R.anim.fade_out);
+            ft.replace(R.id.fragment_container, OPlayFrag);
+            ft.commit();
+        });
+
+        adapter.setLongClickListener((v1, model, position) -> {
+            String playlist_csv = YTutils.readContent( activity,"playlist.csv");
+            PopupMenu popupMenu = new PopupMenu(activity,v1);
+            popupMenu.inflate(R.menu.playlist_context);
+            popupMenu.show();
+            popupMenu.setOnMenuItemClickListener(item -> {
+                int itemId = item.getItemId();
+                switch (itemId) {
+                    case R.id.action_open:
+                        adapter.performSingleClick(v,model,position);
+                        break;
+                    case R.id.action_modify:
+                        if (playlist_csv!=null&&!playlist_csv.isEmpty()) {
+                            String[] lines = playlist_csv.split("\r|\n");
+                            for(int i=0;i<lines.length;i++) {
+                                if (lines[i].contains(","+model.getTitle())) {
+                                    Intent intent = new Intent(activity,CPlaylistActivity.class);
+                                    intent.putExtra("line",lines[i]);
+                                    activity.startActivity(intent);
+                                }
+                            }
+                        }
+
+                        break;
+                    case R.id.action_delete:
+                        if (playlist_csv!=null&&!playlist_csv.isEmpty()) {
+                            ArrayList<String> lines = new ArrayList<>(Arrays.asList(playlist_csv.split("\r|\n")));
+                            for(int i=0;i<lines.size();i++) {
+                                if (lines.get(i).contains(","+model.getTitle())) {
+                                    data.remove(i);
+                                    lines.remove(i);
+                                    YTutils.writeContent(activity,"playlist.csv",
+                                            YTutils.convertListToStringMethod(lines));
+                                    adapter.notifyDataSetChanged();
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                }
+                return false;
+            });
+        });
+    }
+
+    class getData extends AsyncTask<Void,Void,Void> {
 
         @SuppressLint("StaticFieldLeak")
         Activity activity;
@@ -177,7 +200,8 @@ public class PlaylistFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             if (data.size()>0) {
-                adapter = new PlaylistAdapter(data,activity,listener);
+                adapter = new PlaylistAdapter(data,activity);
+                setAdapterClicks();
                 recyclerView.setAdapter(adapter);
                 recyclerView.setVisibility(View.VISIBLE);
             }
@@ -190,7 +214,7 @@ public class PlaylistFragment extends Fragment {
             playlist_csv = YTutils.readContent(activity,"playlist.csv");
             if (playlist_csv !=null && !playlist_csv.isEmpty()) {
                 data.clear();
-                for (String line : playlist_csv.split("[\n\r]")) {
+                for (String line : playlist_csv.split("\n|\r")) {
                     if (line!=null&&!line.isEmpty()) {
                         ArrayList<String> list = new ArrayList<>();
                         String[] lines = line.split(",");

@@ -31,7 +31,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
     private ArrayList<PlaylistModel> dataSet;
     private ArrayList<String> Dateset;
     Context con;
-    View.OnClickListener listener;
+    LongClickListener longClickListener;
+    SingleClickListener singleClickListener;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -55,10 +56,9 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
         }
     }
 
-    public PlaylistAdapter(ArrayList<PlaylistModel> data, Context context, View.OnClickListener listener) {
+    public PlaylistAdapter(ArrayList<PlaylistModel> data, Context context) {
         this.dataSet = data;
         this.con = context;
-        this.listener = listener;
         Dateset = new ArrayList<>();
     }
 
@@ -99,66 +99,41 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.MyView
             Dateset.add(playlistModel.getDate());
         }
 
-        Log.e(TAG, "onBindViewHolder: " +playlistModel.getData().get(0) );
 
         holder.mainCard.setTag(playlistModel);
 
-        holder.mainCard.setOnClickListener(listener);
+        holder.mainCard.setOnClickListener(view -> singleClickListener.onSingleClick(view,playlistModel,listPosition));
 
-        holder.imageMore.setOnClickListener(v -> {
-            commonMethod(holder,v,playlistModel);
-        });
+        holder.imageMore.setOnClickListener(v -> longClickListener.onLongClick(v,playlistModel,listPosition));
 
         holder.mainCard.setOnLongClickListener(v -> {
-            commonMethod(holder,v,playlistModel);
+            longClickListener.onLongClick(v,playlistModel,listPosition);
             return true;
         });
     }
 
+    public void setLongClickListener(LongClickListener longClickListener) {
+        this.longClickListener = longClickListener;
+    }
+
+    public void setSingleClickListener(SingleClickListener singleClickListener) {
+        this.singleClickListener = singleClickListener;
+    }
+
+    public void performSingleClick(View v,PlaylistModel playlistModel, int position) {
+        singleClickListener.onSingleClick(v,playlistModel,position);
+    }
+
     private static final String TAG = "PlaylistAdapter";
 
-    final void commonMethod(MyViewHolder holder,View v, PlaylistModel playlistModel) {
-        String playlist_csv = YTutils.readContent((Activity) con,"playlist.csv");
-        PopupMenu popupMenu = new PopupMenu(con,v);
-        popupMenu.inflate(R.menu.playlist_context);
-        popupMenu.show();
-        popupMenu.setOnMenuItemClickListener(item -> {
-            int itemId = item.getItemId();
-            switch (itemId) {
-                case R.id.action_open:
-                    listener.onClick(holder.mainCard);
-                    break;
-                case R.id.action_modify:
-                    if (playlist_csv!=null&&!playlist_csv.isEmpty()) {
-                        String[] lines = playlist_csv.split("\r|\n");
-                        for(int i=0;i<lines.length;i++) {
-                            if (lines[i].contains(","+playlistModel.getTitle())) {
-                                Intent intent = new Intent(con,CPlaylistActivity.class);
-                                intent.putExtra("line",lines[i]);
-                                con.startActivity(intent);
-                            }
-                        }
-                    }
-
-                    break;
-                case R.id.action_delete:
-                    if (playlist_csv!=null&&!playlist_csv.isEmpty()) {
-                        ArrayList<String> lines = new ArrayList<>(Arrays.asList(playlist_csv.split("\r|\n")));
-                        for(int i=0;i<lines.size();i++) {
-                            if (lines.get(i).contains(","+playlistModel.getTitle())) {
-                                dataSet.remove(i);
-                                lines.remove(i);
-                                YTutils.writeContent((Activity)con,"playlist.csv",
-                                        YTutils.convertListToStringMethod(lines));
-                                PlaylistFragment.loadRecyclerAgain();
-                            }
-                        }
-                    }
-                    break;
-            }
-            return false;
-        });
+    public interface LongClickListener {
+        void onLongClick(View v, PlaylistModel model, int position);
     }
+
+    public interface SingleClickListener {
+        void onSingleClick(View v, PlaylistModel model, int position);
+    }
+
 
     @Override
     public int getItemCount() {

@@ -11,13 +11,12 @@ public class PlaylistModel implements Serializable {
     public PlaylistModel(String date,String title, ArrayList<String> data) {
         Title = title;
         this.Date = date;
-        this.data = new ArrayList<>();
+        this.data = data;
 
         // Calculation for time seconds from videoIDs
 
         for (String line : data) {
             if (line.isEmpty()) continue;
-            this.data.add(line.split("\\|")[0]);
             Timeseconds+=Integer.parseInt(line.split("\\|")[1]);
         }
     }

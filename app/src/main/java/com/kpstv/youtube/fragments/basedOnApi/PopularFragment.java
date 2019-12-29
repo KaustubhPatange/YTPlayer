@@ -77,7 +77,7 @@ public class PopularFragment extends Fragment {
     private LinearLayout mLinearlayout;
     private RelativeLayout mRelativelayout;
     ProgressBar progressBar; ArrayList<String> strings;
-    String fileName="ytend.csv";
+    String fileName="ytrend.csv";
     LinearLayoutManager manager;
     String ref = "top_100"; boolean isOther,fallinWeek;
     ArrayList<DiscoverModel> models;
@@ -312,7 +312,8 @@ public class PopularFragment extends Fragment {
                                             wait=true;
                                         }
                                     }else {
-                                        if ((!val.equals("empty")||val.equals(todayDate)||val.equals(tomorrowDate))) {
+                                        Log.e(TAG, "onDataChange: TimerString Val="+val+", Today Date: "+todayDate+", Tomorrow Date: "+tomorrowDate);
+                                        if (!val.contains("empty") && ( val.equals(todayDate)||val.equals(tomorrowDate))) {
                                             Log.e(TAG, "onDataChange: Getting data from Firebase" );
                                             json = (String) dataSnapshot.child("data").getValue();
                                             YTutils.writeContent(activity,fileName,YTutils.getTodayDate_nogaps()+"$"+json);
@@ -321,6 +322,7 @@ public class PopularFragment extends Fragment {
                                             Log.e(TAG, "onDataChange: Got it");
                                         }else {
                                             // We will use api response here...
+                                            Log.e(TAG, "onDataChange: We will download new data!" );
                                             downloadNew=true;
                                             wait=true;
                                         }
@@ -359,6 +361,7 @@ public class PopularFragment extends Fragment {
                 DatabaseReference reference = database.getReference(ref);
                 reference.child("timeString").setValue(YTutils.getTodayDate_nogaps());
                 reference.child("data").setValue(writeData);
+                Toast.makeText(activity, "Updated server list!", Toast.LENGTH_SHORT).show();
             }
             if (models.size()>0) {
                 mOplayfab.setOnClickListener(view -> {
@@ -398,7 +401,6 @@ public class PopularFragment extends Fragment {
                     error=true;
                     return null;
                 }
-                Log.e(TAG, "doInBackground: JSON "+json );
                 try {
                     JSONObject object = new JSONObject(json);
                     builder.append(YTutils.getTodayDate_nogaps());
