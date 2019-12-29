@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:id="@+id/aImage"
-        android:scaleType="fitXY"
+        android:scaleType="centerCrop"
         android:layout_width="80dp"
         android:layout_height="45dp" />
 

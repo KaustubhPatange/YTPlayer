@@ -70,7 +70,7 @@
                       android:id="@+id/cImage"
                       android:layout_width="80dp"
                       android:layout_height="45dp"
-                      android:scaleType="fitXY"
+                      android:scaleType="centerCrop"
                       app:layout_constraintStart_toStartOf="parent"
                       app:layout_constraintBottom_toBottomOf="parent"
                       app:layout_constraintTop_toTopOf="parent" />

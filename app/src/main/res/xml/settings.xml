@@ -10,6 +10,21 @@
             android:summary="This will change your trending, viral songs as per your region choice."
             android:title="Select Region" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="Look &#38; Feel">
+        <CheckBoxPreference
+            android:key="pref_squarePager"
+            android:defaultValue="false"
+            android:title="Use Square Image"
+            android:summary="Use square cropped image in player."/>
+        <ListPreference
+            android:defaultValue="mq"
+            android:dialogTitle="Image quality"
+            android:entries="@array/pref_image_entries"
+            android:entryValues="@array/pref_image_values"
+            android:key="pref_image_quality"
+            android:summary="Quality of image which will be used in player as well as in media tag."
+            android:title="Image quality" />
+    </PreferenceCategory>
     <PreferenceCategory android:title="Updates">
         <CheckBoxPreference
             android:key="pref_update_check"

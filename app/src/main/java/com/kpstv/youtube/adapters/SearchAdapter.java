@@ -47,7 +47,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
 
     private ArrayList<SearchModel> dataSet;
     private ArrayList<String> yturls;
-    Context con; boolean isLibraryFrag;
+    Context con; boolean isLibraryFrag=false;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 

@@ -190,6 +190,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         settingPref = getSharedPreferences("settings",MODE_PRIVATE);
         isEqualizerEnabled = settingPref.getBoolean("equalizer_enabled",false);
 
+        AppSettings.squarePagerItem = getSharedPreferences("appSettings",MODE_PRIVATE)
+                .getBoolean("pref_squarePager",false);
+
         dataSourceFactory = new DefaultDataSourceFactory(MainActivity.this,
                 Util.getUserAgent(MainActivity.this,
                         getResources().getString(R.string.app_name)), BANDWIDTH_METER);
@@ -1118,7 +1121,6 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 PlayerActivity2.hidePlayButton();
             }
         }catch (Exception ignored){}
-        adViewLayout.setVisibility(VISIBLE);
         AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
         adView.setAdListener(new AdListener(){
@@ -1126,6 +1128,12 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             public void onAdLoaded() {
                 adView.setVisibility(VISIBLE);
                 super.onAdLoaded();
+            }
+
+            @Override
+            public void onAdFailedToLoad(int i) {
+                adViewLayout.setVisibility(View.GONE);
+                super.onAdFailedToLoad(i);
             }
         });
         bottom_player.setVisibility(VISIBLE);
@@ -1188,7 +1196,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static void write_Favourite() {
         String t = YTutils.readContent(activity,"favourite.csv");
         if (t!=null && !t.contains(MainActivity.videoID)) {
-            t += "\n"+MainActivity.videoID+"|"+MainActivity.total_seconds;
+            t += "\n"+MainActivity.videoID+"|"+MainActivity.total_seconds+"|"+MainActivity.videoTitle+"|"+MainActivity.channelTitle;
             Toast.makeText(activity, "Added to favourites!", Toast.LENGTH_SHORT).show();
             MainActivity.isFavourite=true;
         }else if (t!=null && t.contains(MainActivity.videoID)) {
@@ -1214,6 +1222,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     }
 
     static boolean dontAllowToPlay=false;
+
     private static void continueinMainThread(String link) {
 
         player.stop();

@@ -45,7 +45,7 @@ public class YTMeta {
                 model = new MetaModel(
                         object.getString("title"),
                         object.getString("author_name"),
-                        "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg"
+                        YTutils.getImageUrlID(videoID)
                 );
             } catch (JSONException e) {
                 e.printStackTrace();

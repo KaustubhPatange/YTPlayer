@@ -443,8 +443,8 @@ public class OPlaylistFragment extends Fragment {
                     OPlaylistFragment fragment = new OPlaylistFragment();
                     fragment.setArguments(args);
                     FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
-                    ft.setCustomAnimations(android.R.anim.fade_in,
-                            android.R.anim.fade_out);
+                    ft.setCustomAnimations(R.anim.fade_in,
+                            R.anim.fade_out);
                     ft.addToBackStack(null).replace(R.id.fragment_container, fragment,"localMusic");
                     ft.commit();
                 });
@@ -613,7 +613,7 @@ public class OPlaylistFragment extends Fragment {
         Log.e(TAG, "onCreateAnimation: Enter: "+enter );
 
         if (enter) {
-            final int animatorId = android.R.anim.fade_in;
+            final int animatorId = R.anim.fade_in;
             final Animation anim = AnimationUtils.loadAnimation(getActivity(), animatorId);
             if (anim==null) return null;
             anim.setAnimationListener(new Animation.AnimationListener() {

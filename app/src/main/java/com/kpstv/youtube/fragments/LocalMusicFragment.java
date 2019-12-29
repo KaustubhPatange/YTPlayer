@@ -79,8 +79,8 @@ public class LocalMusicFragment extends Fragment {
                     case R.id.action_search:
                         MainActivity.localSearchFrag = new LocalSearchFragment();
                         FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
-                        ft.setCustomAnimations(android.R.anim.fade_in,
-                                android.R.anim.fade_out);
+                        ft.setCustomAnimations(R.anim.fade_in,
+                                R.anim.fade_out);
                         ft.replace(R.id.fragment_container, MainActivity.localSearchFrag);
                         ft.commit();
                         break;
@@ -144,8 +144,8 @@ public class LocalMusicFragment extends Fragment {
                 localFrag = new OPlaylistFragment();
                 localFrag.setArguments(args);
                 FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
-                ft.setCustomAnimations(android.R.anim.fade_in,
-                        android.R.anim.fade_out);
+                ft.setCustomAnimations(R.anim.fade_in,
+                        R.anim.fade_out);
                 ft.replace(R.id.fragment_container, localFrag,"localMusic");
                 ft.commit();
             }

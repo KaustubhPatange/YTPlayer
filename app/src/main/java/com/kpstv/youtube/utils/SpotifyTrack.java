@@ -38,7 +38,7 @@ public class SpotifyTrack {
 
         String videoId = ytSearch.getVideoIDs().get(0);
         YtUrl = "https://www.youtube.com/watch?v="+videoId;
-        ImageUrl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
+        ImageUrl = YTutils.getImageUrlID(videoId);
         Title = title;
         Author = author;
     }
@@ -63,7 +63,7 @@ public class SpotifyTrack {
                         YTSearch ytSearch = new YTSearch(search_text);
                         String videoId = ytSearch.getVideoIDs().get(0);
                         YtUrl = "https://www.youtube.com/watch?v="+videoId;
-                        ImageUrl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
+                        ImageUrl = YTutils.getImageUrlID(videoId);
                         return;
                     }
                     if (line.contains("\"og:title\"")) {

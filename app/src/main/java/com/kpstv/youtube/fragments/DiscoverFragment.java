@@ -297,7 +297,7 @@ public class DiscoverFragment extends Fragment {
             YTSearch ytSearch = new YTSearch(search_text);
 
             final String videoId = ytSearch.getVideoIDs().get(0);
-            String imgurl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
+            String imgurl = YTutils.getImageUrlID(videoId);
             if (!main.startsWith(title+"|"))
             {
                 builder.append("\n").append(title).append("|").append(author).append("|")

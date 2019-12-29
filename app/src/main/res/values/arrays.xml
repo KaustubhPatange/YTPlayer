@@ -97,6 +97,16 @@
         <item>Hard Rock</item>
     </string-array>
 
+    <string-array name="pref_image_entries">
+        <item>Medium quality</item>
+        <item>High quality</item>
+    </string-array>
+
+    <string-array name="pref_image_values">
+        <item>mq</item>
+        <item>hq</item>
+    </string-array>
+
     <string-array name="pref_region_entries">
         <item>Global (Default)</item>
         <item>United States</item>

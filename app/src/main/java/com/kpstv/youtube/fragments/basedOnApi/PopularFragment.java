@@ -234,7 +234,7 @@ public class PopularFragment extends Fragment {
         Log.e(TAG, "onCreateAnimation: Enter: "+enter );
 
         if (enter) {
-            final int animatorId = android.R.anim.fade_in;
+            final int animatorId = R.anim.fade_in;
             final Animation anim = AnimationUtils.loadAnimation(getActivity(), animatorId);
             if (anim==null) return null;
             anim.setAnimationListener(new Animation.AnimationListener() {

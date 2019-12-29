@@ -138,8 +138,8 @@ public class PlaylistFragment extends Fragment {
             Log.e(TAG, "Data1: "+model.getData().get(0) );
             OPlayFrag.setArguments(args);
             FragmentTransaction ft = fragmentManager.beginTransaction();
-            ft.setCustomAnimations(android.R.anim.fade_in,
-                    android.R.anim.fade_out);
+            ft.setCustomAnimations(R.anim.fade_in,
+                    R.anim.fade_out);
             ft.replace(R.id.fragment_container, OPlayFrag);
             ft.commit();
         });

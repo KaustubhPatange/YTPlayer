@@ -359,8 +359,8 @@ public class LocalSearchFragment extends Fragment {
             OPlaylistFragment fragment = new OPlaylistFragment();
             fragment.setArguments(args);
             FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
-            ft.setCustomAnimations(android.R.anim.fade_in,
-                    android.R.anim.fade_out);
+            ft.setCustomAnimations(R.anim.fade_in,
+                    R.anim.fade_out);
             ft.addToBackStack(null).replace(R.id.fragment_container, fragment,"localMusic");
             ft.commit();
         }

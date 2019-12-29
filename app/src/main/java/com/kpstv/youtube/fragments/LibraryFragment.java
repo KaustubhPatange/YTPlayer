@@ -397,8 +397,8 @@ public class LibraryFragment extends Fragment implements AppInterface {
         localMusicLayout.setOnClickListener(view -> {
             FragmentManager manager = getActivity().getSupportFragmentManager();
             FragmentTransaction ft = manager.beginTransaction();
-            ft.setCustomAnimations(android.R.anim.fade_in,
-                    android.R.anim.fade_out);
+            ft.setCustomAnimations(R.anim.fade_in,
+                    R.anim.fade_out);
             ft.replace(R.id.fragment_container, MainActivity.localMusicFrag);
             ft.commit();
         });
@@ -450,8 +450,8 @@ public class LibraryFragment extends Fragment implements AppInterface {
             MainActivity.loadedFavFrag=true;
             FragmentManager manager = getActivity().getSupportFragmentManager();
             FragmentTransaction ft = manager.beginTransaction();
-            ft.setCustomAnimations(android.R.anim.fade_in,
-                    android.R.anim.fade_out);
+            ft.setCustomAnimations(R.anim.fade_in,
+                    R.anim.fade_out);
             ft.replace(R.id.fragment_container, MainActivity.FavouriteFrag);
             ft.commit();
         });
@@ -459,8 +459,8 @@ public class LibraryFragment extends Fragment implements AppInterface {
         playlistLayout.setOnClickListener(view -> {
             FragmentManager manager = getActivity().getSupportFragmentManager();
             FragmentTransaction ft = manager.beginTransaction();
-            ft.setCustomAnimations(android.R.anim.fade_in,
-                    android.R.anim.fade_out);
+            ft.setCustomAnimations(R.anim.fade_in,
+                    R.anim.fade_out);
             ft.replace(R.id.fragment_container, MainActivity.PlaylistFrag);
             ft.commit();
         });

@@ -1,8 +1,35 @@
+package com.kpstv.youtube;
+
+import android.annotation.SuppressLint;
+import android.os.AsyncTask;
+
+public class Backup {
+
+
+    public class Demo extends Super {
 
 
 
+        @Override
+        public void onLong() {
 
+        }
+    }
 
+    public abstract class Super {
+        public abstract void onLong();
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    void DoWork() {
+        new Demo() {
+            @Override
+            public void onLong() {
+                super.onLong();
+            }
+        };
+    }
+}
 
 
 

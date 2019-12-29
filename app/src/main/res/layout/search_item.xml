@@ -16,7 +16,7 @@
     <ImageView
         android:id="@+id/sImage"
         android:tint="#2F000000"
-        android:scaleType="fitXY"
+        android:scaleType="centerCrop"
         android:layout_width="match_parent"
         android:layout_height="115dp" />
     <TextView

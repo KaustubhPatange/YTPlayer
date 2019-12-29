@@ -238,7 +238,7 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
                 model = new MetaModel(
                         object.getString("title"),
                         object.getString("author_name"),
-                        "https://i.ytimg.com/vi/"+id+"/mqdefault.jpg"
+                        YTutils.getImageUrlID(id)
                 );
             } catch (JSONException e) {
                 e.printStackTrace();

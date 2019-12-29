@@ -206,8 +206,8 @@ public class SearchFragment extends Fragment {
                     discoverFrag.setArguments(args);
                     FragmentManager manager = getActivity().getSupportFragmentManager();
                     FragmentTransaction ft = manager.beginTransaction();
-                    ft.setCustomAnimations(android.R.anim.fade_in,
-                            android.R.anim.fade_out);
+                    ft.setCustomAnimations(R.anim.fade_in,
+                            R.anim.fade_out);
                     ft.replace(R.id.fragment_container, discoverFrag);
                     ft.commit();
                 }
@@ -227,8 +227,8 @@ public class SearchFragment extends Fragment {
                     discoverFrag.setArguments(args);
                     FragmentManager manager = getActivity().getSupportFragmentManager();
                     FragmentTransaction ft = manager.beginTransaction();
-                    ft.setCustomAnimations(android.R.anim.fade_in,
-                            android.R.anim.fade_out);
+                    ft.setCustomAnimations(R.anim.fade_in,
+                            R.anim.fade_out);
                     ft.replace(R.id.fragment_container, discoverFrag);
                     ft.commit();
                 }
@@ -246,7 +246,7 @@ public class SearchFragment extends Fragment {
                 }catch (Exception e){}
                 MainActivity.popularFrag = new PopularFragment();
                 FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
-                ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
                 ft.replace(R.id.fragment_container, MainActivity.popularFrag,"normalTag");
                 ft.commit();
             });
@@ -260,7 +260,7 @@ public class SearchFragment extends Fragment {
                 }catch (Exception e){}
                 MainActivity.popularFrag = new PopularFragment();
                 FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
-                ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
                 ft.replace(R.id.fragment_container,  MainActivity.popularFrag,"viral");
                 ft.commit();
             });
@@ -274,7 +274,7 @@ public class SearchFragment extends Fragment {
                 }catch (Exception e){}
                 MainActivity.popularFrag = new PopularFragment();
                 FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
-                ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
                 ft.replace(R.id.fragment_container,  MainActivity.popularFrag,"most_viewed");
                 ft.commit();
             });
@@ -288,7 +288,7 @@ public class SearchFragment extends Fragment {
                 }catch (Exception e){}
                 MainActivity.popularFrag = new PopularFragment();
                 FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
-                ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
                 ft.replace(R.id.fragment_container,  MainActivity.popularFrag,"most_popular");
                 ft.commit();
             });
@@ -302,7 +302,7 @@ public class SearchFragment extends Fragment {
                 }catch (Exception e){}
                 MainActivity.popularFrag = new PopularFragment();
                 FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
-                ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
                 ft.replace(R.id.fragment_container,  MainActivity.popularFrag,"weekly_popular");
                 ft.commit();
             });
@@ -336,8 +336,8 @@ public class SearchFragment extends Fragment {
         SearchFrag.setArguments(args);
         FragmentManager manager = activity.getSupportFragmentManager();
         FragmentTransaction ft = manager.beginTransaction();
-        ft.setCustomAnimations(android.R.anim.fade_in,
-                android.R.anim.fade_out);
+        ft.setCustomAnimations(R.anim.fade_in,
+                R.anim.fade_out);
         ft.replace(R.id.fragment_container, SearchFrag);
         ft.commit();
     }
@@ -410,7 +410,7 @@ public class SearchFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
 
             recyclerView.setItemAnimator(new DefaultItemAnimator());
-            adapter = new SearchAdapter(models,activity);
+            adapter = new SearchAdapter(models,activity,false);
             recyclerView.setAdapter(adapter);
             recyclerView.getLayoutManager().scrollToPosition(models.size()-1);
             progresslayout.setVisibility(View.GONE);
@@ -482,7 +482,7 @@ public class SearchFragment extends Fragment {
                        YTSearch ytSearch = new YTSearch(search_text);
 
                        final String videoId = ytSearch.getVideoIDs().get(0);
-                       String imgurl = "https://i.ytimg.com/vi/"+videoId+"/mqdefault.jpg";
+                       String imgurl =YTutils.getImageUrlID(videoId);
 
                        Log.e("TrendingLines",line.split(",")[1].replace("\"",""));
                        publishProgress((float)(i-2)*10);

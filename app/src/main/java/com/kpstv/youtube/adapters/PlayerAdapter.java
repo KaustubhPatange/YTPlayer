@@ -8,6 +8,7 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.graphics.Palette;
@@ -51,10 +52,15 @@ public class PlayerAdapter extends PagerAdapter {
     public boolean isViewFromObject(@NonNull View view, @NonNull Object o) {
         return view == o;
     }
-
+    boolean squarePage;
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        View itemView = mLayoutInflater.inflate(R.layout.player_item, container, false);
+        squarePage = context.getSharedPreferences("appSettings",Context.MODE_PRIVATE)
+                .getBoolean("pref_squarePager",false);
+        View itemView;
+        if (squarePage)
+            itemView = mLayoutInflater.inflate(R.layout.player_item1, container, false);
+        else itemView = mLayoutInflater.inflate(R.layout.player_item, container, false);
 
         ImageView imageView = itemView.findViewById(R.id.mainImage);
         ImageView imageView1 = itemView.findViewById(R.id.mainImage1);
@@ -113,6 +119,9 @@ public class PlayerAdapter extends PagerAdapter {
 
     @Override
     public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-        container.removeView((LinearLayout)object);
+        if (squarePage)
+            container.removeView((ConstraintLayout)object);
+        else
+            container.removeView((LinearLayout)object);
     }
 }

@@ -65,29 +65,53 @@
                 android:layout_width="match_parent"
                 android:layout_height="2dp"/>
 
-            <RelativeLayout
+            <android.support.constraint.ConstraintLayout
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="49dp">
                 <ProgressBar
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_margin="5dp"
                     android:id="@+id/song_progress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
                 <ImageButton
                     android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/song_progress"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     android:id="@+id/action_maximize"
                     android:layout_marginStart="10dp"
                     android:background="@color/transparent_black"
                     android:src="@drawable/ic_arrow_up"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent" />
+                <ImageButton
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/song_progress"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginEnd="10dp"
+                    android:id="@+id/action_play"
+                    android:layout_alignParentEnd="true"
+                    android:background="@color/transparent_black"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_pause_circle"
+                    android:layout_width="36dp"
+                    android:layout_height="match_parent" />
                 <LinearLayout
+                    android:layout_marginEnd="10dp"
+                    app:layout_constraintEnd_toStartOf="@id/action_play"
+                    app:layout_constraintStart_toEndOf="@id/action_maximize"
                     android:id="@+id/swipeLayout"
                     android:layout_toEndOf="@id/action_maximize"
                     android:orientation="horizontal"
-                    android:layout_width="match_parent"
+                    android:layout_alignEnd="@id/action_play"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent">
                     <TextView
                         android:visibility="gone"
@@ -120,17 +144,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent" />
                 </LinearLayout>
-                <ImageButton
-                    android:visibility="gone"
-                    android:layout_marginEnd="10dp"
-                    android:id="@+id/action_play"
-                    android:layout_alignParentEnd="true"
-                    android:background="@color/transparent_black"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ic_pause_circle"
-                    android:layout_width="36dp"
-                    android:layout_height="match_parent" />
-            </RelativeLayout>
+
+            </android.support.constraint.ConstraintLayout>
 
             <View
                 android:background="@color/colorScreen"

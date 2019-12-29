@@ -31,7 +31,7 @@ public class SplashActivity extends AppCompatActivity {
         SharedPreferences preferences = getSharedPreferences("settings",MODE_PRIVATE);
         if (!preferences.getBoolean("intro",false)) {
             startActivity(new Intent(this,IntroActivity.class));
-            overridePendingTransition(android.R.anim.fade_in,android.R.anim.fade_out);
+            overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
             finish();
         } else {
             startActivity(new Intent(SplashActivity.this, MainActivity.class));

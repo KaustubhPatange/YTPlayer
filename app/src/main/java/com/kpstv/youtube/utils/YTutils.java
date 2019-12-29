@@ -115,6 +115,8 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class YTutils implements AppInterface {
 
+    private static final String TAG = "YTutils";
+
     public static String[] ConvertToStringArray(ArrayList<String> list) {
         final String[] arrays = new String[list.size()];
         for(int i=0;i<list.size();i++)
@@ -123,11 +125,32 @@ public class YTutils implements AppInterface {
     }
 
     public static String getImageUrl(String YtUrl) {
-        return "https://i.ytimg.com/vi/"+getVideoID(YtUrl)+"/mqdefault.jpg";
+        String imageUrl = "https://i.ytimg.com/vi/"+getVideoID(YtUrl)+"/mqdefault.jpg";
+        if (MainActivity.activity.getSharedPreferences("appSettings",MODE_PRIVATE)
+                .getString("pref_image_quality","mq").equals("hq"))
+            imageUrl = "https://i.ytimg.com/vi/"+getVideoID(YtUrl)+"/hqdefault.jpg";
+        return imageUrl;
     }
     public static String getImageUrlID(String videoID) {
-        return "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg";
+        String imageUrl = "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg";
+        if (MainActivity.activity.getSharedPreferences("appSettings",MODE_PRIVATE)
+                .getString("pref_image_quality","mq").equals("hq"))
+            imageUrl = "https://i.ytimg.com/vi/"+videoID+"/hqdefault.jpg";
+
+        Log.e(TAG, "getImageUrlID: ImageUrl: "+imageUrl);
+
+        return imageUrl;
     }
+    /*public static String getImageUrlID(Context context,String videoID) {
+        String imageUrl = "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg";
+        if (context.getSharedPreferences("pref_image_quality",MODE_PRIVATE)
+                .getString("pref_image_quality","mq").equals("hq"))
+            imageUrl = "https://i.ytimg.com/vi/"+videoID+"/hqdefault.jpg";
+
+        Log.e(TAG, "getImageUrlID: Context ImageUrl: "+imageUrl );
+
+        return imageUrl;
+    }*/
 
     public static String getYtUrl(String videoID) {
         return "https://www.youtube.com/watch?v="+videoID;
