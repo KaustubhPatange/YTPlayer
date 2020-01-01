@@ -43,6 +43,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.coremedia.iso.boxes.Container;
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.googlecode.mp4parser.authoring.Movie;
@@ -103,7 +104,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
     static ProgressBar mprogressBar;
 
     static IndicatorSeekBar indicatorSeekBar;
-    private InterstitialAd mInterstitialAd;
+    private static InterstitialAd mInterstitialAd;
 
     public static ImageView favouriteButton, addToPlaylist;
 
@@ -842,28 +843,29 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         startActivity(i);
     }
 
-    void showAd() {
-        if (mInterstitialAd.isLoaded()) {
-            mInterstitialAd.show();
-        } else {
-            Log.e("PlayerActivity", "The interstitial wasn't loaded yet.");
-        }
-    }
-
-    void LoadAd() {
+    public static void showAd() {
         //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712, Use ca-app-pub-1763645001743174/8453566324
-        mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-xxx1763645001743174/8453566324");
+        mInterstitialAd = new InterstitialAd(activity);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        mInterstitialAd.setAdListener(new AdListener(){
+            @Override
+            public void onAdFailedToLoad(int i) {
+                super.onAdFailedToLoad(i);
+                Log.e(TAG, "onAdFailedToLoad: Ad failed to load: "+i );
+            }
 
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                mInterstitialAd.show();
+            }
+        });
     }
 
     void showListDialog() {
 
-        LoadAd();
-
         //     Log.e("YOUTUBEURL",YouTubeUrl);
-
         ArrayList<String> tmplist = new ArrayList<>();
         final ArrayList<YTConfig> configs = new ArrayList<>();
 

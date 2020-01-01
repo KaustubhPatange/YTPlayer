@@ -72,13 +72,11 @@ public class EqualizerActivity extends AppCompatActivity {
         equalizerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.e(TAG, "onItemSelected: Selected: " + i + ", Long: " + l);
                 mEqualizer.usePreset((short) i);
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putInt("selected_preset", i);
                 editor.apply();
                 setLayout(false);
-                Log.e(TAG, "onItemSelected: Current Preset: " + mEqualizer.getCurrentPreset());
             }
 
             @Override
@@ -87,95 +85,95 @@ public class EqualizerActivity extends AppCompatActivity {
             }
         });
 
-        ArrayAdapter<CharSequence> reverbAdapter = ArrayAdapter.createFromResource(this
-                , R.array.reverb_presets, android.R.layout.simple_spinner_item);
-        reverbAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        reverbSpinner.setAdapter(reverbAdapter);
-        int default_reverb = preferences.getInt("selected_reverb", 0);
-        if (default_reverb != 0) {
-            reverbSpinner.setSelection(default_reverb);
-            presetReverb.setPreset((short) default_reverb);
+        if (AppSettings.enableEqualizer) {
+            ArrayAdapter<CharSequence> reverbAdapter = ArrayAdapter.createFromResource(this
+                    , R.array.reverb_presets, android.R.layout.simple_spinner_item);
+            reverbAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            reverbSpinner.setAdapter(reverbAdapter);
+            int default_reverb = preferences.getInt("selected_reverb", 0);
+            if (default_reverb != 0) {
+                reverbSpinner.setSelection(default_reverb);
+                presetReverb.setPreset((short) default_reverb);
+            }
+            reverbSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    presetReverb.setPreset((short) i);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putInt("selected_reverb", i);
+                    editor.apply();
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+            });
+
+            bassBoastSeekbar.setMax(1000);
+            bassBoastSeekbar.setProgress(bassBoost.getRoundedStrength());
+            bassBoastSeekbar.setOnSeekChangeListener(new OnSeekChangeListener() {
+                @Override
+                public void onSeeking(SeekParams seekParams) {
+                }
+
+                @Override
+                public void onStartTrackingTouch(IndicatorSeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
+                    bassBoost.setStrength((short)seekBar.getProgress());
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putInt("selected_bass", seekBar.getProgress());
+                    editor.apply();
+                }
+            });
+
+            virtualizerSeekbar.setMax(1000);
+            virtualizerSeekbar.setProgress(virtualizer.getRoundedStrength());
+            virtualizerSeekbar.setOnSeekChangeListener(new OnSeekChangeListener() {
+                @Override
+                public void onSeeking(SeekParams seekParams) {
+                }
+
+                @Override
+                public void onStartTrackingTouch(IndicatorSeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
+                    virtualizer.setStrength((short)seekBar.getProgress());
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putInt("selected_virtualizer", seekBar.getProgress());
+                    editor.apply();
+                }
+            });
+
+            loudnessSeekbar.setMax(100);
+            loudnessSeekbar.setProgress(loudnessEnhancer.getTargetGain());
+            loudnessSeekbar.setOnSeekChangeListener(new OnSeekChangeListener() {
+                @Override
+                public void onSeeking(SeekParams seekParams) {
+
+                }
+
+                @Override
+                public void onStartTrackingTouch(IndicatorSeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
+                    loudnessEnhancer.setTargetGain(seekBar.getProgress());
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putInt("selected_loudness", seekBar.getProgress());
+                    editor.apply();
+                }
+            });
         }
-        reverbSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.e(TAG, "onItemSelected: Selected: " + i + ", Long: " + l);
-                presetReverb.setPreset((short) i);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putInt("selected_reverb", i);
-                editor.apply();
-                Log.e(TAG, "onItemSelected: Current Reverb: " + presetReverb.getPreset());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-        bassBoastSeekbar.setMax(1000);
-        bassBoastSeekbar.setProgress(bassBoost.getRoundedStrength());
-        bassBoastSeekbar.setOnSeekChangeListener(new OnSeekChangeListener() {
-            @Override
-            public void onSeeking(SeekParams seekParams) {
-            }
-
-            @Override
-            public void onStartTrackingTouch(IndicatorSeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
-                bassBoost.setStrength((short)seekBar.getProgress());
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putInt("selected_bass", seekBar.getProgress());
-                editor.apply();
-            }
-        });
-
-        virtualizerSeekbar.setMax(1000);
-        virtualizerSeekbar.setProgress(virtualizer.getRoundedStrength());
-        virtualizerSeekbar.setOnSeekChangeListener(new OnSeekChangeListener() {
-            @Override
-            public void onSeeking(SeekParams seekParams) {
-            }
-
-            @Override
-            public void onStartTrackingTouch(IndicatorSeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
-                virtualizer.setStrength((short)seekBar.getProgress());
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putInt("selected_virtualizer", seekBar.getProgress());
-                editor.apply();
-            }
-        });
-
-        loudnessSeekbar.setMax(100);
-        loudnessSeekbar.setProgress(loudnessEnhancer.getTargetGain());
-        loudnessSeekbar.setOnSeekChangeListener(new OnSeekChangeListener() {
-            @Override
-            public void onSeeking(SeekParams seekParams) {
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(IndicatorSeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
-                loudnessEnhancer.setTargetGain(seekBar.getProgress());
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putInt("selected_loudness", seekBar.getProgress());
-                editor.apply();
-            }
-        });
 
         mLinearLayout = findViewById(R.id.linearLayout);
 
@@ -183,8 +181,6 @@ public class EqualizerActivity extends AppCompatActivity {
             return;
 
         setLayout(true);
-
-        setEqualizerLayout();
     }
 
     void setLayout(boolean loadOrSave) {
@@ -276,8 +272,8 @@ public class EqualizerActivity extends AppCompatActivity {
 
             mLinearLayout.addView(equalizerLayout, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT));
-
         }
+        setEqualizerLayout();
     }
 
     @Override
@@ -304,24 +300,28 @@ public class EqualizerActivity extends AppCompatActivity {
         Log.e(TAG, "setEqualizerLayout: Enabled" + MainActivity.isEqualizerEnabled);
         RelativeLayout layout = findViewById(R.id.mainlayout);
         if (MainActivity.isEqualizerEnabled) {
+            Log.e(TAG, "setEqualizerLayout: And I got here too" );
             layout.setClickable(false);
-            reverbSpinner.setEnabled(true);
             equalizerSpinner.setEnabled(true);
-            bassBoastSeekbar.setEnabled(true);
-            virtualizerSeekbar.setEnabled(true);
-            loudnessSeekbar.setEnabled(true);
-            bassBoost.setStrength((short)bassBoastSeekbar.getProgress());
-            virtualizer.setStrength((short)virtualizerSeekbar.getProgress());
-            loudnessEnhancer.setTargetGain(loudnessSeekbar.getProgress());
             for (int i=0;i<mLinearLayout.getChildCount();i++) {
                 View view = mLinearLayout.getChildAt(i);
                 IndicatorSeekBar seekBar = view.findViewById(R.id.seekBar);
                 seekBar.setEnabled(true);
             }
+            if (AppSettings.enableEqualizer) {
+                reverbSpinner.setEnabled(true);
+                bassBoastSeekbar.setEnabled(true);
+                virtualizerSeekbar.setEnabled(true);
+                loudnessSeekbar.setEnabled(true);
+                bassBoost.setStrength((short)bassBoastSeekbar.getProgress());
+                virtualizer.setStrength((short)virtualizerSeekbar.getProgress());
+                loudnessEnhancer.setTargetGain(loudnessSeekbar.getProgress());
+            }
         } else {
+            Log.e(TAG, "setEqualizerLayout: Got here..." );
             layout.setClickable(true);
-            reverbSpinner.setEnabled(false);
             equalizerSpinner.setEnabled(false);
+            reverbSpinner.setEnabled(false);
             bassBoastSeekbar.setEnabled(false);
             virtualizerSeekbar.setEnabled(false);
             loudnessSeekbar.setEnabled(false);

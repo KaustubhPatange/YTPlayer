@@ -137,8 +137,6 @@ public class YTutils implements AppInterface {
                 .getString("pref_image_quality","mq").equals("hq"))
             imageUrl = "https://i.ytimg.com/vi/"+videoID+"/hqdefault.jpg";
 
-        Log.e(TAG, "getImageUrlID: ImageUrl: "+imageUrl);
-
         return imageUrl;
     }
     /*public static String getImageUrlID(Context context,String videoID) {

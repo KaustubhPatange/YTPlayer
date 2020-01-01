@@ -14,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,6 +30,9 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
@@ -44,6 +48,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> {
 
     private ArrayList<DiscoverModel> dataSet;
@@ -58,7 +65,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         TextView AuthorText;
         ImageView imageView, removeButton;
         ConstraintLayout mainLayout; View disabledView;
-
+        LinearLayout adLayout;
+        AdView adView;
         public MyViewHolder(View itemView) {
             super(itemView);
             this.titleText = itemView.findViewById(R.id.aTitle);
@@ -67,6 +75,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             this.AuthorText = itemView.findViewById(R.id.aAuthor);
             this.imageView = itemView.findViewById(R.id.aImage);
             this.mainLayout = itemView.findViewById(R.id.mainlayout);
+            this.adLayout = itemView.findViewById(R.id.adViewLayout);
+            this.adView = itemView.findViewById(R.id.adView);
         }
     }
 
@@ -267,6 +277,16 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                 }
                 MainActivity.PlayVideo(YTutils.convertListToArrayMethod(yturls),listPosition);
             });
+
+            if (listPosition % 15 == 0 && listPosition !=0 && AppSettings.showAds) {
+                // Load ads on 5,15,25...
+                Log.e("ShowingAds","pos: "+listPosition);
+                holder.adLayout.setVisibility(VISIBLE);
+                AdRequest adRequest = new AdRequest.Builder().build();
+                holder.adView.loadAd(adRequest);
+            }else {
+                holder.adLayout.setVisibility(GONE);
+            }
         }
 
        /* if (O_PLAYLIST) {
@@ -281,6 +301,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             holder.mainLayout.setOnClickListener(cplaylistener);
         }
     }
+
 
 
     public class layoutListener extends AsyncTask<Void, Void, Void> {

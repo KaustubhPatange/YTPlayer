@@ -79,6 +79,7 @@ import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.kpstv.youtube.fragments.DiscoverFragment;
 import com.kpstv.youtube.fragments.HistoryBottomSheet;
@@ -190,9 +191,6 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         settingPref = getSharedPreferences("settings",MODE_PRIVATE);
         isEqualizerEnabled = settingPref.getBoolean("equalizer_enabled",false);
 
-        AppSettings.squarePagerItem = getSharedPreferences("appSettings",MODE_PRIVATE)
-                .getBoolean("pref_squarePager",false);
-
         dataSourceFactory = new DefaultDataSourceFactory(MainActivity.this,
                 Util.getUserAgent(MainActivity.this,
                         getResources().getString(R.string.app_name)), BANDWIDTH_METER);
@@ -220,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 .apply();
 
         //TODO: Change app unit id, Sample : ca-app-pub-3940256099942544~3347511713, ca-app-pub-1763645001743174~5602018181
-        MobileAds.initialize(this, "ca-app-pub-xxx3645001743174~5602018181");
+        MobileAds.initialize(this, "ca-app-pub-3940256099942544~3347511713");
 
         // Get required views...
         adView = findViewById(R.id.adView);
@@ -961,8 +959,11 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         @Override
         protected void onPostExecute(Void aVoid) {
 
-            if (toPlayNext) {
-                playNext();
+            if (skipSong) {
+                if (command==1)
+                    playNext();
+                else if (command==2)
+                    playPrevious();
                 return;
             }
 
@@ -1037,7 +1038,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             super.onPostExecute(aVoid);
         }
 
-        boolean toPlayNext;
+        boolean skipSong;
 
         @Override
         protected Void doInBackground(String... arg0) {
@@ -1052,7 +1053,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                     else  MainActivity.playListItems.add(data.trim());
                 }
                 if (playListItems.contains("ytID:"+videoID)) {
-                    toPlayNext=true;
+                    skipSong =true;
                     return null;
                 }
             }
@@ -1121,21 +1122,24 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 PlayerActivity2.hidePlayButton();
             }
         }catch (Exception ignored){}
-        AdRequest adRequest = new AdRequest.Builder().build();
-        adView.loadAd(adRequest);
-        adView.setAdListener(new AdListener(){
-            @Override
-            public void onAdLoaded() {
-                adView.setVisibility(VISIBLE);
-                super.onAdLoaded();
-            }
+        if (AppSettings.showAds) {
+            AdRequest adRequest = new AdRequest.Builder().build();
+            adView.loadAd(adRequest);
+            adView.setAdListener(new AdListener(){
+                @Override
+                public void onAdLoaded() {
+                    adView.setVisibility(VISIBLE);
+                    super.onAdLoaded();
+                }
 
-            @Override
-            public void onAdFailedToLoad(int i) {
-                adViewLayout.setVisibility(View.GONE);
-                super.onAdFailedToLoad(i);
-            }
-        });
+                @Override
+                public void onAdFailedToLoad(int i) {
+                    adViewLayout.setVisibility(View.GONE);
+                    Log.e(TAG, "onAdFailedToLoad: Failed to load Ad"+i );
+                    super.onAdFailedToLoad(i);
+                }
+            });
+        }else adView.setVisibility(View.GONE);
         bottom_player.setVisibility(VISIBLE);
         onClear();
     }
@@ -1328,28 +1332,30 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         mEqualizer.setEnabled(isEqualizerEnabled);
 
         presetReverb = new PresetReverb(0,audioSessionId);
-        presetReverb.setEnabled(isEqualizerEnabled);
+        presetReverb.setEnabled(AppSettings.enableEqualizer);
 
         bassBoost = new BassBoost(0,audioSessionId);
-        bassBoost.setEnabled(isEqualizerEnabled);
+        bassBoost.setEnabled(AppSettings.enableEqualizer);
 
         virtualizer = new Virtualizer(0,audioSessionId);
-        virtualizer.setEnabled(isEqualizerEnabled);
+        virtualizer.setEnabled(AppSettings.enableEqualizer);
 
         loudnessEnhancer = new LoudnessEnhancer(audioSessionId);
-        loudnessEnhancer.setEnabled(isEqualizerEnabled);
+        loudnessEnhancer.setEnabled(AppSettings.enableEqualizer);
 
-        int default_reverb = preferences.getInt("selected_reverb", 0);
-        presetReverb.setPreset((short)default_reverb);
+        if (AppSettings.enableEqualizer) {
+            int default_reverb = preferences.getInt("selected_reverb", 0);
+            presetReverb.setPreset((short)default_reverb);
 
-        int default_bass = preferences.getInt("selected_bass", 0);
-        bassBoost.setStrength((short)default_bass);
+            int default_bass = preferences.getInt("selected_bass", 0);
+            bassBoost.setStrength((short)default_bass);
 
-        int default_virtualizer = preferences.getInt("selected_virtualizer", 0);
-        virtualizer.setStrength((short)default_virtualizer);
+            int default_virtualizer = preferences.getInt("selected_virtualizer", 0);
+            virtualizer.setStrength((short)default_virtualizer);
 
-        int default_loudness = preferences.getInt("selected_loudness", 0);
-        loudnessEnhancer.setTargetGain((short)default_loudness);
+            int default_loudness = preferences.getInt("selected_loudness", 0);
+            loudnessEnhancer.setTargetGain((short)default_loudness);
+        }
 
         isEqualizerSet=true;
         int current = settingPref.getInt("position", 0);
@@ -1367,8 +1373,6 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                             (short) (progressBar + lowerEqualizerBandLevel));
                 }
             }
-        } else {
-           // mEqualizer.usePreset((short) (current - 1));
         }
     }
 
@@ -1649,16 +1653,17 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         }
     }
 
-
-
     public static void playPrevious() {
         if (ytIndex <= 0) {
             Toast.makeText(activity, "No previous song in playlist", Toast.LENGTH_SHORT).show();
             return;
         }
+        command=2;
         onClear();
         videoID = YTutils.getVideoID(yturls.get(ytIndex-1));
         ytIndex--;
+        AppSettings.playAdCount++;
+        showAd(activity);
         if (!localPlayBack) {
             LoadVideo = new loadVideo();
             LoadVideo.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videoID);
@@ -1668,7 +1673,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             LoadOffline.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
-
+    static int command=0;
     public static void playNext() {
         if ((ytIndex + 1) == yturls.size()) {
             if (isLoop) {
@@ -1678,9 +1683,12 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 return;
             }
         }
+        command=1;
         onClear();
         videoID = YTutils.getVideoID(yturls.get(ytIndex+1));
         ytIndex++;
+        AppSettings.playAdCount++;
+        showAd(activity);
         if (!localPlayBack) {
             LoadVideo = new loadVideo();
             LoadVideo.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videoID);
@@ -1688,6 +1696,35 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             videoID = yturls.get(ytIndex);
             LoadOffline = new loadVideo_Local(yturls.get(ytIndex));
             LoadOffline.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+    }
+
+    static void showAd(Context con) {
+        if (AppSettings.playAdCount%AppSettings.adOffset==0 && AppSettings.playAdCount!=0 && AppSettings.showAds && !localPlayBack) {
+            Log.e(TAG, "showAd: Showing Ad..." );
+            //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712, Use ca-app-pub-1763645001743174/8453566324
+           try {
+               PlayerActivity2.showAd();
+           }catch (Exception ex){
+              try {
+                  InterstitialAd mInterstitialAd = new InterstitialAd(con);
+                  mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+                  mInterstitialAd.loadAd(new AdRequest.Builder().build());
+                  mInterstitialAd.setAdListener(new AdListener() {
+                      @Override
+                      public void onAdFailedToLoad(int i) {
+                          super.onAdFailedToLoad(i);
+                          Log.e(TAG, "onAdFailedToLoad: Ad failed to load: " + i);
+                      }
+
+                      @Override
+                      public void onAdLoaded() {
+                          super.onAdLoaded();
+                          mInterstitialAd.show();
+                      }
+                  });
+              } catch (Exception ignored){}
+           }
         }
     }
 

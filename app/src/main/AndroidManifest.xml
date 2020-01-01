@@ -28,14 +28,21 @@
         <!-- TODO: Change Sample AdMob AppNotify ID: ca-app-pub-3940256099942544~3347511713, ca-app-pub-1763645001743174~5602018181 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-1763645001743174~5602018181" />
+            android:value="ca-app-pub-3940256099942544~3347511713" />
+        <!--  TODO: Change your razorpay api key here... -->
+        <meta-data
+            android:name="com.razorpay.ApiKey"
+            android:value="rzp_test_xilTaJRWPpqiUp" />
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".PurchaseActivity"/>
         <activity
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <activity
             android:name=".EqualizerActivity"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".EditTagActivity"
             android:launchMode="singleTask"
@@ -51,7 +58,8 @@
             android:name=".MainActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar1">
+            android:theme="@style/AppTheme.NoActionBar1"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -118,9 +126,10 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".CPlaylistActivity"
+        <activity
+            android:name=".CPlaylistActivity"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity android:name=".SettingsActivity" />
         <activity
             android:name=".SplashActivity"

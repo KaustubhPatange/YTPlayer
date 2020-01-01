@@ -23,6 +23,10 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.kpstv.youtube.AppInterface;
+import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.MetaModel;
@@ -39,6 +43,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static android.content.Context.MODE_PRIVATE;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewHolder> {
 
@@ -58,7 +64,8 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
         LinearLayout dateLayout;
         LinearLayout addPlaylist;
         CardView mainCard;
-
+        LinearLayout adLayout;
+        AdView adView;
         public MyViewHolder(View itemView) {
             super(itemView);
             this.rate_percent = itemView.findViewById(R.id.hRate_percent);
@@ -69,6 +76,8 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
             this.dateLayout = itemView.findViewById(R.id.hDate_layout);
             this.addPlaylist = itemView.findViewById(R.id.hAdd_playlist);
             this.mainCard = itemView.findViewById(R.id.cardView);
+            this.adLayout = itemView.findViewById(R.id.adViewLayout);
+            this.adView = itemView.findViewById(R.id.adView);
         }
     }
 
@@ -192,6 +201,16 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
                 Activity activity = (Activity) con;
                 new addToPlay(activity,ytUrl).executeOnExecutor(THREAD_POOL_EXECUTOR);
             });
+
+            if (pos%5==0 && pos!=0 && pos%10!=0 && AppSettings.showAds) {
+                // Load ads on 5,15,25...
+                Log.e("ShowingAds","pos: "+pos);
+                viewHolder.adLayout.setVisibility(VISIBLE);
+                AdRequest adRequest = new AdRequest.Builder().build();
+                viewHolder.adView.loadAd(adRequest);
+            }else {
+                viewHolder.adLayout.setVisibility(GONE);
+            }
             super.onPostExecute(aVoid);
         }
 

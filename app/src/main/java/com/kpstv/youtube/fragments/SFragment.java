@@ -79,7 +79,11 @@ public class SFragment extends Fragment implements AppInterface {
 
             Toolbar toolbar = v.findViewById(R.id.toolbar);
             toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
-            toolbar.setNavigationOnClickListener(view -> MainActivity.loadSearchFrag());
+            toolbar.setNavigationOnClickListener(view -> {
+                ((InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE))
+                        .hideSoftInputFromWindow(searchEdit.getWindowToken(), 0);
+                MainActivity.loadSearchFrag();
+            });
 
             Bundle args = getArguments();
             SongList = args.getString("data_csv");
@@ -190,8 +194,10 @@ public class SFragment extends Fragment implements AppInterface {
             task.execute();
         }
         searchEdit.requestFocus();
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(searchEdit.getWindowToken(), 0);
+        ((InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE))
+                .toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+       /* InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(searchEdit.getWindowToken(), 0);*/
         return v;
     }
 

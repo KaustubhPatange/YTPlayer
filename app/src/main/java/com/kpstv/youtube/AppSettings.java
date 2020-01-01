@@ -7,5 +7,9 @@ public class AppSettings {
     public static SortOrder sortOrder;
     public static SortType sortType;
 
-    public static boolean squarePagerItem=false;
+    public static boolean showAds=true;
+    public static boolean enableEqualizer=false;
+    public static int playAdCount=0;
+    public static int adOffset=5;
+    public static int downloadCount=15;
 }

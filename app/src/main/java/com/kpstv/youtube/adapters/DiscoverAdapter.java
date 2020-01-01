@@ -30,6 +30,7 @@ import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
@@ -198,7 +199,7 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
                 MainActivity.PlayVideo(yturls,position);
             });
 
-            if (position%5==0 && position!=0 && position%10!=0) {
+            if (position%5==0 && position!=0 && position%10!=0 && AppSettings.showAds) {
                 // Load ads on 5,15,25...
                 Log.e("ShowingAds","pos: "+position);
                 viewHolder.adLayout.setVisibility(VISIBLE);

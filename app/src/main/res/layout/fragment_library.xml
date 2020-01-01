@@ -281,8 +281,11 @@
 
 
 
+            <include layout="@layout/premium_layout"/>
+
+
             <View
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@color/colorScreen"/>

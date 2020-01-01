@@ -85,6 +85,14 @@ button:focus {
   box-shadow: none;
 }
 
+.jumbotron {
+  border-radius:20px;
+  padding:120px;
+  background-color:rgba(255,255,255,0.00);
+  /*max-width:900px;*/
+  margin:0 auto;
+}
+
 .p_120 {
   padding-top: 120px;
   padding-bottom: 120px;

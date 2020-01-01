@@ -11,7 +11,7 @@
             android:title="Select Region" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Look &#38; Feel">
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="pref_squarePager"
             android:defaultValue="false"
             android:title="Use Square Image"
@@ -26,7 +26,7 @@
             android:title="Image quality" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Updates">
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="pref_update_check"
             android:defaultValue="true"
             android:title="Auto Check Updates"

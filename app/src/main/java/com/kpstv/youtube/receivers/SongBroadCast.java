@@ -21,7 +21,11 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.kpstv.youtube.AppInterface;
+import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity2;
 import com.kpstv.youtube.R;
@@ -41,6 +45,7 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
 
     AsyncTask<Void,Void,Void> setData;
     private static final String TAG = "SongBroadCast";
+    private InterstitialAd mInterstitialAd;
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
@@ -122,6 +127,30 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                     Toast.makeText(context, "Error: "+e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
                 break;
+        }
+        showAd(context);
+    }
+
+    void showAd(Context con) {
+        if (AppSettings.playAdCount%AppSettings.adOffset==0 && AppSettings.playAdCount!=0 && AppSettings.showAds) {
+            Log.e(TAG, "showAd: Showing Ad..." );
+            //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712, Use ca-app-pub-1763645001743174/8453566324
+            mInterstitialAd = new InterstitialAd(con);
+            mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+            mInterstitialAd.loadAd(new AdRequest.Builder().build());
+            mInterstitialAd.setAdListener(new AdListener() {
+                @Override
+                public void onAdFailedToLoad(int i) {
+                    super.onAdFailedToLoad(i);
+                    Log.e(TAG, "onAdFailedToLoad: Ad failed to load: " + i);
+                }
+
+                @Override
+                public void onAdLoaded() {
+                    super.onAdLoaded();
+                    mInterstitialAd.show();
+                }
+            });
         }
     }
 
