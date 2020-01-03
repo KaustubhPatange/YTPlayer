@@ -130,10 +130,14 @@ public class DiscoverFragment extends Fragment {
         int position = (int) objects[0];
         String title = (String) objects[1];
         String yturl = (String) objects[2];
+        String author = (String) objects[3];
+        String imageUri = (String) objects[4];
         HistoryBottomSheet bottomSheet = new HistoryBottomSheet();
         Bundle bundle = new Bundle();
         bundle.putInt("pos",position);
         bundle.putString("title",title);
+        bundle.putString("channelTitle",author);
+        bundle.putString("imageUri",imageUri);
         bundle.putString("yturl",yturl);
         bottomSheet.setArguments(bundle);
         bottomSheet.show(activity.getSupportFragmentManager(), "discover");

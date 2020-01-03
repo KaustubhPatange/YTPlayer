@@ -424,7 +424,7 @@ public class PlayerActivity extends AppCompatActivity {
                 playPrevious();
                 break;
             case "add":
-                YTutils.addToPlayList(this, YouTubeUrl, total_duration / 1000);
+             //   YTutils.addToPlayList(this, YouTubeUrl, total_duration / 1000);
                 break;
             case "focus":
                 Log.e("FocusWindow","true");
@@ -1021,7 +1021,7 @@ public class PlayerActivity extends AppCompatActivity {
             shareIntent.putExtra(Intent.EXTRA_TEXT, YouTubeUrl);
             startActivity(Intent.createChooser(shareIntent, "Share using..."));
         } else if (itemId == R.id.action_add) {
-            YTutils.addToPlayList(this, YouTubeUrl, total_duration / 1000);
+            //YTutils.addToPlayList(this, YouTubeUrl, total_duration / 1000);
         } else if (itemId == R.id.action_loop) {
             isLoop = !isLoop;
             item.setChecked(isLoop);

@@ -1,6 +1,7 @@
 package com.kpstv.youtube.fragments;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -50,7 +51,9 @@ import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 import com.spyhunter99.supertooltips.ToolTip;
 import com.spyhunter99.supertooltips.ToolTipManager;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 
 public class SearchFragment extends Fragment {
@@ -325,8 +328,26 @@ public class SearchFragment extends Fragment {
                 editor.putBoolean("searchTip",true);
                 editor.apply();
             }
+            changeYear();
         }
         return v;
+    }
+
+    private static final String TAG = "SearchFragment";
+    void changeYear() {
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat df = new SimpleDateFormat("yyyy");
+        String year = df.format(Calendar.getInstance().getTime());
+        LinearLayout regionLayout = v.findViewById(R.id.regionalLayout);
+        LinearLayout item1 = regionLayout.findViewById(R.id.layout_item1);
+        LinearLayout item2 = regionLayout.findViewById(R.id.layout_item2);
+        LinearLayout item3 = regionLayout.findViewById(R.id.layout_item3);
+
+        TextView txt1 = item1.findViewById(R.id.year);
+        TextView txt2 = item2.findViewById(R.id.year);
+        TextView txt3 = item3.findViewById(R.id.year);
+
+        txt1.setText(year); txt2.setText(year); txt3.setText(year);
     }
 
     public void loadSearchViewFrag() {

@@ -480,7 +480,7 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
                 meta = new YTMeta(YTutils.getVideoID(url));
                 if (meta.getVideMeta() != null) {
-                    if (YTutils.getVideoID_ImageUri(meta.getVideMeta().getImgUrl()).equals(MainActivity.videoID)) {
+                    if (meta.getVideMeta().getVideoID().equals(MainActivity.videoID)) {
                         models.add(new NPlayModel(url, meta, true));
                     } else
                         models.add(new NPlayModel(url, meta, false));

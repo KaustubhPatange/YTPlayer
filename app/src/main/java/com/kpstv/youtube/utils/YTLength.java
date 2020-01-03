@@ -50,6 +50,7 @@ public class YTLength {
                     length = length.split("\"")[7];
                     Log.e("FoundText",length+"");
                     seconds = YTutils.TimertoMilliseconds(length)/1000;
+                    return;
                 }
             }
             in.close();

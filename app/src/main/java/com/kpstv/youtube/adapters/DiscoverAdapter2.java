@@ -151,7 +151,7 @@ public class DiscoverAdapter2 extends RecyclerView.Adapter {
         @Override
         protected void onPostExecute(Void aVoid) {
             dialog.dismiss();
-            YTutils.addToPlayList(activity,yturl,seconds);
+           // YTutils.addToPlayList(activity,yturl,seconds);
             super.onPostExecute(aVoid);
         }
 

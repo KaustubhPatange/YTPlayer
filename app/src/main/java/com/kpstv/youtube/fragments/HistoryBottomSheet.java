@@ -32,7 +32,7 @@ public class HistoryBottomSheet extends BottomSheetDialogFragment {
 
     public static final String TAG = "HistoryBottomSheet";
     LinearLayout addToPlaylist, removeList, copyLink, shareButton, mainLayout, watchOnYouTube;
-    String ytUrl, Title; BottomSheetListener mListener; ProgressBar progressBar;
+    String ytUrl, Title,ChannelTitle,ImageUrl; BottomSheetListener mListener; ProgressBar progressBar;
     Activity activity; int position;
     long ytseconds; View v; TextView title_TextView;
     @Nullable
@@ -62,6 +62,8 @@ public class HistoryBottomSheet extends BottomSheetDialogFragment {
 
         position = getArguments().getInt("pos",0);
         Title = getArguments().getString("title");
+        ChannelTitle = getArguments().getString("channelTitle");
+        ImageUrl = getArguments().getString("imageUri");
         Log.e(TAG, "onCreateView: Title: "+Title);
         ytUrl = getArguments().getString("yturl");
         title_TextView.setText(Title);
@@ -129,7 +131,7 @@ public class HistoryBottomSheet extends BottomSheetDialogFragment {
             });
 
             addToPlaylist.setOnClickListener(v1 -> {
-                YTutils.addToPlayList(activity,ytUrl,ytseconds);
+                YTutils.addToPlayList(activity,YTutils.getVideoID(ytUrl),Title,ChannelTitle,ImageUrl,ytseconds);
                 dismiss();
             });
 

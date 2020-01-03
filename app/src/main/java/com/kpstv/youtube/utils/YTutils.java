@@ -62,6 +62,7 @@ import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.LocalModel;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Attr;
@@ -86,6 +87,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
@@ -151,6 +153,8 @@ public class YTutils implements AppInterface {
     }*/
 
     public static String getYtUrl(String videoID) {
+        if (videoID.contains("soundcloud.com"))
+            return videoID;
         return "https://www.youtube.com/watch?v="+videoID;
     }
 
@@ -249,7 +253,8 @@ public class YTutils implements AppInterface {
         }
     }
 
-    public static void addToPlayList(Activity activity,String ytUrl, long seconds) {
+    public static void addToPlayList(Activity activity,String videoID, String videoTitle, String channelTitle,
+                                     String imageUrl, long seconds) {
         String playlist_csv = YTutils.readContent(activity,"playlist.csv");
         if (playlist_csv==null||playlist_csv.isEmpty()) {
             Toast.makeText(activity, "No playlist found!", Toast.LENGTH_SHORT).show();
@@ -275,9 +280,8 @@ public class YTutils implements AppInterface {
             boolean alreadPresent=false,added=false;
             String name = configs.get(which);
             for (int i=0;i<configs.size();i++) {
-                String videoID = YTutils.getVideoID(ytUrl);
                 if (allPlaylist[i].contains(","+name) && !allPlaylist[i].contains(videoID+"|")) {
-                    allPlaylist[i]+=","+videoID+"|"+seconds;
+                    allPlaylist[i]+=","+videoID+"|"+seconds+"|"+videoTitle+"|"+channelTitle+"|"+imageUrl;
                     writeContent(activity,"playlist.csv",
                             join(allPlaylist,'\n'));
                     added=true;
@@ -343,6 +347,36 @@ public class YTutils implements AppInterface {
         setRingtone(activity,f);
     }
 
+    public static String getRedirectAppUrl(String urlOriginal) {
+        if (StringUtils.isEmpty(urlOriginal)) {
+            return null;
+        }
+        URL u = null;
+        try {
+            u = new URL(urlOriginal);
+            HttpURLConnection huc = (HttpURLConnection) u.openConnection();
+            huc.setInstanceFollowRedirects(false);
+            huc.setReadTimeout(5000);
+            boolean redirect = false;
+            int status = huc.getResponseCode();
+            if (status != HttpURLConnection.HTTP_OK) {
+                if (status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_MOVED_PERM || status == HttpURLConnection.HTTP_SEE_OTHER) {
+                    redirect = true;
+                }
+            }
+            if (redirect) {
+                String newUrl = huc.getHeaderField("Location");
+                return newUrl;
+            }
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     static void setRingtone(Activity activity,File f) {
         try {
             RingtoneManager.setActualDefaultRingtoneUri(activity, RingtoneManager.TYPE_RINGTONE, Uri.fromFile(f));
@@ -676,6 +710,8 @@ public class YTutils implements AppInterface {
 
     public static String getVideoID(String youtube_url) {
         String t = youtube_url;
+        if (t.contains("soundcloud.com"))
+            return t;
         if (youtube_url.contains("youtube.com")) {
             t = youtube_url.split("=")[1];
         }else if (youtube_url.contains("youtu.be")) {

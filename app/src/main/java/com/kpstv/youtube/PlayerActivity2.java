@@ -56,6 +56,7 @@ import com.kpstv.youtube.models.LyricModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.services.DownloadService;
 import com.kpstv.youtube.utils.HttpHandler;
+import com.kpstv.youtube.utils.SoundCloud;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
@@ -272,7 +273,8 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                     {
                         Toast.makeText(activity, "Player is still processing!", Toast.LENGTH_SHORT).show();
                     }else
-                    YTutils.addToPlayList(activity,YTutils.getYtUrl(MainActivity.videoID),MainActivity.total_seconds);
+                    YTutils.addToPlayList(activity,MainActivity.videoID,MainActivity.videoTitle,
+                            MainActivity.channelTitle,MainActivity.imgUrl,MainActivity.total_seconds);
 
                 case MotionEvent.ACTION_CANCEL: {
                     ImageView view = (ImageView) v;
@@ -606,9 +608,12 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
     static class loadData extends AsyncTask<Void,Void,Void> {
         @Override
         protected void onPostExecute(Void aVoid) {
+            String imageUri = YTutils.getImageUrl(MainActivity.yturls.get(MainActivity.ytIndex));
+            if (MainActivity.videoID.contains("soundcloud.com"))
+                imageUri = soundCloud.getModel().getImageUrl();
             Glide.with(activity)
                     .asBitmap()
-                    .load(YTutils.getImageUrl(MainActivity.yturls.get(MainActivity.ytIndex)))
+                    .load(imageUri)
                     .into(new CustomTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
@@ -634,10 +639,26 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             String link = "https://www.googleapis.com/youtube/v3/videos?id=" + videoID + "&key=" + API_KEYS[apinumber] + "&part=statistics";
             return httpHandler.makeServiceCall(link);
         }
-
+        SoundCloud soundCloud;
         @Override
         protected Void doInBackground(Void... voids) {
             String videoID = MainActivity.videoID;
+
+            if (videoID.contains("soundcloud.com")) {
+                soundCloud = new SoundCloud(videoID);
+                if (soundCloud.getModel()==null || soundCloud.getModel().getStreamUrl()==null) {
+                    return null;
+                }
+                soundCloud.captureViews();
+                MainActivity.soundCloudPlayBack=true;
+                MainActivity.videoTitle = soundCloud.getModel().getTitle();
+                MainActivity.channelTitle = soundCloud.getModel().getAuthorName();
+                MainActivity.imgUrl = soundCloud.getModel().getImageUrl();
+                MainActivity.likeCounts = -1; MainActivity.dislikeCounts = -1;
+                if (soundCloud.getViewCount()!=null && soundCloud.getViewCount().isEmpty())
+                    MainActivity.viewCounts = soundCloud.getViewCount();
+                return null;
+            }
 
             int i=0;
             int apiLength = API_KEYS.length;
@@ -891,6 +912,17 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         builder.setTitle("Select Media Codec");
 
         builder.setItems(arrays, (dialog, which) -> {
+
+            if (AppSettings.downloadCount<=0 && AppSettings.setDownloads) {
+                View v = getLayoutInflater().inflate(R.layout.alert_buy_premium,null);
+                new AlertDialog.Builder(this)
+                        .setView(v).setPositiveButton("Purchase",(dialogInterface, i) -> {
+                            Intent intent = new Intent(this,PurchaseActivity.class);
+                            startActivity(intent);
+                        }).setNegativeButton("Cancel",null)
+                        .show();
+                return;
+            }else if (AppSettings.setDownloads) AppSettings.downloadCount--;
             YTConfig config = configs.get(which);
             config.setVideoID(MainActivity.videoID);
             config.setAudioUrl(MainActivity.audioLink);
@@ -967,7 +999,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
     private Fetch fetch;
     private void downloadFromUrl(String fileName, YTConfig config) {
 
-        if (config.isAudio() && supportFFmpeg) {
+        if (config.isAudio() && supportFFmpeg && !config.getExt().equals(".mp3")) {
 
             final AlertDialog.Builder alert= new AlertDialog.Builder(PlayerActivity2.this);
             alert.setIcon( android.R.drawable.ic_dialog_info);

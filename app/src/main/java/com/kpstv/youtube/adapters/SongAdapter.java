@@ -190,11 +190,13 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                     notifyItemChanged(listPosition);
                 }else {
                     dataSet.get(listPosition).setDisabled(true);
-
-                    String data = YTutils.readContent((Activity) con,"removedList.csv");
+                    String wr = "ytID:"+ytID;
+                    if (ytID.contains("soundcloud.com"))
+                        wr = "sd:"+ytID;
+                    String data = YTutils.readContent(con,"removedList.csv");
                     if (data!=null && !data.isEmpty()) {
-                        YTutils.writeContent((Activity)con,"removedList.csv",data.trim()+",ytID:"+ytID);
-                    }else  YTutils.writeContent((Activity)con,"removedList.csv","ytID:"+ytID);
+                        YTutils.writeContent((Activity)con,"removedList.csv",data.trim()+","+wr);
+                    }else  YTutils.writeContent((Activity)con,"removedList.csv",wr);
 
                     notifyItemChanged(listPosition);
 

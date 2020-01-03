@@ -17,6 +17,8 @@ public interface AppInterface {
             "AIzaSyABQpCWPL2GDGR0KODLKv21y1Cej71_P0k",
             "AIzaSyAtLOqomDix-6Y4UmK6aLvhLfE5c5WWLLg"};
 
+    String SOUNDCLOUD_API = "c0cfd39532cab4fee36066c06b651747";
+
 }
 
 

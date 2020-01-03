@@ -128,7 +128,7 @@ public class CPlaylistActivity extends AppCompatActivity {
                 DiscoverModel model = new DiscoverModel(
                         childs[2],
                         childs[3],
-                        YTutils.getImageUrlID(videoID),
+                        childs[4],
                         YTutils.getYtUrl(videoID)
                 );
                 model.setSeconds(seconds);
@@ -209,7 +209,7 @@ public class CPlaylistActivity extends AppCompatActivity {
         String line = date+","+
                 title;
         for (DiscoverModel model : models) {
-            line +=","+YTutils.getVideoID(model.getYtUrl())+"|"+model.getSeconds()+"|"+model.getTitle()+"|"+ model.getAuthor();
+            line +=","+YTutils.getVideoID(model.getYtUrl())+"|"+model.getSeconds()+"|"+model.getTitle()+"|"+ model.getAuthor()+"|"+model.getImgUrl();
         }
         return line;
     }

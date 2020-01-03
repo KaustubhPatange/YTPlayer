@@ -294,8 +294,12 @@ public class DownloadService extends Service {
 
             switch (model.getTaskExtra()) {
                 case "mp3task":
+                    String imageUri=null;
+                    if (model.getVideoID().contains("soundcloud.com"))
+                        imageUri = model.getImageUrl();
+                    else YTutils.getImageUrlID(model.getVideoID());
                     try {
-                        Glide.with(context).asBitmap().load(YTutils.getImageUrlID(model.getVideoID())).into(new CustomTarget<Bitmap>() {
+                        Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
                             @Override
                             public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                                 icon = resource;
@@ -421,8 +425,9 @@ public class DownloadService extends Service {
                         else
                         {
                             URL uri = null; ImageData imageData=null;
+
                             try {
-                                uri = new URL(YTutils.getImageUrlID(model.getVideoID()));
+                                uri = new URL(imageUri);
                                 Bitmap bitmap = BitmapFactory.decodeStream(uri.openConnection().getInputStream());
                                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);

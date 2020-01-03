@@ -5,16 +5,21 @@ import java.io.Serializable;
 public class YTConfig implements Serializable {
 
     String Text,Url,Ext,Title,ChannelTitle,taskExtra;
-    String targetName, videoID, audioUrl;
+    String targetName, videoID, audioUrl, imageUrl;
     boolean audio; long length;
 
-    public YTConfig(String text, String linkurl,String ext,String videoTitle, String channelTitle,boolean audio) {
+    public YTConfig(String text, String linkurl,String ext,String videoTitle, String channelTitle,boolean audio,String imageUrl) {
         Text = text;
         Url = linkurl;
         Ext = ext;
         Title = videoTitle;
         ChannelTitle = channelTitle;
+        this.imageUrl = imageUrl;
         this.audio = audio;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
     }
 
     public String getAudioUrl() {

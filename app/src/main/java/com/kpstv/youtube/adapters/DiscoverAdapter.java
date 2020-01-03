@@ -169,11 +169,12 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
 
             viewHolder.addPlaylist.setOnClickListener(v -> {
                 Activity activity = (Activity) con;
-                new getData(activity,model.getYtUrl()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new getData(activity,model).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             });
 
-            Object[] objects = new Object[3];
-            objects[0]=position; objects[1]=model.getTitle();objects[2]=model.getYtUrl();
+            Object[] objects = new Object[5];
+            objects[0]=position; objects[1]=model.getTitle();objects[2]=model.getYtUrl();objects[3]=model.getAuthor();
+            objects[4]=model.getImgUrl();
             viewHolder.mainCard.setTag(objects);
             viewHolder.mainCard.setOnLongClickListener(longClickListener);
 
@@ -216,11 +217,11 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
 
 
     class getData extends AsyncTask<Void,Void,Void> {
-        String yturl;
+        DiscoverModel model;
         long seconds; Activity activity; ProgressDialog dialog;
-        public getData(Activity activity,String yturl) {
+        public getData(Activity activity,DiscoverModel model) {
             this.activity = activity;
-            this.yturl = yturl;
+            this.model = model;
             dialog = new ProgressDialog(activity);
         }
 
@@ -234,13 +235,14 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
         @Override
         protected void onPostExecute(Void aVoid) {
             dialog.dismiss();
-            YTutils.addToPlayList(activity,yturl,seconds);
+            YTutils.addToPlayList(activity,YTutils.getVideoID(model.getYtUrl())
+                    ,model.getTitle(),model.getAuthor(),model.getImgUrl(),seconds);
             super.onPostExecute(aVoid);
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            YTLength ytLength = new YTLength(YTutils.getVideoID(yturl));
+            YTLength ytLength = new YTLength(YTutils.getVideoID(model.getYtUrl()));
             seconds = ytLength.getSeconds();
             return null;
         }

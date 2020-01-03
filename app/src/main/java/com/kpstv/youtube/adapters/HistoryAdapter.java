@@ -32,6 +32,7 @@ import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTLength;
+import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
 
 import org.json.JSONException;
@@ -135,7 +136,8 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
 
         @Override
         protected void onPostExecute(Void aVoid) {
-
+            if (model ==null || model.getImgUrl() == null)
+                return;
             Date c = Calendar.getInstance().getTime();
             @SuppressLint("SimpleDateFormat")
             SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
@@ -168,8 +170,9 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
             } else if (DateString.contains(yesterday)) {
                 toput = "Yesterday";
             }
-            Object[] objects = new Object[3];
-            objects[0]=pos; objects[1]=model.getTitle();objects[2]=ytUrl;
+            Object[] objects = new Object[5];
+            objects[0]=pos; objects[1]=model.getTitle();objects[2]=ytUrl;objects[3]=model.getAuthor();
+            objects[4]=model.getImgUrl();
             viewHolder.mainCard.setTag(objects);
             viewHolder.mainCard.setOnLongClickListener(longClickListener);
 
@@ -199,7 +202,7 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
 
             viewHolder.addPlaylist.setOnClickListener(v -> {
                 Activity activity = (Activity) con;
-                new addToPlay(activity,ytUrl).executeOnExecutor(THREAD_POOL_EXECUTOR);
+                new addToPlay(activity,model).executeOnExecutor(THREAD_POOL_EXECUTOR);
             });
 
             if (pos%5==0 && pos!=0 && pos%10!=0 && AppSettings.showAds) {
@@ -215,11 +218,11 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
         }
 
         class addToPlay extends AsyncTask<Void,Void,Void> {
-            String yturl;
-            long seconds; Activity activity; ProgressDialog dialog;
-            public addToPlay(Activity activity,String yturl) {
+            MetaModel model;
+            long seconds=0; Activity activity; ProgressDialog dialog;
+            public addToPlay(Activity activity,MetaModel model) {
                 this.activity = activity;
-                this.yturl = yturl;
+                this.model = model;
                 dialog = new ProgressDialog(activity);
             }
 
@@ -233,14 +236,19 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
             @Override
             protected void onPostExecute(Void aVoid) {
                 dialog.dismiss();
-                YTutils.addToPlayList(activity,yturl,seconds);
+                YTutils.addToPlayList(activity,YTutils.getVideoID_ImageUri(model.getImgUrl()),
+                        model.getTitle(),model.getAuthor(),model.getImgUrl(),seconds);
                 super.onPostExecute(aVoid);
             }
 
             @Override
             protected Void doInBackground(Void... voids) {
-                YTLength ytLength = new YTLength(YTutils.getVideoID(yturl));
-                seconds = ytLength.getSeconds();
+                if (model.getImgUrl().contains("i.ytimg")) {
+                    YTLength ytLength = new YTLength(YTutils.getVideoID_ImageUri(model.getImgUrl()));
+                    seconds = ytLength.getSeconds();
+                }else {
+                    // TODO: Add support for soundCloud
+                }
                 return null;
             }
         }
@@ -248,24 +256,15 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
 
         @Override
         protected Void doInBackground(String... strings) {
-
-            String id = YTutils.getVideoID(ytUrl);
-            HttpHandler handler = new HttpHandler();
-            String json = handler.makeServiceCall("https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v="+id+"&format=json");
-            try {
-                JSONObject object = new JSONObject(json);
-                model = new MetaModel(
-                        object.getString("title"),
-                        object.getString("author_name"),
-                        YTutils.getImageUrlID(id)
-                );
-            } catch (JSONException e) {
-                e.printStackTrace();
+            YTMeta ytMeta = new YTMeta(YTutils.getVideoID(ytUrl));
+            if (ytMeta.getVideMeta()!=null) {
+                model = ytMeta.getVideMeta();
             }
             return null;
         }
     }
 
+    private static final String TAG = "HistoryAdapter";
     boolean containsDateItem(String item) {
         for (int i=0;i<Dateset.size();i++) {
             if (Dateset.get(i).contains(item))

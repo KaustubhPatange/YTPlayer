@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -101,6 +102,7 @@ import com.kpstv.youtube.receivers.SongBroadCast;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.LyricsApi;
 import com.kpstv.youtube.utils.OnSwipeTouchListener;
+import com.kpstv.youtube.utils.SoundCloud;
 import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
@@ -113,7 +115,15 @@ import com.naveed.ytextractor.model.YoutubeMeta;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -371,6 +381,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
        /* File file = YTutils.getFile("Download/9WR9YF2.csv");
         Date lastModDate = new Date(file.lastModified());
         Log.e(TAG, "onCreate: Last modified "+lastModDate.toString());*/
+
+        new soundCloudData("https://soundcloud.com/alesso/this-summers-gonna-hurt-like-a-mother-fr-alesso-remix-radio-edit")
+                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     void setDefaultEqualizerValues() {
@@ -777,7 +790,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
     @SuppressLint("StaticFieldLeak")
     void commonIntentCheck(String ytLink) {
-        if (YTutils.isValidID(ytLink)) {
+        if (YTutils.isValidID(ytLink) || (ytLink.contains("soundcloud.com"))) {
             if (yturls.size()<=0) {
                 PlayVideo(getYTUrls(ytLink),0);
             }else {
@@ -789,31 +802,63 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                     return;
                 }
                 if (nPlayModels.size()>0 && nPlayModels.size()==yturls.size()) {
-                    new AsyncTask<Void,Void,Void>(){
-                        YTMeta ytMeta;
-                        @Override
-                        protected void onPostExecute(Void aVoid) {
-                            if (ytMeta.getVideMeta()!=null) {
-                                NPlayModel model = new NPlayModel(ytLink,ytMeta,false);
-                                for (NPlayModel model1 : nPlayModels) {
-                                    if (model1.getUrl().equals(model.getUrl()))
-                                    {
-                                        nPlayModels.remove(model1);
-                                        break;
-                                    }
-                                }
-                                nPlayModels.add(insert_pos,model);
-                            }else
-                                Toast.makeText(activity, "Unexpected parsing error occurred!", Toast.LENGTH_SHORT).show();
-                            super.onPostExecute(aVoid);
-                        }
+                    if (YTutils.isValidID(ytLink)) {
+                        new AsyncTask<Void, Void, Void>() {
+                            YTMeta ytMeta;
 
-                        @Override
-                        protected Void doInBackground(Void... voids) {
-                            ytMeta = new YTMeta(YTutils.getVideoID(ytLink));
-                            return null;
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                            @Override
+                            protected void onPostExecute(Void aVoid) {
+                                if (ytMeta.getVideMeta() != null) {
+                                    NPlayModel model = new NPlayModel(ytLink, ytMeta, false);
+                                    for (NPlayModel model1 : nPlayModels) {
+                                        if (model1.getUrl().equals(model.getUrl())) {
+                                            nPlayModels.remove(model1);
+                                            break;
+                                        }
+                                    }
+                                    nPlayModels.add(insert_pos, model);
+                                } else
+                                    Toast.makeText(activity, "Unexpected parsing error occurred!", Toast.LENGTH_SHORT).show();
+                                super.onPostExecute(aVoid);
+                            }
+
+                            @Override
+                            protected Void doInBackground(Void... voids) {
+                                ytMeta = new YTMeta(YTutils.getVideoID(ytLink));
+                                return null;
+                            }
+                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    }else if (ytLink.contains("soundcloud.com")) {
+                        new AsyncTask<Void,Void,Void>() {
+                            SoundCloud.SoundCloudModel model;
+
+                            @Override
+                            protected void onPostExecute(Void aVoid) {
+                                if (model!=null) {
+                                    MetaModel metaModel = new MetaModel(model.getTitle(),model.getAuthorName(),
+                                            model.getImageUrl());
+                                    NPlayModel nPlayModel = new NPlayModel(ytLink,new YTMeta(metaModel),false);
+                                    for (NPlayModel model1: nPlayModels) {
+                                        if (model1.getUrl().equals(nPlayModel.getUrl())) {
+                                            nPlayModels.remove(model1);
+                                            break;
+                                        }
+                                    }
+                                    nPlayModels.add(insert_pos, nPlayModel);
+                                } else
+                                    Toast.makeText(activity, "Unexpected parsing error occurred!", Toast.LENGTH_SHORT).show();
+                                super.onPostExecute(aVoid);
+                            }
+
+                            @Override
+                            protected Void doInBackground(Void... voids) {
+                                SoundCloud soundCloud = new SoundCloud(ytLink);
+                                if (soundCloud.getModel()!=null)
+                                    model = soundCloud.getModel();
+                                return null;
+                            }
+                        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    }
                 }
                 String ytID = YTutils.getVideoID(ytLink);
                 for (String yturl: yturls) {
@@ -825,16 +870,18 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 yturls.add(insert_pos,ytLink);
                 ChangeVideo(insert_pos);
             }
-            return;
         }else if (ytLink.contains("open.spotify.com")&&ytLink.contains("/track/")) {
             new makeSpotifyData(ytLink).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            return;
-        }else {
+        } /*else if (ytLink.contains("soundcloud.com")) {
+            Log.e(TAG, "commonIntentCheck: Working here..." );
+          //  new soundCloudData(ytLink).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }*/else {
             YTutils.showAlert(MainActivity.this,"Callback Error",
                     "The requested url is not a valid YouTube url", true);
-            return;
         }
     }
+
+
 
     /**
     * Implementing a new player within main activity itself...
@@ -848,7 +895,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     static PendingIntent prevPendingIntent,pausePendingIntent,nextPendingIntent,clickPendingIntent,favouritePendingIntent;
     public static Bitmap bitmapIcon; static ArrayList<YTConfig> ytConfigs;
     static NotificationCompat.Builder builder;
-    public static boolean isplaying, sleepEndTrack=false,localPlayBack=false,isFavourite=false,isEqualizerEnabled=false;
+    public static boolean isplaying, sleepEndTrack=false,localPlayBack=false, soundCloudPlayBack,isFavourite=false,isEqualizerEnabled=false;
     public static boolean isLoop=false,isEqualizerSet=false;
     static Handler mHandler = new Handler();
     static long total_duration = 0; public static PresetReverb presetReverb;
@@ -958,7 +1005,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         @SuppressLint("StaticFieldLeak")
         @Override
         protected void onPostExecute(Void aVoid) {
-
+            if (noInternet) {
+                return;
+            }
             if (skipSong) {
                 if (command==1)
                     playNext();
@@ -966,8 +1015,6 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                     playPrevious();
                 return;
             }
-
-            setLyricData();
 
             Glide.with(activity)
                     .asBitmap()
@@ -989,6 +1036,17 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
                         }
                     });
+
+            setLyricData();
+
+            if (soundCloudPlayBack) {
+                ytConfigs.clear();
+                ytConfigs.add(new YTConfig("Audio 128 kbit/s",soundCloud.getModel().getStreamUrl(),
+                        ".mp3",videoTitle,channelTitle,true,soundCloud.getModel().getImageUrl()));
+                audioLink = soundCloud.getModel().getStreamUrl();
+                continueinMainThread(audioLink);
+                return;
+            }
 
             new YouTubeExtractor(activity) {
 
@@ -1038,10 +1096,17 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             super.onPostExecute(aVoid);
         }
 
-        boolean skipSong;
-
+        boolean skipSong, noInternet;
+        SoundCloud soundCloud;
         @Override
         protected Void doInBackground(String... arg0) {
+            soundCloudPlayBack=false;
+            if (!YTutils.isInternetAvailable()) {
+                Toast.makeText(activity, "No active internet connection", Toast.LENGTH_SHORT).show();
+                noInternet=true;
+                return null;
+            }
+
             videoID = arg0[0];
             MainActivity.playListItems = new ArrayList<>();
 
@@ -1052,10 +1117,31 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                         MainActivity.playListItems = new ArrayList<>(Arrays.asList(data.split(",")));
                     else  MainActivity.playListItems.add(data.trim());
                 }
-                if (playListItems.contains("ytID:"+videoID)) {
+                if (playListItems.contains("ytID:"+videoID)||playListItems.contains("sd:"+videoID)) {
                     skipSong =true;
                     return null;
                 }
+            }
+
+            if (videoID.contains("soundcloud.com")) {
+                soundCloud = new SoundCloud(videoID);
+                Log.e(TAG, "doInBackground: Likely here..." );
+                if (soundCloud.getModel()==null || soundCloud.getModel().getStreamUrl()==null) {
+                    Log.e(TAG, "doInBackground: Skipping soundcloud" );
+                    skipSong=true;
+                    command=1;
+                    return null;
+                }
+                soundCloud.captureViews();
+                soundCloudPlayBack=true;
+                MainActivity.videoTitle = soundCloud.getModel().getTitle();
+                MainActivity.channelTitle = soundCloud.getModel().getAuthorName();
+                MainActivity.imgUrl = soundCloud.getModel().getImageUrl();
+                likeCounts = -1; dislikeCounts = -1;
+                if (soundCloud.getViewCount()!=null && soundCloud.getViewCount().isEmpty())
+                viewCounts = soundCloud.getViewCount();
+                Log.e(TAG, "doInBackground: Here I am: " +soundCloud.getModel().getStreamUrl());
+                return null;
             }
 
             int i=0;
@@ -1200,7 +1286,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static void write_Favourite() {
         String t = YTutils.readContent(activity,"favourite.csv");
         if (t!=null && !t.contains(MainActivity.videoID)) {
-            t += "\n"+MainActivity.videoID+"|"+MainActivity.total_seconds+"|"+MainActivity.videoTitle+"|"+MainActivity.channelTitle;
+            t += "\n"+MainActivity.videoID+"|"+MainActivity.total_seconds+"|"+MainActivity.videoTitle+"|"+MainActivity.channelTitle
+                    +"|"+MainActivity.imgUrl;
             Toast.makeText(activity, "Added to favourites!", Toast.LENGTH_SHORT).show();
             MainActivity.isFavourite=true;
         }else if (t!=null && t.contains(MainActivity.videoID)) {
@@ -1395,7 +1482,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         if (ytText.contains("128 kbit/s"))
             audioLink = ytfile.getUrl();
 
-        ytConfigs.add(new YTConfig(ytText, ytfile.getUrl(), ytfile.getFormat().getExt(), videoTitle, channelTitle,isaudio));
+        ytConfigs.add(new YTConfig(ytText, ytfile.getUrl(), ytfile.getFormat().getExt(), videoTitle, channelTitle,isaudio,imgUrl));
     }
 
     private static void addVideoToList(final YTMedia media, final String videoTitle, final String channelTitle) { ;
@@ -1424,7 +1511,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             audioLink = media.getUrl();
         }
 
-        ytConfigs.add(new YTConfig(ytText, media.getUrl(), ext, videoTitle, channelTitle,isaudio));
+        ytConfigs.add(new YTConfig(ytText, media.getUrl(), ext, videoTitle, channelTitle,isaudio,imgUrl));
     }
 
    /* private static void addVideoToList(final YTMedia media, final String videoTitle, final String channelTitle) {
@@ -1472,6 +1559,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
                         .setShowActionsInCompactView(0,1,2)
                 .setMediaSession(mediaSession.getSessionToken()))
+                .setShowWhen(false)
                 .setContentTitle(videoTitle)
                 .setOngoing(setgoing)
                 .setSound(null)
@@ -1605,6 +1693,50 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             String[] yt_urls = new String[1];
             yt_urls[0] = to_inject_yturl;
             return yt_urls;
+        }
+    }
+
+    static class soundCloudData extends AsyncTask<Void,Void,Void> {
+        String link,ytLink;
+        SoundCloud.SoundCloudModel model;
+        public soundCloudData(String link) {
+            this.link = link;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Log.e(TAG, "onPostExecute: Comming now..." );
+           /* if (ytLink!=null) {
+                if (yturls.size()<=0) {
+                    PlayVideo(getYTUrls(ytLink),0);
+                } else {
+                    int insert_index = ytIndex;
+                    if (nPlayModels.size()>0 && nPlayModels.size()==yturls.size()) {
+                        MetaModel metaModel = new MetaModel(model.getTitle(),model.getAuthorName(),model.getImageUrl());
+                        NPlayModel model = new NPlayModel(ytLink,new YTMeta(metaModel),true);
+                        nPlayModels.add(insert_index,model);
+                    }
+                    yturls.remove(ytLink);
+                    yturls.add(insert_index,ytLink);
+                    ChangeVideo(insert_index);
+                }
+            }else {
+                Toast.makeText(activity, "Couldn't parse this Spotify url", Toast.LENGTH_SHORT).show();
+            }*/
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            SoundCloud soundCloud = new SoundCloud(link);
+            soundCloud.captureViews();
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            bottom_player.setVisibility(VISIBLE);
         }
     }
 

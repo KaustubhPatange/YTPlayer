@@ -361,7 +361,7 @@ public class SFragment extends Fragment implements AppInterface {
                         discoverModels.add(new DiscoverModel(
                                 snippet.getString("title"),
                                 snippet.getString("channelTitle"),
-                                YTutils.getImageUrl(videoID),
+                                YTutils.getImageUrlID(videoID),
                                 YTutils.getYtUrl(videoID)
                         ));
                     }

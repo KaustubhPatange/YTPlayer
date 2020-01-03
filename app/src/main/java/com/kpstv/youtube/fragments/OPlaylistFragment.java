@@ -1013,11 +1013,11 @@ public class OPlaylistFragment extends Fragment {
                 DiscoverModel discoverModel = new DiscoverModel(
                         childs[2],
                         childs[3],
-                        YTutils.getImageUrlID(videoId),
+                        childs[4],
                         YTutils.getYtUrl(videoId)
                 );
 
-                if (strings.contains("ytID:"+videoId))
+                if (strings.contains("ytID:"+videoId)||strings.contains("sd:"+videoId))
                     discoverModel.setDisabled(true);
 
                 models.add(discoverModel);

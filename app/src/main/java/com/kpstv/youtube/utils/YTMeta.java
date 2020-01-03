@@ -31,6 +31,18 @@ public class YTMeta {
 
     public YTMeta(String videoID) {
         if (videoID==null) return;
+        if (videoID.contains("soundcloud.com")) {
+            SoundCloud soundCloud = new SoundCloud(videoID);
+            if (soundCloud.getModel()!=null) {
+                model = new MetaModel(
+                        soundCloud.getModel().getTitle(),
+                        soundCloud.getModel().getAuthorName(),
+                        soundCloud.getModel().getImageUrl()
+                );
+                model.setVideoID(videoID);
+            }
+            return;
+        }
         try {
             HttpHandler handler = new HttpHandler();
             String json = handler.makeServiceCall(
@@ -47,6 +59,7 @@ public class YTMeta {
                         object.getString("author_name"),
                         YTutils.getImageUrlID(videoID)
                 );
+                model.setVideoID(videoID);
             } catch (JSONException e) {
                 e.printStackTrace();
             }

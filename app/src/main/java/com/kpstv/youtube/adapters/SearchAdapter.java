@@ -1,47 +1,29 @@
 package com.kpstv.youtube.adapters;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.kpstv.youtube.MainActivity;
-import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.SearchModel;
-import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTutils;
 
-import org.json.JSONObject;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHolder> {
 
@@ -115,13 +97,18 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
 
         if (isLibraryFrag) {
             holder.mainCard.setOnClickListener(v -> {
-                ArrayList<String> urls = (ArrayList<String>) yturls.clone();
-                Collections.reverse(urls);
-                MainActivity.PlayVideo(YTutils.ConvertToStringArray(urls),listPosition);
+                if (YTutils.isInternetAvailable()) {
+                    ArrayList<String> urls = (ArrayList<String>) yturls.clone();
+                    Collections.reverse(urls);
+                    MainActivity.PlayVideo(YTutils.ConvertToStringArray(urls), listPosition);
+                }else Toast.makeText(con, "No active internet connection!", Toast.LENGTH_SHORT).show();
             });
         }else {
             holder.mainCard.setOnClickListener(v -> {
+                if (YTutils.isInternetAvailable())
                 MainActivity.PlayVideo(YTutils.ConvertToStringArray(yturls),9-listPosition);
+                else
+                    Toast.makeText(con, "No active internet connection!", Toast.LENGTH_SHORT).show();
             });
         }
 

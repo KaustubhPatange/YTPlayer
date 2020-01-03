@@ -31,6 +31,7 @@ import com.kpstv.youtube.PlayerActivity2;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.services.DownloadService;
 import com.kpstv.youtube.utils.HttpHandler;
+import com.kpstv.youtube.utils.SoundCloud;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
@@ -259,9 +260,26 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
             return httpHandler.makeServiceCall(link);
         }
 
+        SoundCloud soundCloud;
         @Override
         protected Void doInBackground(Void... voids) {
             String videoID = MainActivity.videoID;
+
+            if (videoID.contains("soundcloud.com")) {
+                soundCloud = new SoundCloud(videoID);
+                if (soundCloud.getModel()==null || soundCloud.getModel().getStreamUrl()==null) {
+                    return null;
+                }
+                soundCloud.captureViews();
+                MainActivity.soundCloudPlayBack=true;
+                MainActivity.videoTitle = soundCloud.getModel().getTitle();
+                MainActivity.channelTitle = soundCloud.getModel().getAuthorName();
+                MainActivity.imgUrl = soundCloud.getModel().getImageUrl();
+                MainActivity.likeCounts = -1; MainActivity.dislikeCounts = -1;
+                if (soundCloud.getViewCount()!=null && soundCloud.getViewCount().isEmpty())
+                    MainActivity.viewCounts = soundCloud.getViewCount();
+                return null;
+            }
 
             int i=0;
             int apiLength = API_KEYS.length;

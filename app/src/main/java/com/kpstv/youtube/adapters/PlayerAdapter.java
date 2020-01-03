@@ -1,11 +1,13 @@
 package com.kpstv.youtube.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
@@ -25,6 +27,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity2;
 import com.kpstv.youtube.R;
+import com.kpstv.youtube.utils.SoundCloud;
 import com.kpstv.youtube.utils.YTutils;
 
 import java.io.File;
@@ -53,6 +56,7 @@ public class PlayerAdapter extends PagerAdapter {
         return view == o;
     }
     boolean squarePage;
+    @SuppressLint("StaticFieldLeak")
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
         squarePage = context.getSharedPreferences("appSettings",Context.MODE_PRIVATE)
@@ -86,26 +90,58 @@ public class PlayerAdapter extends PagerAdapter {
                 // TODO: Do something when cannot played...
             }
         }else {
-            imageView1.setVisibility(View.GONE);
-            Glide.with(context)
-                    .asBitmap()
-                    .load(YTutils.getImageUrl(yturls.get(position)))
-                    .into(new CustomTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            Palette.generateAsync(resource, palette -> {
-                            /*MainActivity.bitmapIcon = resource;
-                            MainActivity.nColor = palette.getVibrantColor(context.getResources().getColor(R.color.light_white));*/
+            if (yturls.get(position).contains("soundcloud.com")) {
+                new AsyncTask<Void, Void, Void>() {
+                    SoundCloud soundCloud;
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        Glide.with(context)
+                                .asBitmap()
+                                .load(soundCloud.getModel().getImageUrl())
+                                .into(new CustomTarget<Bitmap>() {
+                                    @Override
+                                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                        Palette.generateAsync(resource, palette -> {
+                                            imageView.setImageBitmap(resource);
+                                           /* MainActivity.imgUrl = soundCloud.getModel().getImageUrl();
+                                            MainActivity.bitmapIcon = resource;
+                                            MainActivity.nColor = palette.getVibrantColor(context.getResources()
+                                                    .getColor(R.color.light_white));
+                                            MainActivity.rebuildNotification();*/
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                                    }
+                                });
+                        super.onPostExecute(aVoid);
+                    }
+
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        soundCloud = new SoundCloud(yturls.get(position),true);
+                        return null;
+                    }
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }else {
+                imageView1.setVisibility(View.GONE);
+                Glide.with(context)
+                        .asBitmap()
+                        .load(YTutils.getImageUrl(yturls.get(position)))
+                        .into(new CustomTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                                 imageView.setImageBitmap(resource);
+                            }
 
-                            });
-                        }
+                            @Override
+                            public void onLoadCleared(@Nullable Drawable placeholder) {
 
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                        }
-                    });
+                            }
+                        });
+            }
         }
 
         container.addView(itemView);

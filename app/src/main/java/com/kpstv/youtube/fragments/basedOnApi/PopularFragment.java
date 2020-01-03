@@ -61,6 +61,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.security.auth.login.LoginException;
+
 import top.defaults.drawabletoolbox.DrawableBuilder;
 
 import static com.kpstv.youtube.utils.AppBarStateChangeListener.State.COLLAPSED;
@@ -196,10 +198,13 @@ public class PopularFragment extends Fragment {
                     yr = view.findViewById(R.id.year);
                     yr.setText(year);
 
-                    @SuppressLint("SimpleDateFormat") int month =  Integer.parseInt(new SimpleDateFormat("mm").format(c));
-                    @SuppressLint("SimpleDateFormat") int yearInt =  Integer.parseInt(new SimpleDateFormat("yyyy").format(c));
-                    @SuppressLint("SimpleDateFormat") int date =  Integer.parseInt(new SimpleDateFormat("dd").format(c));
-                    @SuppressLint("SimpleDateFormat") String today =  new SimpleDateFormat("yyyy-mm-dd").format(c);
+                    Date d = Calendar.getInstance().getTime();
+                    @SuppressLint("SimpleDateFormat") int month =  Integer.parseInt(new SimpleDateFormat("MM").format(d));
+                    @SuppressLint("SimpleDateFormat") int yearInt =  Integer.parseInt(new SimpleDateFormat("yyyy").format(d));
+                    @SuppressLint("SimpleDateFormat") int date =  Integer.parseInt(new SimpleDateFormat("dd").format(d));
+                    @SuppressLint("SimpleDateFormat") String today =  new SimpleDateFormat("yyyy-MM-dd").format(d);
+
+                    Log.e(TAG, "onCreateView: Today:"+today+", Day: "+date+", Month: "+month+", Year: "+yearInt );
 
                     if (date>=7) {
                         date = date-7;
@@ -213,8 +218,7 @@ public class PopularFragment extends Fragment {
                     }
                     Log.e(TAG, "onCreateView: Month: "+month );
                     mRelativelayout.setBackground(activity.getResources().getDrawable(R.drawable.yt_background3));
-                    url = "https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&order=viewCount&publishedAfter="+yearInt+"-"+month+"-"+date+"T00%3A00%3A00Z&publishedBefore="+today+"T00%3A00%3A00Z&region="+region+"&type=video&videoCategoryId=10";
-
+                    url = "https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&order=viewCount&publishedAfter="+yearInt+"-"+month+"-"+date+"T00:00:00Z&publishedBefore="+today+"T00:00:00Z&region="+region+"&type=video&videoCategoryId=10";
                     break;
                 default:
                     url = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=PL4fGSI1pDJn6puJdseH2Rt9sMvt9E2M4i";
@@ -261,11 +265,22 @@ public class PopularFragment extends Fragment {
                     String tomorrowDate = YTutils.getTomorrowDate_nogap();
                     String yesterdayDate = YTutils.getYesterday_nogap();
                     int day = Calendar.getInstance().getFirstDayOfWeek();
+                    @SuppressLint("SimpleDateFormat")
+                    SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
                     if (data!=null) {
                         String date = data.trim().split("\\$")[0];
                         if (fallinWeek) {
-                            int data_date = Integer.parseInt(date.substring(date.length()-2));
-                            if (data_date+7>=day) {
+
+                            Calendar c = Calendar.getInstance();
+                            c.setTime(new Date());
+                            c.add(Calendar.DATE, -7);
+
+                            int oldDate = Integer.parseInt(date);
+                            int previousDate = Integer.parseInt(df.format(c.getTime()));
+
+                            Log.e(TAG, "onAnimationEnd: oldDate: "+oldDate+", previousDate: "+previousDate );
+
+                            if (oldDate>=previousDate) {
                                 json = data.substring(data.indexOf('$')+1); // Remove first line from string
                                 processAsCSV = true;
                                 wait = true;
@@ -299,11 +314,17 @@ public class PopularFragment extends Fragment {
                             }else {
                                 String val = (String) dataSnapshot.child("timeString").getValue();
                                 if (val!=null) {
-                                    int data_date =  Integer.parseInt(val.substring(val.length()-2));
+                                    Calendar c = Calendar.getInstance();
+                                    c.setTime(new Date());
+                                    c.add(Calendar.DATE, -7);
+
+                                    int oldDate = Integer.parseInt(val);
+                                    int previousDate = Integer.parseInt(df.format(c.getTime()));
+
                                     if (fallinWeek) {
-                                        if (data_date+7>=day) {
+                                        if (oldDate>=previousDate) {
                                             json = (String) dataSnapshot.child("data").getValue();
-                                            YTutils.writeContent(activity,fileName,YTutils.getTodayDate_nogaps()+"$"+json);
+                                            YTutils.writeContent(activity,fileName,val+"$"+json);
                                             processAsCSV=true;
                                             wait=true;
                                         }
@@ -439,7 +460,7 @@ public class PopularFragment extends Fragment {
                                title,channelTitle,YTutils.getImageUrlID(videoId),
                                YTutils.getYtUrl(videoId));
 
-                       if (strings.contains("ytID:"+videoId))
+                       if (strings.contains("ytID:"+videoId)||strings.contains("sd:"+videoId))
                            discoverModel.setDisabled(true);
 
                        models.add(discoverModel);
@@ -471,7 +492,7 @@ public class PopularFragment extends Fragment {
                            ,YTutils.getImageUrlID(videoId)
                            ,YTutils.getYtUrl(videoId));
 
-                   if (strings.contains("ytID:"+videoId))
+                   if (strings.contains("ytID:"+videoId)||strings.contains("sd:"+videoId))
                        discoverModel.setDisabled(true);
 
                    models.add(discoverModel);

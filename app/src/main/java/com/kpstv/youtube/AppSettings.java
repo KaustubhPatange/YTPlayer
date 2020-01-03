@@ -9,7 +9,8 @@ public class AppSettings {
 
     public static boolean showAds=true;
     public static boolean enableEqualizer=false;
+    public static boolean setDownloads=true;
     public static int playAdCount=0;
-    public static int adOffset=5;
+    public static int adOffset=7;
     public static int downloadCount=15;
 }
