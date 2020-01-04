@@ -222,8 +222,8 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
         if (MainActivity.yturls.size()>0) {
             models.clear();
             // Check for old data....
+            Log.e(TAG, "onStart: Data Size: "+MainActivity.nPlayModels.size()+", YTUrl size: "+MainActivity.yturls.size() );
             if (MainActivity.nPlayModels.size()>0 && MainActivity.yturls.size() == MainActivity.nPlayModels.size()) {
-
                 new AsyncTask<Void,Float,Void>() {
                     boolean sameData=true;
 
@@ -250,12 +250,15 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                             String videoID;
 
                             /** For local playback stuff */
+                            MetaModel metaData = MainActivity.nPlayModels.get(i).getModel().getVideMeta();
                             if (MainActivity.localPlayBack)
                                 videoID = MainActivity.nPlayModels.get(i).getUrl();
-                            else videoID = MainActivity.nPlayModels.get(i).getModel()
-                                    .getVideMeta().getVideoID();
+                           /* else if (metaData.getVideoID()!=null && metaData.getVideoID().contains("soundcloud.com")) videoID = metaData.getVideoID();
+                          */  else videoID = metaData.getVideoID();
 
+                            Log.e(TAG, "doInBackground: MainId: "+MainActivity.videoID+", LocalId: "+videoID );
                             if (MainActivity.videoID.equals(videoID)) {
+                                Log.e(TAG, "doInBackground: This is playing..." );
                                 MainActivity.nPlayModels.get(i).set_playing(true);
                             }
 
@@ -351,7 +354,7 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                         if (title.contains("."))
                             title = title.split("\\.")[0];
 
-                        MetaModel model = new MetaModel(title,artist,null);
+                        MetaModel model = new MetaModel(url,title,artist,null);
                         YTMeta meta = new YTMeta(model);
                         if (MainActivity.videoID.equals(url))
                             models.add(new NPlayModel(url,meta,true));
@@ -378,7 +381,7 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
     }
 
     void reloadAdapter() {
-        models = MainActivity.nPlayModels;
+        models = new ArrayList<>(MainActivity.nPlayModels);
         adapter = new NPlayAdapter(models,this, this);
         setAdapterClicks();
         recyclerView.setAdapter(adapter);

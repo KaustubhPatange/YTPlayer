@@ -46,13 +46,13 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
 
     }
 
-    public SearchAdapter(ArrayList<SearchModel> data, Context context) {
+   /* public SearchAdapter(ArrayList<SearchModel> data, Context context) {
         this.dataSet = data;
         this.con = context;
         yturls = new ArrayList<>();
         for (SearchModel model: data)
             yturls.add(model.getYturl());
-    }
+    }*/
 
 
     public SearchAdapter(ArrayList<SearchModel> data, Context context, boolean isLibraryFrag) {
@@ -98,7 +98,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
         if (isLibraryFrag) {
             holder.mainCard.setOnClickListener(v -> {
                 if (YTutils.isInternetAvailable()) {
-                    ArrayList<String> urls = (ArrayList<String>) yturls.clone();
+                    ArrayList<String> urls = new ArrayList<>(yturls);
                     Collections.reverse(urls);
                     MainActivity.PlayVideo(YTutils.ConvertToStringArray(urls), listPosition);
                 }else Toast.makeText(con, "No active internet connection!", Toast.LENGTH_SHORT).show();

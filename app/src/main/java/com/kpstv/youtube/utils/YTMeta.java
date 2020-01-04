@@ -35,6 +35,7 @@ public class YTMeta {
             SoundCloud soundCloud = new SoundCloud(videoID);
             if (soundCloud.getModel()!=null) {
                 model = new MetaModel(
+                        videoID,
                         soundCloud.getModel().getTitle(),
                         soundCloud.getModel().getAuthorName(),
                         soundCloud.getModel().getImageUrl()
@@ -55,6 +56,7 @@ public class YTMeta {
             try {
                 JSONObject object = new JSONObject(json);
                 model = new MetaModel(
+                        videoID,
                         object.getString("title"),
                         object.getString("author_name"),
                         YTutils.getImageUrlID(videoID)

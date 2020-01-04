@@ -132,6 +132,7 @@ import java.util.Objects;
 import at.huber.youtubeExtractor.Format;
 import at.huber.youtubeExtractor.VideoMeta;
 import at.huber.youtubeExtractor.YouTubeExtractor;
+import at.huber.youtubeExtractor.YouTubeUriExtractor;
 import at.huber.youtubeExtractor.YtFile;
 import cat.ereza.customactivityoncrash.config.CaocConfig;
 
@@ -294,11 +295,11 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         setDefaultEqualizerValues();
 
         preferences = getSharedPreferences("history",MODE_PRIVATE);
-        String list = preferences.getString("urls","");
+        /*String list = preferences.getString("urls","");
         ArrayList<String> urls = new ArrayList<>();
         if (!Objects.requireNonNull(list).isEmpty()) {
             urls.addAll(Arrays.asList(list.split(",")));
-        }
+        }*/
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
                 .permitAll().build();
@@ -844,7 +845,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                             @Override
                             protected void onPostExecute(Void aVoid) {
                                 if (model!=null) {
-                                    MetaModel metaModel = new MetaModel(model.getTitle(),model.getAuthorName(),
+                                    MetaModel metaModel = new MetaModel(model.getNormalUrl(),model.getTitle(),model.getAuthorName(),
                                             model.getImageUrl());
                                     NPlayModel nPlayModel = new NPlayModel(ytLink,new YTMeta(metaModel),false);
                                     for (NPlayModel model1: nPlayModels) {
@@ -1144,15 +1145,16 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                     command=1;
                     return null;
                 }
-                soundCloud.captureViews();
+             //   soundCloud.captureViews();
                 soundCloudPlayBack=true;
                 MainActivity.videoTitle = soundCloud.getModel().getTitle();
                 MainActivity.channelTitle = soundCloud.getModel().getAuthorName();
                 MainActivity.imgUrl = soundCloud.getModel().getImageUrl();
                 likeCounts = -1; dislikeCounts = -1;
-                if (soundCloud.getViewCount()!=null && !soundCloud.getViewCount().isEmpty())
+                viewCounts = "-1";
+               /* if (soundCloud.getViewCount()!=null && !soundCloud.getViewCount().isEmpty())
                     viewCounts =YTutils.getViewCount( Long.parseLong(soundCloud.getViewCount()));
-                Log.e(TAG, "doInBackground: Here I am: " +soundCloud.getModel().getStreamUrl());
+                Log.e(TAG, "doInBackground: Here I am: " +soundCloud.getModel().getStreamUrl());*/
                 return null;
             }
 
@@ -1317,7 +1319,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             Toast.makeText(activity, "Removed from favourites!", Toast.LENGTH_SHORT).show();
             MainActivity.isFavourite=false;
         }else {
-            t = MainActivity.videoID+"|"+MainActivity.total_seconds;
+            t =MainActivity.videoID+"|"+MainActivity.total_seconds+"|"+MainActivity.videoTitle+"|"+MainActivity.channelTitle
+                    +"|"+MainActivity.imgUrl;
             Toast.makeText(activity, "Added to favourites!", Toast.LENGTH_SHORT).show();
             MainActivity.isFavourite=true;
         }
@@ -1676,30 +1679,26 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
     static String[] getYTUrls(String to_inject_yturl) {
         preferences = activity.getSharedPreferences("history",MODE_PRIVATE);
-        String line = preferences.getString("urls","");
-        if (line!=null && !line.isEmpty()) {
-            String[] lines = line.split(",");
+        String data = YTutils.readContent(activity,"history.csv");
+        // String line = preferences.getString("urls","");
+        if (data!=null && !data.isEmpty()) {
+            String[] lines = data.split("\n|\r");
 
             ArrayList<String> arrayList = new ArrayList<>();
 
-        //    String[] yt_urls = new String[1+lines.length];
-            Log.e(TAG, "getYTUrls: Injected uri 0: "+to_inject_yturl );
+             Log.e(TAG, "getYTUrls: Injected uri 0: "+to_inject_yturl );
             arrayList.add(to_inject_yturl);
-         //   yt_urls[0] = to_inject_yturl;
             int i=1;
             for(String l: lines) {
                 l = l.split("\\|")[0];
                 if (l.isEmpty()) continue;
                 if (YTutils.getVideoID(l).equals(YTutils.getVideoID(to_inject_yturl))) continue;
                 arrayList.add(l);
-            //    yt_urls[i] = l;
                 Log.e(TAG, "getYTUrls: Injected uri "+i+": "+l);
 //                i++;
             }
             nPlayModels.clear();
 
-            /*for (int i=1;i<yt_urls.length;i++)
-                yt_urls[i] = lines[i-1].split("\\|")[0];*/
             return YTutils.convertListToArrayMethod(arrayList);
         }else {
             String[] yt_urls = new String[1];
@@ -1767,7 +1766,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 } else {
                     int insert_index = ytIndex;
                     if (nPlayModels.size()>0 && nPlayModels.size()==yturls.size()) {
-                        MetaModel metaModel = new MetaModel(track.getTitle(),track.getAuthor(),track.getImageUrl());
+                        MetaModel metaModel = new MetaModel(YTutils.getVideoID(track.getYtUrl()),track.getTitle(),track.getAuthor(),track.getImageUrl());
                         NPlayModel model = new NPlayModel(ytLink,new YTMeta(metaModel),true);
                         nPlayModels.add(insert_index,model);
                     }
@@ -1964,12 +1963,36 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         protected Void doInBackground(String... strings) {
             String url_link = strings[0];
             String set = preferences.getString("urls", "");
-
             String ytID = YTutils.getVideoID(url_link);
-            
+
+            String formattedDate = YTutils.getTodayDate();
+            int percent = 100;
+            try {
+                percent = likeCounts*100/(likeCounts+dislikeCounts);
+            }catch (Exception e){e.printStackTrace();}
+
+            String insert_data = ytID+"|"+1+"|"+videoTitle+"|"+channelTitle+"|"+imgUrl+ "|"
+                    + formattedDate+"|"+percent;
+
+            String historyData = YTutils.readContent(activity,"history.csv");
+            if (historyData!=null && !historyData.isEmpty()) {
+                if (historyData.contains(ytID+"|")) {
+                    String[] childs = historyData.split("\n|\r");
+                    StringBuilder builder = new StringBuilder();
+                    builder.append(insert_data);
+                    for (int i=0;i<childs.length;i++) {
+                        if (!childs[i].startsWith(ytID))
+                            builder.append("\n").append(childs[i]);
+                    }
+                    YTutils.writeContent(activity,"history.csv",builder.toString().trim());
+                }else YTutils.writeContent(activity,"history.csv",
+                        insert_data+"\n"+historyData.trim());
+            }else YTutils.writeContent(activity,"history.csv",
+                    insert_data);
+
             /** A logic to calculate no of times a song is played and saved to list */
             String data = YTutils.readContent(activity,"library.csv");
-            String insert_data = ytID+"|"+1+"|"+videoTitle+"|"+channelTitle+"|"+imgUrl;
+
             if (data!=null && !data.isEmpty()) {
                 boolean ifExist=false;
                 if (data.contains(ytID)) {
@@ -1978,7 +2001,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                         if (items[i].contains(ytID)) {
                             ifExist=true;
                             int count = Integer.parseInt(items[i].split("\\|")[1]);
-                            items[i] = ytID+"|"+ (++count)+"|"+videoTitle+"|"+channelTitle+"|"+imgUrl;
+                            items[i] = ytID+"|"+ (++count)+"|"+videoTitle+"|"+channelTitle+"|"+imgUrl+ "|"
+                                    + formattedDate+"|"+percent;
                             String lines = YTutils.join(items,'\n');
                             YTutils.writeContent(activity,"library.csv",lines.trim());
                             break;
@@ -2003,11 +2027,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                     urls.remove(i);
                 }
             }
-            String formattedDate = YTutils.getTodayDate();
-            int percent = 100;
-            try {
-                percent = likeCounts*100/(likeCounts+dislikeCounts);
-            }catch (Exception e){e.printStackTrace();}
+
             Log.e("StringtoAdd", url_link + "|" + formattedDate+"|"+percent);
             urls.add(0, url_link + "|" + formattedDate+"|"+percent);
 

@@ -5,11 +5,11 @@ import android.graphics.Bitmap;
 import com.kpstv.youtube.utils.YTMeta;
 
 public class NPlayModel {
-    YTMeta model;
-    String url;
-    boolean selected=false;
-    boolean playing=false;
-    Bitmap icon;
+    private YTMeta model;
+    private String url;
+    private boolean selected=false;
+    private boolean playing;
+    private Bitmap icon;
 
     public NPlayModel(String url, YTMeta model, boolean isplaying) {
         this.url = url;

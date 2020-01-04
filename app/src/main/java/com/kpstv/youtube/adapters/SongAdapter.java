@@ -227,7 +227,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                                 }
                                 if (toAdd) {
                                     if (MainActivity.nPlayModels.size()>0 && MainActivity.nPlayModels.size()== MainActivity.yturls.size()) {
-                                        MetaModel metaModel = new MetaModel(discoverModel.getTitle()
+                                        MetaModel metaModel = new MetaModel(YTutils.getVideoID(discoverModel.getYtUrl()),discoverModel.getTitle()
                                                 ,discoverModel.getAuthor(),discoverModel.getImgUrl());
                                         NPlayModel nPlayModel = new NPlayModel(discoverModel.getYtUrl(),new YTMeta(metaModel),false);
                                         MainActivity.nPlayModels.add(nPlayModel);
@@ -267,6 +267,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                 for (DiscoverModel dModel : dataSet) {
 
                     MetaModel metaModel = new MetaModel(
+                            YTutils.getVideoID(dModel.getYtUrl()),
                             dModel.getTitle(),
                             dModel.getAuthor(),
                             dModel.getImgUrl()

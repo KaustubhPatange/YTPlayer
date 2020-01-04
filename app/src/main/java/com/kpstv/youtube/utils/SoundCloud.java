@@ -36,12 +36,17 @@ public class SoundCloud {
     private String link;
     private String viewCount;
     public class SoundCloudModel {
-        private String Title, AuthorName, ImageUrl, StreamUrl;
-        public SoundCloudModel(String title, String authorName, String imageUrl, String streamUrl) {
+        private String Title, AuthorName, ImageUrl, StreamUrl, normalUrl;
+        public SoundCloudModel(String title, String authorName, String imageUrl, String streamUrl,String normalUrl) {
             Title = title;
             AuthorName = authorName;
             ImageUrl = imageUrl;
             StreamUrl = streamUrl;
+            this.normalUrl = normalUrl;
+        }
+
+        public String getNormalUrl() {
+            return normalUrl;
         }
 
         public String getTitle() {
@@ -107,7 +112,7 @@ public class SoundCloud {
                 Log.e("FINAL_STREAM_URL", manualUrl + "");
 
                 model = new SoundCloudModel(
-                        title, author, imageUri, manualUrl
+                        title, author, imageUri, manualUrl,url
                 );
             }
         }catch (Exception e){
@@ -162,7 +167,7 @@ public class SoundCloud {
                     Log.e("FINAL_STREAM_URL", manualUrl + "");
                 }
                 model = new SoundCloudModel(
-                        title, author, imageUri, manualUrl
+                        title, author, imageUri, manualUrl,url
                 );
             }
         }catch (Exception e){

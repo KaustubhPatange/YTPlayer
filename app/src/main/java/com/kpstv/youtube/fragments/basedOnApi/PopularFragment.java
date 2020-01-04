@@ -390,6 +390,7 @@ public class PopularFragment extends Fragment {
                     MainActivity.nPlayModels.clear();
                     for (int i=0;i<models.size();i++) {
                         MetaModel metaModel = new MetaModel(
+                                YTutils.getVideoID(models.get(i).getYtUrl()),
                                 models.get(i).getTitle(),
                                 models.get(i).getAuthor(),
                                 models.get(i).getImgUrl()

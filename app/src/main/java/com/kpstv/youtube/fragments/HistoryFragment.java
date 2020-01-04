@@ -2,9 +2,11 @@ package com.kpstv.youtube.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -22,12 +24,16 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.HistoryAdapter;
+import com.kpstv.youtube.models.HistoryModel;
 import com.kpstv.youtube.utils.YTutils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class HistoryFragment extends Fragment {
 
@@ -38,9 +44,9 @@ public class HistoryFragment extends Fragment {
     static HistoryAdapter adapter;
     View v; boolean networkCreated,onCreateViewCalled;
     static SharedPreferences sharedPreferences, settingspref;
-    static ArrayList<String> urls; static LinearLayout hiddenLayout;
+    static ArrayList<HistoryModel> urls; static LinearLayout hiddenLayout;
     ConstraintLayout tipLayout; LinearLayout historyButton;
-
+    static FragmentActivity activity;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +59,8 @@ public class HistoryFragment extends Fragment {
         onCreateViewCalled=true;
         if (!networkCreated) {
             v = inflater.inflate(R.layout.fragment_history, container, false);
+
+            activity = getActivity();
 
             sharedPreferences = getContext().getSharedPreferences("history",Context.MODE_PRIVATE);
             settingspref = getContext().getSharedPreferences("settings",Context.MODE_PRIVATE);
@@ -107,19 +115,18 @@ public class HistoryFragment extends Fragment {
     };
 
     public static void removeFromHistory(int position) {
-        String history = sharedPreferences.getString("urls","");
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+        String history = YTutils.readContent(activity,"history.csv");
         if (history!=null&&!history.isEmpty()) {
-            String[] items = history.split(",");
+            String[] items = history.split("\n|\r");
             StringBuilder builder = new StringBuilder();
+            String videoId = YTutils.getVideoID(urls.get(position).getVideoId());
             for (String item: items) {
-                if (!item.contains(urls.get(position))) {
-                    builder.append(item).append(",");
+                if (!item.startsWith(videoId)) {
+                    builder.append(item).append("\n");
                 }
             }
-            editor.putString("urls",builder.toString());
+           YTutils.writeContent(activity,"history.csv",builder.toString().trim());
         }
-        editor.apply();
         urls.remove(position);
         adapter.notifyDataSetChanged();
         if (urls.isEmpty()) {
@@ -151,9 +158,7 @@ public class HistoryFragment extends Fragment {
                         .setTitle("Clear History")
                         .setMessage("Are you sure? This can't be undone.")
                         .setPositiveButton("Yes", (dialog, which) -> {
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putString("urls","");
-                            editor.apply();
+                            YTutils.writeContent(activity,"history.csv","");
                             LoadMainMethod();
                         })
                         .setNegativeButton("No",null)
@@ -175,12 +180,21 @@ public class HistoryFragment extends Fragment {
         layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        String items = sharedPreferences.getString("urls","");
-
-        if (!items.isEmpty()) {
+       // String items = sharedPreferences.getString("urls","");
+        String data = YTutils.readContent(activity,"history.csv");
+        if (data!=null&&!data.isEmpty()) {
+            String[] lines = data.split("\n|\r");
+            for (String line: lines) {
+                String[] childs = line.split("\\|");
+                urls.add(new HistoryModel(
+                        childs[0],childs[2],childs[3],childs[4],childs[5],childs[6]
+                ));
+            }
+        }
+        /*if (!items.isEmpty()) {
             String[] urlarray = items.split(",");
             urls.addAll(Arrays.asList(urlarray));
-        }
+        }*/
         if (urls.size()>0) {
             swipeRefreshLayout.setRefreshing(true);
             adapter = new HistoryAdapter(urls,getActivity(),recyclerItemLongListener);
@@ -206,6 +220,13 @@ public class HistoryFragment extends Fragment {
             adapter = new HistoryAdapter(urls,getActivity(),recyclerItemLongListener);
             recyclerView.setAdapter(adapter);
            hiddenLayout.setVisibility(View.VISIBLE);
+        }
+
+        SharedPreferences preferences = activity.getSharedPreferences("appSettings", MODE_PRIVATE);
+        boolean checkForUpdates = preferences.getBoolean("pref_update_check", true);
+        if (checkForUpdates)
+        {
+            new YTutils.CheckForUpdates(activity,true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
 

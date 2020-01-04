@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -25,18 +26,15 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.kpstv.youtube.AppInterface;
 import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
+import com.kpstv.youtube.models.HistoryModel;
 import com.kpstv.youtube.models.MetaModel;
-import com.kpstv.youtube.utils.HttpHandler;
+import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.utils.YTLength;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,18 +42,19 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static android.content.Context.MODE_PRIVATE;
+import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewHolder> {
+public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.MyViewHolder> {
 
-    private ArrayList<String> dataSet;
+    private ArrayList<HistoryModel> models;
     private ArrayList<String> Dateset;
     View.OnLongClickListener longClickListener;
-    Context con; boolean checkForUpdates;
+    Context con;
 
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder{
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
 
         TextView rate_percent;
         TextView titleText;
@@ -67,6 +66,7 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
         CardView mainCard;
         LinearLayout adLayout;
         AdView adView;
+
         public MyViewHolder(View itemView) {
             super(itemView);
             this.rate_percent = itemView.findViewById(R.id.hRate_percent);
@@ -82,9 +82,9 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
         }
     }
 
-    public HistoryAdapter(ArrayList<String> data,Context context, View.OnLongClickListener longClickListener) {
+    public HistoryAdapter(ArrayList<HistoryModel> data, Context context, View.OnLongClickListener longClickListener) {
         this.longClickListener = longClickListener;
-        this.dataSet = data;
+        this.models = data;
         this.con = context;
         Dateset = new ArrayList<>();
     }
@@ -100,28 +100,162 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.history_item, parent, false);
 
-        SharedPreferences preferences = parent.getContext().getSharedPreferences("appSettings",MODE_PRIVATE);
-        checkForUpdates = preferences.getBoolean("pref_update_check",true);
-
-        MyViewHolder myViewHolder = new MyViewHolder(view);
+         MyViewHolder myViewHolder = new MyViewHolder(view);
 
         return myViewHolder;
     }
+
+
+
     @Override
-    public void onBindViewHolder(final MyViewHolder holder, final int listPosition) {
+    public void onBindViewHolder(final MyViewHolder viewHolder, final int listPosition) {
 
-        String urlset = dataSet.get(listPosition);
+        HistoryModel model = models.get(listPosition);
 
-        new getData(holder,urlset,listPosition).execute();
+        if (model == null || model.getImageUrl() == null)
+            return;
+        Date c = Calendar.getInstance().getTime();
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+        String formattedDate = df.format(c);
+        @SuppressLint("SimpleDateFormat") int dateOnly = Integer.parseInt(new SimpleDateFormat("dd").format(c));
+        @SuppressLint("SimpleDateFormat") String monthOnly = new SimpleDateFormat("MM").format(c);
+        @SuppressLint("SimpleDateFormat") String yearOnly = new SimpleDateFormat("yyyy").format(c);
 
-        if (checkForUpdates)
+
+        Glide.with(con).load(model.getImageUrl()).addListener(new RequestListener<Drawable>() {
+            @Override
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                viewHolder.imageView.setImageDrawable(resource);
+                return true;
+            }
+        }).into(viewHolder.imageView);
+        viewHolder.titleText.setText(YTutils.getVideoTitle(model.getTitle()));
+        viewHolder.authorText.setText(YTutils.getChannelTitle(model.getTitle(), model.getChannelTitle()));
+        viewHolder.rate_percent.setText(model.getPercent());
+
+        String toput = model.getDate();
+        String yesterday = String.format("%s-%s-%s", dateOnly - 1, monthOnly, yearOnly);
+        if (model.getDate().contains(formattedDate)) {
+            toput = "Today";
+        } else if (model.getDate().contains(yesterday)) {
+            toput = "Yesterday";
+        }
+        Object[] objects = new Object[5];
+        objects[0] = listPosition;
+        objects[1] = model.getTitle();
+        objects[2] = YTutils.getYtUrl(model.getVideoId());
+        objects[3] = model.getChannelTitle();
+        objects[4] = model.getImageUrl();
+        viewHolder.mainCard.setTag(objects);
+        viewHolder.mainCard.setOnLongClickListener(longClickListener);
+
+        viewHolder.mainCard.setOnClickListener(v -> {
+            MainActivity.nPlayModels.clear();
+            String[] arr = new String[models.size()];
+            for (int i = 0; i < arr.length; i++) {
+                HistoryModel mod = models.get(i);
+                MetaModel metaModel = new MetaModel(mod.getVideoId(),mod.getTitle(),mod.getChannelTitle(),mod.getImageUrl());
+                boolean isPlaying = false;
+                if (listPosition==i) {
+                    isPlaying=true;
+                    Log.e(TAG, "onBindViewHolder: Made playing: "+listPosition );
+                }
+                NPlayModel nPlayModel = new NPlayModel(YTutils.getYtUrl(mod.getVideoId()),new YTMeta(metaModel),false);
+                MainActivity.nPlayModels.add(nPlayModel);
+
+                arr[i] = YTutils.getYtUrl(mod.getVideoId());
+            }
+            MainActivity.PlayVideo(arr, listPosition);
+        });
+
+        viewHolder.dateText.setText(toput);
+
+        if (!containsDateItem(model.getDate())) {
+            viewHolder.dateLayout.setVisibility(View.VISIBLE);
+            Dateset.add(model.getDate());
+            Log.e("ShownDataLayout", listPosition + "");
+        } else viewHolder.dateLayout.setVisibility(View.GONE);
+
+        viewHolder.addPlaylist.setOnClickListener(v -> {
+            Activity activity = (Activity) con;
+            new addToPlay(activity, new MetaModel(model.getVideoId(),
+                    model.getTitle(), model.getChannelTitle(), model.getImageUrl()
+            )).executeOnExecutor(THREAD_POOL_EXECUTOR);
+        });
+
+        /*if (listPosition % 5 == 0 && listPosition != 0 && listPosition % 10 != 0 && AppSettings.showAds) {
+            // Load ads on 5,15,25...
+            Log.e("ShowingAds", "pos: " + listPosition);
+            viewHolder.adLayout.setVisibility(VISIBLE);
+            AdRequest adRequest = new AdRequest.Builder().build();
+            viewHolder.adView.loadAd(adRequest);
+        } else {
+            viewHolder.adLayout.setVisibility(GONE);
+        }*/
+
+       /* if (checkForUpdates)
         {
             Activity activity = (Activity) con;
             new YTutils.CheckForUpdates(activity,true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }*/
+    }
+
+    class addToPlay extends AsyncTask<Void, Void, Void> {
+        MetaModel model;
+        long seconds = 0;
+        Activity activity;
+        ProgressDialog dialog;
+
+        public addToPlay(Activity activity, MetaModel model) {
+            this.activity = activity;
+            this.model = model;
+            dialog = new ProgressDialog(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog.setMessage("Parsing your playlist...");
+            dialog.show();
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            dialog.dismiss();
+            YTutils.addToPlayList(activity, YTutils.getVideoID_ImageUri(model.getImgUrl()),
+                    model.getTitle(), model.getAuthor(), model.getImgUrl(), seconds);
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (model.getImgUrl().contains("i.ytimg")) {
+                YTLength ytLength = new YTLength(YTutils.getVideoID_ImageUri(model.getImgUrl()));
+                seconds = ytLength.getSeconds();
+            } else {
+                // TODO: Add support for soundCloud
+            }
+            return null;
         }
     }
 
-    class getData extends AsyncTask<String,Void,Void> {
+    private static final String TAG = "HistoryAdapter";
+
+    boolean containsDateItem(String item) {
+        for (int i = 0; i < Dateset.size(); i++) {
+            if (Dateset.get(i).contains(item))
+                return true;
+        }
+        return false;
+    }
+
+    /*class getData extends AsyncTask<String,Void,Void> {
 
         MyViewHolder viewHolder; String DateString,ytUrl;
         MetaModel model;int pos; String percent;
@@ -178,16 +312,16 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
 
             viewHolder.mainCard.setOnClickListener(v -> {
 
-               /* Activity activity = (Activity) con;
+               *//* Activity activity = (Activity) con;
 
                 Intent intent = new Intent(con,PlayerActivity.class);
                 intent.putExtra("youtubelink",new String[]{ ytUrl });
                 con.startActivity(intent);
-                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);*/
+                activity.overridePendingTransition(R.anim.slide_up,R.anim.slide_down);*//*
 
-               String[] arr = new String[dataSet.size()];
+               String[] arr = new String[models.size()];
                for (int i = 0; i<arr.length;i++) {
-                   arr[i] = dataSet.get(i).split("\\|")[0];
+                   arr[i] = models.get(i).split("\\|")[0];
                }
                MainActivity.PlayVideo(arr,pos);
             });
@@ -217,40 +351,7 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
             super.onPostExecute(aVoid);
         }
 
-        class addToPlay extends AsyncTask<Void,Void,Void> {
-            MetaModel model;
-            long seconds=0; Activity activity; ProgressDialog dialog;
-            public addToPlay(Activity activity,MetaModel model) {
-                this.activity = activity;
-                this.model = model;
-                dialog = new ProgressDialog(activity);
-            }
 
-            @Override
-            protected void onPreExecute() {
-                dialog.setMessage("Parsing your playlist...");
-                dialog.show();
-                super.onPreExecute();
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                dialog.dismiss();
-                YTutils.addToPlayList(activity,YTutils.getVideoID_ImageUri(model.getImgUrl()),
-                        model.getTitle(),model.getAuthor(),model.getImgUrl(),seconds);
-                super.onPostExecute(aVoid);
-            }
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                if (model.getImgUrl().contains("i.ytimg")) {
-                    YTLength ytLength = new YTLength(YTutils.getVideoID_ImageUri(model.getImgUrl()));
-                    seconds = ytLength.getSeconds();
-                }else {
-                    // TODO: Add support for soundCloud
-                }
-                return null;
-            }
         }
 
 
@@ -262,20 +363,12 @@ public class HistoryAdapter  extends RecyclerView.Adapter<HistoryAdapter.MyViewH
             }
             return null;
         }
-    }
+*/
 
-    private static final String TAG = "HistoryAdapter";
-    boolean containsDateItem(String item) {
-        for (int i=0;i<Dateset.size();i++) {
-            if (Dateset.get(i).contains(item))
-                return true;
-        }
-        return false;
-    }
 
     @Override
     public int getItemCount() {
 
-        return dataSet.size();
+        return models.size();
     }
 }

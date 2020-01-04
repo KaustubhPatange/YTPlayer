@@ -164,15 +164,13 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            Palette.generateAsync(MainActivity.bitmapIcon, new Palette.PaletteAsyncListener() {
-                public void onGenerated(Palette palette) {
-                    MainActivity.nColor = palette.getVibrantColor(context.getResources().getColor(R.color.light_white));
-                    MainActivity.rebuildNotification();
-                    try {
-                        PlayerActivity2.loadAgain();
-                    }catch (Exception e) {
-                        Log.e("PlayerActivity","is_still_null");
-                    }
+            Palette.generateAsync(MainActivity.bitmapIcon, palette -> {
+                MainActivity.nColor = palette.getVibrantColor(context.getResources().getColor(R.color.light_white));
+                MainActivity.rebuildNotification();
+                try {
+                    PlayerActivity2.loadAgain();
+                }catch (Exception e) {
+                    Log.e("PlayerActivity","is_still_null");
                 }
             });
             super.onPostExecute(aVoid);
@@ -232,16 +230,14 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                     .into(new CustomTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            Palette.generateAsync(resource, new Palette.PaletteAsyncListener() {
-                                public void onGenerated(Palette palette) {
-                                    MainActivity.nColor = palette.getVibrantColor(context.getResources().getColor(R.color.light_white));
-                                    MainActivity.bitmapIcon = resource;
-                                    MainActivity.rebuildNotification();
-                                    try {
-                                        PlayerActivity2.loadAgain();
-                                    }catch (Exception e) {
-                                        Log.e("PlayerActivity","is_still_null");
-                                    }
+                            Palette.generateAsync(resource, palette -> {
+                                MainActivity.nColor = palette.getVibrantColor(context.getResources().getColor(R.color.light_white));
+                                MainActivity.bitmapIcon = resource;
+                                MainActivity.rebuildNotification();
+                                try {
+                                    PlayerActivity2.loadAgain();
+                                }catch (Exception ignored) {
+
                                 }
                             });
                         }
@@ -270,14 +266,13 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                 if (soundCloud.getModel()==null || soundCloud.getModel().getStreamUrl()==null) {
                     return null;
                 }
-                soundCloud.captureViews();
+               // soundCloud.captureViews();
                 MainActivity.soundCloudPlayBack=true;
                 MainActivity.videoTitle = soundCloud.getModel().getTitle();
                 MainActivity.channelTitle = soundCloud.getModel().getAuthorName();
                 MainActivity.imgUrl = soundCloud.getModel().getImageUrl();
                 MainActivity.likeCounts = -1; MainActivity.dislikeCounts = -1;
-                if (soundCloud.getViewCount()!=null && !soundCloud.getViewCount().isEmpty())
-                    MainActivity.viewCounts =YTutils.getViewCount( Long.parseLong(soundCloud.getViewCount()));
+                MainActivity.viewCounts = "-1";
                 return null;
             }
 

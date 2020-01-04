@@ -173,7 +173,7 @@ public class PlaylistFragment extends Fragment {
                             ArrayList<String> lines = new ArrayList<>(Arrays.asList(playlist_csv.split("\r|\n")));
                             for(int i=0;i<lines.size();i++) {
                                 if (lines.get(i).contains(","+model.getTitle())) {
-                                    data.remove(i);
+                                    data.remove(data.size()-1-i);
                                     lines.remove(i);
                                     YTutils.writeContent(activity,"playlist.csv",
                                             YTutils.convertListToStringMethod(lines));

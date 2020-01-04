@@ -915,7 +915,7 @@ public class OPlaylistFragment extends Fragment {
                 else
                     icon = YTutils.drawableToBitmap(ContextCompat.getDrawable(activity,R.drawable.ic_pulse));
                 MetaModel model1 = new MetaModel(
-                        model.getTitle(),model.getPath(),null
+                        model.getPath(),model.getTitle(),model.getPath(),null
                 );
                 NPlayModel nPlayModel = new NPlayModel(model.getPath(),new YTMeta(model1),false);
                 nPlayModel.setIcon(icon);

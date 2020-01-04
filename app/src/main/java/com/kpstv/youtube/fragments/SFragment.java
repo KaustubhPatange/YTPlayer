@@ -407,15 +407,14 @@ public class SFragment extends Fragment implements AppInterface {
         @Override
         protected Void doInBackground(Void... voids) {
 
-            SharedPreferences preferences = activity.getSharedPreferences("history",MODE_PRIVATE);
-            String list = preferences.getString("urls",null);
+            String list = YTutils.readContent(activity,"history.csv");
             if (list!=null) {
                 if (list.isEmpty()) {
                     MakeSpotifyList();
                     showTrend=true;
                     return null;
                 }
-                String[] songList = list.split(",");
+                String[] songList = list.split("\n|\r");
                 if (songList.length>5) {
                     MakeList(songList,5);
                 }else if (songList.length<=0) {
@@ -467,16 +466,13 @@ public class SFragment extends Fragment implements AppInterface {
 
     void MakeList(String[] songList, int length) {
         for (int i=0;i<length;i++) {
-            String ytUrl = songList[i].split("\\|")[0];
-            YTMeta ytMeta = new YTMeta(YTutils.getVideoID(ytUrl));
-            if (ytMeta.getVideMeta()!=null) {
-                discoverModels.add(new DiscoverModel(
-                        ytMeta.getVideMeta().getTitle(),
-                        ytMeta.getVideMeta().getAuthor(),
-                        ytMeta.getVideMeta().getImgUrl(),
-                        ytUrl
-                ));
-            }
+            String[] childs = songList[i].split("\\|");
+            discoverModels.add(new DiscoverModel(
+                    childs[2],
+                    childs[3],
+                    childs[4],
+                    YTutils.getYtUrl( childs[0])
+            ));
         }
     }
 

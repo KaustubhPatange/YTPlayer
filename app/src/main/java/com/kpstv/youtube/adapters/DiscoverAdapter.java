@@ -187,6 +187,7 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
                 String[] yturls = new String[discoverModels.size()];
                 for (int i=0;i<yturls.length;i++) {
                     MetaModel metaModel = new MetaModel(
+                            YTutils.getVideoID(discoverModels.get(i).getYtUrl()),
                             discoverModels.get(i).getTitle(),
                             discoverModels.get(i).getAuthor(),
                             discoverModels.get(i).getImgUrl()

@@ -72,7 +72,7 @@ public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder
     @Override
     public boolean onItemMoved(int fromPosition, int toPosition) {
         Log.e("onItemMoved","true");
-        MainActivity.nPlayModels = models;
+        MainActivity.nPlayModels = new ArrayList<>(models);
         MainActivity.yturls.clear();
         for (int i=0;i<models.size();i++){
             MainActivity.yturls.add(models.get(i).getUrl());
@@ -186,7 +186,7 @@ public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder
         }
 
         if (listPosition+1==MainActivity.yturls.size()) {
-            MainActivity.nPlayModels = models;
+            MainActivity.nPlayModels = new ArrayList<>(models);
         }
     }
 

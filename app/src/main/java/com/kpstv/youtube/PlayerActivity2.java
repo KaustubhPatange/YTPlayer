@@ -448,8 +448,12 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         @Override
         public void onPageScrollStateChanged(int i) {
             /** When song is changed automatically this will keep background image...*/
+            String imageUri = YTutils.getImageUrl(MainActivity.yturls.get(MainActivity.ytIndex));
+            if (MainActivity.videoID.contains("soundcloud.com"))
+                imageUri = MainActivity.imgUrl;
+            Log.e(TAG, "onPageScrollStateChanged: Loading Image: "+imageUri);
             Glide.with(activity).asBitmap()
-                    .load(YTutils.getImageUrl(MainActivity.yturls.get(MainActivity.ytIndex)))
+                    .load(imageUri)
                     .into(new CustomTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
@@ -521,6 +525,14 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
             youTubeButton.setVisibility(View.GONE);
             playlistButton.setVisibility(View.GONE);
+        }
+
+        if (MainActivity.viewCounts.equals("-1")) {
+            viewCount.setVisibility(View.GONE);
+            viewImage.setVisibility(View.GONE);
+        }else {
+            viewCount.setVisibility(View.VISIBLE);
+            viewImage.setVisibility(View.VISIBLE);
         }
 
         if (MainActivity.yturls.size()>1)
@@ -649,14 +661,15 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 if (soundCloud.getModel()==null || soundCloud.getModel().getStreamUrl()==null) {
                     return null;
                 }
-                soundCloud.captureViews();
+              //  soundCloud.captureViews();
                 MainActivity.soundCloudPlayBack=true;
                 MainActivity.videoTitle = soundCloud.getModel().getTitle();
                 MainActivity.channelTitle = soundCloud.getModel().getAuthorName();
                 MainActivity.imgUrl = soundCloud.getModel().getImageUrl();
                 MainActivity.likeCounts = -1; MainActivity.dislikeCounts = -1;
-                if (soundCloud.getViewCount()!=null && !soundCloud.getViewCount().isEmpty())
-                    MainActivity.viewCounts =YTutils.getViewCount( Long.parseLong(soundCloud.getViewCount()));
+                MainActivity.viewCounts = "-1";
+                /*if (soundCloud.getViewCount()!=null && !soundCloud.getViewCount().isEmpty())
+                    MainActivity.viewCounts =YTutils.getViewCount( Long.parseLong(soundCloud.getViewCount()));*/
                 return null;
             }
 

@@ -28,6 +28,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.kpstv.youtube.adapters.SongAdapter;
 import com.kpstv.youtube.models.DiscoverModel;
+import com.kpstv.youtube.utils.APIResponse;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTLength;
@@ -286,7 +287,11 @@ public class CPlaylistActivity extends AppCompatActivity {
 
                 parseData(0,0,YTutils.getSpotifyID(urltosearch));
             }else if (urltosearch.contains("youtube.com")||urltosearch.contains("youtu.be")) {
-                new youtubeplaylist(urltosearch).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                if (spotifyPlayList!=null && spotifyPlayList.getStatus()== AsyncTask.Status.RUNNING)
+                    spotifyPlayList.cancel(true);
+                spotifyPlayList = new youtubeplaylist(urltosearch);
+                spotifyPlayList.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+               // new youtubeplaylist(urltosearch).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }else Toast.makeText(this, "Bad search code!", Toast.LENGTH_SHORT).show();
         });
         alert.setNeutralButton("Connect", null);
@@ -366,53 +371,59 @@ public class CPlaylistActivity extends AppCompatActivity {
 
     class youtubeplaylist extends AsyncTask<Void,String,Void> {
 
-        String url;
-        ProgressDialog dialog;
+        String url; int current,total;
         public youtubeplaylist(String url) {
             this.url = url;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            dialog.dismiss();
+            globalAlertDialog.dismiss();
             adapter.notifyDataSetChanged();
             super.onPostExecute(aVoid);
         }
-
         @Override
         protected Void doInBackground(Void... voids) {
             try {
                 String id = YTutils.getVideoID(url);
-                JSONObject mainJson = new JSONObject(new HttpHandler().makeServiceCall(
-                        "https://www.googleapis.com/youtube/v3/playlistItems?playlistId=\"+id+\"&part=snippet&maxResults=50&key=AIzaSyCA2Py9snHNdp4Y4Dkyq-z7gUfxLqdPhtQ"));
-                int current = 1;
-                parseStructure(id,mainJson,current);
-             }catch (Exception e){}
+                APIResponse response = new APIResponse("https://www.googleapis.com/youtube/v3/playlistItems?playlistId="+id+"&part=snippet&maxResults=50");
+                if (response.getJson()!=null) {
+                    JSONObject mainJson = new JSONObject(response.getJson());
+                    total = Integer.parseInt(mainJson.getJSONObject("pageInfo")
+                            .getString("totalResults"));
+                    Log.e(TAG, "doInBackground: Total:"+total);
+                    parseStructure(id,mainJson);
+                }
+             }catch (Exception e){
+                e.printStackTrace();
+            }
             return null;
         }
 
-        void parseStructure(String id, JSONObject mainJson, int current) {
+        void parseStructure(String id, JSONObject mainJson) {
             try {
                 JSONArray mainArrays = mainJson.getJSONArray("items");
-                int total = Integer.parseInt(mainJson.getJSONObject("pageInfo")
-                        .getString("totalResults"));
-                if (mainArrays.length()<total) {
+                if (current<total) {
                     for(int i=0;i<mainArrays.length();i++) {
-                        publishProgress("Parsing video "+current+"/"+total+"...");
-                        models.add(parseVideo(mainArrays.getJSONObject(i)));
+                       // publishProgress("Parsing video "+current+"/"+total+"...");
+                        models.add(parseVideo(mainArrays.getJSONObject(i),i));
                         current++;
                     }
-                    if (mainJson.getJSONObject("etag").has("nextPageToken")) {
-                        String Nexttoken = mainJson.getJSONObject("etag").getString("nextPageToken");
-                        JSONObject newJSON = new JSONObject(new HttpHandler().makeServiceCall(
-                                "https://www.googleapis.com/youtube/v3/playlistItems?playlistId="+id+"pageToken="+Nexttoken+"&part=snippet&maxResults=50&key=AIzaSyCA2Py9snHNdp4Y4Dkyq-z7gUfxLqdPhtQ"));
-                        parseStructure(id,newJSON,current);
+                    if (mainJson.has("nextPageToken")) {
+                        String Nexttoken = mainJson.getString("nextPageToken");
+                        APIResponse response = new APIResponse("https://www.googleapis.com/youtube/v3/playlistItems?playlistId="+id+"&pageToken="+Nexttoken+"&part=snippet&maxResults=50");
+                        if (response.getJson()!=null) {
+                            JSONObject newJSON = new JSONObject(response.getJson());
+                            parseStructure(id, newJSON);
+                        }
                     }
                 }
-            }catch (Exception e){}
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
 
-        DiscoverModel parseVideo(JSONObject object) {
+        DiscoverModel parseVideo(JSONObject object,int i) {
             try {
                 String videoID =  object.getJSONObject("snippet").getJSONObject("resourceId")
                         .getString("videoId");
@@ -424,6 +435,8 @@ public class CPlaylistActivity extends AppCompatActivity {
                         .getJSONObject("medium").getString("url"),
                         YTutils.getYtUrl(videoID)
                         );
+                publishProgress(current+1+"",total+"",YTutils.getVideoTitle(model.getTitle()),
+                        YTutils.getChannelTitle(model.getTitle(),model.getAuthor()));
                 model.setSeconds(ytLength.getSeconds());
                 return model;
             }catch (Exception e){}
@@ -432,15 +445,37 @@ public class CPlaylistActivity extends AppCompatActivity {
 
         @Override
         protected void onProgressUpdate(String... values) {
-            dialog.setMessage(values[0]);
+            currentTextView.setText("Current song ("+values[0]+"/"+values[1]+"):");
+            titleAuthorText.setText(values[2]+" by "+values[3]);
+            int curr = Integer.parseInt(values[0]);
+            int total = Integer.parseInt(values[1]);
+
+            circularProgressBar.setProgress((float)((float)curr*100.00/(float)total));
             super.onProgressUpdate(values);
         }
 
         @Override
         protected void onPreExecute() {
-            dialog.setCancelable(false);
-            dialog.setMessage("Parsing youtube playlist");
-            dialog.show();
+            View v = getLayoutInflater().inflate(R.layout.alert_progress,null);
+            titleAuthorText = v.findViewById(R.id.textView);
+            currentTextView = v.findViewById(R.id.textView1);
+            circularProgressBar = v.findViewById(R.id.progressBar);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(CPlaylistActivity.this);
+            builder.setView(v);
+            builder.setCancelable(false);
+            builder.setPositiveButton("Cancel",(dialogInterface, i) -> {
+                if (spotifyPlayList!=null && spotifyPlayList.getStatus()== AsyncTask.Status.RUNNING) {
+                    Log.e(TAG, "showAlertWithEditText1: Stopping it" );
+                    do {
+                        spotifyPlayList.cancel(true);
+                    }while (!spotifyPlayList.isCancelled());
+                    trackModels.clear();
+                    adapter.notifyDataSetChanged();
+                }
+            });
+            globalAlertDialog = builder.create();
+            globalAlertDialog.show();
             super.onPreExecute();
         }
     }

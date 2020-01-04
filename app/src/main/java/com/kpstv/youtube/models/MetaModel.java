@@ -5,7 +5,8 @@ import java.io.Serializable;
 public class MetaModel implements Serializable {
     String Title, Author, ImgUrl;
     String videoID;
-    public MetaModel(String title, String author, String imgUrl) {
+    public MetaModel(String videoID, String title, String author, String imgUrl) {
+        this.videoID = videoID;
         Title = title;
         Author = author;
         ImgUrl = imgUrl;
