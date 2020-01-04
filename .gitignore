@@ -1,7 +1,7 @@
 *.iml
 .gradle
-AppInterface.java
-google-services.json
+/app/src/main/java/com/kpstv/youtube/AppInterface.java
+/app/google-services.json
 /local.properties
 /.idea/caches/build_file_checksums.ser
 /.idea/libraries

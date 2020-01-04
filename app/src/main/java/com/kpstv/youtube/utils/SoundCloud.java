@@ -185,7 +185,7 @@ public class SoundCloud {
             while((line = reader.readLine()) != null)
             {
                 builder.append(line).append("\n");
-                if (line.contains("playback_count")) {
+                if (line.contains("play_count\" content=\"")) {
                     Log.e(TAG, "captureViews: In Playback count..."+line );
                     List<String> strings = RegexUtils.getAllMatches("play_count\" content=\"(.*?)\"",
                             line);
