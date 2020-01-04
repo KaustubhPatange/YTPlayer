@@ -276,8 +276,8 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                 MainActivity.channelTitle = soundCloud.getModel().getAuthorName();
                 MainActivity.imgUrl = soundCloud.getModel().getImageUrl();
                 MainActivity.likeCounts = -1; MainActivity.dislikeCounts = -1;
-                if (soundCloud.getViewCount()!=null && soundCloud.getViewCount().isEmpty())
-                    MainActivity.viewCounts = soundCloud.getViewCount();
+                if (soundCloud.getViewCount()!=null && !soundCloud.getViewCount().isEmpty())
+                    MainActivity.viewCounts =YTutils.getViewCount( Long.parseLong(soundCloud.getViewCount()));
                 return null;
             }
 

@@ -214,7 +214,7 @@ public class LibraryFragment extends Fragment implements AppInterface {
                             SortModel sortModel = sortModels.get(i);
                             String[] childs = sortModel.getValue().split("\\|");
                             models.add(new SearchModel(
-                                    childs[2],YTutils.getImageUrl(childs[0]),
+                                    childs[2],childs[4],
                                     YTutils.getYtUrl(childs[0])
                             ));
                         }

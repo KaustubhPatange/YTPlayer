@@ -382,8 +382,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         Date lastModDate = new Date(file.lastModified());
         Log.e(TAG, "onCreate: Last modified "+lastModDate.toString());*/
 
-        new soundCloudData("https://soundcloud.com/alesso/this-summers-gonna-hurt-like-a-mother-fr-alesso-remix-radio-edit")
-                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+       /* new soundCloudData("https://soundcloud.com/alesso/this-summers-gonna-hurt-like-a-mother-fr-alesso-remix-radio-edit")
+                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
     }
 
     void setDefaultEqualizerValues() {
@@ -789,8 +789,17 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     }
 
     @SuppressLint("StaticFieldLeak")
-    void commonIntentCheck(String ytLink) {
-        if (YTutils.isValidID(ytLink) || (ytLink.contains("soundcloud.com"))) {
+    void commonIntentCheck(String yt) {
+        if (YTutils.isValidID(yt) || (yt.contains("soundcloud.com"))) {
+            if (yt.contains("soundcloud.com")) {
+                String[] childs = yt.split("\\s");
+                for (String child : childs) {
+                    if (child.contains("soundcloud.com")) {
+                        ytLink = child;
+                        break;
+                    }
+                }
+            } else ytLink = yt;
             if (yturls.size()<=0) {
                 PlayVideo(getYTUrls(ytLink),0);
             }else {
@@ -1009,6 +1018,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 return;
             }
             if (skipSong) {
+                if (souncloudFailed)
+                    Toast.makeText(activity, "Error: Parsing song "+videoTitle, Toast.LENGTH_SHORT).show();
                 if (command==1)
                     playNext();
                 else if (command==2)
@@ -1096,11 +1107,11 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             super.onPostExecute(aVoid);
         }
 
-        boolean skipSong, noInternet;
+        boolean skipSong, noInternet,souncloudFailed=false;
         SoundCloud soundCloud;
         @Override
         protected Void doInBackground(String... arg0) {
-            soundCloudPlayBack=false;
+            soundCloudPlayBack=false;souncloudFailed=false;
             if (!YTutils.isInternetAvailable()) {
                 Toast.makeText(activity, "No active internet connection", Toast.LENGTH_SHORT).show();
                 noInternet=true;
@@ -1126,9 +1137,10 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             if (videoID.contains("soundcloud.com")) {
                 soundCloud = new SoundCloud(videoID);
                 Log.e(TAG, "doInBackground: Likely here..." );
+                videoTitle = soundCloud.getModel().getTitle();
                 if (soundCloud.getModel()==null || soundCloud.getModel().getStreamUrl()==null) {
                     Log.e(TAG, "doInBackground: Skipping soundcloud" );
-                    skipSong=true;
+                    skipSong=true; souncloudFailed=true;
                     command=1;
                     return null;
                 }
@@ -1138,8 +1150,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 MainActivity.channelTitle = soundCloud.getModel().getAuthorName();
                 MainActivity.imgUrl = soundCloud.getModel().getImageUrl();
                 likeCounts = -1; dislikeCounts = -1;
-                if (soundCloud.getViewCount()!=null && soundCloud.getViewCount().isEmpty())
-                viewCounts = soundCloud.getViewCount();
+                if (soundCloud.getViewCount()!=null && !soundCloud.getViewCount().isEmpty())
+                    viewCounts =YTutils.getViewCount( Long.parseLong(soundCloud.getViewCount()));
                 Log.e(TAG, "doInBackground: Here I am: " +soundCloud.getModel().getStreamUrl());
                 return null;
             }
@@ -1552,7 +1564,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         builder = new NotificationCompat.Builder(activity, "channel_01")
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setSmallIcon(R.drawable.ic_music)
+                .setSmallIcon(R.drawable.ic_audio_pulse2)
                 .addAction(R.drawable.ic_previous_notify, "Previous", prevPendingIntent)
                 .addAction(icon, "Pause", pausePendingIntent)
                 .addAction(R.drawable.ic_next_notify, "Next", nextPendingIntent)
@@ -1954,10 +1966,10 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             String set = preferences.getString("urls", "");
 
             String ytID = YTutils.getVideoID(url_link);
-
+            
             /** A logic to calculate no of times a song is played and saved to list */
             String data = YTutils.readContent(activity,"library.csv");
-            String insert_data = ytID+"|"+1+"|"+videoTitle+"|"+channelTitle;
+            String insert_data = ytID+"|"+1+"|"+videoTitle+"|"+channelTitle+"|"+imgUrl;
             if (data!=null && !data.isEmpty()) {
                 boolean ifExist=false;
                 if (data.contains(ytID)) {
@@ -1966,7 +1978,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                         if (items[i].contains(ytID)) {
                             ifExist=true;
                             int count = Integer.parseInt(items[i].split("\\|")[1]);
-                            items[i] = ytID+"|"+ (++count)+"|"+videoTitle+"|"+channelTitle;
+                            items[i] = ytID+"|"+ (++count)+"|"+videoTitle+"|"+channelTitle+"|"+imgUrl;
                             String lines = YTutils.join(items,'\n');
                             YTutils.writeContent(activity,"library.csv",lines.trim());
                             break;

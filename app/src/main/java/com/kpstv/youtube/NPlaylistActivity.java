@@ -252,8 +252,8 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                             /** For local playback stuff */
                             if (MainActivity.localPlayBack)
                                 videoID = MainActivity.nPlayModels.get(i).getUrl();
-                            else videoID = YTutils.getVideoID_ImageUri(MainActivity.nPlayModels.get(i).getModel()
-                                    .getVideMeta().getImgUrl());
+                            else videoID = MainActivity.nPlayModels.get(i).getModel()
+                                    .getVideMeta().getVideoID();
 
                             if (MainActivity.videoID.equals(videoID)) {
                                 MainActivity.nPlayModels.get(i).set_playing(true);
