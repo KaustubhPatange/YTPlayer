@@ -581,7 +581,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         protected void onPostExecute(Void aVoid) {
             Palette.generateAsync(MainActivity.bitmapIcon, palette -> {
                 MainActivity.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
-                
+
                 loadAgain();
                 MainActivity.rebuildNotification();
             });
