@@ -33,7 +33,33 @@
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-
+                <RelativeLayout
+                    android:layout_marginBottom="15dp"
+                    android:id="@+id/purchaseLayout"
+                    android:orientation="horizontal"
+                    android:padding="13dp"
+                    android:background="@color/colorScreen"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_alignParentStart="true"
+                        android:textSize="15sp"
+                        android:fontFamily="@font/dmsans_font"
+                        android:textColor="@color/white"
+                        android:layout_marginStart="5dp"
+                        android:text="Unlock unlimited downloads"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <Button
+                        android:id="@+id/purchaseButton"
+                        android:layout_alignParentEnd="true"
+                        android:textColor="@color/colorAccent"
+                        android:text="Purchase"
+                        android:minHeight="0dp"
+                        android:background="@android:color/transparent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </RelativeLayout>
                 <LinearLayout
                     android:id="@+id/emptyLayout"
                     android:visibility="gone"

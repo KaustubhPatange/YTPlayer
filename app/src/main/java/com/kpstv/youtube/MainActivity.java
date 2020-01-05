@@ -937,6 +937,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             try {
                 Palette.generateAsync(bitmapIcon, palette -> {
                     nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+                    Log.e(TAG, "loadData_ OFFLINE Changing nColor: "+MainActivity.nColor
+                            +", ImageUri:"+MainActivity.imgUrl);
                     continueinMainThread("isPath:"+filePath);
                 });
             }catch (Exception e){
@@ -1028,7 +1030,15 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 return;
             }
 
-            Glide.with(activity)
+            if (bitmapIcon!=null) {
+                Palette.generateAsync(bitmapIcon, palette -> {
+                    Log.e(TAG, "loadVideo: Changing nColor: "+MainActivity.nColor +
+                            ", ImageUri: "+MainActivity.imgUrl);
+                    nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+                });
+            }
+
+           /* Glide.with(activity)
                     .asBitmap()
                     .load(imgUrl)
                     .into(new CustomTarget<Bitmap>() {
@@ -1037,6 +1047,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                             Palette.generateAsync(resource, new Palette.PaletteAsyncListener() {
                                 public void onGenerated(Palette palette) {
                                     bitmapIcon = resource;
+                                    Log.e(TAG, "loadVideo: Changing nColor: "+MainActivity.nColor +
+                                            ", ImageUri: "+MainActivity.imgUrl);
                                     nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
                                 }
                             });
@@ -1047,7 +1059,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                         public void onLoadCleared(@Nullable Drawable placeholder) {
 
                         }
-                    });
+                    });*/
 
             setLyricData();
 
@@ -1198,6 +1210,11 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                     e.printStackTrace();
                     Log.e("PlayerActivity_JSON", e.getMessage());
                 }
+            }
+
+            if (imgUrl!=null) {
+                Log.e(TAG, "doInBackground: Downloading Image..." );
+                bitmapIcon = YTutils.getBitmapFromURL(imgUrl);
             }
             return null;
         }

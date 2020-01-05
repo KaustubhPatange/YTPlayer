@@ -1,6 +1,7 @@
 package com.kpstv.youtube.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,7 +25,9 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.MainActivity;
+import com.kpstv.youtube.PurchaseActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.HistoryAdapter;
 import com.kpstv.youtube.models.HistoryModel;
@@ -222,11 +225,27 @@ public class HistoryFragment extends Fragment {
            hiddenLayout.setVisibility(View.VISIBLE);
         }
 
+
         SharedPreferences preferences = activity.getSharedPreferences("appSettings", MODE_PRIVATE);
         boolean checkForUpdates = preferences.getBoolean("pref_update_check", true);
         if (checkForUpdates)
         {
             new YTutils.CheckForUpdates(activity,true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }else if (preferences.getBoolean("pref_show_purchase",true)) {
+            View view = getLayoutInflater().inflate(R.layout.alert_buy,null);
+            AlertDialog alertDialog = new AlertDialog.Builder(activity)
+                    .setView(view)
+                    .setPositiveButton("Purchase",(dialogInterface, i) -> {
+                        Intent intent = new Intent(activity, PurchaseActivity.class);
+                        startActivity(intent);
+                    })
+                    .setNegativeButton("No Thanks",(dialogInterface, i) -> {
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putBoolean("pref_show_purchase",false);
+                        editor.apply();
+                    })
+                    .create();
+            alertDialog.show();
         }
     }
 

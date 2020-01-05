@@ -1,6 +1,7 @@
 package com.kpstv.youtube;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -13,9 +14,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -41,6 +42,8 @@ public class EqualizerActivity extends AppCompatActivity {
     private IndicatorSeekBar bassBoastSeekbar;
     private IndicatorSeekBar virtualizerSeekbar;
     private IndicatorSeekBar loudnessSeekbar;
+    private Button mPurchasebutton;
+    private RelativeLayout mPurchaselayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,7 +127,7 @@ public class EqualizerActivity extends AppCompatActivity {
 
                 @Override
                 public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
-                    bassBoost.setStrength((short)seekBar.getProgress());
+                    bassBoost.setStrength((short) seekBar.getProgress());
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putInt("selected_bass", seekBar.getProgress());
                     editor.apply();
@@ -145,7 +148,7 @@ public class EqualizerActivity extends AppCompatActivity {
 
                 @Override
                 public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
-                    virtualizer.setStrength((short)seekBar.getProgress());
+                    virtualizer.setStrength((short) seekBar.getProgress());
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putInt("selected_virtualizer", seekBar.getProgress());
                     editor.apply();
@@ -181,6 +184,15 @@ public class EqualizerActivity extends AppCompatActivity {
             return;
 
         setLayout(true);
+
+        if (AppSettings.enableEqualizer) {
+            mPurchaselayout.setVisibility(View.GONE);
+        }else {
+            mPurchasebutton.setOnClickListener(view -> {
+                Intent intent = new Intent(this,PurchaseActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
     void setLayout(boolean loadOrSave) {
@@ -300,10 +312,10 @@ public class EqualizerActivity extends AppCompatActivity {
         Log.e(TAG, "setEqualizerLayout: Enabled" + MainActivity.isEqualizerEnabled);
         RelativeLayout layout = findViewById(R.id.mainlayout);
         if (MainActivity.isEqualizerEnabled) {
-            Log.e(TAG, "setEqualizerLayout: And I got here too" );
+            Log.e(TAG, "setEqualizerLayout: And I got here too");
             layout.setClickable(false);
             equalizerSpinner.setEnabled(true);
-            for (int i=0;i<mLinearLayout.getChildCount();i++) {
+            for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
                 View view = mLinearLayout.getChildAt(i);
                 IndicatorSeekBar seekBar = view.findViewById(R.id.seekBar);
                 seekBar.setEnabled(true);
@@ -313,22 +325,22 @@ public class EqualizerActivity extends AppCompatActivity {
                 bassBoastSeekbar.setEnabled(true);
                 virtualizerSeekbar.setEnabled(true);
                 loudnessSeekbar.setEnabled(true);
-                bassBoost.setStrength((short)bassBoastSeekbar.getProgress());
-                virtualizer.setStrength((short)virtualizerSeekbar.getProgress());
+                bassBoost.setStrength((short) bassBoastSeekbar.getProgress());
+                virtualizer.setStrength((short) virtualizerSeekbar.getProgress());
                 loudnessEnhancer.setTargetGain(loudnessSeekbar.getProgress());
             }
         } else {
-            Log.e(TAG, "setEqualizerLayout: Got here..." );
+            Log.e(TAG, "setEqualizerLayout: Got here...");
             layout.setClickable(true);
             equalizerSpinner.setEnabled(false);
             reverbSpinner.setEnabled(false);
             bassBoastSeekbar.setEnabled(false);
             virtualizerSeekbar.setEnabled(false);
             loudnessSeekbar.setEnabled(false);
-            bassBoost.setStrength((short)0);
-            virtualizer.setStrength((short)0);
+            bassBoost.setStrength((short) 0);
+            virtualizer.setStrength((short) 0);
             loudnessEnhancer.setTargetGain(0);
-            for (int i=0;i<mLinearLayout.getChildCount();i++) {
+            for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
                 View view = mLinearLayout.getChildAt(i);
                 IndicatorSeekBar seekBar = view.findViewById(R.id.seekBar);
                 seekBar.setEnabled(false);
@@ -364,5 +376,7 @@ public class EqualizerActivity extends AppCompatActivity {
         bassBoastSeekbar = findViewById(R.id.bass_boast_seekBar);
         virtualizerSeekbar = findViewById(R.id.virtualizer_seekBar);
         loudnessSeekbar = findViewById(R.id.loudness_seekBar);
+        mPurchasebutton = findViewById(R.id.purchaseButton);
+        mPurchaselayout = findViewById(R.id.purchaseLayout);
     }
 }

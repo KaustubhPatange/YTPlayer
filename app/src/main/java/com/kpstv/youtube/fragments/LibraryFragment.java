@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -21,6 +22,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -28,8 +30,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kpstv.youtube.AppInterface;
+import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.EqualizerActivity;
 import com.kpstv.youtube.MainActivity;
+import com.kpstv.youtube.PurchaseActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.RingdroidEditActivity;
 import com.kpstv.youtube.SettingsActivity;
@@ -61,7 +65,7 @@ public class LibraryFragment extends Fragment implements AppInterface {
     String region; LinearLayout commonLayout; RelativeLayout progressLayout; SearchAdapter adapter;
     SharedPreferences preferences; ArrayList<SearchModel> models;
     NestedScrollView nestedScrollView; boolean networkCheck=false;
-    TextView sleepTimerTextview;
+    TextView sleepTimerTextview; ConstraintLayout purchaseLayout; Button purchaseButton;
 
     private static final String TAG = "LibraryFragment";
 
@@ -73,6 +77,9 @@ public class LibraryFragment extends Fragment implements AppInterface {
             activity = getActivity();
 
             getAllViews();
+
+            if (AppSettings.contentActivated)
+                v.findViewById(R.id.purchaseMainLayout).setVisibility(View.GONE);
             toolbar.setTitle("Library");
             recyclerView.setLayoutManager(manager);
             models = new ArrayList<>();
@@ -118,6 +125,8 @@ public class LibraryFragment extends Fragment implements AppInterface {
 
     void getAllViews() {
         moonId = v.findViewById(R.id.moonId);
+        purchaseButton = v.findViewById(R.id.buyButton);
+        purchaseLayout = v.findViewById(R.id.purchaseLayout);
         sleepTimerTextview = v.findViewById(R.id.sleepTimer_textview);
         commonLayout = v.findViewById(R.id.common_recycler_layout);
         sleepLayout = v.findViewById(R.id.sleepTimer_layout);
@@ -392,7 +401,20 @@ public class LibraryFragment extends Fragment implements AppInterface {
         startActivity(intent);
     }
 
+    void onPurchaseClick() {
+        Intent i = new Intent(activity, PurchaseActivity.class);
+        startActivity(i);
+    }
+
     void preClicks() {
+
+        purchaseLayout.setOnClickListener(view -> {
+            onPurchaseClick();
+        });
+
+        purchaseButton.setOnClickListener(view -> {
+            onPurchaseClick();
+        });
 
         localMusicLayout.setOnClickListener(view -> {
             FragmentManager manager = getActivity().getSupportFragmentManager();

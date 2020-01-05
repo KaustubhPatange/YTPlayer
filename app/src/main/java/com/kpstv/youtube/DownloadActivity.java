@@ -18,9 +18,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.github.hiteshsondhi88.libffmpeg.Util;
@@ -42,8 +44,8 @@ public class DownloadActivity extends AppCompatActivity {
     ImageView currentImageView, moreButton;
     TextView txtTitle, txtSize, txtPercent,pendingText,currentText;
     DownloadAdapter adapter; ConstraintLayout itemConstraint;
-    LinearLayout emptyLayout;
-    Context context; int lastJobUpdate;
+    LinearLayout emptyLayout; RelativeLayout purchaseLayout;
+    Context context; int lastJobUpdate; Button purchaseButton;
     Handler mHandler = new Handler();
 
     @SuppressLint("ClickableViewAccessibility")
@@ -60,6 +62,8 @@ public class DownloadActivity extends AppCompatActivity {
         context = DownloadActivity.this;
 
         currentText = findViewById(R.id.currentText);
+        purchaseButton = findViewById(R.id.purchaseButton);
+        purchaseLayout = findViewById(R.id.purchaseLayout);
         itemConstraint = findViewById(R.id.item_constraint);
         emptyLayout = findViewById(R.id.emptyLayout);
         recyclerView = findViewById(R.id.recyclerView);
@@ -73,6 +77,15 @@ public class DownloadActivity extends AppCompatActivity {
         txtTitle = findViewById(R.id.DTitle);
         txtPercent = findViewById(R.id.DPercentText);
         txtSize = findViewById(R.id.DSizeText);
+
+        if (!AppSettings.setDownloads) {
+            purchaseLayout.setVisibility(View.GONE);
+        }else {
+            purchaseButton.setOnClickListener(view -> {
+                Intent intent = new Intent(this,PurchaseActivity.class);
+                startActivity(intent);
+            });
+        }
 
         if (DownloadService.currentModel !=null) {
 
@@ -148,6 +161,7 @@ public class DownloadActivity extends AppCompatActivity {
             recyclerView.setAdapter(adapter);
             mHandler.postDelayed(mUpdateTimeTask, 1000);
         }else finish();
+
     }
 
     void runTask() {

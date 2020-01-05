@@ -521,6 +521,8 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                                     MainActivity.bitmapIcon = resource;
                                     MainActivity.nColor = palette.getVibrantColor(NPlaylistActivity.this
                                             .getResources().getColor(R.color.light_white));
+                                    Log.e(TAG, "setCurrentData: Changing nColor: "+MainActivity.nColor +
+                                            ", ImageUri: "+MainActivity.imgUrl );
                                     MainActivity.rebuildNotification();
                                 });
 

@@ -256,6 +256,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
         Palette.generateAsync(MainActivity.bitmapIcon, palette -> {
             MainActivity.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+            Log.e(TAG, "onCreate: Changing nColor: "+MainActivity.nColor );
             backImage.setColorFilter(MainActivity.nColor);
         });
 
@@ -461,6 +462,8 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                                 int color = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
                                 MainActivity.bitmapIcon = resource;
                                 MainActivity.nColor = color;
+                                Log.e(TAG, "onPageScrolled: Changing nColor: "+MainActivity.nColor +
+                                        ", ImageUri: "+MainActivity.imgUrl );
                                 ChangeBackgroundColor(color);
                                 MainActivity.rebuildNotification();
                             });
@@ -578,6 +581,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         protected void onPostExecute(Void aVoid) {
             Palette.generateAsync(MainActivity.bitmapIcon, palette -> {
                 MainActivity.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+                
                 loadAgain();
                 MainActivity.rebuildNotification();
             });
@@ -632,6 +636,8 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                             Palette.generateAsync(resource, palette -> {
                                 MainActivity.bitmapIcon = resource;
                                 MainActivity.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+                                Log.e(TAG, "loadData: Changing nColor: "+MainActivity.nColor +
+                                        ", ImageUri: "+MainActivity.imgUrl );
                                 loadAgain();
                                 MainActivity.rebuildNotification();
                             });

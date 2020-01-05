@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.google.android.gms.ads.MobileAds;
+import com.kpstv.youtube.helper.BillingUtils;
 import com.kpstv.youtube.utils.YTutils;
 
 import java.io.File;
@@ -27,6 +28,9 @@ public class SplashActivity extends AppCompatActivity {
 
         File f = YTutils.getFile("YTPlayer");
         f.mkdirs();
+
+        if (getSharedPreferences("appSettings",MODE_PRIVATE).getBoolean("pref_purchase",false))
+            BillingUtils.publishPremium();
 
         SharedPreferences preferences = getSharedPreferences("settings",MODE_PRIVATE);
         if (!preferences.getBoolean("intro",false)) {

@@ -166,6 +166,8 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
         protected void onPostExecute(Void aVoid) {
             Palette.generateAsync(MainActivity.bitmapIcon, palette -> {
                 MainActivity.nColor = palette.getVibrantColor(context.getResources().getColor(R.color.light_white));
+                Log.e(TAG, "loadData_OFFLINE Changing nColor: "+MainActivity.nColor +
+                        ", ImageUri: "+MainActivity.imgUrl);
                 MainActivity.rebuildNotification();
                 try {
                     PlayerActivity2.loadAgain();
@@ -233,6 +235,8 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                             Palette.generateAsync(resource, palette -> {
                                 MainActivity.nColor = palette.getVibrantColor(context.getResources().getColor(R.color.light_white));
                                 MainActivity.bitmapIcon = resource;
+                                Log.e(TAG, "loadData: Changing nColor: "+MainActivity.nColor +
+                                        ", ImageUri: "+MainActivity.imgUrl );
                                 MainActivity.rebuildNotification();
                                 try {
                                     PlayerActivity2.loadAgain();

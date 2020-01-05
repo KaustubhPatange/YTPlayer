@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?><RelativeLayout android:background="@color/colorScreen"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:padding="15dp"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:fontFamily="@font/dmsans_font"
+            android:textSize="21sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:text="Buy Premium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <include layout="@layout/common_purchase"/>
+
+    </LinearLayout>
+
+
+    <ImageView
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/ic_diamond"
+        android:tint="@color/colorAccent"/>
+
+</RelativeLayout>

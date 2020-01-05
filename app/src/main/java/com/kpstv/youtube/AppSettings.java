@@ -8,6 +8,7 @@ public class AppSettings {
     public static SortType sortType;
 
     public static boolean showAds=true;
+    public static boolean contentActivated =false;
     public static boolean enableEqualizer=false;
     public static boolean setDownloads=true;
     public static int playAdCount=0;
