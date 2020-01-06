@@ -22,10 +22,11 @@ public class ArtistImage implements AppInterface {
     public ArtistImage(String query) {
         this.query = query;
 
-        YTSearch ytSearch = new YTSearch(URLEncoder.encode(query)+" channel");
+        YTSearch ytSearch = new YTSearch(query+" channel");
         if (ytSearch.channelImages.size()>0) {
             imageLocation = ytSearch.channelImages.get(0);
-        }
+            Log.e(TAG, "ArtistImage: ImageLocation: "+imageLocation );
+        }else Log.e(TAG, "ArtistImage: Failed: "+query);
        /* int i=0;
         int apiLength = API_KEYS.length;
         String json;

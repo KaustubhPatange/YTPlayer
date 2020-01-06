@@ -3,8 +3,11 @@ package com.kpstv.youtube.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -49,7 +52,7 @@ public class HistoryFragment extends Fragment {
     static SharedPreferences sharedPreferences, settingspref;
     static ArrayList<HistoryModel> urls; static LinearLayout hiddenLayout;
     ConstraintLayout tipLayout; LinearLayout historyButton;
-    static FragmentActivity activity;
+    static FragmentActivity activity; boolean showedOnce=false,showedUpdateOnce=false;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -228,10 +231,31 @@ public class HistoryFragment extends Fragment {
 
         SharedPreferences preferences = activity.getSharedPreferences("appSettings", MODE_PRIVATE);
         boolean checkForUpdates = preferences.getBoolean("pref_update_check", true);
-        if (checkForUpdates)
+        if (checkForUpdates && !showedUpdateOnce)
         {
-            new YTutils.CheckForUpdates(activity,true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }else if (preferences.getBoolean("pref_show_purchase",true)) {
+            if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.O) {
+                boolean canInstallpackage;
+                canInstallpackage = activity.getPackageManager().canRequestPackageInstalls();
+                if (canInstallpackage)
+                    new YTutils.CheckForUpdates(activity,true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                else {
+                    AlertDialog alertDialog = new AlertDialog.Builder(activity)
+                            .setTitle("Permission")
+                            .setCancelable(false)
+                            .setMessage("You need to allow install unknown source permission from settings for installing updates!")
+                            .setPositiveButton("OK",(dialogInterface, i) -> {
+                                startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+                                        .setData(Uri.parse(String.format("package:%s", activity.getPackageName()))));
+                            })
+                            .create();
+                    alertDialog.show();
+                }
+            }else
+                new YTutils.CheckForUpdates(activity,true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            showedUpdateOnce=true;
+        }
+        if (preferences.getBoolean("pref_show_purchase",true) && !showedOnce) {
+            Log.e(TAG, "LoadMainMethod: Showing alert..." );
             View view = getLayoutInflater().inflate(R.layout.alert_buy,null);
             AlertDialog alertDialog = new AlertDialog.Builder(activity)
                     .setView(view)
@@ -239,13 +263,15 @@ public class HistoryFragment extends Fragment {
                         Intent intent = new Intent(activity, PurchaseActivity.class);
                         startActivity(intent);
                     })
-                    .setNegativeButton("No Thanks",(dialogInterface, i) -> {
+                    .setNegativeButton("Later",null)
+                    .setNeutralButton("No Thanks",(dialogInterface, i) -> {
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putBoolean("pref_show_purchase",false);
                         editor.apply();
                     })
                     .create();
             alertDialog.show();
+            showedOnce=true;
         }
     }
 

@@ -379,12 +379,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             e.printStackTrace();
 
         }
-       /* File file = YTutils.getFile("Download/9WR9YF2.csv");
-        Date lastModDate = new Date(file.lastModified());
-        Log.e(TAG, "onCreate: Last modified "+lastModDate.toString());*/
 
-       /* new soundCloudData("https://soundcloud.com/alesso/this-summers-gonna-hurt-like-a-mother-fr-alesso-remix-radio-edit")
-                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
     }
 
     void setDefaultEqualizerValues() {
@@ -1038,29 +1033,6 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 });
             }
 
-           /* Glide.with(activity)
-                    .asBitmap()
-                    .load(imgUrl)
-                    .into(new CustomTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            Palette.generateAsync(resource, new Palette.PaletteAsyncListener() {
-                                public void onGenerated(Palette palette) {
-                                    bitmapIcon = resource;
-                                    Log.e(TAG, "loadVideo: Changing nColor: "+MainActivity.nColor +
-                                            ", ImageUri: "+MainActivity.imgUrl);
-                                    nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
-                                }
-                            });
-
-                        }
-
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                        }
-                    });*/
-
             setLyricData();
 
             if (soundCloudPlayBack) {
@@ -1167,51 +1139,52 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                /* if (soundCloud.getViewCount()!=null && !soundCloud.getViewCount().isEmpty())
                     viewCounts =YTutils.getViewCount( Long.parseLong(soundCloud.getViewCount()));
                 Log.e(TAG, "doInBackground: Here I am: " +soundCloud.getModel().getStreamUrl());*/
-                return null;
-            }
+            } else {
 
-            int i=0;
-            int apiLength = API_KEYS.length;
-            String json;
-            do {
-                json = jsonResponse(videoID, i);
-                i++;
-            }while (json.contains("\"error\":") && i<apiLength);
+                int i = 0;
+                int apiLength = API_KEYS.length;
+                String json;
+                do {
+                    json = jsonResponse(videoID, i);
+                    i++;
+                } while (json.contains("\"error\":") && i < apiLength);
 
-            YTMeta ytMeta = new YTMeta(videoID);
-            if (ytMeta.getVideMeta() != null) {
-                MainActivity.channelTitle = YTutils.getChannelTitle(ytMeta.getVideMeta().getTitle(),
-                        ytMeta.getVideMeta().getAuthor());
-                MainActivity.videoTitle = YTutils.setVideoTitle(ytMeta.getVideMeta().getTitle());
-                MainActivity.imgUrl = ytMeta.getVideMeta().getImgUrl();
-            }
+                YTMeta ytMeta = new YTMeta(videoID);
+                if (ytMeta.getVideMeta() != null) {
+                    MainActivity.channelTitle = YTutils.getChannelTitle(ytMeta.getVideMeta().getTitle(),
+                            ytMeta.getVideMeta().getAuthor());
+                    MainActivity.videoTitle = YTutils.setVideoTitle(ytMeta.getVideMeta().getTitle());
+                    MainActivity.imgUrl = ytMeta.getVideMeta().getImgUrl();
+                }
 
-            if (json.contains("\"error\":")) {
-                YTStatistics ytStatistics = new YTStatistics(videoID);
-                MainActivity.viewCounts = ytStatistics.getViewCount();
-                MainActivity.likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
-                MainActivity.dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
-                json = null;
-            }
+                if (json.contains("\"error\":")) {
+                    YTStatistics ytStatistics = new YTStatistics(videoID);
+                    MainActivity.viewCounts = ytStatistics.getViewCount();
+                    MainActivity.likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
+                    MainActivity.dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
+                    json = null;
+                }
 
-            if (json != null) {
-                try {
-                    JSONObject statistics = new JSONObject(json).getJSONArray("items")
-                            .getJSONObject(0).getJSONObject("statistics");
-                    viewCounts = YTutils.getViewCount(Long.parseLong(statistics.getString("viewCount")));
-                    likeCounts = 100;
-                    dislikeCounts = 0;
+                if (json != null) {
                     try {
-                        likeCounts = Integer.parseInt(statistics.getString("likeCount"));
-                        dislikeCounts = Integer.parseInt(statistics.getString("dislikeCount"));
-                    }catch (Exception e){e.printStackTrace();}
+                        JSONObject statistics = new JSONObject(json).getJSONArray("items")
+                                .getJSONObject(0).getJSONObject("statistics");
+                        viewCounts = YTutils.getViewCount(Long.parseLong(statistics.getString("viewCount")));
+                        likeCounts = 100;
+                        dislikeCounts = 0;
+                        try {
+                            likeCounts = Integer.parseInt(statistics.getString("likeCount"));
+                            dislikeCounts = Integer.parseInt(statistics.getString("dislikeCount"));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.e("PlayerActivity_JSON", e.getMessage());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e("PlayerActivity_JSON", e.getMessage());
+                    }
                 }
             }
-
             if (imgUrl!=null) {
                 Log.e(TAG, "doInBackground: Downloading Image..." );
                 bitmapIcon = YTutils.getBitmapFromURL(imgUrl);
@@ -1984,9 +1957,11 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
             String formattedDate = YTutils.getTodayDate();
             int percent = 100;
-            try {
-                percent = likeCounts*100/(likeCounts+dislikeCounts);
-            }catch (Exception e){e.printStackTrace();}
+            if (!url_link.contains("soundcloud.com")) {
+                try {
+                    percent = likeCounts*100/(likeCounts+dislikeCounts);
+                }catch (Exception e){e.printStackTrace();}
+            }
 
             String insert_data = ytID+"|"+1+"|"+videoTitle+"|"+channelTitle+"|"+imgUrl+ "|"
                     + formattedDate+"|"+percent;

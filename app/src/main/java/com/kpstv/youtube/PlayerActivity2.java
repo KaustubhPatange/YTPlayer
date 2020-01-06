@@ -154,12 +154,12 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 case MotionEvent.ACTION_UP:
 
                     MainActivity.playNext();
-                    if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
+                   /* if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                         setData.cancel(true);
                     if (!MainActivity.localPlayBack)
                         setData = new loadData();
                     else setData = new loadData_Offline(MainActivity.videoID);
-                    setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
 
                 case MotionEvent.ACTION_CANCEL: {
                     ImageButton view = (ImageButton) v;
@@ -182,10 +182,10 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 case MotionEvent.ACTION_UP:
 
                     MainActivity.playPrevious();
-                    if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
+                   /* if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                         setData.cancel(true);
                     setData = new loadData();
-                    setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
 
                 case MotionEvent.ACTION_CANCEL: {
                     ImageButton view = (ImageButton) v;
@@ -406,6 +406,12 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             callFinish();
         });
 
+        if (!MainActivity.localPlayBack) {
+            String url = MainActivity.yturls.get(MainActivity.ytIndex);
+            if (url.contains("soundcloud.com"))
+                setSoundCloudData(url);
+        }
+
     }
 
     public static void setLyricData(Spanned text) {
@@ -415,6 +421,15 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         }else {
             lyricText=null;
             lyricButton.setVisibility(View.GONE);
+        }
+    }
+
+    static void setSoundCloudData(String url) {
+        if (url.contains("soundcloud.com")) {
+            if (setData != null && setData.getStatus() == AsyncTask.Status.RUNNING)
+                setData.cancel(true);
+            setData = new soundcloud_data(url);
+            setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
 
@@ -432,25 +447,31 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                     MainActivity.ChangeVideoOffline(pos);
                 else
                     MainActivity.ChangeVideo(pos);
-                if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
+                String url = MainActivity.yturls.get(pos);
+                setSoundCloudData(url);
+              /*  if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                     setData.cancel(true);
                 if (!MainActivity.localPlayBack) {
                     setData = new loadData();
                 }
                 else
                     setData = new loadData_Offline(MainActivity.yturls.get(pos));
-                setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
             }catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
+
+
         @SuppressLint("StaticFieldLeak")
         @Override
         public void onPageScrollStateChanged(int i) {
             /** When song is changed automatically this will keep background image...*/
-            String imageUri = YTutils.getImageUrl(MainActivity.yturls.get(MainActivity.ytIndex));
-            if (MainActivity.videoID.contains("soundcloud.com"))
+           /* String imageUri = YTutils.getImageUrl(MainActivity.yturls.get(MainActivity.ytIndex));
+            if (MainActivity.videoID.contains("soundcloud.com")) {
+
+            }
                 imageUri = MainActivity.imgUrl;
             Log.e(TAG, "onPageScrollStateChanged: Loading Image: "+imageUri);
             Glide.with(activity).asBitmap()
@@ -473,7 +494,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                         public void onLoadCleared(@Nullable Drawable placeholder) {
 
                         }
-                    });
+                    });*/
         }
     };
 
@@ -569,6 +590,32 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
     }
 
     private static final String TAG = "PlayerActivity2";
+
+    static class soundcloud_data extends AsyncTask<Void,Void,Void> {
+        SoundCloud soundCloud;String url;
+
+        public soundcloud_data(String url) {
+            this.url = url;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if (soundCloud.getViewCount()!=null && !soundCloud.getViewCount().isEmpty()) {
+                MainActivity.viewCounts = YTutils.getViewCount(Long.parseLong(soundCloud.getViewCount()));
+                viewImage.setVisibility(View.VISIBLE);
+                viewCount.setVisibility(View.VISIBLE);
+                viewCount.setText(MainActivity.viewCounts);
+            }
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            soundCloud = new SoundCloud(url);
+            soundCloud.captureViews();
+            return null;
+        }
+    }
 
     static class loadData_Offline extends AsyncTask<Void,Void,Void> {
         String filePath;

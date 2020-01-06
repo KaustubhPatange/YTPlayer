@@ -53,29 +53,29 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
         switch (action) {
             case "com.kpstv.youtube.ACTION_NEXT":
                 MainActivity.playNext();
-                if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
+               /* if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                     setData.cancel(true);
 
-                /** For local playback stuff */
+                *//** For local playback stuff *//*
                 if (MainActivity.localPlayBack)
                     setData = new loadData_Offline(context);
                 else
                     setData = new loadData(context);
 
-                setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
                 break;
             case "com.kpstv.youtube.ACTION_PREVIOUS":
                 MainActivity.playPrevious();
-                if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
+                /*if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                     setData.cancel(true);
 
-                /** For local playback stuff */
+                *//** For local playback stuff *//*
                 if (MainActivity.localPlayBack)
                     setData = new loadData_Offline(context);
                 else
                     setData = new loadData(context);
 
-                setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
                 break;
             case "com.kpstv.youtube.ACTION_PLAY":
                 MainActivity.changePlayBack(!MainActivity.isplaying);

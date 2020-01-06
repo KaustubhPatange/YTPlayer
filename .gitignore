@@ -1,6 +1,7 @@
 *.iml
 .gradle
 /app/src/main/java/com/kpstv/youtube/helper/BillingClient.java
+/app/src/main/java/com/kpstv/youtube/PaypalActivity.java
 /app/src/main/java/com/kpstv/youtube/helper/BillingUtils.java
 /app/src/main/java/com/kpstv/youtube/AppInterface.java
 /app/google-services.json

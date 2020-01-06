@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,9 +15,12 @@ import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kpstv.youtube.utils.YTutils;
@@ -44,9 +48,18 @@ public class ErrorActivity extends AppCompatActivity {
         crashDetails =  CustomActivityOnCrash.getStackTraceFromIntent(getIntent());
 
         crashLayout.setOnClickListener(v -> {
+            ScrollView nestedScrollView = new ScrollView(this);
+            TextView textView = new TextView(ErrorActivity.this);
+            textView.setLayoutParams(new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT));
+            textView.setPadding(20,20,20,20);
+            textView.setTextSize(13);
+            textView.setText(crashDetails);
+            nestedScrollView.addView(textView);
             final AlertDialog.Builder alert= new AlertDialog.Builder(ErrorActivity.this);
             alert.setTitle("Stack Trace");
-            alert.setMessage(crashDetails+"");
+            alert.setView(nestedScrollView);
             alert.setPositiveButton("OK", null);
             alert.show();
         });

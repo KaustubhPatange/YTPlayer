@@ -402,6 +402,8 @@ public class LibraryFragment extends Fragment implements AppInterface {
     }
 
     void onPurchaseClick() {
+        if (!YTutils.isInternetAvailable())
+            return;
         Intent i = new Intent(activity, PurchaseActivity.class);
         startActivity(i);
     }

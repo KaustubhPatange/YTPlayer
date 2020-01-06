@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -28,9 +29,13 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.jakewharton.processphoenix.ProcessPhoenix;
 import com.kpstv.youtube.helper.BillingClient;
+import com.kpstv.youtube.helper.BillingUtils;
 import com.kpstv.youtube.utils.YTutils;
 import com.razorpay.PaymentData;
 import com.razorpay.PaymentResultWithDataListener;
@@ -42,7 +47,7 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
     private Button mBuybutton; BillingClient client;
     private static final String TAG = "PurchaseActivity";
     GoogleApiClient mGoogleSignInClient;
-    private FirebaseAuth mAuth;
+    private FirebaseAuth mAuth; FirebaseDatabase database;
     @SuppressLint("StaticFieldLeak")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +55,26 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
         setContentView(R.layout.activity_purchase);
 
         initViews();
+
+        database = FirebaseDatabase.getInstance();
+
+        database.getReference("is_payment_disable").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                try {
+                    if ((Boolean) dataSnapshot.getValue()) {
+                        doOnPaymentDisable();
+                    }
+                }catch (Exception ignored){
+                    doOnPaymentDisable();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -63,16 +88,17 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
                 .build();
 
         mGoogleSignInClient = new GoogleApiClient.Builder(getApplicationContext())
-                .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
+                .enableAutoManage(this,connectionResult -> {
+
+        }).addApi(Auth.GOOGLE_SIGN_IN_API, gso).build();
+                /*.enableAutoManmage(this, new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
                     }
-                }).addApi(Auth.GOOGLE_SIGN_IN_API, gso).build();
+                }).addApi(Auth.GOOGLE_SIGN_IN_API, gso).build();*/
 
         mBuybutton.setOnClickListener(view -> {
-
-
             FirebaseUser currentUser = mAuth.getCurrentUser();
             if (currentUser!=null) {
                 makePurchase( currentUser.getUid());
@@ -96,6 +122,16 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
                 Log.e(TAG, "signInResult:failed code=" + e.getStatusCode());
             }
         }
+        if (requestCode == 104) {
+            if (resultCode==1) {
+                boolean isPaid = data.getBooleanExtra("payment",false);
+                if (isPaid) {
+                    BillingUtils.setSuccess(data.getStringExtra("client"),
+                            FirebaseDatabase.getInstance().getReference("orders"));
+                    doOnSuccess();
+                }
+            }
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -116,9 +152,9 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
                 });
     }
 
+
     @SuppressLint("StaticFieldLeak")
     void makePurchase(String uid) {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
 
         client = new BillingClient(PurchaseActivity.this)
                 .getInstance(AppInterface.razorpayKEYID, AppInterface.razorpayKEYSECRET);
@@ -138,7 +174,29 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
             @Override
             public void onVerficationFailed(RazorpayClient razorpayClient, int code) {
                 if (code==1) {
-                    client.quickCheckout();
+                    View v = getLayoutInflater().inflate(R.layout.alert_payment_gateway,null);
+                    ImageView razorpay = v.findViewById(R.id.razorpayButton);
+                    ImageView paypal = v.findViewById(R.id.paypalButton);
+                    Button cancelButton = v.findViewById(R.id.cancelButton);
+
+                    cancelButton.setOnClickListener(view -> alertDialog.dismiss());
+
+                    razorpay.setOnClickListener(view -> {
+                        alertDialog.dismiss();
+                        client.quickCheckout();
+                    });
+
+                    paypal.setOnClickListener(view -> {
+                        alertDialog.dismiss();
+                        Intent intent = new Intent(PurchaseActivity.this,PaypalActivity.class);
+                        intent.putExtra("uid",uid);
+                        startActivityForResult(intent,104);
+                    });
+
+                    alertDialog = new AlertDialog.Builder(PurchaseActivity.this)
+                            .setView(v)
+                            .create();
+                    alertDialog.show();
                 }else
                     Toast.makeText(PurchaseActivity.this, "Error in fetching payment details!"
                             , Toast.LENGTH_SHORT).show();
@@ -152,6 +210,21 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
         return true;
     }
 
+    void doOnPaymentDisable() {
+        alertDialog = new AlertDialog.Builder(this)
+                .setTitle("Payment Disabled")
+                .setCancelable(false)
+                .setMessage("Due to some issues or request, in-app-purchase is disabled currently.\nKindly wait until issue is fixed!")
+                .setPositiveButton("OK",(dialogInterface, i) -> {
+                    finish();
+                })
+                .setNeutralButton("Contact",(dialogInterface, i) -> {
+                    YTutils.StartURLIntent("mailto:developerkp16@gmail.com",MainActivity.activity);
+                    finish();
+                })
+                .create();
+        alertDialog.show();
+    }
 
     private void initViews() {
         mBuybutton = findViewById(R.id.buyButton);
@@ -162,7 +235,6 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
         intent.setType("message/rfc822");
         intent.putExtra(Intent.EXTRA_EMAIL,new String[]{"developerkp16@gmail.com"});
         intent.putExtra(Intent.EXTRA_SUBJECT,"YTPlayer: Payment Error");
-        intent.putExtra(Intent.EXTRA_TEXT,"write details here...");
         try {
             startActivity(Intent.createChooser(intent, "Send mail..."));
         } catch (android.content.ActivityNotFoundException ex) {

@@ -556,25 +556,3 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
         return true;
     }
 }
-
-
-/*
-            ItemTouchHelper helper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
-                    ItemTouchHelper.UP | ItemTouchHelper.DOWN,0) {
-                @Override
-                public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder dragged,
-                                      @NonNull RecyclerView.ViewHolder target) {
-                    int position_dragged = dragged.getAdapterPosition();
-                    int position_target = target.getAdapterPosition();
-
-                    Collections.swap(MainActivity.yturls,position_dragged,position_target);
-
-                    adapter.notifyItemMoved(position_dragged,position_target);
-                    return false;
-                }
-
-                @Override
-                public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-
-                }
-            });*/

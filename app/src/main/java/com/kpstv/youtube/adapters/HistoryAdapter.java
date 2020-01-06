@@ -137,7 +137,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.MyViewHo
         }).into(viewHolder.imageView);
         viewHolder.titleText.setText(YTutils.getVideoTitle(model.getTitle()));
         viewHolder.authorText.setText(YTutils.getChannelTitle(model.getTitle(), model.getChannelTitle()));
-        viewHolder.rate_percent.setText(model.getPercent());
+        viewHolder.rate_percent.setText(model.getPercent()+"%");
 
         String toput = model.getDate();
         String yesterday = String.format("%s-%s-%s", dateOnly - 1, monthOnly, yearOnly);
@@ -228,7 +228,10 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.MyViewHo
         @Override
         protected void onPostExecute(Void aVoid) {
             dialog.dismiss();
-            YTutils.addToPlayList(activity, YTutils.getVideoID_ImageUri(model.getImgUrl()),
+            String videoId=model.getVideoID();
+            if (videoId==null)
+                videoId = YTutils.getVideoID_ImageUri(model.getImgUrl());
+            YTutils.addToPlayList(activity, videoId,
                     model.getTitle(), model.getAuthor(), model.getImgUrl(), seconds);
             super.onPostExecute(aVoid);
         }

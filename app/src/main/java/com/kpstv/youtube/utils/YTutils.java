@@ -608,25 +608,27 @@ public class YTutils implements AppInterface {
         String data = YTutils.readContent(activity,"artistImages.csv");
         String imageUri=null;
         if (data!=null && !data.isEmpty()) {
-            if (data.contains(model.getTitle().trim()+"$")) {
+            String title = model.getTitle().trim();
+            if (data.contains(title+"$")) {
                 String[] items = data.split("\n|\r");
                 for (String item : items) {
                     if (item.isEmpty()) continue;
-                    if (item.contains(model.getTitle().trim()+"$")) {
+                    if (item.contains(title+"$")) {
                         imageUri = item.split("\\$")[1];
                         return imageUri;
                     }
                 }
             }else {
-                ArtistImage artistImage = new ArtistImage(model.getTitle().trim());
-                YTutils.writeContent(activity,"artistImages.csv",data+
-                        model.getTitle().trim()+"$"+imageUri);
+                ArtistImage artistImage = new ArtistImage(title);
                 imageUri = artistImage.getImageUri();
+                YTutils.writeContent(activity,"artistImages.csv",data+
+                        title+"$"+imageUri);
             }
         }else {
-            ArtistImage artistImage = new ArtistImage(model.getTitle().trim());
-            YTutils.writeContent(activity,"artistImages.csv",model.getTitle().trim()+"$"+imageUri);
+            String title = model.getTitle().trim();
+            ArtistImage artistImage = new ArtistImage(title);
             imageUri = artistImage.getImageUri();
+            YTutils.writeContent(activity,"artistImages.csv",title+"$"+imageUri);
         }
         return imageUri;
     }
@@ -848,7 +850,7 @@ public class YTutils implements AppInterface {
     }
 
     public static class CheckForUpdates extends AsyncTask<Void,Void,Void> {
-        boolean isAutomatic;
+        boolean isAutomatic, permissionGranted;
         String json;
         @SuppressLint("StaticFieldLeak")
         Context context;
@@ -861,14 +863,18 @@ public class YTutils implements AppInterface {
             this.isAutomatic = isAutomatic;
 
             if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) {
+
                 if (context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     Dexter.withActivity(context)
                             .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                             .withListener(new PermissionListener() {
-                                @Override public void onPermissionGranted(PermissionGrantedResponse response) { }
+                                @Override public void onPermissionGranted(PermissionGrantedResponse response) {
+                                    permissionGranted=true;
+                                }
 
                                 @Override
                                 public void onPermissionDenied(PermissionDeniedResponse response) {
+                                    Toast.makeText(context, "Permission denied!", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
 
@@ -879,28 +885,55 @@ public class YTutils implements AppInterface {
 
                             }).check();
 
-                }
+                }else permissionGranted=true;
             }
         }
 
-        void runInstall(String updateName) {
-            Intent install = new Intent(Intent.ACTION_VIEW)
-                    .setDataAndType(Uri.fromFile(getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName)),
-                            "application/vnd.android.package-archive");
-            install.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(install);
+        void runInstall(Context context,String updateName) {
+            File f = getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName);
+            Uri data = Uri.fromFile(f);
+            Log.e(TAG, "runInstall: Uri of FIle: "+data.toString());
+            if (f.exists()) {
+            //    if (Build.VERSION.SDK_INT >=29) {
+                if (true) {
+
+                    Uri uri = getApkUri( f.getPath() );
+
+
+                    Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+                    intent.setData( uri );
+                    intent.setFlags( Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK );
+                    intent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true);
+                    intent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
+                    intent.putExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME, context.getApplicationInfo().packageName);
+
+                    if ( context.getPackageManager().queryIntentActivities(intent, 0 ) != null ) {// checked on start Activity
+
+                        Activity act = (Activity)context;
+                        act.startActivityForResult(intent, 100);
+
+                    }
+                    return;
+                }
+                Intent install = new Intent(Intent.ACTION_VIEW)
+                        .setDataAndType(data,
+                                "application/vnd.android.package-archive");
+                install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(install);
+            }else Toast.makeText(context, "Update file does not exist!", Toast.LENGTH_SHORT).show();
         }
 
         BroadcastReceiver onComplete = new BroadcastReceiver() {
             public void onReceive(Context ctxt, Intent intent) {
+                Log.e(TAG, "onReceive: Got here..." );
                 long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                 if (downloadID == id) {
                     Log.e("FileDownloadLink",Uri.fromFile(getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName)).toString());
 
                     if (getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName).exists())
                     {
-                        runInstall(updateName);
+                        runInstall(ctxt,updateName);
                     }
                     else
                         Toast.makeText(ctxt, "There is a problem with update package!", Toast.LENGTH_SHORT).show();
@@ -910,9 +943,47 @@ public class YTutils implements AppInterface {
             }
         };
 
+
+        private Uri getApkUri(String path) {
+
+            // Before N, a MODE_WORLD_READABLE file could be passed via the ACTION_INSTALL_PACKAGE
+            // Intent. Since N, MODE_WORLD_READABLE files are forbidden, and a FileProvider is
+            // recommended.
+            boolean useFileProvider = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N;
+
+            String tempFilename = "tmp.apk";
+            byte[] buffer = new byte[16384];
+            int fileMode = useFileProvider ? Context.MODE_PRIVATE : Context.MODE_WORLD_READABLE;
+            try (InputStream is = new FileInputStream(new File(path));
+                 FileOutputStream fout = context.openFileOutput(tempFilename, fileMode)) {
+
+                int n;
+                while ((n = is.read(buffer)) >= 0) {
+                    fout.write(buffer, 0, n);
+                }
+
+            } catch (IOException e) {
+                Log.i(TAG + ":getApkUri", "Failed to write temporary APK file", e);
+            }
+
+            if (useFileProvider) {
+
+                File toInstall = new File(context.getFilesDir(), tempFilename);
+                return FileProvider.getUriForFile(context,  BuildConfig.APPLICATION_ID, toInstall);
+
+            } else {
+
+                return Uri.fromFile(context.getFileStreamPath(tempFilename));
+
+            }
+
+        }
+
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            if (!permissionGranted)
+                return;
             if (json==null||json.isEmpty())
                 return;
             try {
@@ -925,7 +996,8 @@ public class YTutils implements AppInterface {
                 PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
                 int curVer = Integer.parseInt(pInfo.versionName.replace(".",""));
                 Log.e("VersionLOG","NewVersion: "+newVer+", currVersion: "+curVer);
-                if (newVer>curVer) {
+               // if (newVer>curVer) {
+                if (true) {
                     new AlertDialog.Builder(context)
                             .setTitle("Update Available")
                             .setMessage(getHtml(changelogHtml))
@@ -937,7 +1009,12 @@ public class YTutils implements AppInterface {
                                 request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
                                 request.setTitle("Downloading "+updateName);
                                 request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,updateName);
-                                context.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
+                                IntentFilter intentFilter = new IntentFilter();
+                                intentFilter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+
+
+                                context.registerReceiver(onComplete, intentFilter);
                                 downloadID = downloadManager.enqueue(request);
                                 Toast.makeText(context, "Download Started! Check notification", Toast.LENGTH_SHORT).show();
                             })
