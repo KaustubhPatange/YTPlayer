@@ -135,13 +135,15 @@ public class PlaylistFragment extends Fragment {
             OPlayFrag = new OPlaylistFragment();
             Bundle args = new Bundle();
             args.putSerializable("model",model);
-            Log.e(TAG, "Data1: "+model.getData().get(0) );
-            OPlayFrag.setArguments(args);
-            FragmentTransaction ft = fragmentManager.beginTransaction();
-            ft.setCustomAnimations(R.anim.fade_in,
-                    R.anim.fade_out);
-            ft.replace(R.id.fragment_container, OPlayFrag);
-            ft.commit();
+            if (model.getData().size()>0) {
+                Log.e(TAG, "Data1: " + model.getData().get(0));
+                OPlayFrag.setArguments(args);
+                FragmentTransaction ft = fragmentManager.beginTransaction();
+                ft.setCustomAnimations(R.anim.fade_in,
+                        R.anim.fade_out);
+                ft.replace(R.id.fragment_container, OPlayFrag);
+                ft.commit();
+            }else Toast.makeText(activity, "Playlist is empty!", Toast.LENGTH_SHORT).show();
         });
 
         adapter.setLongClickListener((v1, model, position) -> {

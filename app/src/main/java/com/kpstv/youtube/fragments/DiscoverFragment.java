@@ -27,6 +27,7 @@ import com.kpstv.youtube.models.DiscoverModel;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
+import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,9 +48,10 @@ public class DiscoverFragment extends Fragment {
 
     ArrayList<String> csvlines, directItems; int totalItems;
 
-    ProgressBar progressBar; boolean isdirectData;
+    CircularProgressBar progressBar; boolean isdirectData;
 
     AsyncTask<Void,Void,Void> loadTask;
+    AsyncTask<Void,Float,Void> loadInitialTask;
 
     SharedPreferences preferences; String region="global";
 
@@ -96,6 +98,7 @@ public class DiscoverFragment extends Fragment {
             handler = new Handler();
             mRecyclerView = v.findViewById(R.id.my_recycler_view);
             progressBar = v.findViewById(R.id.progressBar);
+            progressBar.setIndeterminateMode(true);
 
             if (intentTitle.contains("Viral")) {
                 totalItems=50;
@@ -108,7 +111,8 @@ public class DiscoverFragment extends Fragment {
             if (csvString!=null) {
                 toolbar.setTitle(intentTitle+" ("+ csvlines.size() +")");
             }
-            new loadInitialData().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            loadInitialTask = new loadInitialData();
+            loadInitialTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
             networkCreated = true;
         }
@@ -144,7 +148,7 @@ public class DiscoverFragment extends Fragment {
         return false;
     };
 
-    class loadInitialData extends AsyncTask<Void,Void,Void> {
+    class loadInitialData extends AsyncTask<Void,Float,Void> {
 
         @Override
         protected void onPostExecute(Void aVoid) {
@@ -162,7 +166,6 @@ public class DiscoverFragment extends Fragment {
             mAdapter = new DiscoverAdapter(activity, discoverModels, mRecyclerView,
                     recyclerItemLongListener,csvString,intentTitle,totalItems);
             mRecyclerView.setAdapter(mAdapter);
-
 
             mRecyclerView.setVisibility(View.VISIBLE);
             mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -185,21 +188,15 @@ public class DiscoverFragment extends Fragment {
 
                 }
             });
-            /*
-            mRecyclerView.addOnScrollListener(scrollListener);*/
-           /* mAdapter.setOnLoadMoreListener(() -> {
-                try {
-                    Log.e("SizeofArray",csvlines.size()+"");
-                    if (csvlines.isEmpty()&&directItems.isEmpty())
-                        return;
-                    //add null , so the adapter will check view_type and show progress bar at bottom
-                    discoverModels.add(null);
-                    mAdapter.notifyItemInserted(discoverModels.size() - 1);
-
-                }catch (Exception ignored){}
-            });*/
 
             super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected void onProgressUpdate(Float... values) {
+            progressBar.setProgress(values[0]);
+            progressBar.setIndeterminateMode(false);
+            super.onProgressUpdate(values);
         }
 
         @Override
@@ -235,8 +232,48 @@ public class DiscoverFragment extends Fragment {
                 }
             }
             setInitial();
-            CommonLoad();
+            CommonLoadData();
             return null;
+        }
+
+        void CommonLoadData() {
+            String main = YTutils.readContent(activity,fileName);
+            if (main==null||main.isEmpty()) {
+                main=YTutils.getTodayDate();
+            }else if (!main.split("\n|\r")[0].contains(YTutils.getTodayDate())) {
+                main=YTutils.getTodayDate();
+            }
+            StringBuilder builder = new StringBuilder();
+            builder.append(main);
+            for (int i = 0; i < 10; i++) {
+                String line = csvlines.get(i);
+                String title = line.split(",")[1].replace("\"","");
+                String author = line.split(",")[2].replace("\"","");
+
+                String search_text = title.replace(" ","+")
+                        + "+by+" + author.replace(" ","+");
+
+                YTSearch ytSearch = new YTSearch(search_text);
+
+                final String videoId = ytSearch.getVideoIDs().get(0);
+                String imgurl = YTutils.getImageUrlID(videoId);
+                if (!main.startsWith(title+"|"))
+                {
+                    builder.append("\n").append(title).append("|").append(author).append("|")
+                            .append(videoId);
+                    Log.e("AddedItem",title+", YTUrl: "+ytSearch.getVideoIDs().get(0)+"");
+                }
+                discoverModels.add(new DiscoverModel(
+                        title,author,imgurl,"https://www.youtube.com/watch?v="+videoId
+                ));
+
+                publishProgress((float)i*100/10);
+            }
+
+
+            YTutils.writeContent(activity,fileName,
+                    builder.toString().replaceAll("(?m)^[ \t]*\r?\n", ""));
+            csvlines.subList(0,10).clear();
         }
     }
 
@@ -251,7 +288,6 @@ public class DiscoverFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-         //   discoverModels.remove(discoverModels.size() - 1);
             if (isdirectData)
                 CommonLoad_direct();
             else

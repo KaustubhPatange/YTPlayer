@@ -153,7 +153,25 @@
         </RelativeLayout>
 
     </android.support.v7.widget.CardView>
-
+   <!-- <LinearLayout
+        android:visibility="gone"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.mikhaellopez.circularprogressbar.CircularProgressBar
+            android:id="@+id/LprogressBar"
+            app:cpb_progress="70"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:cpb_background_progressbar_width="4dp"
+            app:cpb_progress_direction="to_right"
+            app:cpb_background_progressbar_color="@color/colorScreen"
+            app:cpb_progressbar_color="@color/colorAccent"
+            app:cpb_progressbar_width="4dp"
+            app:cpb_round_border="false" />
+    </LinearLayout>-->
     <ProgressBar
         android:visibility="gone"
         android:layout_marginTop="10dp"

@@ -16,6 +16,7 @@ import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
@@ -83,7 +84,7 @@ public class DownloadService extends Service {
     public static String TAG = "DownloadService";
     public static ArrayList<YTConfig> pendingJobs;
     public static long totalsize;
-    public static long currentsize;
+    public static long currentsize; NotificationManagerCompat notificationManager;
     public static Process process; Bitmap icon;
     public static YTConfig currentModel; long oldbytes;
     boolean isDownloaded=false;
@@ -100,6 +101,8 @@ public class DownloadService extends Service {
         if (pendingJobs==null) pendingJobs = new ArrayList<>();
 
         icon = MainActivity.bitmapIcon;
+
+        notificationManager = NotificationManagerCompat.from(context);
 
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -178,7 +181,6 @@ public class DownloadService extends Service {
 
             if (pendingJobs.size()>0 && (downloadTask!=null && downloadTask.getStatus() != AsyncTask.Status.RUNNING))
             {
-                Log.e(TAG, "doInBackground: STARTED NEXT JOB" );
                 downloadTask = new parseData(pendingJobs.get(0));
                 pendingJobs.remove(0);
                 downloadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -215,7 +217,8 @@ public class DownloadService extends Service {
                         .setProgress(max,incr,false)
                         .build();
 
-                appnotification.notify(105,notification);
+                notificationManager.notify(105,notification);
+              //  appnotification.notify(105,notification);
             }
             handler.postDelayed(updateTask,1000);
         }
@@ -265,11 +268,13 @@ public class DownloadService extends Service {
                     .setContentText(model.getTitle()+" - "+model.getChannelTitle())
                     .setSmallIcon(R.drawable.ic_check)
                     .setContentIntent(opensongService)
+                    .setAutoCancel(true)
                     .setPriority(Notification.PRIORITY_LOW)
                     .addAction(R.mipmap.ic_launcher,"Share",openshareService)
                     .build();
 
-            appnotification.notify(new Random().nextInt(400)+150,notification1);
+            notificationManager.notify(new Random().nextInt(400)+150,notification1);
+           // appnotification.notify(new Random().nextInt(400)+150,notification1);
             super.onPostExecute(aVoid);
         }
 
@@ -297,7 +302,7 @@ public class DownloadService extends Service {
                     String imageUri=null;
                     if (model.getVideoID().contains("soundcloud.com"))
                         imageUri = model.getImageUrl();
-                    else YTutils.getImageUrlID(model.getVideoID());
+                    else imageUri = YTutils.getImageUrlID(model.getVideoID());
                     try {
                         Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
                             @Override
@@ -353,7 +358,7 @@ public class DownloadService extends Service {
 
                         Log.e(TAG, "doInBackground: Just before this" );
                        do {
-                           Log.e(TAG, "doInBackground: Doing in background" );
+                         //  Log.e(TAG, "doInBackground: Doing in background" );
                        } while (!isDownloaded);
 
                         Log.e(TAG, "doInBackground: Loading before");
@@ -427,6 +432,7 @@ public class DownloadService extends Service {
                             URL uri = null; ImageData imageData=null;
 
                             try {
+                                Log.e(TAG, "doInBackground: ImageUri: "+imageUri );
                                 uri = new URL(imageUri);
                                 Bitmap bitmap = BitmapFactory.decodeStream(uri.openConnection().getInputStream());
                                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -611,7 +617,8 @@ public class DownloadService extends Service {
             process.destroy();
         wakeLock.release();
         handler.removeCallbacks(updateTask);
-        appnotification.cancel(105);
+        notificationManager.cancel(105);
+       // appnotification.cancel(105);
         super.onDestroy();
     }
 

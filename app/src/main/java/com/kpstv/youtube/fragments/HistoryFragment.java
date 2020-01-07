@@ -233,6 +233,7 @@ public class HistoryFragment extends Fragment {
         boolean checkForUpdates = preferences.getBoolean("pref_update_check", true);
         if (checkForUpdates && !showedUpdateOnce)
         {
+            Log.e(TAG, "LoadMainMethod: In show update..." );
             if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.O) {
                 boolean canInstallpackage;
                 canInstallpackage = activity.getPackageManager().canRequestPackageInstalls();

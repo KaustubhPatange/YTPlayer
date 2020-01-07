@@ -1,32 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:paddingStart="5dp"
-    android:paddingEnd="5dp"
-    android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".PurchaseActivity">
+    xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <include layout="@layout/common_purchase"/>
-
-    <Button
-        android:textColor="@color/black"
-        android:id="@+id/buyButton"
-        android:backgroundTint="@color/colorAccent"
-        android:layout_margin="10dp"
+    <LinearLayout
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:orientation="vertical"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Purchase"/>
+        android:layout_height="match_parent"
+        tools:context=".PurchaseActivity">
+
+        <include layout="@layout/common_purchase"/>
+
+        <Button
+            android:textColor="@color/black"
+            android:id="@+id/buyButton"
+            android:backgroundTint="@color/colorAccent"
+            android:layout_margin="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Purchase"/>
+
+        <TextView
+            android:autoLink="all"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center|bottom"
+            android:text="@string/purchaseContact"
+            android:onClick="contactClick"/>
+
+
+    </LinearLayout>
 
     <TextView
-        android:autoLink="all"
+        android:padding="10dp"
+        android:layout_gravity="bottom"
+        android:autoLink="web"
+        android:linksClickable="true"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="5dp"
+        android:id="@+id/textView"
+        android:textSize="12sp"
+        android:layout_alignParentBottom="true"
+        android:text="@string/pgt"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center|bottom"
-        android:text="@string/purchaseContact"
-        android:onClick="contactClick"/>
-
-</LinearLayout>
+        android:layout_height="wrap_content" />
+</RelativeLayout>

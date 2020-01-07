@@ -25,7 +25,7 @@
             android:summary="Quality of image which will be used in player as well as in media tag."
             android:title="Image quality" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Updates">
+    <PreferenceCategory android:title="Update">
         <SwitchPreference
             android:key="pref_update_check"
             android:defaultValue="true"
@@ -49,5 +49,11 @@
             android:key="pref_delete"
             android:title="Clear backups"
             android:summary="Clear all of your saved sessions."/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Other">
+        <Preference
+            android:key="pref_account"
+            android:title="Account key"
+            android:summary="Tap on it to set an account key."/>
     </PreferenceCategory>
 </PreferenceScreen>

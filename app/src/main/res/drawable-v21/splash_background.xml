@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/colorPrimary" />
-
-    <item>
-        <inset
-            android:insetBottom="200dp"
-            android:insetRight="160dp"
-            android:insetLeft="160dp"
-            android:insetTop="200dp"
-            android:drawable="@drawable/play"/>
-    </item>
+    <item
+        android:drawable="@drawable/screen"
+        android:gravity="center" />
 </layer-list>

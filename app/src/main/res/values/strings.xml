@@ -95,4 +95,5 @@
     <string name="rfq">Remove from queue</string>
     <string name="purchaseContact">Not able to make purchase, <a href="">contact me.</a></string>
     <string name="default_client_id" translatable="false">203428087039-1a5nv4oq13v39nqtjfplp7r6ff9pckk0.apps.googleusercontent.com</string>
+    <string name="pgt">If you have any problem with the gateway like premium not activated after payment, feel free to contact me!</string>
 </resources>

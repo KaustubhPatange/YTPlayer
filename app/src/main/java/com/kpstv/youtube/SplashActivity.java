@@ -21,12 +21,10 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-/*
 
         if (Build.VERSION.SDK_INT<Build.VERSION_CODES.M) {
             setContentView(R.layout.splash_lollipop);
-        }else setTheme(R.style.SplashTheme);
-*/
+        }
 
         File f = YTutils.getFile("YTPlayer");
         f.mkdirs();

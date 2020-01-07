@@ -34,6 +34,7 @@ import android.os.Vibrator;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.constraint.ConstraintLayout;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
@@ -42,11 +43,15 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.os.EnvironmentCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.graphics.Palette;
+import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.karumi.dexter.Dexter;
@@ -57,6 +62,7 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 import com.kpstv.youtube.AppInterface;
 import com.kpstv.youtube.BuildConfig;
+import com.kpstv.youtube.CPlaylistActivity;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
@@ -253,46 +259,64 @@ public class YTutils implements AppInterface {
         }
     }
 
-    public static void addToPlayList(Activity activity,String videoID, String videoTitle, String channelTitle,
-                                     String imageUrl, long seconds) {
-        String playlist_csv = YTutils.readContent(activity,"playlist.csv");
-        if (playlist_csv==null||playlist_csv.isEmpty()) {
-            Toast.makeText(activity, "No playlist found!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        ArrayList<String> configs = new ArrayList<>();
-
-        String[] allPlaylist = playlist_csv.split("\n|\r");
-
-        for(String line : allPlaylist) {
-            String[] playlist = line.split(",");
-            configs.add(playlist[1]);
-        }
-        final String[] arrays = new String[configs.size()];
-        for(int i=0;i<configs.size();i++) {
-            arrays[i]=configs.get(i);
-        }
+    static AlertDialog alertDialog;
+    public static void addToPlayList(Activity activity,String videoID, String videoTitle, String channelTitle, String imageUrl, long seconds) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle("Add to playlist");
+       // builder.setTitle("Add to playlist");
+        ArrayList<String> configs = new ArrayList<>();
 
-        builder.setItems(arrays, (dialog, which) -> {
-            boolean alreadPresent=false,added=false;
-            String name = configs.get(which);
-            for (int i=0;i<configs.size();i++) {
-                if (allPlaylist[i].contains(","+name) && !allPlaylist[i].contains(videoID+"|")) {
-                    allPlaylist[i]+=","+videoID+"|"+seconds+"|"+videoTitle+"|"+channelTitle+"|"+imageUrl;
-                    writeContent(activity,"playlist.csv",
-                            join(allPlaylist,'\n'));
-                    added=true;
-                    Toast.makeText(activity, "Added to playlist", Toast.LENGTH_SHORT).show();
-                }else alreadPresent=true;
-            }
-            if (alreadPresent&&!added)
-                Toast.makeText(activity, "Already exist in playlist", Toast.LENGTH_SHORT).show();
+        View view = activity.getLayoutInflater().inflate(R.layout.alert_playlist_layout,null);
+
+        ListView listView = view.findViewById(R.id.recyclerView);
+        ConstraintLayout constraintLayout = view.findViewById(R.id.mainLayout);
+
+        constraintLayout.setOnClickListener(view1 -> {
+            alertDialog.dismiss();
+            Intent intent = new Intent(activity, CPlaylistActivity.class);
+            activity.startActivity(intent);
         });
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        builder.setView(view);
+        String playlist_csv = YTutils.readContent(activity,"playlist.csv");
+        if (playlist_csv!=null&&!playlist_csv.isEmpty()) {
+            String[] allPlaylist = playlist_csv.split("\n|\r");
+
+            for(String line : allPlaylist) {
+                String[] playlist = line.split(",");
+                configs.add(playlist[1]);
+            }
+            final String[] arrays = new String[configs.size()];
+            for(int i=0;i<configs.size();i++) {
+                arrays[i]=configs.get(i);
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, configs);
+            listView.setAdapter(adapter);
+            listView.setOnItemClickListener((adapterView, view1, which, l) -> {
+                boolean alreadPresent=false,added=false;
+                String name = configs.get(which);
+                for (int i=0;i<configs.size();i++) {
+                    if (allPlaylist[i].contains(","+name) && !allPlaylist[i].contains(videoID+"|")) {
+                        allPlaylist[i]+=","+videoID+"|"+seconds+"|"+videoTitle+"|"+channelTitle+"|"+imageUrl;
+                        writeContent(activity,"playlist.csv",
+                                join(allPlaylist,'\n'));
+                        added=true;
+                        Toast.makeText(activity, "Added to playlist", Toast.LENGTH_SHORT).show();
+                    }else alreadPresent=true;
+                }
+                if (alreadPresent&&!added)
+                    Toast.makeText(activity, "Already exist in playlist", Toast.LENGTH_SHORT).show();
+                alertDialog.dismiss();
+            });
+           /* builder.setItems(arrays, (dialog, which) -> {
+
+            });*/
+        }
+
+
+
+
+        alertDialog = builder.create();
+        alertDialog.show();
     }
 
     public static String setVideoTitle(String title) {
@@ -862,6 +886,8 @@ public class YTutils implements AppInterface {
             this.context = context;
             this.isAutomatic = isAutomatic;
 
+            Log.e(TAG, "CheckForUpdates: Okay I am here...");
+
             if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) {
 
                 if (context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -886,7 +912,7 @@ public class YTutils implements AppInterface {
                             }).check();
 
                 }else permissionGranted=true;
-            }
+            }else permissionGranted=true;
         }
 
         void runInstall(Context context,String updateName) {
@@ -894,25 +920,26 @@ public class YTutils implements AppInterface {
             Uri data = Uri.fromFile(f);
             Log.e(TAG, "runInstall: Uri of FIle: "+data.toString());
             if (f.exists()) {
-            //    if (Build.VERSION.SDK_INT >=29) {
+
+                Uri uri = getApkUri( f.getPath() );
+
+                Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+                intent.setData( uri );
+                intent.setFlags( Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK );
+                intent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true);
+                intent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
+                intent.putExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME, context.getApplicationInfo().packageName);
+
+                if ( context.getPackageManager().queryIntentActivities(intent, 0 ) != null ) {// checked on start Activity
+
+                    Activity act = (Activity)context;
+                    act.startActivityForResult(intent, 100);
+
+                }
+            /*//    if (Build.VERSION.SDK_INT >=29) {
                 if (true) {
 
-                    Uri uri = getApkUri( f.getPath() );
 
-
-                    Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
-                    intent.setData( uri );
-                    intent.setFlags( Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK );
-                    intent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true);
-                    intent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
-                    intent.putExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME, context.getApplicationInfo().packageName);
-
-                    if ( context.getPackageManager().queryIntentActivities(intent, 0 ) != null ) {// checked on start Activity
-
-                        Activity act = (Activity)context;
-                        act.startActivityForResult(intent, 100);
-
-                    }
                     return;
                 }
                 Intent install = new Intent(Intent.ACTION_VIEW)
@@ -920,7 +947,7 @@ public class YTutils implements AppInterface {
                                 "application/vnd.android.package-archive");
                 install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(install);
+                context.startActivity(install);*/
             }else Toast.makeText(context, "Update file does not exist!", Toast.LENGTH_SHORT).show();
         }
 
@@ -996,8 +1023,8 @@ public class YTutils implements AppInterface {
                 PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
                 int curVer = Integer.parseInt(pInfo.versionName.replace(".",""));
                 Log.e("VersionLOG","NewVersion: "+newVer+", currVersion: "+curVer);
-               // if (newVer>curVer) {
-                if (true) {
+                if (newVer>curVer) {
+               // if (true) {
                     new AlertDialog.Builder(context)
                             .setTitle("Update Available")
                             .setMessage(getHtml(changelogHtml))

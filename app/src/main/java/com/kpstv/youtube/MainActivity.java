@@ -29,6 +29,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
@@ -165,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static LinearLayout bottom_player, adViewLayout;
     static ImageButton actionUp,actionPlay;static ProgressBar loadProgress,songProgress;
     static TextView actionTitle, actionChannelTitle; static AdView adView;
-    static AsyncTask<String,String,Void> LoadVideo; public static Activity activity;
+    static AsyncTask<String,String,Void> LoadVideo; public static FragmentActivity activity;
     static AsyncTask<Void,Void,Void> LoadOffline;
 
     public static ArrayList<NPlayModel> nPlayModels;

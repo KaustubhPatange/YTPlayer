@@ -43,6 +43,7 @@ import com.kpstv.youtube.utils.OnLoadMoreListener;
 import com.kpstv.youtube.utils.YTLength;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
+import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 
 import org.json.JSONObject;
 
@@ -214,8 +215,6 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
             ((ProgressViewHolder) holder).progressBar.setIndeterminate(true);
         }
     }
-
-
 
     class getData extends AsyncTask<Void,Void,Void> {
         DiscoverModel model;
