@@ -1,0 +1,15 @@
+Version 1.4
+
+Added: Complete new music player experience
+Added: SoundCloud music downloads
+Added: Local music playing option
+Added: Equalizer and audio effects
+Added: Lyrics finding option
+Added: Mp3 converter, Sleep Timer
+Added: Lots of feature can't remember
+Updated: Search tab with more personalized songs
+Updated: Faster search results
+Updated: UI and fixes
+Fixed: Spotify playlist download not working
+Fixed: Some YouTube links not working
+Fixed: App not working on Lollipop devices

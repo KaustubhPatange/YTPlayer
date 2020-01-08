@@ -1814,6 +1814,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 ytIndex=-1;
             }else {
                 Toast.makeText(activity, "No new song in playlist", Toast.LENGTH_SHORT).show();
+           //     bottom_player.setVisibility(View.GONE);
                 return;
             }
         }

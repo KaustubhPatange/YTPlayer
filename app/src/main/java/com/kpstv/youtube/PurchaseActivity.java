@@ -242,6 +242,11 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
         }
     }
 
+
+    public void guideClick(View view) {
+        YTutils.StartURL("https://github.com/KaustubhPatange/YTPlayer/wiki/Purchasing-Premium-Content",this);
+    }
+
     AlertDialog alertDialog;
     void doOnSuccess() {
 

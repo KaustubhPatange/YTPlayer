@@ -1,5 +1,0 @@
-1. parse lyrics from https://www.azlyrics.com
- 
-https://www.azlyrics.com/lyrics/artist/song-name.html
-
-eg: https://www.azlyrics.com/lyrics/linkinpark/numb.html

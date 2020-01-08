@@ -33,6 +33,15 @@
             android:text="@string/purchaseContact"
             android:onClick="contactClick"/>
 
+        <TextView
+            android:layout_marginTop="5dp"
+            android:autoLink="all"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center|bottom"
+            android:text="@string/htg"
+            android:onClick="guideClick"/>
+
 
     </LinearLayout>
 
