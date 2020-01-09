@@ -255,7 +255,7 @@ public class HistoryFragment extends Fragment {
                 new YTutils.CheckForUpdates(activity,true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             showedUpdateOnce=true;
         }
-        if (preferences.getBoolean("pref_show_purchase",true) && !showedOnce) {
+        if (preferences.getBoolean("pref_show_purchase",true) && !showedOnce && !AppSettings.contentActivated) {
             Log.e(TAG, "LoadMainMethod: Showing alert..." );
             View view = getLayoutInflater().inflate(R.layout.alert_buy,null);
             AlertDialog alertDialog = new AlertDialog.Builder(activity)

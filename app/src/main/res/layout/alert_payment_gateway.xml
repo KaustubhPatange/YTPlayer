@@ -31,7 +31,7 @@
     <ImageView
         android:clickable="true"
         android:focusable="true"
-        android:background="?attr/selectableItemBackground"
+        android:background="@drawable/history_background"
         android:id="@+id/paypalButton"
         android:src="@drawable/paypal"
         android:padding="10dp"
@@ -46,7 +46,7 @@
     <ImageView
         android:clickable="true"
         android:focusable="true"
-        android:background="?attr/selectableItemBackground"
+        android:background="@drawable/history_background"
         android:id="@+id/razorpayButton"
         android:src="@drawable/razorpay"
         android:padding="10dp"

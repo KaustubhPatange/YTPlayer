@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
@@ -26,7 +27,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
@@ -155,7 +157,18 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
             viewHolder.titleText.setText(model.getTitle());
             viewHolder.rate_percent.setText("#"+(position+1));
 
-            Glide.with(con).load(model.getImgUrl()).addListener(new RequestListener<Drawable>() {
+            Glide.with(con).asBitmap().load(model.getImgUrl()).into(new CustomTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                    viewHolder.imageView.setImageBitmap(resource);
+                }
+
+                @Override
+                public void onLoadCleared(@Nullable Drawable placeholder) {
+                }
+            });
+
+            /*Glide.with(con).load(model.getImgUrl()).addListener(new RequestListener<Drawable>() {
                 @Override
                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                     return false;
@@ -166,7 +179,7 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
                     viewHolder.imageView.setImageDrawable(resource);
                     return true;
                 }
-            }).into(viewHolder.imageView);
+            }).into(viewHolder.imageView);*/
 
             viewHolder.addPlaylist.setOnClickListener(v -> {
                 Activity activity = (Activity) con;

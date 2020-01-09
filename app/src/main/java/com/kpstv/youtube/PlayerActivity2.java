@@ -931,6 +931,8 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
     }
 
     public static void showAd() {
+        if (!AppSettings.showAds)
+            return;
         //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712, Use ca-app-pub-1763645001743174/8453566324
         mInterstitialAd = new InterstitialAd(activity);
         mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");

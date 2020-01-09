@@ -326,6 +326,7 @@ public class DiscoverFragment extends Fragment {
         }
         StringBuilder builder = new StringBuilder();
         builder.append(main);
+        ArrayList<DiscoverModel> dModels = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             String line = csvlines.get(i);
             String title = line.split(",")[1].replace("\"","");
@@ -344,10 +345,12 @@ public class DiscoverFragment extends Fragment {
                         .append(videoId);
                 Log.e("AddedItem",title+", YTUrl: "+ytSearch.getVideoIDs().get(0)+"");
             }
-            discoverModels.add(new DiscoverModel(
+
+            dModels.add(new DiscoverModel(
                     title,author,imgurl,"https://www.youtube.com/watch?v="+videoId
             ));
         }
+        discoverModels.addAll(dModels);
         YTutils.writeContent(activity,fileName,
                 builder.toString().replaceAll("(?m)^[ \t]*\r?\n", ""));
         csvlines.subList(0,10).clear();

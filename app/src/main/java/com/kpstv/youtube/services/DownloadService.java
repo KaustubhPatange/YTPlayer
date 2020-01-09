@@ -18,6 +18,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
@@ -457,6 +458,11 @@ public class DownloadService extends Service {
                                 e.printStackTrace();
                             } catch (ID3WriteException e) {
                                 e.printStackTrace();
+                            }
+                            if (!dst.exists()) {
+                                File sf = new File(dst.getPath().replace(".mp3",".m4a"));
+                                f.renameTo(sf);
+                                Toast.makeText(context, "Failed to convert to mp3, overriding defaults!", Toast.LENGTH_SHORT).show();
                             }
                         }
 

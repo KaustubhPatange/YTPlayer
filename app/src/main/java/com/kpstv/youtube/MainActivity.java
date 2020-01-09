@@ -1097,6 +1097,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         SoundCloud soundCloud;
         @Override
         protected Void doInBackground(String... arg0) {
+            trials=3;
             soundCloudPlayBack=false;souncloudFailed=false;
             if (!YTutils.isInternetAvailable()) {
                 Toast.makeText(activity, "No active internet connection", Toast.LENGTH_SHORT).show();
@@ -1206,6 +1207,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         }
     }
 
+    static int trials=3;
+
     static void commonPreExecute() {
         try {
             if (!localPlayBack) {
@@ -1240,6 +1243,12 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
             @Override
             public void onExtractionGoesWrong(ExtractorException e) {
+                if (trials>0) {
+                    trials--;
+                    Log.e(TAG, "onExtractionGoesWrong: Trial Count: "+trials );
+                    parseVideoNewMethod(yturl,videoTitle);
+                    return;
+                }
                 playNext();
                 Toast.makeText(activity, videoTitle+": Couldn't get the required audio stream!", Toast.LENGTH_SHORT).show();
             }
@@ -1248,6 +1257,12 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             public void onExtractionDone(List<YTMedia> adativeStream, List<YTMedia> muxedStream, YoutubeMeta meta) {
                 Log.e(TAG, "onExtractionDone: Parsing Audio using second method" );
                 if (adativeStream.isEmpty()) {
+                    if (trials>0) {
+                        trials--;
+                        Log.e(TAG, "onExtractionGoesWrong: Trial Count: "+trials );
+                        parseVideoNewMethod(yturl,videoTitle);
+                        return;
+                    }
                     playNext();
                     Toast.makeText(activity, videoTitle+": Couldn't get the required audio stream!", Toast.LENGTH_SHORT).show();
                     // showAlert("Failed!", "Couldn't get the required audio stream. Try again!", true);
