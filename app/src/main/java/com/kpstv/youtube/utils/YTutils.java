@@ -54,6 +54,7 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -319,6 +320,26 @@ public class YTutils implements AppInterface {
         alertDialog.show();
     }
 
+   /* public Long getTodayTimeString() {
+        Date c = Calendar.getInstance().getTime();
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+        return Long.parseLong(df.format(c));
+    }
+
+    public String getLastSavedUrl(Context activity,String videoId) {
+        String data = YTutils.readContent(activity,"lastSavedUrls.csv");
+        if (data!=null && !data.isEmpty()) {
+            long today_time=
+            String[] items = data.split("\n|\r");
+            for (int i=0;i<items.length;i++) {
+
+                if (items[0].split("\\|")[0])
+            }
+        }
+        return null;
+    }
+*/
     public static String setVideoTitle(String title) {
         Log.e("VideoTitle",title);
         String t = title;

@@ -28,9 +28,6 @@ public class YTMedia
 	public int getFps() {
 		return fps;
 	}
-	
-	
-
 
 	public void setItag(int itag)
 	{
@@ -203,7 +200,8 @@ public class YTMedia
 	}
 	
 	public boolean useCipher(){
-		return cipher!=null && url==null;
+		
+		return (cipher!=null && cipher.contains("s="));
 		
 	}
 	

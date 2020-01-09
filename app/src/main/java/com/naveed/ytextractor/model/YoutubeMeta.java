@@ -24,6 +24,15 @@ public class YoutubeMeta {
 	private String title;
 	private String videoId;
 	private String viewCount;
+	private long expiresInSeconds;
+
+	public long getExpiresInSeconds() {
+		return expiresInSeconds;
+	}
+
+	public void setExpiresInSeconds(long expiresInSeconds) {
+		this.expiresInSeconds = expiresInSeconds;
+	}
 
 	public void setIsLive(boolean isLive) {
 		this.isLive = isLive;

@@ -1,3 +1,4 @@
+package com.naveed.ytextractor;
 /*
 package com.naveed.ytextractor;
 
@@ -15,6 +16,8 @@ import com.naveed.ytextractor.model.YTMedia;
 import com.naveed.ytextractor.model.YoutubeMeta;
 import com.naveed.ytextractor.utils.ContextUtils;
 import com.naveed.ytextractor.utils.LogUtils;
+import com.universalvideoview.UniversalMediaController;
+import com.universalvideoview.UniversalVideoView;
 import java.util.List;
 import android.widget.ListAdapter;
 import java.util.ArrayList;
@@ -122,7 +125,10 @@ public class MainActivity extends Activity {
 												   }
 												   //Toast.makeText(getApplicationContext(), meta.getTitle(), Toast.LENGTH_LONG).show();
 												  Toast.makeText(getApplicationContext(), meta.getAuthor(), Toast.LENGTH_LONG).show();
-
+												   if (adativeStream.isEmpty()) {
+													   LogUtils.log("null ha");
+													   return;
+												   }
 												   if (muxedStream.isEmpty()) {
 													   LogUtils.log("null ha");
 													   return;
@@ -141,7 +147,7 @@ public class MainActivity extends Activity {
 
 
 											   }
-										   }).Extract(edit.getText().toString());
+										   }).useDefaultLogin().Extract(edit.getText().toString());
 
 								   }
 							   }));

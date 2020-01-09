@@ -130,6 +130,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import javax.security.auth.login.LoginException;
+
 import at.huber.youtubeExtractor.Format;
 import at.huber.youtubeExtractor.VideoMeta;
 import at.huber.youtubeExtractor.YouTubeExtractor;
@@ -1045,7 +1047,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 return;
             }
 
-            new YouTubeExtractor(activity) {
+            parseVideoNewMethod(YTutils.getYtUrl(videoID),videoTitle);
+          /*  new YouTubeExtractor(activity) {
 
                 @Override
                 protected void onPostExecute(SparseArray<YtFile> ytFiles) {
@@ -1089,7 +1092,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                         videoTitle = YTutils.setVideoTitle(videoMeta.getTitle());
                     }
                 }
-            }.execute(YTutils.getYtUrl(videoID));
+            }.execute(YTutils.getYtUrl(videoID));*/
             super.onPostExecute(aVoid);
         }
 
@@ -1238,9 +1241,10 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         onClear();
     }
 
-    private static void parseVideoNewMethod(String yturl, String videoTitle) {
-        new YoutubeStreamExtractor(new YoutubeStreamExtractor.ExtractorListner(){
 
+    private static void parseVideoNewMethod(String yturl, String videoTitle) {
+        Log.e(TAG, "parseVideoNewMethod: Starting here...." );
+        new YoutubeStreamExtractor(new YoutubeStreamExtractor.ExtractorListner(){
             @Override
             public void onExtractionGoesWrong(ExtractorException e) {
                 if (trials>0) {
@@ -1272,19 +1276,21 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 Log.e("Method2","Extracted using new method");
 
                 ytConfigs.clear();
-
             //    List<YTMedia> bestStream = getBestStream(adativeStream);
 
+                Log.e(TAG, "onExtractionDone: Expires in: "+meta.getExpiresInSeconds());
                 Log.e(TAG, "onExtractionDone: Media Size: " +adativeStream.size());
 
                 for(int i=0; i<adativeStream.size();i++) addVideoToList(adativeStream.get(i),videoTitle,channelTitle);
 
                 Log.e(TAG, "onExtractionDone: AudioLink: "+audioLink );
 
+
+                Log.e(TAG, "parseVideoNewMethod: Ending here...." );
                 continueinMainThread(audioLink);
             }
 
-        }).Extract(YTutils.getVideoID(yturl));
+        }).useDefaultLogin().Extract(YTutils.getVideoID(yturl));
     }
 
     public static void actionFavouriteClicked() {

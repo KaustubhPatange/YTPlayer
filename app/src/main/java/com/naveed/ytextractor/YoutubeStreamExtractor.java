@@ -2,6 +2,8 @@ package com.naveed.ytextractor;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
+
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
 import com.naveed.ytextractor.CipherManager;
@@ -38,8 +40,20 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 	Handler han=new Handler(Looper.getMainLooper());
 	private Response response;
 	private YoutubeMeta ytmeta;
+	YTDetails ytDetails;
 
 
+	class YTDetails {
+		long expiresInSeconds;
+
+		public YTDetails(long expiresInSeconds) {
+			this.expiresInSeconds = expiresInSeconds;
+		}
+
+		public long getExpiresInSeconds() {
+			return expiresInSeconds;
+		}
+	}
 
 
 
@@ -48,8 +62,14 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 		Headers.put("Accept-Language", "en");
 	}
 
-	public void setHeaders(Map<String, String> headers) {
+	public YoutubeStreamExtractor setHeaders(Map<String, String> headers) {
 		Headers = headers;
+		return this;
+	}
+
+	public YoutubeStreamExtractor useDefaultLogin() {
+		Headers.put("Cookie", Utils.loginCookie);
+		return setHeaders(Headers);	
 	}
 
 	public Map<String, String> getHeaders() {
@@ -68,7 +88,7 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 			listener.onExtractionGoesWrong(Ex);
 		} else {
 			listener.onExtractionDone(adaptiveMedia, muxedMedia, ytmeta);
-			}
+		}
 	}
 
 	@Override
@@ -86,7 +106,7 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 		}	
 	}
 
-
+	private static final String TAG = "YoutubeStreamExtractor";
 
 	@Override
 	protected Void doInBackground(String[] ids) {
@@ -96,21 +116,39 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
         try {
 			String body = HTTPUtility.downloadPageSource("https://www.youtube.com/watch?v=" + Videoid + "&has_verified=1&bpctr=9999999999", Headers);
 			jsonBody = parsePlayerConfig(body);
-			//Utils.copyToBoard(jsonBody);
+
 			PlayerResponse playerResponse=parseJson(jsonBody);
 			ytmeta = playerResponse.getVideoDetails();
+			//Utils.copyToBoard(playerResponse.getStreamingData().);
 			if (playerResponse.getVideoDetails().getisLive()) {
-				parseLiveUrls(playerResponse.getStreamingData());
+				StreamingData sd=playerResponse.getStreamingData();
+				setDefaults(sd);
+				parseLiveUrls(sd);
 			} else {
-				adaptiveMedia =	parseUrls(playerResponse.getStreamingData().getAdaptiveFormats());
-				muxedMedia =	parseUrls(playerResponse.getStreamingData().getFormats());
+				StreamingData sd=playerResponse.getStreamingData();
+				setDefaults(sd);
+				LogUtils.log("sizea= " + sd.getAdaptiveFormats().length);
+				LogUtils.log("sizem= " + sd.getFormats().length);
+
+				adaptiveMedia =	parseUrls(sd.getAdaptiveFormats());
+				muxedMedia =	parseUrls(sd.getFormats());
+				LogUtils.log("sizeXa= " + adaptiveMedia.size());
+				LogUtils.log("sizeXm= " + muxedMedia.size());
+
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			LogUtils.log(Arrays.toString(e.getStackTrace()));// e.toString());
 			Ex = new ExtractorException("Error While getting Youtube Data:" + e.getMessage());
 			this.cancel(true);
 		}
 		return null;
+	}
+
+	private void setDefaults(StreamingData data) {
+		try {
+		ytmeta.setExpiresInSeconds(data.getExpiresInSeconds());
+		}catch (Exception ignored){}
 	}
 
 	/*this function creates Json models using Gson*/
@@ -143,33 +181,49 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 		try {
 			for (int x=0;x < rawMedia.length;x++) {
 				YTMedia media=rawMedia[x];
+				LogUtils.log(media.getCipher() != null ? media.getCipher(): "null cip");
+
 				if (media.useCipher()) {
-					String tempUrl=URLDecoder.decode(RegexUtils.matchGroup(regexUrl, media.getCipher()));
-					for (String url_part:tempUrl.split("&")) {
-						if (url_part.startsWith("s=")) {
-							String decodedSig=CipherManager.dechiperSig(URLDecoder.decode(url_part.replace("s=", "")), response.getAssets().getJs());
-							String FinalUrl;
-							if (tempUrl.contains("&lsig=")) {
-								FinalUrl = tempUrl + "&sig=" + decodedSig;
-							} else {
-								FinalUrl = tempUrl + "&signature=" + decodedSig;
+					String tempUrl = "";
+					String decodedSig = "";
+					for (String partCipher:media.getCipher().split("&")) {
+
+
+
+						if (partCipher.startsWith("s=")) {
+							decodedSig = CipherManager.dechiperSig(URLDecoder.decode(partCipher.replace("s=", "")), response.getAssets().getJs());
+						}
+
+						if (partCipher.startsWith("url=")) {
+							tempUrl = URLDecoder.decode(partCipher.replace("url=", ""));
+
+							for (String url_part:tempUrl.split("&")) {
+								if (url_part.startsWith("s=")) {
+									decodedSig = CipherManager.dechiperSig(URLDecoder.decode(url_part.replace("s=", "")), response.getAssets().getJs());
+								}
 							}
-							media.setUrl(FinalUrl);
-							links.add(media);
-							LogUtils.log(FinalUrl);
 						}
 					}
-				}else{
+
+					String	FinalUrl= tempUrl + "&sig=" + decodedSig;
+					media.setUrl(FinalUrl);
+					links.add(media);
+
+
+				} else {
 					links.add(media);
 				}
 			}
 
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			Ex = new ExtractorException(e.getMessage());
 			this.cancel(true);
 		}
 		return links;
 	}
+
+
 
 
 
