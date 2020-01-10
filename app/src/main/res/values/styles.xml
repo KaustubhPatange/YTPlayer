@@ -52,8 +52,9 @@
         <item name="android:homeAsUpIndicator">@drawable/ic_arrow_down</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
+
+     <!--   <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>-->
     </style>
     <style name="AppTheme.NoActionBar1" parent="Theme.AppCompat.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>

@@ -100,6 +100,7 @@ import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.receivers.SongBroadCast;
+import com.kpstv.youtube.utils.DataUtils;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.LyricsApi;
 import com.kpstv.youtube.utils.OnSwipeTouchListener;
@@ -904,7 +905,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static Bitmap bitmapIcon; static ArrayList<YTConfig> ytConfigs;
     static NotificationCompat.Builder builder;
     public static boolean isplaying, sleepEndTrack=false,localPlayBack=false, soundCloudPlayBack,isFavourite=false,isEqualizerEnabled=false;
-    public static boolean isLoop=false,isEqualizerSet=false;
+    public static boolean isLoop=false,isEqualizerSet=false,loadedFromData=false;
     static Handler mHandler = new Handler();
     static long total_duration = 0; public static PresetReverb presetReverb;
     public static BassBoost bassBoost; public static Virtualizer virtualizer;
@@ -1047,7 +1048,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 return;
             }
 
-            parseVideoNewMethod(YTutils.getYtUrl(videoID),videoTitle);
+            if (!loadedFromData)
+                parseVideoNewMethod(YTutils.getYtUrl(videoID),videoTitle);
+            else continueinMainThread(audioLink);
           /*  new YouTubeExtractor(activity) {
 
                 @Override
@@ -1100,7 +1103,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         SoundCloud soundCloud;
         @Override
         protected Void doInBackground(String... arg0) {
-            trials=3;
+            trials=3; loadedFromData=false;
             soundCloudPlayBack=false;souncloudFailed=false;
             if (!YTutils.isInternetAvailable()) {
                 Toast.makeText(activity, "No active internet connection", Toast.LENGTH_SHORT).show();
@@ -1188,6 +1191,13 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                         e.printStackTrace();
                         Log.e("PlayerActivity_JSON", e.getMessage());
                     }
+                }
+
+                DataUtils.DataModel dataModel = DataUtils.getSavedUrl(activity,videoID,videoTitle,channelTitle);
+                if (dataModel!=null) {
+                    loadedFromData=true;
+                    audioLink = dataModel.getAudioLink();
+                    ytConfigs = dataModel.getConfigs();
                 }
             }
             if (imgUrl!=null) {
@@ -1430,7 +1440,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         });
 
         // Store video into history
-        if (!localPlayBack)
+        if (!localPlayBack &&!loadedFromData)
         new saveToHistory().execute(YTutils.getYtUrl(videoID));
     }
 
@@ -1975,7 +1985,6 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         @Override
         protected Void doInBackground(String... strings) {
             String url_link = strings[0];
-            String set = preferences.getString("urls", "");
             String ytID = YTutils.getVideoID(url_link);
 
             String formattedDate = YTutils.getTodayDate();
@@ -2030,7 +2039,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 }
             }else YTutils.writeContent(activity,"library.csv",insert_data);
 
-            // Get playlist
+            DataUtils.saveUrl(activity,videoID,audioLink,ytConfigs);
+
+            /*// Get playlist
             ArrayList<String> urls = new ArrayList<>();
             if (!Objects.requireNonNull(set).isEmpty()) {
                 urls.addAll(Arrays.asList(set.split(",")));
@@ -2053,7 +2064,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             }
             SharedPreferences.Editor prefsEditor = preferences.edit();
             prefsEditor.putString("urls", sb.toString());
-            prefsEditor.apply();
+            prefsEditor.apply();*/
             return null;
         }
     }

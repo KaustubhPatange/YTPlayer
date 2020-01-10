@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -33,8 +34,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -95,7 +99,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     static ImageButton previousFab, playFab, nextFab, repeatButton, downloadButton, playlistButton, youTubeButton,lyricButton;
 
-    ImageButton navigationDown; //static VisualizerView visualizerView;
+    ImageButton navigationDown, shareButton; //static VisualizerView visualizerView;
 
     static ViewPager mainPager;
     static PlayerAdapter adapter;
@@ -132,6 +136,14 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         activity = this;
 
         setContentView(R.layout.activity_player_new);
+
+        Rect rectangle = new Rect();
+        Window window = getWindow();
+        window.getDecorView().getWindowVisibleDisplayFrame(rectangle);
+        int statusBarHeight = rectangle.top;
+        int contentViewTop =
+                window.findViewById(Window.ID_ANDROID_CONTENT).getTop();
+        int titleBarHeight= contentViewTop - statusBarHeight;
 
         accentColor = ContextCompat.getColor(this,R.color.colorAccent);
 
@@ -212,6 +224,32 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                     LyricBottomSheet bottomSheet = new LyricBottomSheet();
                     bottomSheet.setArguments(args);
                     bottomSheet.show(getSupportFragmentManager(),"");
+
+                case MotionEvent.ACTION_CANCEL: {
+                    ImageButton view = (ImageButton) v;
+                    view.clearColorFilter();
+                    view.invalidate();
+                    break;
+                }
+            }
+            return true;
+        });
+
+        shareButton.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN: {
+                    ImageButton view = (ImageButton ) v;
+                    view.setColorFilter(accentColor);
+                    v.invalidate();
+                    break;
+                }
+                case MotionEvent.ACTION_UP:
+
+                   Intent intent = new Intent(Intent.ACTION_SEND);
+                   intent.setType("text/plain");
+                   intent.putExtra(Intent.EXTRA_TEXT,"Listen to "+MainActivity.videoTitle+" by "+MainActivity.channelTitle+" "+
+                           YTutils.getYtUrl(MainActivity.videoID));
+                   activity.startActivity(Intent.createChooser(intent,"Share"));
 
                 case MotionEvent.ACTION_CANCEL: {
                     ImageButton view = (ImageButton) v;
@@ -894,6 +932,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         viewImage = findViewById(R.id.imageView3);
         mainPager = findViewById(R.id.viewPager);
         lyricButton = findViewById(R.id.lyricButton);
+        shareButton = findViewById(R.id.shareButton);
 //        visualizerView = findViewById(R.id.visualizerView);
         favouriteButton = findViewById(R.id.favourite_button);
         progressBar = findViewById(R.id.progressBar);

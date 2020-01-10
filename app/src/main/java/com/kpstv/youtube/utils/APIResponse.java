@@ -23,6 +23,7 @@ public class APIResponse implements AppInterface {
         this.json = json;
     }
 
+
     public String getJson() {
         return json;
     }

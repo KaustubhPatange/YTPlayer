@@ -119,7 +119,7 @@ public class LocalSearchFragment extends Fragment {
                         searchTask.cancel(true);
                     }
                     searchTask = new SearchTask(editable.toString());
-                    searchTask.execute();
+                    searchTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             });
         }

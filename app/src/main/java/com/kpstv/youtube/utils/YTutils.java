@@ -238,7 +238,7 @@ public class YTutils implements AppInterface {
         }
     }
 
-    public static void writeContent(Activity activity, String FILE_NAME, String content) {
+    public static void writeContent(Context activity, String FILE_NAME, String content) {
         FileOutputStream fos = null;
 
         try {
@@ -331,7 +331,8 @@ public class YTutils implements AppInterface {
         String data = YTutils.readContent(activity,"lastSavedUrls.csv");
         if (data!=null && !data.isEmpty()) {
             long today_time=
-            String[] items = data.split("\n|\r");
+            String[] items = data.spl
+            it("\n|\r");
             for (int i=0;i<items.length;i++) {
 
                 if (items[0].split("\\|")[0])
@@ -650,6 +651,8 @@ public class YTutils implements AppInterface {
 
 
     public static String getLocalArtworkImage(Activity activity, LocalModel model) {
+        if (!YTutils.isInternetAvailable())
+            return null;
         String data = YTutils.readContent(activity,"artistImages.csv");
         String imageUri=null;
         if (data!=null && !data.isEmpty()) {

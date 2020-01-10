@@ -1,72 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:layout_marginStart="10dp"
-    android:orientation="horizontal"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+<HorizontalScrollView android:scrollbars="vertical"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <LinearLayout
-        android:layout_marginBottom="5dp"
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <include layout="@layout/trend_item1"/>
-        <TextView
-            android:textSize="13sp"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:fontFamily="@font/dmsans_font"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="15dp"
-            android:text="Global Top 100"
-            android:layout_marginTop="-3dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-        <TextView
-            android:ellipsize="end"
-            android:textColor="@color/dark_white"
-            android:maxLines="2"
-            android:lines="2"
-            android:textSize="13sp"
-            android:fontFamily="@font/dmsans_font"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="15dp"
-            android:text="Daily update of most played tracks on YouTube"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
+        android:layout_marginStart="10dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <LinearLayout
-        android:layout_marginBottom="5dp"
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <include layout="@layout/trend_item2"/>
-        <TextView
-            android:textSize="13sp"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:fontFamily="@font/dmsans_font"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="15dp"
-            android:text="Global Viral 100"
-            android:layout_marginTop="-3dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-        <TextView
-            android:ellipsize="end"
-            android:textColor="@color/dark_white"
-            android:maxLines="2"
-            android:lines="2"
-            android:textSize="13sp"
-            android:fontFamily="@font/dmsans_font"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="15dp"
-            android:text="Daily update of most viral tracks on YouTube"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
+        <LinearLayout
+            android:layout_marginBottom="5dp"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <include layout="@layout/trend_item1"/>
+            <TextView
+                android:textSize="13sp"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:fontFamily="@font/dmsans_font"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:text="Global Top 100"
+                android:layout_marginTop="-3dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:ellipsize="end"
+                android:textColor="@color/dark_white"
+                android:maxLines="2"
+                android:lines="2"
+                android:textSize="13sp"
+                android:fontFamily="@font/dmsans_font"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:text="Daily update of most played tracks on YouTube"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
 
-</LinearLayout>
+        <LinearLayout
+            android:layout_marginBottom="5dp"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <include layout="@layout/trend_item2"/>
+            <TextView
+                android:textSize="13sp"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:fontFamily="@font/dmsans_font"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:text="Global Viral 100"
+                android:layout_marginTop="-3dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:ellipsize="end"
+                android:textColor="@color/dark_white"
+                android:maxLines="2"
+                android:lines="2"
+                android:textSize="13sp"
+                android:fontFamily="@font/dmsans_font"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:text="Daily update of most viral tracks on YouTube"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginBottom="5dp"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <include layout="@layout/trend_item3"/>
+            <TextView
+                android:textSize="13sp"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:fontFamily="@font/dmsans_font"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:text="Top 20"
+                android:layout_marginTop="-3dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:ellipsize="end"
+                android:textColor="@color/dark_white"
+                android:maxLines="2"
+                android:lines="2"
+                android:textSize="13sp"
+                android:fontFamily="@font/dmsans_font"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</HorizontalScrollView>

@@ -38,6 +38,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.kpstv.youtube.AppInterface;
+import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.SongAdapter;
@@ -47,6 +49,7 @@ import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.utils.APIResponse;
 import com.kpstv.youtube.utils.AppBarStateChangeListener;
+import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
@@ -91,7 +94,7 @@ public class PopularFragment extends Fragment {
     View v; SongAdapter adapter;
 
     boolean error; boolean processAsCSV;boolean downloadNew=false;
-    boolean getitFromFirebase=false; boolean passed=false;
+    boolean getitFromFirebase=false; boolean passed=false,isSoundCloud;
     String json; boolean wait=false; String writeData;
     StringBuilder builder = new StringBuilder();
     int number=0; SharedPreferences preferences; String region;
@@ -156,6 +159,19 @@ public class PopularFragment extends Fragment {
 
                     mRelativelayout.setBackground(activity.getResources().getDrawable(R.drawable.trend_background2));
                     url = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=PL4fGSI1pDJn5kI81J1fYWK5eZRl1zJ5kM";
+                    break;
+                case "sound20":
+                    fileName = "sound20.csv";
+                    isSoundCloud = true;
+                    ref="sound_20";
+                    title = "Top 20 songs";
+                    mLinearlayout.removeAllViews();
+                    mOplayfab.setBackground(activity.getResources().getDrawable(R.drawable.button_background4));
+                    mOplayfab.setTextColor(ContextCompat.getColor(activity,R.color.background));
+                    getLayoutInflater().inflate(R.layout.trend_item3,mLinearlayout);
+
+                    mRelativelayout.setBackground(activity.getResources().getDrawable(R.drawable.trend_background3));
+                    url = "https://api-v2.soundcloud.com/charts?&kind=top&client_id="+ AppInterface.SOUNDCLOUD_API +"&genre=soundcloud:genres:all-music&offset=0&limit=50&linked_partitioning=1";
                     break;
                 case "most_viewed":
                     isOther=true;
@@ -226,9 +242,6 @@ public class PopularFragment extends Fragment {
             }
             Log.e(TAG, "onCreateView: Url to calculate: "+url);
         }
-
-      //  new getData().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
         return v;
     }
 
@@ -314,14 +327,12 @@ public class PopularFragment extends Fragment {
                             }else {
                                 String val = (String) dataSnapshot.child("timeString").getValue();
                                 if (val!=null) {
-                                    Calendar c = Calendar.getInstance();
-                                    c.setTime(new Date());
-                                    c.add(Calendar.DATE, -7);
-
-                                    int oldDate = Integer.parseInt(val);
-                                    int previousDate = Integer.parseInt(df.format(c.getTime()));
-
                                     if (fallinWeek) {
+                                        Calendar c = Calendar.getInstance();
+                                        c.setTime(new Date());
+                                        c.add(Calendar.DATE, -7);
+                                        int oldDate = Integer.parseInt(val);
+                                        int previousDate = Integer.parseInt(df.format(c.getTime()));
                                         if (oldDate>=previousDate) {
                                             json = (String) dataSnapshot.child("data").getValue();
                                             YTutils.writeContent(activity,fileName,val+"$"+json);
@@ -417,8 +428,14 @@ public class PopularFragment extends Fragment {
             Log.e(TAG, "doInBackground: The beginning of the end");
             if (downloadNew) {
                 Log.e(TAG, "doInBackground: Downloading data now..." );
-                APIResponse response = new APIResponse(url);
-                json = response.getJson();
+                APIResponse response;
+                if (isSoundCloud) {
+                    HttpHandler handler = new HttpHandler();
+                    json = handler.makeServiceCall(url);
+                }else {
+                    response = new APIResponse(url);
+                    json = response.getJson();
+                }
                 if (json == null) {
                     error=true;
                     return null;
@@ -427,7 +444,7 @@ public class PopularFragment extends Fragment {
                     JSONObject object = new JSONObject(json);
                     builder.append(YTutils.getTodayDate_nogaps());
                     processJSON(object);
-                    if (!isOther) {
+                    if (!isOther && !isSoundCloud) {
                         String nextToken = object.getString("nextPageToken");
                         response = new APIResponse(url+"&pageToken="+nextToken);
                         json = response.getJson();
@@ -451,15 +468,30 @@ public class PopularFragment extends Fragment {
                 String[] lines = json.split("\\$");
                 for (String line: lines) {
                     if (line.isEmpty()) continue;
-                    if (!line.contains("|")) continue;
+                    if (isSoundCloud) {
+                        if (!line.contains(">")) continue;
+                    }
+                    else if (!line.contains("|")) continue;
+                    line = line.trim();
                    try {
-                       String[] childs = line.split("\\|");
+                       String[] childs;
+                       if (isSoundCloud)
+                           childs = line.split(">");
+                       else
+                           childs = line.split("\\|");
                        String title = childs[0];
                        String channelTitle = childs[1];
                        String videoId = childs[2];
-                       DiscoverModel discoverModel = new DiscoverModel(
-                               title,channelTitle,YTutils.getImageUrlID(videoId),
-                               YTutils.getYtUrl(videoId));
+                       DiscoverModel discoverModel;
+                       if (isSoundCloud) {
+                           discoverModel = new DiscoverModel(
+                                   title,channelTitle,childs[3],videoId
+                           );
+                       }else {
+                           discoverModel = new DiscoverModel(
+                                   title,channelTitle,YTutils.getImageUrlID(videoId),
+                                   YTutils.getYtUrl(videoId));
+                       }
 
                        if (strings.contains("ytID:"+videoId)||strings.contains("sd:"+videoId))
                            discoverModel.setDisabled(true);
@@ -476,6 +508,33 @@ public class PopularFragment extends Fragment {
         }
 
         void processJSON(JSONObject object) {
+            if (isSoundCloud) {
+                try {
+                    JSONArray array = object.getJSONArray("collection");
+                    Log.e(TAG, "processJSON: Total Size: "+array.length());
+                    for (int i=0;i<array.length();i++) {
+                        JSONObject obj = array.getJSONObject(i).getJSONObject("track");
+                        String title = obj.getString("title");
+                        String channelTitle = obj.getJSONObject("user").getString("username");
+
+                        String imageUrl = obj.getString("artwork_url");
+                        String videoId = obj.getString("permalink_url");
+
+                        DiscoverModel discoverModel = new DiscoverModel(
+                                title,channelTitle,imageUrl,videoId
+                        );
+
+                        if (strings.contains("ytID:"+videoId)||strings.contains("sd:"+videoId))
+                            discoverModel.setDisabled(true);
+
+                        models.add(discoverModel);
+                        number++;
+                        builder.append("$").append(title).append(">").append(channelTitle).append(">")
+                                .append(videoId).append(">").append(imageUrl);
+                    }
+                }catch (Exception e){e.printStackTrace();}
+                return;
+            }
            try {
                JSONArray array = object.getJSONArray("items");
                for (int i=0;i<array.length();i++) {

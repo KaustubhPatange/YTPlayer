@@ -35,8 +35,8 @@
                           <map>
                             <entry key="assetSourceType" value="FILE" />
                             <entry key="color" value="ffffff" />
-                            <entry key="outputName" value="ic_sale" />
-                            <entry key="sourceFile" value="D:\Pictures\sale.svg" />
+                            <entry key="outputName" value="ic_youtube_logo" />
+                            <entry key="sourceFile" value="D:\Pictures\svg\youtube.svg" />
                           </map>
                         </option>
                       </PersistentState>

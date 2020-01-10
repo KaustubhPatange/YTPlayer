@@ -306,7 +306,7 @@ public class OPlaylistFragment extends Fragment {
                     Log.e(TAG, "onCreateView: " + AppSettings.sortType.ordinal());
                     editor.apply();
                     if (searchMusic)
-                        new searchTask(scanAlbum,localModel).execute();
+                        new searchTask(scanAlbum,localModel).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     else
                         new getData_Offline(mainFile.getPath()).execute();
                     return true;
@@ -328,6 +328,7 @@ public class OPlaylistFragment extends Fragment {
 
 
         public searchTask(boolean scanAlbum, LocalModel model) {
+            Log.e(TAG, "searchTask: Created Task" );
             this.scanAlbum = scanAlbum;
             this.model = model;
             albumKey = new ArrayList<>();
@@ -637,7 +638,7 @@ public class OPlaylistFragment extends Fragment {
                     if (localMusic && !searchMusic)
                         new getData_Offline(mainFile.getPath()).execute();
                     else if (searchMusic)
-                        new searchTask(scanAlbum,localModel).execute();
+                        new searchTask(scanAlbum,localModel).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     loadComplete=true;
                 }
             });

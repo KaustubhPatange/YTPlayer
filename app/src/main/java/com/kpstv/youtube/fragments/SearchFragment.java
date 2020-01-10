@@ -75,7 +75,7 @@ public class SearchFragment extends Fragment {
     SharedPreferences preferences,settingpref; String region="global";
 
     private static String SpotifyTrendsCSV, SpotifyViralCSV;
-    CardView top100Card,viral100Card,mostViewedCard,mostPopularCard,weeklyPopularCard;
+    CardView top100Card,viral100Card,mostViewedCard,mostPopularCard,weeklyPopularCard,top20songsCard;
     ToolTipManager toolTipManager;
 
     ImageView imageView1;
@@ -118,6 +118,7 @@ public class SearchFragment extends Fragment {
             tipLayout = v.findViewById(R.id.search_layout);
             top100Card = v.findViewById(R.id.top100songsCard);
             viral100Card = v.findViewById(R.id.top100musicCard);
+            top20songsCard = v.findViewById(R.id.top20songsCard);
             mostViewedCard = v.findViewById(R.id.most_viewed_card);
             mostPopularCard = v.findViewById(R.id.most_popular_card);
             weeklyPopularCard = v.findViewById(R.id.week_popular_card);
@@ -251,6 +252,20 @@ public class SearchFragment extends Fragment {
                 FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
                 ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
                 ft.replace(R.id.fragment_container, MainActivity.popularFrag,"normalTag");
+                ft.commit();
+            });
+            top20songsCard.setOnClickListener(view -> {
+                if (!YTutils.isInternetAvailable()) {
+                    Toast.makeText(activity, "No active connection is found!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                try {
+                    MainActivity.popularFrag.onDestroy();
+                }catch (Exception e){}
+                MainActivity.popularFrag = new PopularFragment();
+                FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
+                ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+                ft.replace(R.id.fragment_container, MainActivity.popularFrag,"sound20");
                 ft.commit();
             });
             viral100Card.setOnClickListener(view -> {
