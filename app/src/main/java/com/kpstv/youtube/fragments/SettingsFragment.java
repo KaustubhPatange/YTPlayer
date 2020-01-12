@@ -1,7 +1,9 @@
 package com.kpstv.youtube.fragments;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
@@ -208,24 +210,47 @@ public class SettingsFragment extends PreferenceFragment {
         } else Toast.makeText(getActivity(), "No backups were found!", Toast.LENGTH_LONG).show();
     }
 
+    @SuppressLint("StaticFieldLeak")
     void backupData() {
-        String postFix = YTutils.getTodayDate_Time();
-        SharedPreferences preferences = getActivity().getSharedPreferences("history",
-                Context.MODE_PRIVATE);
-        String urls = preferences.getString("urls","");
-        if (!urls.isEmpty()) {
-            YTutils.writeContent(getActivity(),"History",urls);
-        }
-        YTutils.getFile("YTPlayer/backups").mkdirs();
-        File location = YTutils.getFile("YTPlayer/backups/backup-"+postFix+".zip");
-        YTutils.zipFileAtPath(getActivity().getFilesDir().toString(),
-                location.toString());
-        if (location.exists())
-            Toast.makeText(getActivity(), "Created local backup-"+postFix+".zip", Toast.LENGTH_LONG).show();
-        else {
-            Toast.makeText(getActivity(), "Failed creating a local backup", Toast.LENGTH_LONG).show();
-            Log.e("FileName_To_Save",location.toString());
-        }
+        new AsyncTask<Void,Void,Void>() {
+            ProgressDialog progressDialog=new ProgressDialog(getActivity());
+            File location; String postFix;
+            @Override
+            protected void onPreExecute() {
+                progressDialog.setMessage("Backing up...");
+                progressDialog.show();
+                super.onPreExecute();
+            }
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                postFix = YTutils.getTodayDate_Time();
+                SharedPreferences preferences = getActivity().getSharedPreferences("history",
+                        Context.MODE_PRIVATE);
+                String urls = preferences.getString("urls","");
+                if (!urls.isEmpty()) {
+                    YTutils.writeContent(getActivity(),"History",urls);
+                }
+                YTutils.getFile("YTPlayer/backups").mkdirs();
+                location = YTutils.getFile("YTPlayer/backups/backup-"+postFix+".zip");
+                YTutils.zipFileAtPath(getActivity().getFilesDir().toString(),
+                        location.toString());
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                progressDialog.dismiss();
+                if (location!=null && location.exists())
+                    Toast.makeText(getActivity(), "Created local backup-"+postFix+".zip", Toast.LENGTH_LONG).show();
+                else {
+                    Toast.makeText(getActivity(), "Failed creating a local backup", Toast.LENGTH_LONG).show();
+                    Log.e("FileName_To_Save",location.toString());
+                }
+                super.onPostExecute(aVoid);
+            }
+        }.execute();
+
     }
 
     @Override

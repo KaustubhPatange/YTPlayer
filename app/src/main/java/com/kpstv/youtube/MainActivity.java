@@ -121,6 +121,8 @@ import com.naveed.ytextractor.ExtractorException;
 import com.naveed.ytextractor.YoutubeStreamExtractor;
 import com.naveed.ytextractor.model.YTMedia;
 import com.naveed.ytextractor.model.YoutubeMeta;
+import com.spyhunter99.supertooltips.ToolTip;
+import com.spyhunter99.supertooltips.ToolTipManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -189,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
     public static String selectedItemText=""; public static int sleepSeconds;
     private static MediaSessionCompat mediaSession; LinearLayout swipeLayout;
-    PowerManager.WakeLock wakeLock;
+    PowerManager.WakeLock wakeLock; static ToolTipManager toolTipManager;
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -257,6 +259,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         actionChannelTitle = findViewById(R.id.action_channelTitle);
         songProgress = findViewById(R.id.songLayoutProgress);
         loadProgress = findViewById(R.id.song_progress);
+
+        toolTipManager = new ToolTipManager(activity);
+
 
         // Check onComing links from YouTube or Spotify...
         CheckIntent(getIntent());
@@ -1473,6 +1478,21 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                             libraryFrag.onActivityResult(101,0,null);
                             changePlayBack(false);
                         }
+
+
+                        if (!settingPref.getBoolean("showPlayerTip",false)) {
+                            ToolTip toolTip = new ToolTip()
+                                    .withText("Swipe player right and left to change song.")
+                                    .withTextColor(activity.getResources().getColor(R.color.black))
+                                    .withColor(activity.getResources().getColor(R.color.colorAccent)) //or whatever you want
+                                    .withAnimationType(ToolTip.AnimationType.FROM_MASTER_VIEW)
+                                    .withShadow();
+                            toolTipManager.showToolTip(toolTip,bottom_player);
+                            SharedPreferences.Editor editor = settingPref.edit();
+                            editor.putBoolean("showPlayerTip",true);
+                            editor.apply();
+                        }
+
                         break;
                 }
             }

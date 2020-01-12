@@ -7,6 +7,7 @@ public class AppSettings {
     public static SortOrder sortOrder;
     public static SortType sortType;
 
+    public static boolean showLyricTooltip=false;
     public static boolean showAds=true;
     public static boolean listenAudioChange=true;
     public static boolean contentActivated =false;

@@ -44,6 +44,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.TransitionOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.coremedia.iso.boxes.Container;
@@ -64,6 +65,8 @@ import com.kpstv.youtube.utils.SoundCloud;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
+import com.spyhunter99.supertooltips.ToolTip;
+import com.spyhunter99.supertooltips.ToolTipManager;
 import com.tonyodev.fetch2.Fetch;
 import com.warkiz.widget.IndicatorSeekBar;
 import com.warkiz.widget.OnSeekChangeListener;
@@ -248,11 +251,15 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                    // shareButton.setVisibility();
                     Log.e(TAG, "onCreate: ShareButtonState:"+shareButton.getVisibility() );
 
-                   Intent intent = new Intent(Intent.ACTION_SEND);
-                   intent.setType("text/plain");
-                   intent.putExtra(Intent.EXTRA_TEXT,"Listen to "+MainActivity.videoTitle+" by "+MainActivity.channelTitle+" "+
-                           YTutils.getYtUrl(MainActivity.videoID));
-                   activity.startActivity(Intent.createChooser(intent,"Share"));
+                   if (MainActivity.localPlayBack) {
+                       YTutils.shareFile(PlayerActivity2.activity,new File(MainActivity.videoID));
+                   }else {
+                       Intent intent = new Intent(Intent.ACTION_SEND);
+                       intent.setType("text/plain");
+                       intent.putExtra(Intent.EXTRA_TEXT,"Listen to "+MainActivity.videoTitle+" by "+MainActivity.channelTitle+" "+
+                               YTutils.getYtUrl(MainActivity.videoID));
+                       activity.startActivity(Intent.createChooser(intent,"Share"));
+                   }
 
                 case MotionEvent.ACTION_CANCEL: {
                     ImageButton view = (ImageButton) v;
@@ -458,6 +465,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     public static void setLyricData(Spanned text) {
         if (text!=null) {
+            Log.e(TAG, "setLyricData: Show data here..." +AppSettings.showLyricTooltip );
             lyricText = text;
             lyricButton.setVisibility(View.VISIBLE);
         }else {
@@ -981,15 +989,15 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
     public static void showAd() {
         if (!AppSettings.showAds)
             return;
-        //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712, Use ca-app-pub-1763645001743174/8453566324
+        //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712
         mInterstitialAd = new InterstitialAd(activity);
         mInterstitialAd.setAdUnitId("ca-app-pub-1164424526503510/4801416648");
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
-        mInterstitialAd.setAdListener(new AdListener(){
+        mInterstitialAd.setAdListener(new AdListener() {
             @Override
             public void onAdFailedToLoad(int i) {
                 super.onAdFailedToLoad(i);
-                Log.e(TAG, "onAdFailedToLoad: Ad failed to load: "+i );
+                Log.e(TAG, "onAdFailedToLoad: Ad failed to load: " + i);
             }
 
             @Override

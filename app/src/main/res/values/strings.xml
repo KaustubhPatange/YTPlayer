@@ -97,4 +97,6 @@
     <string name="default_client_id" translatable="false">203428087039-1a5nv4oq13v39nqtjfplp7r6ff9pckk0.apps.googleusercontent.com</string>
     <string name="pgt">If you have any problem with the gateway like premium not activated after payment, <a href="">follow this steps.</a></string>
     <string name="htg">How to guide, <a href="">here!</a></string>
+    <string name="rescan_lib">Rescaning library?</string>
+    <string name="rescan_text">Whenever you are adding new songs to storage, make sure to Rescan library by clicking 3 dots on top right corner.</string>
 </resources>

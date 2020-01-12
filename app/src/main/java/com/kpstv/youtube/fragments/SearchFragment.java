@@ -106,6 +106,7 @@ public class SearchFragment extends Fragment {
 
             toolTipManager = new ToolTipManager(activity);
             ToolTip toolTip = new ToolTip()
+                    .withTextColor(activity.getResources().getColor(R.color.black))
                     .withText("You can also enter Spotify or YouTube url.")
                     .withColor(getResources().getColor(R.color.colorAccent)) //or whatever you want
                     .withAnimationType(ToolTip.AnimationType.FROM_MASTER_VIEW)
@@ -483,9 +484,12 @@ public class SearchFragment extends Fragment {
             }
 
             String trendRead = YTutils.readContent(activity,"trend_"+region+".csv");
+            Log.e(TAG, "doInBackground: is File null" );
             if (trendRead!=null && !trendRead.isEmpty()) {
                 String[] lines = trendRead.split("\n|\r");
+                Log.e(TAG, "doInBackground: Not file null: "+lines[0]+ ", lines Length: "+lines.length);
                 if (lines[0].contains(YTutils.getTodayDate())&&lines.length==11) {
+                    Log.e(TAG, "doInBackground: Trend In here...");
                     for (int i=1;i<11;i++) {
                         String id = lines[i].split(",")[1];
 
@@ -515,17 +519,20 @@ public class SearchFragment extends Fragment {
                        String search_text = title.replace(" ","+")
                                + "+by+" + author.replace(" ","+");
 
+                       Log.e("TrendingLines",line.split(",")[1].replace("\"",""));
+
                        YTSearch ytSearch = new YTSearch(search_text);
 
                        final String videoId = ytSearch.getVideoIDs().get(0);
                        String imgurl =YTutils.getImageUrlID(videoId);
 
-                       Log.e("TrendingLines",line.split(",")[1].replace("\"",""));
                        publishProgress((float)(i-2)*10);
                        models.add(0,new SearchModel(
                                title, imgurl, "https://www.youtube.com/watch?v="+videoId
                        ));
-                   }catch (Exception ignored){ Log.e("ExceptionFragment",ignored.getMessage()); }
+                   }catch (Exception e){
+                       e.printStackTrace();
+                   }
                 }
             }
             // Save data to internal storage

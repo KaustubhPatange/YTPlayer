@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -14,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -52,8 +54,9 @@ public class LocalMusicFragment extends Fragment {
     RecyclerView recyclerView; Toolbar toolbar;
     LinearLayoutManager manager; LinearLayout noLayout;
     OFAdapter adapter; ArrayList<OFModel> models;
-    AsyncTask<Void,String,Void> loadTask;
-    Fragment localFrag;
+    AsyncTask<Void,String,Void> loadTask; LinearLayout localGotButton;
+    Fragment localFrag; LinearLayout localLayout;
+    SharedPreferences preferences; boolean showTip;
     private static final String TAG = "LocalMusicFragment";
 
     @Override
@@ -88,11 +91,23 @@ public class LocalMusicFragment extends Fragment {
                 return true;
             });
 
+            preferences = activity.getSharedPreferences("settings",Context.MODE_PRIVATE);
+            showTip = preferences.getBoolean("showLocalTip",true);
+
             recyclerView = v.findViewById(R.id.recyclerView);
             models = new ArrayList<>();
             noLayout = v.findViewById(R.id.noLocalLayout);
+            localGotButton = v.findViewById(R.id.local_gotButton);
+            localLayout = v.findViewById(R.id.local_layout);
             manager = new LinearLayoutManager(activity);
             recyclerView.setLayoutManager(manager);
+
+            localGotButton.setOnClickListener(view -> {
+                localLayout.setVisibility(View.GONE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean("showLocalTip",false);
+                editor.apply();
+            });
 
             if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) {
                 if (activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -253,6 +268,8 @@ public class LocalMusicFragment extends Fragment {
                 adapter = new OFAdapter(activity,models);
                 registerAdapterClicks();
                 recyclerView.setAdapter(adapter);
+                if (showTip)
+                    localLayout.setVisibility(View.VISIBLE);
             }else {
                 noLayout.setVisibility(View.VISIBLE);
                 recyclerView.setVisibility(View.GONE);

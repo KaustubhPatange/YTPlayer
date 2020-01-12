@@ -33,11 +33,6 @@ public class YTSearch {
 
     public YTSearch(String query) {
 
-       /* String tosearch = query.replace(" ","+")
-                .replace("&#039;","'")
-                .replace("&#038;","%26")
-                .replace(",","%2");
-*/
         videoIDs = new ArrayList<>();
         channelImages = new ArrayList<>();
         try {
@@ -52,6 +47,9 @@ public class YTSearch {
             while((line = reader.readLine()) != null)
             {
                 builder.append(line).append("\n");
+                if (line.contains("src=\"//i.ytimg.com")) {
+                    videoIDs.add(line.split("/")[4]);
+                }
                 if (line.contains("src=\"https://i.ytimg.com"))
                 {
                     videoIDs.add(line.split("/")[4]);
