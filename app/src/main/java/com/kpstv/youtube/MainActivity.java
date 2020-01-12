@@ -13,6 +13,8 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.media.AudioFocusRequest;
+import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.audiofx.BassBoost;
 import android.media.audiofx.Equalizer;
@@ -24,6 +26,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -65,10 +68,15 @@ import com.facebook.network.connectionclass.ConnectionQuality;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.audio.AudioAttributes;
+import com.google.android.exoplayer2.audio.AudioFocusManager;
+import com.google.android.exoplayer2.audio.AudioListener;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
@@ -142,7 +150,7 @@ import cat.ereza.customactivityoncrash.config.CaocConfig;
 
 import static android.view.View.VISIBLE;
 
-public class MainActivity extends AppCompatActivity implements AppInterface, SleepBottomSheet.ItemClickListener, HistoryBottomSheet.BottomSheetListener, NCFragment.NoConnectionListener {
+public class MainActivity extends AppCompatActivity implements AppInterface, SleepBottomSheet.ItemClickListener, HistoryBottomSheet.BottomSheetListener, NCFragment.NoConnectionListener{
 
     // https://www.googleapis.com/youtube/v3/videos?id=BDocp-VpCwY&key=AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw&part=snippet,statistics
 
@@ -181,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
     public static String selectedItemText=""; public static int sleepSeconds;
     private static MediaSessionCompat mediaSession; LinearLayout swipeLayout;
-
+    PowerManager.WakeLock wakeLock;
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -211,6 +219,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                         getResources().getString(R.string.app_name)), BANDWIDTH_METER);
 
         player = ExoPlayerFactory.newSimpleInstance(MainActivity.this, trackSelector);
+
+      //  AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
 
         activity = MainActivity.this;
 
@@ -384,6 +395,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
         }
 
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "app:wakelockTag");
+        wakeLock.acquire();
     }
 
     void setDefaultEqualizerValues() {
@@ -688,6 +702,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
     @Override
     protected void onDestroy() {
+        wakeLock.release();
         if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             notificationManager.deleteNotificationChannel("channel_01");
@@ -1293,9 +1308,6 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
                 for(int i=0; i<adativeStream.size();i++) addVideoToList(adativeStream.get(i),videoTitle,channelTitle);
 
-                Log.e(TAG, "onExtractionDone: AudioLink: "+audioLink );
-
-
                 Log.e(TAG, "parseVideoNewMethod: Ending here...." );
                 continueinMainThread(audioLink);
             }
@@ -1353,6 +1365,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
     private static void continueinMainThread(String link) {
 
+        Log.e(TAG, "onExtractionDone: AudioLink: "+link );
+
         player.stop();
         player.release();
         if (link.startsWith("isPath:"))
@@ -1369,11 +1383,32 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         makePause();
         isplaying = true;
 
+        if (AppSettings.listenAudioChange) {
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setUsage(C.USAGE_MEDIA)
+                    .setContentType(C.CONTENT_TYPE_MOVIE)
+                    .build();
+
+            player.setAudioAttributes(audioAttributes, true);
+        }
+
         player.addListener(new Player.EventListener() {
-            @SuppressLint("RestrictedApi")
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+
+                Log.e(TAG, "onPlayerStateChanged: playWhenReady: "+playWhenReady+", playbackState: "
+                        +YTutils.getPlayBackstate(playbackState));
+
+                /** A logic to listen to audio focus change listener */
+                if (!playWhenReady && playbackState==ExoPlayer.STATE_READY && AppSettings.listenAudioChange) {
+                    Log.e(TAG, "onPlayerStateChanged: Here I am..." );
+                    makePlay();
+                    isplaying = false;
+                    rebuildNotification();
+                }
                 switch (playbackState) {
+                    case ExoPlayer.STATE_IDLE:
+                        break;
                     case ExoPlayer.STATE_BUFFERING:
                         try {
                             if (!localPlayBack) {
@@ -1386,8 +1421,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                         makePlay();
                         isplaying = false;
                         playNext();
-                        Log.e(TAG, "onPlayerStateChanged: State Changed "+MainActivity.sleepEndTrack );
-                        if (sleepEndTrack) {
+                       if (sleepEndTrack) {
                             Log.e(TAG, "onPlayerStateChanged: tiggered" );
                             sleepEndTrack=false;
                             dontAllowToPlay=true;
@@ -1428,6 +1462,11 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
                         rebuildNotification();
                         updateProgressBar();
+
+                        // Store video into history
+                        if (!localPlayBack)
+                            new saveToHistory().execute(YTutils.getYtUrl(videoID));
+
                         if (dontAllowToPlay)
                         {
                             dontAllowToPlay=false;
@@ -1438,11 +1477,71 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 }
             }
         });
-
-        // Store video into history
-        if (!localPlayBack &&!loadedFromData)
-        new saveToHistory().execute(YTutils.getYtUrl(videoID));
     }
+
+    public static void setAudioFocusListener() {
+       /* AudioManager mAudioManager = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
+
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
+
+            AudioAttributes attributes = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MOVIE)
+                    .build();
+
+            AudioFocusRequest focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                    .setAudioAttributes(attributes)
+                    .setOnAudioFocusChangeListener(i -> {
+                        Log.e(TAG, "onAudioFocusChange: Focus Change OREO: "+i );
+                        if (i==AudioManager.AUDIOFOCUS_LOSS) {
+                            changePlayBack(false);
+                        }
+                    })
+                    .build();
+
+            mAudioManager.requestAudioFocus(focusRequest);
+
+        }else {
+            mAudioManager.requestAudioFocus(i -> {
+                Log.e(TAG, "onAudioFocusChange: Focus Change "+i );
+                if (i==AudioManager.AUDIOFOCUS_LOSS) {
+                    changePlayBack(false);
+                }
+                },AudioManager.STREAM_MUSIC,AudioManager.AUDIOFOCUS_GAIN);
+        }*/
+    }
+
+   /* @Override
+    public void onAudioFocusChange(int focusChange) {
+        switch (focusChange) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                if (mPlaybackDelayed || mResumeOnFocusGain) {
+                    synchronized(mFocusLock) {
+                        mPlaybackDelayed = false;
+                        mResumeOnFocusGain = false;
+                    }
+                    playbackNow();
+                }
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS:
+                synchronized(mFocusLock) {
+                    mResumeOnFocusGain = false;
+                    mPlaybackDelayed = false;
+                }
+                pausePlayback();
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                synchronized(mFocusLock) {
+                    mResumeOnFocusGain = true;
+                    mPlaybackDelayed = false;
+                }
+                pausePlayback();
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                // ... pausing or ducking depends on your application
+                break;
+        }
+    }*/
 
     public static void addEqualizer() {
         int audioSessionId = player.getAudioComponent().getAudioSessionId();
@@ -1868,13 +1967,13 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     static void showAd(Context con) {
         if (AppSettings.playAdCount%AppSettings.adOffset==0 && AppSettings.playAdCount!=0 && AppSettings.showAds && !localPlayBack) {
             Log.e(TAG, "showAd: Showing Ad..." );
-            //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712, Use ca-app-pub-1763645001743174/8453566324
+            //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712
            try {
                PlayerActivity2.showAd();
            }catch (Exception ex){
               try {
                   InterstitialAd mInterstitialAd = new InterstitialAd(con);
-                  mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+                  mInterstitialAd.setAdUnitId("ca-app-pub-1164424526503510/4801416648");
                   mInterstitialAd.loadAd(new AdRequest.Builder().build());
                   mInterstitialAd.setAdListener(new AdListener() {
                       @Override
@@ -2039,7 +2138,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 }
             }else YTutils.writeContent(activity,"library.csv",insert_data);
 
-            DataUtils.saveUrl(activity,videoID,audioLink,ytConfigs);
+            if (!loadedFromData)
+                DataUtils.saveUrl(activity,videoID,audioLink,ytConfigs);
 
             /*// Get playlist
             ArrayList<String> urls = new ArrayList<>();

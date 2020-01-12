@@ -89,7 +89,7 @@ import java.util.ArrayList;
 public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     static String YouTubeUrl;
-    static ImageView backImage, viewImage;
+    static ImageView backImage,backImage1, viewImage;
 
     static ConstraintLayout mainlayout;
 
@@ -106,7 +106,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     static ImageView mainImageView;
 
-    static ProgressBar mprogressBar;
+   // static ProgressBar mprogressBar;
 
     static IndicatorSeekBar indicatorSeekBar;
     private static InterstitialAd mInterstitialAd;
@@ -245,6 +245,9 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 }
                 case MotionEvent.ACTION_UP:
 
+                   // shareButton.setVisibility();
+                    Log.e(TAG, "onCreate: ShareButtonState:"+shareButton.getVisibility() );
+
                    Intent intent = new Intent(Intent.ACTION_SEND);
                    intent.setType("text/plain");
                    intent.putExtra(Intent.EXTRA_TEXT,"Listen to "+MainActivity.videoTitle+" by "+MainActivity.channelTitle+" "+
@@ -296,6 +299,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             MainActivity.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
             Log.e(TAG, "onCreate: Changing nColor: "+MainActivity.nColor );
             backImage.setColorFilter(MainActivity.nColor);
+            backImage1.setColorFilter(MainActivity.nColor);
         });
 
         addToPlaylist.setOnTouchListener((v, motionEvent) -> {
@@ -553,7 +557,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     static void player_common() {
         mainlayout.setVisibility(View.VISIBLE);
-        mprogressBar.setVisibility(View.GONE);
+      //  mprogressBar.setVisibility(View.GONE);
         mainTitle.setText(MainActivity.videoTitle);
         channelTitle.setText(MainActivity.channelTitle);
         if (!MainActivity.localPlayBack)
@@ -606,7 +610,10 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         int colorTo = MainActivity.nColor;
         if (backImage.getTag()!=null) {
             ChangeBackgroundColor(colorTo);
-        }else backImage.setColorFilter(MainActivity.nColor);
+        }else {
+            backImage.setColorFilter(MainActivity.nColor);
+            backImage1.setColorFilter(MainActivity.nColor);
+        }
         backImage.setTag(colorTo);
 
         makeRepeat(MainActivity.isLoop);
@@ -624,6 +631,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
         colorAnimation.setDuration(300);
         colorAnimation.addUpdateListener(animator -> backImage.setColorFilter((int) animator.getAnimatedValue()));
+        colorAnimation.addUpdateListener(animator -> backImage1.setColorFilter((int) animator.getAnimatedValue()));
         colorAnimation.start();
     }
 
@@ -938,7 +946,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         progressBar = findViewById(R.id.progressBar);
         addToPlaylist = findViewById(R.id.addPlaylist_button);
         navigationDown = findViewById(R.id.navigation_down);
-        mprogressBar = findViewById(R.id.mainprogress);
+      //  mprogressBar = findViewById(R.id.mainprogress);
         mainTitle = findViewById(R.id.maintitle);
         viewCount = findViewById(R.id.mainviews);
         currentDuration = findViewById(R.id.currentDur);
@@ -947,6 +955,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         indicatorSeekBar = findViewById(R.id.seekBar);
         mainlayout = findViewById(R.id.mainlayout);
         backImage = findViewById(R.id.background_image);
+        backImage1 = findViewById(R.id.background_image1);
         channelTitle = findViewById(R.id.channelTitle);
         youTubeButton = findViewById(R.id.youtube_IButton);
 
@@ -974,7 +983,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             return;
         //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712, Use ca-app-pub-1763645001743174/8453566324
         mInterstitialAd = new InterstitialAd(activity);
-        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.setAdUnitId("ca-app-pub-1164424526503510/4801416648");
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
         mInterstitialAd.setAdListener(new AdListener(){
             @Override
@@ -1024,8 +1033,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 View v = getLayoutInflater().inflate(R.layout.alert_buy_premium,null);
                 new AlertDialog.Builder(this)
                         .setView(v).setPositiveButton("Purchase",(dialogInterface, i) -> {
-                            Intent intent = new Intent(this,PurchaseActivity.class);
-                            startActivity(intent);
+                    YTutils.openPurchaseActivity(this);
                         }).setNegativeButton("Cancel",null)
                         .show();
                 return;

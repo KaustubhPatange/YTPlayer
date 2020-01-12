@@ -1,6 +1,7 @@
 package com.kpstv.youtube.utils;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.text.Html;
 import android.text.Spanned;
@@ -21,8 +22,8 @@ import java.util.regex.Pattern;
 
 public class LyricsApi extends AsyncTask<Void,Void,Void> {
     private static final String TAG = "LyricsApi";
-    String videoTitle, authorName; Activity activity;
-    public LyricsApi(Activity activity,String videoTitle, String authorName) {
+    String videoTitle, authorName; Context activity;
+    public LyricsApi(Context activity, String videoTitle, String authorName) {
         this.activity = activity;
         this.videoTitle = videoTitle;
         this.authorName = authorName;
@@ -79,7 +80,7 @@ public class LyricsApi extends AsyncTask<Void,Void,Void> {
                     }
                 }
             }else { onError("Lyrics not found");}
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             onError("Failed to connect API");
         }

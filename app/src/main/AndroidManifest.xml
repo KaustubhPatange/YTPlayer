@@ -25,13 +25,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <!-- TODO: Change Sample AdMob AppNotify ID: ca-app-pub-3940256099942544~3347511713, ca-app-pub-1763645001743174~5602018181 -->
+        <!-- TODO: Change Sample AdMob AppNotify ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" /> <!-- TODO: Change your razorpay api key here... -->
+            android:value="ca-app-pub-1164424526503510~9892933550" />
         <meta-data
             android:name="com.razorpay.ApiKey"
-            android:value="rzp_test_xilTaJRWPpqiUp" />
+            android:value="rzp_test_xilTaJRWPpqiUp" /> <!-- TODO: Change your razorpay api key here... -->
         <activity
             android:theme="@style/AppTheme.Purchase.NoActionBar"
             android:screenOrientation="portrait"

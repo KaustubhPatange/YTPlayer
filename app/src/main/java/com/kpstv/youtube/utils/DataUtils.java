@@ -15,6 +15,9 @@ public class DataUtils {
 
     // yyyyMMddHHmmss|videoId|url|text,url,ext,isAudio>text,url,ext,isAudio
 
+
+    // 2020 01 11 12 45 32
+    // 2020 01 11 12 56 00
     private static final String TAG = "DataUtils";
 
     public static class DataModel {
@@ -33,6 +36,7 @@ public class DataUtils {
     }
 
     public static DataModel getSavedUrl(Context context,String videoId,String title,String channelTitle) {
+        long start = System.currentTimeMillis();
         String data = YTutils.readContent(context,"urlList.csv");
 
         if (data!=null && !data.isEmpty()) {
@@ -70,6 +74,8 @@ public class DataUtils {
                                 configs.add(new YTConfig(confItems[0],confItems[1],confItems[2],title,channelTitle,isAudio,
                                         YTutils.getImageUrlID(videoId)));
                             }
+                            long end = System.currentTimeMillis();
+                            Log.e(TAG, "Got Url: "+videoId+" in "+(end-start)+"ms" );
                             return new DataModel(childs[2],configs);
                         }else return null;
                     }
@@ -81,7 +87,7 @@ public class DataUtils {
 
     public static void saveUrl(Context context, String videoId, String audioUrl, ArrayList<YTConfig> ytconfigs) {
 
-        Log.e(TAG, "saveUrl: "+videoId );
+        long start = System.currentTimeMillis();
 
         String data = YTutils.readContent(context,"urlList.csv");
 
@@ -112,5 +118,7 @@ public class DataUtils {
                 YTutils.writeContent(context,"urlList.csv",finalBuilder.toString().trim());
             }else YTutils.writeContent(context,"urlList.csv",data.trim()+"\n"+builder.toString());
         }else YTutils.writeContent(context,"urlList.csv",builder.toString());
+        long end = System.currentTimeMillis();
+        Log.e(TAG, "saveUrl: "+videoId+" in "+(end-start)+"ms" );
     }
 }

@@ -47,6 +47,7 @@
 
     <TextView
         android:padding="10dp"
+        android:onClick="helpClick"
         android:layout_gravity="bottom"
         android:autoLink="web"
         android:linksClickable="true"

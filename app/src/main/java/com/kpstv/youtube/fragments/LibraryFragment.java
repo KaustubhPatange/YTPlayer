@@ -18,6 +18,7 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +42,7 @@ import com.kpstv.youtube.adapters.SearchAdapter;
 import com.kpstv.youtube.models.PlaylistModel;
 import com.kpstv.youtube.models.SearchModel;
 import com.kpstv.youtube.utils.HttpHandler;
+import com.kpstv.youtube.utils.LyricsApi;
 import com.kpstv.youtube.utils.YTutils;
 
 import org.json.JSONArray;
@@ -299,23 +301,19 @@ public class LibraryFragment extends Fragment implements AppInterface {
     }
 
 
- /*   @Override
+  @Override
     public void onResume() {
-        String newregion = preferences.getString("pref_select_region","global");
-        if (!newregion.contains(region)) {
-            nestedScrollView.scrollTo(0, 0);
-
-            models.clear();
-            adapter.notifyDataSetChanged();
-
-            progressLayout.setVisibility(View.VISIBLE);
-            region = newregion;
-
-            setRecyclerView();
+        boolean newChange = activity.getSharedPreferences("appSettings",Context.MODE_PRIVATE)
+                .getBoolean("pref_audioChange",true);
+        if (newChange!=AppSettings.listenAudioChange) {
+            if (MainActivity.videoID!=null)
+                Toast.makeText(activity, "App will start listening changes when next song will be played.", Toast.LENGTH_LONG).show();
+            AppSettings.listenAudioChange = newChange;
         }
+
         super.onResume();
     }
-*/
+
     Handler mHandler = new Handler();
 
     public Runnable sleepTimerTask = new Runnable() {
@@ -404,8 +402,7 @@ public class LibraryFragment extends Fragment implements AppInterface {
     void onPurchaseClick() {
         if (!YTutils.isInternetAvailable())
             return;
-        Intent i = new Intent(activity, PurchaseActivity.class);
-        startActivity(i);
+       YTutils.openPurchaseActivity(activity);
     }
 
     void preClicks() {

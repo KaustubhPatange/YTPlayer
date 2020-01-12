@@ -9,6 +9,11 @@
             android:key="pref_select_region"
             android:summary="This will change your trending, viral songs as per your region choice."
             android:title="Select Region" />
+        <SwitchPreference
+            android:key="pref_audioChange"
+            android:defaultValue="true"
+            android:title="Listen to audio focus change"
+            android:summary="When ON app will pause the player when it detects any other app using audio service."/>
     </PreferenceCategory>
     <PreferenceCategory android:title="Look &#38; Feel">
         <SwitchPreference

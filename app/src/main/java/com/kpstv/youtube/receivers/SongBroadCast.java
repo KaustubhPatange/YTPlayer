@@ -135,9 +135,9 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
     void showAd(Context con) {
         if (AppSettings.playAdCount%AppSettings.adOffset==0 && AppSettings.playAdCount!=0 && AppSettings.showAds) {
             Log.e(TAG, "showAd: Showing Ad..." );
-            //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712, Use ca-app-pub-1763645001743174/8453566324
+            //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712
             mInterstitialAd = new InterstitialAd(con);
-            mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+            mInterstitialAd.setAdUnitId("ca-app-pub-1164424526503510/4801416648");
             mInterstitialAd.loadAd(new AdRequest.Builder().build());
             mInterstitialAd.setAdListener(new AdListener() {
                 @Override

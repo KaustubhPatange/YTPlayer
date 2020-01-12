@@ -82,8 +82,7 @@ public class DownloadActivity extends AppCompatActivity {
             purchaseLayout.setVisibility(View.GONE);
         }else {
             purchaseButton.setOnClickListener(view -> {
-                Intent intent = new Intent(this,PurchaseActivity.class);
-                startActivity(intent);
+                YTutils.openPurchaseActivity(this);
             });
         }
 

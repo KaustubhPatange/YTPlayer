@@ -189,8 +189,7 @@ public class EqualizerActivity extends AppCompatActivity {
             mPurchaselayout.setVisibility(View.GONE);
         }else {
             mPurchasebutton.setOnClickListener(view -> {
-                Intent intent = new Intent(this,PurchaseActivity.class);
-                startActivity(intent);
+                YTutils.openPurchaseActivity(this);
             });
         }
     }

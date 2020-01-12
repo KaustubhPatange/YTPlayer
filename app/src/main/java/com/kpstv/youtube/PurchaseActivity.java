@@ -182,8 +182,10 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
                     cancelButton.setOnClickListener(view -> alertDialog.dismiss());
 
                     razorpay.setOnClickListener(view -> {
-                        alertDialog.dismiss();
-                        client.quickCheckout();
+                        Toast.makeText(PurchaseActivity.this, "This payment method is currently disabled!", Toast.LENGTH_SHORT).show();
+
+                        /*alertDialog.dismiss();
+                        client.quickCheckout();*/
                     });
 
                     paypal.setOnClickListener(view -> {
@@ -245,6 +247,11 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
 
     public void guideClick(View view) {
         YTutils.StartURL("https://github.com/KaustubhPatange/YTPlayer/wiki/Purchasing-Premium-Content",this);
+    }
+
+    public void helpClick(View view) {
+        YTutils.StartURL("https://github.com/KaustubhPatange/YTPlayer/wiki/Purchasing-Premium-Content#q-payment-complete-but-premium-not-unlocked"
+                ,this);
     }
 
     AlertDialog alertDialog;

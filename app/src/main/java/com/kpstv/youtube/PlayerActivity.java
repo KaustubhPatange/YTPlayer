@@ -1145,7 +1145,7 @@ public class PlayerActivity extends AppCompatActivity {
     void LoadAd() {
         //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712, Use ca-app-pub-1763645001743174/8453566324
         mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-1763645001743174/8453566324");
+        mInterstitialAd.setAdUnitId("ca-app-pub-1164424526503510/4801416648");
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
     }

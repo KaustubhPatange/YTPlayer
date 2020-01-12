@@ -23,14 +23,13 @@
         android:theme="@style/BottomNavigationTheme"
         app:menu="@menu/bottom_navigation" />
 
-    <!-- TODO: Change ad unit ID for banner; Sample ca-app-pub-3940256099942544/6300978111-->
-
     <LinearLayout
         android:id="@+id/adViewLayout"
         android:layout_width="match_parent"
         android:gravity="center"
         android:layout_height="wrap_content"
         android:layout_above="@id/bottom_player">
+        <!-- TODO: Sample Banner ca-app-pub-3940256099942544/6300978111 -->
         <com.google.android.gms.ads.AdView
             android:visibility="gone"
             xmlns:ads="http://schemas.android.com/apk/res-auto"
@@ -38,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             ads:adSize="BANNER"
-            ads:adUnitId="ca-app-pub-3940256099942544/6300978111">
+            ads:adUnitId="ca-app-pub-1164424526503510/4743714503">
         </com.google.android.gms.ads.AdView>
     </LinearLayout>
 

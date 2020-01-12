@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.preference.SwitchPreference;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
@@ -31,6 +32,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.jakewharton.processphoenix.ProcessPhoenix;
+import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.utils.YTutils;
@@ -95,6 +97,8 @@ public class SettingsFragment extends PreferenceFragment {
             }else removeBackups();
             return false;
         });
+
+
 
         Preference backup = findPreference("pref_backup");
         backup.setOnPreferenceClickListener(preference -> {

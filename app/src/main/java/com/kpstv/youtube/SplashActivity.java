@@ -26,10 +26,18 @@ public class SplashActivity extends AppCompatActivity {
             setContentView(R.layout.splash_lollipop);
         }
 
+        File app = new File(getFilesDir(),"tmp.apk");
+        if (app.exists())
+            app.delete();
+
         File f = YTutils.getFile("YTPlayer");
         f.mkdirs();
 
-        if (getSharedPreferences("appSettings",MODE_PRIVATE).getBoolean("pref_purchase",false))
+        SharedPreferences pref = getSharedPreferences("appSettings",MODE_PRIVATE);
+        if (!pref.getBoolean("pref_audioChange",true))
+            AppSettings.listenAudioChange = false;
+
+        if (pref.getBoolean("pref_purchase",false))
             BillingUtils.publishPremium();
 
         SharedPreferences preferences = getSharedPreferences("settings",MODE_PRIVATE);

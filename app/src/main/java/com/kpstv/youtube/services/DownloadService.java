@@ -303,7 +303,7 @@ public class DownloadService extends Service {
                     String imageUri=null;
                     if (model.getVideoID().contains("soundcloud.com"))
                         imageUri = model.getImageUrl();
-                    else imageUri = YTutils.getImageUrlID(model.getVideoID());
+                    else imageUri = YTutils.getImageUrlID_HQ(model.getVideoID());
                     try {
                         Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
                             @Override

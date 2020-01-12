@@ -261,8 +261,7 @@ public class HistoryFragment extends Fragment {
             AlertDialog alertDialog = new AlertDialog.Builder(activity)
                     .setView(view)
                     .setPositiveButton("Purchase",(dialogInterface, i) -> {
-                        Intent intent = new Intent(activity, PurchaseActivity.class);
-                        startActivity(intent);
+                        YTutils.openPurchaseActivity(activity);
                     })
                     .setNegativeButton("Later",null)
                     .setNeutralButton("No Thanks",(dialogInterface, i) -> {

@@ -8,14 +8,25 @@
     tools:context=".PlayerActivity2">
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:background="@null"
+        android:background="@android:color/transparent"
         app:elevation="0dp"
         android:translationZ="0.1dp"
         android:layout_height="wrap_content">
+
         <android.support.constraint.ConstraintLayout
             android:id="@+id/mainLayout"
             android:layout_width="match_parent"
             android:layout_height="?android:attr/actionBarSize">
+            <ImageView
+                android:id="@+id/background_image1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@color/light_white"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#49000000"/>
             <ImageButton
                 android:paddingStart="15dp"
                 android:paddingEnd="15dp"
@@ -74,9 +85,11 @@
                 app:layout_constraintStart_toStartOf="@+id/navigation_down"
                 app:layout_constraintTop_toTopOf="parent" />
         </android.support.constraint.ConstraintLayout>
+
     </android.support.design.widget.AppBarLayout>
 
-    <RelativeLayout
+    <FrameLayout
+        app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <ImageView
@@ -89,13 +102,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/gradient_bg"/>
-        <ProgressBar
+        <!--<ProgressBar
             android:visibility="gone"
             android:id="@+id/mainprogress"
             android:layout_centerInParent="true"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </RelativeLayout>
+            android:layout_height="wrap_content" />-->
+    </FrameLayout>
 
 
     <LinearLayout

@@ -54,6 +54,7 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.gson.Gson;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
@@ -66,6 +67,7 @@ import com.kpstv.youtube.BuildConfig;
 import com.kpstv.youtube.CPlaylistActivity;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
+import com.kpstv.youtube.PurchaseActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.LocalModel;
 
@@ -140,6 +142,11 @@ public class YTutils implements AppInterface {
             imageUrl = "https://i.ytimg.com/vi/"+getVideoID(YtUrl)+"/hqdefault.jpg";
         return imageUrl;
     }
+
+    public static String getImageUrlID_HQ(String videoID) {
+        return "https://i.ytimg.com/vi/"+videoID+"/hqdefault.jpg";
+    }
+
     public static String getImageUrlID(String videoID) {
         String imageUrl = "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg";
         if (MainActivity.activity.getSharedPreferences("appSettings",MODE_PRIVATE)
@@ -679,6 +686,21 @@ public class YTutils implements AppInterface {
             YTutils.writeContent(activity,"artistImages.csv",title+"$"+imageUri);
         }
         return imageUri;
+    }
+
+    public static void openPurchaseActivity(Context context) {
+        Intent intent = new Intent(context, PurchaseActivity.class);
+        context.startActivity(intent);
+    }
+
+    public static String getPlayBackstate(int state) {
+        switch (state) {
+            case ExoPlayer.STATE_IDLE: return "IDLE";
+            case ExoPlayer.STATE_BUFFERING: return "BUFFERING";
+            case ExoPlayer.STATE_READY: return "READY";
+            case ExoPlayer.STATE_ENDED: return "ENDED";
+        }
+        return "-1";
     }
 
     public static String getAudioFormat(File f) {
