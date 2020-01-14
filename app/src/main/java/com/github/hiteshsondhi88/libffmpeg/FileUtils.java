@@ -13,9 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
 import java.util.Map;
 
-import static com.kpstv.youtube.services.DownloadService.TAG;
-
-public class FileUtils {
+class FileUtils {
 
     static final String ffmpegFileName = "ffmpeg";
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
@@ -53,12 +51,11 @@ public class FileUtils {
         return context.getFilesDir();
 	}
 
-    public static String getFFmpeg(Context context) {
+    static String getFFmpeg(Context context) {
         return getFilesDirectory(context).getAbsolutePath() + File.separator + FileUtils.ffmpegFileName;
-
     }
 
-    public static String getFFmpeg(Context context, Map<String,String> environmentVars) {
+    static String getFFmpeg(Context context, Map<String,String> environmentVars) {
         String ffmpegCommand = "";
         if (environmentVars != null) {
             for (Map.Entry<String, String> var : environmentVars.entrySet()) {
@@ -66,7 +63,6 @@ public class FileUtils {
             }
         }
         ffmpegCommand += getFFmpeg(context);
-        android.util.Log.e(TAG, "getFFmpeg: "+ffmpegCommand+", getFFmpeg(context): "+getFFmpeg(context));
         return ffmpegCommand;
     }
 

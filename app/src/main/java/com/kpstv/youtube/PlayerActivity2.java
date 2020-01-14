@@ -62,7 +62,7 @@ import com.kpstv.youtube.adapters.PlayerAdapter;
 import com.kpstv.youtube.fragments.LyricBottomSheet;
 import com.kpstv.youtube.models.LyricModel;
 import com.kpstv.youtube.models.YTConfig;
-import com.kpstv.youtube.services.DownloadService;
+//import com.kpstv.youtube.services.DownloadService;
 import com.kpstv.youtube.services.IntentDownloadService;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.SoundCloud;
@@ -398,7 +398,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         });
 
         downloadButton.setOnLongClickListener(view -> {
-            if (DownloadService.pendingJobs.size()>0) {
+            if (IntentDownloadService.pendingJobs.size()>0) {
                 Intent intent = new Intent(PlayerActivity2.this,DownloadActivity.class);
                 startActivity(intent);
             }

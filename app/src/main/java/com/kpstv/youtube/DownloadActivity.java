@@ -25,16 +25,17 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.github.hiteshsondhi88.libffmpeg.Util;
 import com.kpstv.youtube.adapters.DownloadAdapter;
 import com.kpstv.youtube.receivers.SongBroadCast;
-import com.kpstv.youtube.services.DownloadService;
+//import com.kpstv.youtube.services.DownloadService;
 import com.kpstv.youtube.services.IntentDownloadService;
 import com.kpstv.youtube.utils.YTutils;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 
-import static com.kpstv.youtube.services.DownloadService.downloadTask;
-import static com.kpstv.youtube.services.DownloadService.process;
+import static com.kpstv.youtube.services.IntentDownloadService.process;
+
+//import static com.kpstv.youtube.services.DownloadService.downloadTask;
+//import static com.kpstv.youtube.services.DownloadService.process;
 
 public class DownloadActivity extends AppCompatActivity {
 
@@ -112,12 +113,12 @@ public class DownloadActivity extends AppCompatActivity {
 
                             return true;
                         }
-                        if (downloadTask.getStatus()== AsyncTask.Status.RUNNING)
+                        /*if (downloadTask.getStatus()== AsyncTask.Status.RUNNING)
                         {
                             Log.e(TAG, "onCreate: Cancelling current task");
                             downloadTask.cancel(true);
-                        }
-                        if (!Util.isProcessCompleted(IntentDownloadService.process))
+                        }*/
+                        if (!YTutils.isProcessCompleted(process))
                         {
                             Log.e(TAG, "onCreate: Destroying process" );
                             process.destroy();

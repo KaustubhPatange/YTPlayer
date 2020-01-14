@@ -18,7 +18,8 @@ import android.widget.TextView;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.YTConfig;
-import com.kpstv.youtube.services.DownloadService;
+//import com.kpstv.youtube.services.DownloadService;
+import com.kpstv.youtube.services.IntentDownloadService;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.MyView
         popupMenu.setOnMenuItemClickListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.cancel_action:
-                    DownloadService.pendingJobs.remove(model);
+                    IntentDownloadService.pendingJobs.remove(model);
                     notifyDataSetChanged();
                     break;
             }

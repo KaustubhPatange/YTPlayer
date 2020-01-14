@@ -155,7 +155,7 @@
             android:launchMode="singleTask"
             android:noHistory="true" />
 
-        <service android:name=".services.DownloadService" />
+       <!-- <service android:name=".services.DownloadService" />-->
         <service android:name=".services.IntentDownloadService" />
 
 

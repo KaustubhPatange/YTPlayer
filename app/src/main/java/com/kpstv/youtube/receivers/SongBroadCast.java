@@ -30,7 +30,7 @@ import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity2;
 import com.kpstv.youtube.R;
-import com.kpstv.youtube.services.DownloadService;
+//import com.kpstv.youtube.services.DownloadService;
 import com.kpstv.youtube.services.IntentDownloadService;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.SoundCloud;

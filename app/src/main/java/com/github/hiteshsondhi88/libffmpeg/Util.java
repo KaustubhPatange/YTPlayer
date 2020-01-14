@@ -10,7 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
-public class Util {
+class Util {
 
     static boolean isDebug(Context context) {
         return (0 != (context.getApplicationContext().getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE));
@@ -52,7 +52,7 @@ public class Util {
         return null;
     }
 
-    public static void destroyProcess(Process process) {
+    static void destroyProcess(Process process) {
         if (process != null)
             process.destroy();
     }
@@ -61,7 +61,7 @@ public class Util {
         return asyncTask != null && !asyncTask.isCancelled() && asyncTask.cancel(true);
     }
 
-    public static boolean isProcessCompleted(Process process) {
+    static boolean isProcessCompleted(Process process) {
         try {
             if (process == null) return true;
             process.exitValue();

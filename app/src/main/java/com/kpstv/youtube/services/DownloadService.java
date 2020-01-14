@@ -1,3 +1,4 @@
+/*
 package com.kpstv.youtube.services;
 
 import android.app.Notification;
@@ -29,16 +30,11 @@ import com.downloader.Error;
 import com.downloader.OnDownloadListener;
 import com.downloader.PRDownloader;
 import com.downloader.PRDownloaderConfig;
-import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
-import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteAsyncTask;
-import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.FileUtils;
-import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.ShellCommand;
-import com.github.hiteshsondhi88.libffmpeg.Util;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.kpstv.libffmpeg.ExecuteBinaryResponseHandler;
+import com.kpstv.libffmpeg.FFmpeg;
+
+import com.kpstv.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
+import com.kpstv.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.google.android.exoplayer2.util.NotificationUtil;
 import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.Track;
@@ -49,6 +45,7 @@ import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.receivers.SongBroadCast;
+import com.kpstv.youtube.utils.FileUtils;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
 
@@ -74,7 +71,6 @@ import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static com.github.hiteshsondhi88.libffmpeg.FFmpeg.concatenate;
 import static com.kpstv.youtube.MainActivity.notificationManagerCompat;
 import static com.kpstv.youtube.MainActivity.supportFFmpeg;
 
@@ -159,9 +155,11 @@ public class DownloadService extends Service {
 
             if (currentModel==null) stopSelf();
 
-          /*  if (pendingJobs.size()>0) {
+          */
+/*  if (pendingJobs.size()>0) {
                 Log.e(TAG, "doInBackground: Next JOB: "+pendingJobs.get(0).getTaskExtra());
-            }//else Log.e(TAG, "doInBackground: NO JOB" );*/
+            }//else Log.e(TAG, "doInBackground: NO JOB" );*//*
+
 
             if (pendingJobs.size()>0 && (downloadTask!=null && downloadTask.getStatus() != AsyncTask.Status.RUNNING))
             {
@@ -315,7 +313,9 @@ public class DownloadService extends Service {
 
                         String audioUrl = model.getUrl(); // This is basically a DownloadUrl...
 
-                        /** Download audio file first...*/
+                        */
+/** Download audio file first...*//*
+
 
                         isDownloaded=false;
 
@@ -365,7 +365,9 @@ public class DownloadService extends Service {
 
                         Log.e(TAG, "doInBackground: About to convert");
 
-                        /** Convert the audio file to mp3...*/
+                        */
+/** Convert the audio file to mp3...*//*
+
 
                         String cmd[] = new String[] { "-y","-i",f.getPath(),mp3.getPath() };
                         String[] ffmpegBinary = new String[] { FileUtils.getFFmpeg(context) };
@@ -392,13 +394,13 @@ public class DownloadService extends Service {
                                     currentsize = total;
                                     publishProgress(((int) (total * 100 / totalsize)));
                                 }
-                            }while (!Util.isProcessCompleted(process));
+                            }while (!YTutils.isProcessCompleted(process));
                             Log.e(TAG, "doInBackground: Execution done" );
                         }catch (Exception e){
                             e.printStackTrace();
                         }
                         finally {
-                            Util.destroyProcess(process);
+                            YTutils.destroyProcess(process);
                         }
 
                         Log.e(TAG, "onSuccess: ONCompleted" );
@@ -475,14 +477,18 @@ public class DownloadService extends Service {
                         File video = YTutils.getFile("/YTPlayer/video.download");
                         if (video.exists()) video.delete();
 
-                        /** Calculate total file size... */
+                        */
+/** Calculate total file size... *//*
+
                         URL url = new URL(videoUrl);
                         URLConnection connection = url.openConnection();
                         connection.connect();
 
                         long fileLength = connection.getContentLength();
 
-                        /** Download audio file first... */
+                        */
+/** Download audio file first... *//*
+
                         url = new URL(audioUrl);
                         connection = url.openConnection();
                         connection.connect();
@@ -504,7 +510,9 @@ public class DownloadService extends Service {
                                     public void onDownloadComplete() {
                                         Log.e(TAG, "onDownloadComplete: Audio Download Complete" );
 
-                                        /** Download video file now... */
+                                        */
+/** Download video file now... *//*
+
                                         PRDownloader.download(audioUrl,YTutils.getFile("YTPlayer").getPath(),"audio.download")
                                                 .build()
                                                 .setOnProgressListener(progress1 -> {
@@ -675,3 +683,4 @@ public class DownloadService extends Service {
     }
 
 }
+*/

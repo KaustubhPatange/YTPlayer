@@ -5,7 +5,6 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -31,20 +30,18 @@ import com.coremedia.iso.boxes.Container;
 import com.downloader.Error;
 import com.downloader.OnDownloadListener;
 import com.downloader.PRDownloader;
-import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
-import com.github.hiteshsondhi88.libffmpeg.FileUtils;
 import com.github.hiteshsondhi88.libffmpeg.ShellCommand;
-import com.github.hiteshsondhi88.libffmpeg.Util;
 import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
+
 import com.kpstv.youtube.DownloadActivity;
-import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.receivers.SongBroadCast;
+import com.kpstv.youtube.utils.FileUtils;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
 
@@ -67,7 +64,6 @@ import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static com.github.hiteshsondhi88.libffmpeg.FFmpeg.concatenate;
 import static com.kpstv.youtube.MainActivity.supportFFmpeg;
 
 public class IntentDownloadService extends IntentService {
@@ -237,7 +233,8 @@ public class IntentDownloadService extends IntentService {
                         /** Setup ffmpeg commands... */
                         String[] cmd = new String[]{"-y", "-i", f.getPath(), mp3.getPath()};
                         String[] ffmpegBinary = new String[]{FileUtils.getFFmpeg(context)};
-                        String[] command = concatenate(ffmpegBinary, cmd);
+                        String[] command = FFmpeg.concatenate(ffmpegBinary, cmd);
+
 
                         ShellCommand shellCommand = new ShellCommand();
 
@@ -255,12 +252,12 @@ public class IntentDownloadService extends IntentService {
                                     currentsize = mp3.length() + f.length();
                                     updateNotification((int) (currentsize * 100 / totalsize), false);
                                 }
-                            } while (!Util.isProcessCompleted(process));
+                            } while (!YTutils.isProcessCompleted(process));
                         } catch (Exception e) {
                             LOG("Error: " + e.getMessage());
                             e.printStackTrace();
                         } finally {
-                            Util.destroyProcess(process);
+                            YTutils.destroyProcess(process);
                         }
 
                         LOG("FFMPEG Run complete");
