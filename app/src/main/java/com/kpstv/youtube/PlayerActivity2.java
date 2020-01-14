@@ -48,6 +48,9 @@ import com.bumptech.glide.TransitionOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.coremedia.iso.boxes.Container;
+import com.downloader.Error;
+import com.downloader.OnDownloadListener;
+import com.downloader.PRDownloader;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
@@ -60,6 +63,7 @@ import com.kpstv.youtube.fragments.LyricBottomSheet;
 import com.kpstv.youtube.models.LyricModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.services.DownloadService;
+import com.kpstv.youtube.services.IntentDownloadService;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.SoundCloud;
 import com.kpstv.youtube.utils.YTMeta;
@@ -249,7 +253,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 case MotionEvent.ACTION_UP:
 
                    // shareButton.setVisibility();
-                    Log.e(TAG, "onCreate: ShareButtonState:"+shareButton.getVisibility() );
+                    Log.e(TAG, "onCreate: ShareButtonState:"+shareButton.getVisibility());
 
                    if (MainActivity.localPlayBack) {
                        YTutils.shareFile(PlayerActivity2.activity,new File(MainActivity.videoID));
@@ -896,7 +900,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
     }*/
 
     public void startService(YTConfig model) {
-        Intent serviceIntent = new Intent(this, DownloadService.class);
+        Intent serviceIntent = new Intent(this, IntentDownloadService.class);
         serviceIntent.putExtra("addJob", model);
 
         ContextCompat.startForegroundService(this, serviceIntent);
@@ -992,7 +996,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712
         mInterstitialAd = new InterstitialAd(activity);
         mInterstitialAd.setAdUnitId("ca-app-pub-1164424526503510/4801416648");
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        mInterstitialAd.loadAd(new AdRequest.Builder().addTestDevice("07153BA64BB64F7C3F726B71C4AE30B9").build());
         mInterstitialAd.setAdListener(new AdListener() {
             @Override
             public void onAdFailedToLoad(int i) {
@@ -1010,7 +1014,6 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     void showListDialog() {
 
-        //     Log.e("YOUTUBEURL",YouTubeUrl);
         ArrayList<String> tmplist = new ArrayList<>();
         final ArrayList<YTConfig> configs = new ArrayList<>();
 
@@ -1057,56 +1060,16 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             }
             filename = filename.replaceAll("[\\\\><\"|*?%:#/]", "");
             final String fileCurrent = filename; // Using this since current filename cannot be placed as final
-            if (arrays[which].contains("(no audio)")) {
-
+            if (arrays[which].contains("+ merge audio")) {
                 config.setTargetName(fileCurrent.split("\\.")[0]+".mp4");
                 config.setTaskExtra("mergetask");
                 startService(config);
-
-               /* int icon = android.R.drawable.ic_dialog_info;
-                final AlertDialog.Builder alert= new AlertDialog.Builder(PlayerActivity2.this);
-                alert.setIcon(icon);
-                alert.setTitle("Merge");
-                alert.setMessage("The current sample you selected does not contain audio stream.\n\nDo you want to merge the audio with it?");
-                alert.setPositiveButton("Yes", (dialog1, which1) -> {
-                    showAd();
-                    mergeTask = new MergeAudioVideo(PlayerActivity2.this,"/sdcard/Download/"+fileCurrent);
-                    mergeTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,MainActivity.audioLink,config.getUrl());
-                });
-                alert.setNegativeButton("No", (dialog12, which12) -> {
-                    downloadFromUrl(fileCurrent, config);
-
-                    Toast.makeText(PlayerActivity2.this, "Download started",
-                            Toast.LENGTH_SHORT).show();
-                    showAd();
-                });
-                alert.setNeutralButton("Cancel",null);
-                alert.show();*/
 
             } else if (arrays[which].contains("Audio ")) {
 
                 config.setTargetName(fileCurrent.split("\\.")[0]+".mp3");
                 config.setTaskExtra("mp3task");
                 startService(config);
-
-               /* int icon = android.R.drawable.ic_dialog_info;
-                final AlertDialog.Builder alert= new AlertDialog.Builder(PlayerActivity2.this);
-                alert.setIcon(icon);
-                alert.setTitle("Edit Sample");
-                alert.setMessage("Do you want to download and cut sample in editor?\n\nIf so select \"Cut\" else \"Normal\" to begin usual download.");
-                alert.setPositiveButton("Cut", (dialog1, which1) -> {
-                    showAd();
-                    cutTask = new cutTask(PlayerActivity2.this,
-                            "Download/"+fileCurrent);
-                    cutTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,config.getUrl());
-                });
-                alert.setNeutralButton("Cancel",null);
-                alert.setNegativeButton("Normal", (dialog12, which12) -> {
-                    downloadFromUrl(fileCurrent, config);
-
-                    showAd();
-                });
-                alert.show();*/
 
             }else
                 downloadFromUrl(fileCurrent, config);
@@ -1524,62 +1487,89 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             alertdialog = alert.create();
             alertdialog.show();
         }
-
+        boolean isDownloaded=false; long totalsize,currentsize,oldbytes,fileLength;
         @Override
         protected String doInBackground(String... sUrl) {
             try {
+
                 String audioUrl = sUrl[0];
                 String videoUrl = sUrl[1];
 
-                // Download audio file first...
-                URL url = new URL(audioUrl);
+                File audio = YTutils.getFile("/YTPlayer/audio.m4a");
+                if (audio.exists()) audio.delete();
+                File video = YTutils.getFile("/YTPlayer/video.download");
+                if (video.exists()) video.delete();
+
+                /** Calculate total file size... */
+                URL url = new URL(videoUrl);
                 URLConnection connection = url.openConnection();
                 connection.connect();
 
-                long fileLength = connection.getContentLength();
-                fileLengthString = YTutils.getSize(fileLength);
-                File root = Environment.getExternalStorageDirectory();
+                fileLength = connection.getContentLength();
 
-                DataInputStream input = new DataInputStream(url.openStream());
-                DataOutputStream output = new DataOutputStream(new FileOutputStream(
-                        root.getAbsolutePath() + "/YTPlayer/audio.download"));
-
-
-                byte data[] = new byte[4096];
-                long total = 0;
-                int count;
-                while ((count = input.read(data)) != -1) {
-                    total += count;
-                    publishProgress(((int) (total * 100 / fileLength)) + "",
-                            "Downloading Audio... 1/3",total+"");
-                    output.write(data, 0, count);
-                    output.flush();
-                }
-                output.flush();
-                output.close();
-                input.close();
-
-                // Download video file second...
-                url = new URL(videoUrl);
+                /** Download audio file first... */
+                url = new URL(audioUrl);
                 connection = url.openConnection();
                 connection.connect();
 
-                fileLength = connection.getContentLength();
-                fileLengthString = YTutils.getSize(fileLength);
-                input = new DataInputStream(url.openStream());
-                output = new DataOutputStream(new FileOutputStream(
-                        root.getAbsolutePath() + "/YTPlayer/video.download"));
+                fileLength += connection.getContentLength();
+                totalsize = fileLength;
 
-                total = 0;
-                while ((count = input.read(data)) != -1) {
-                    total += count;
-                    publishProgress(((int) (total * 100 / fileLength)) + "", "Downloading Video... 2/3",total+"");
-                    output.write(data, 0, count);
-                    output.flush();
-                }
-                output.flush();
-                output.close();
-                input.close();
+                PRDownloader.download(videoUrl, YTutils.getFile("YTPlayer").getPath(), "video.mp4")
+                        .build()
+                        .setOnProgressListener(progress -> {
+                            currentsize = progress.currentBytes;
+                            if (totalsize==0)
+                                return;
+                            publishProgress(((int) (totalsize * 100 / fileLength)) + "",
+                                    "Downloading Audio... 1/3");
+                       //     updateNotification((int) (progress.currentBytes * 100 / totalsize),false);
+                            oldbytes = currentsize;
+                        })
+                        .start(new OnDownloadListener() {
+                            @Override
+                            public void onDownloadComplete() {
+                                Log.e(TAG, "onDownloadComplete: Audio Download Complete" );
+
+                                /** Download video file now... */
+                                PRDownloader.download(audioUrl,YTutils.getFile("YTPlayer").getPath(),"audio.m4a")
+                                        .build()
+                                        .setOnProgressListener(progress1 -> {
+                                            currentsize = oldbytes+progress1.currentBytes;
+                                         //   updateNotification((int) ((progress1.currentBytes + oldbytes) * 100 / totalsize),false);
+                                        })
+                                        .start(new OnDownloadListener() {
+                                            @Override
+                                            public void onDownloadComplete() {
+                                                Log.e(TAG, "onDownloadComplete: Video Download Complete" );
+
+
+
+                                                   /* muxing(YTutils.getFile("YTPlayer/video.mp4").getPath(),
+                                                            YTutils.getFile("YTPlayer/audio.m4a").getPath(),
+                                                            save.getPath());*/
+
+                                                /** Show notification... */
+
+
+                                                isDownloaded=true;
+                                            }
+
+                                            @Override
+                                            public void onError(Error error) {
+                                                isDownloaded=true;
+                                            }
+                                        });
+                            }
+
+                            @Override
+                            public void onError(Error error) {
+                                isDownloaded=true;
+                            }
+
+                        });
+
+                do {} while (!isDownloaded);
 
                 // Merging audio and video third
                 publishProgress((-1) + "", "Merging media... 3/3");

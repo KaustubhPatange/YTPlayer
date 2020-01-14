@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ShareCompat;
@@ -30,6 +31,7 @@ import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity2;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.services.DownloadService;
+import com.kpstv.youtube.services.IntentDownloadService;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.SoundCloud;
 import com.kpstv.youtube.utils.YTMeta;
@@ -40,6 +42,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.net.URLConnection;
 
 public class SongBroadCast extends BroadcastReceiver implements AppInterface {
@@ -53,51 +56,63 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
         switch (action) {
             case "com.kpstv.youtube.ACTION_NEXT":
                 MainActivity.playNext();
-               /* if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
-                    setData.cancel(true);
-
-                *//** For local playback stuff *//*
-                if (MainActivity.localPlayBack)
-                    setData = new loadData_Offline(context);
-                else
-                    setData = new loadData(context);
-
-                setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
                 break;
             case "com.kpstv.youtube.ACTION_PREVIOUS":
                 MainActivity.playPrevious();
-                /*if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
-                    setData.cancel(true);
-
-                *//** For local playback stuff *//*
-                if (MainActivity.localPlayBack)
-                    setData = new loadData_Offline(context);
-                else
-                    setData = new loadData(context);
-
-                setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
                 break;
             case "com.kpstv.youtube.ACTION_PLAY":
                 MainActivity.changePlayBack(!MainActivity.isplaying);
                 try {
                     if (MainActivity.isplaying) {
-                            PlayerActivity2.makePause();
-                        } else {
+                        PlayerActivity2.makePause();
+                    } else {
                         PlayerActivity2.makePlay();
-                        }
+                    }
                 }catch (Exception ignored){}
                 break;
             case "com.kpstv.youtube.STOP_SERVICE":
-                Log.e("SongBroadCast", "onReceive: STOP_SERVICE called" );
-                Intent serviceIntent = new Intent(context, DownloadService.class);
+                Intent serviceIntent = new Intent(context, IntentDownloadService.class);
                 context.stopService(serviceIntent);
                 break;
             case "com.kpstv.youtube.OPEN_SONG":
-                Log.e(TAG, "onReceive: triggered" );
-                //TODO: Change this OPEN_SONG reciever to in-built player if possible
                 try {
-                    Uri uri = Uri.parse(intent.getStringExtra("filePath"));
-                    String mime = context.getContentResolver().getType(uri);
+                    Log.e(TAG, "onReceive: triggered" );
+                    Log.e(TAG, "onReceive: "+intent.getData().toString());
+                    Uri uri = intent.getData();
+                    Log.e(TAG, "onReceive: "+uri.toString() );
+                    File f = new File(uri.getPath());
+                    if (!f.exists()) {
+                        f = new File(uri.toString().replace(".mp3",".m4a"));
+                    }
+
+                    if (f.exists()) {
+                        File downloads = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS);
+                        File[] files = downloads.listFiles(new FileFilter() {
+                            @Override
+                            public boolean accept(File file)
+                            {
+                                return (file.getPath().endsWith(".mp3")||file.getPath().endsWith(".m4a")
+                                        ||file.getPath().endsWith(".wav")||file.getPath().endsWith(".aac")
+                                        ||file.getPath().endsWith(".ogg")||file.getPath().endsWith(".flac"));
+                            }
+                        });
+                        if (files.length>0) {
+                            String[] ids = new String[files.length];
+                            int position = 0;
+                            for (int i=0;i<files.length;i++) {
+                                File id = files[i];
+                                ids[i] = files[i].getPath();
+                                if (id.getPath().equals(f.getPath())) {
+                                    position=0;
+                                }
+                            }
+                            MainActivity.PlayVideo_Local(ids,position);
+                        }else
+                            Toast.makeText(context, "There seems to be an error in parsing downloads!", Toast.LENGTH_SHORT).show();
+
+                    }else Toast.makeText(context, "Error: File not found!", Toast.LENGTH_SHORT).show();
+
+                   /* String mime = context.getContentResolver().getType(uri);
 
                     // Open file with user selected app
                     Intent i = new Intent();
@@ -106,7 +121,7 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                     i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(i);
-                   // ContextCompat.startActivity(context,i,null);
+                   // ContextCompat.startActivity(context,i,null);*/
                 }catch (Exception e){
                     e.printStackTrace();
                     Toast.makeText(context, "Error: "+e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -118,6 +133,7 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
             case "com.kpstv.youtube.OPEN_SHARE_SONG":
                 try {
                     Uri uri = Uri.parse(intent.getStringExtra("filePath"));
+                    Log.e(TAG, "onReceive: Uri: "+uri.toString() );
                     File f = new File(uri.getPath());
                     ShareCompat.IntentBuilder.from(MainActivity.activity)
                             .setStream(uri)
@@ -216,7 +232,7 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
         }
     }
 
-    class loadData extends AsyncTask<Void,Void,Void> {
+    /*class loadData extends AsyncTask<Void,Void,Void> {
 
         Context context;
 
@@ -270,7 +286,7 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                 if (soundCloud.getModel()==null || soundCloud.getModel().getStreamUrl()==null) {
                     return null;
                 }
-               // soundCloud.captureViews();
+                // soundCloud.captureViews();
                 MainActivity.soundCloudPlayBack=true;
                 MainActivity.videoTitle = soundCloud.getModel().getTitle();
                 MainActivity.channelTitle = soundCloud.getModel().getAuthorName();
@@ -322,5 +338,5 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
             }
             return null;
         }
-    }
+    }*/
 }

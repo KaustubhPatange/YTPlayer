@@ -36,6 +36,7 @@ import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.SongAdapter;
 import com.kpstv.youtube.models.DiscoverModel;
+import com.kpstv.youtube.utils.APIResponse;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTMeta;
@@ -314,26 +315,29 @@ public class SFragment extends Fragment implements AppInterface {
             super.onPostExecute(aVoid);
         }
 
-        String jsonResponse(int apinumber) {
+   /*     String jsonResponse(int apinumber) {
             HttpHandler httpHandler = new HttpHandler();
             String link = "https://www.googleapis.com/youtube/v3/search?part=id%2Csnippet&type=video&maxResults=20&q=+"+URLEncoder.encode(textToSearch)+"&key="+ API_KEYS[apinumber];
             return httpHandler.makeServiceCall(link);
-        }
+        }*/
 
         @Override
         protected Void doInBackground(Void... voids) {
 
             //https://www.googleapis.com/youtube/v3/search?part=id%2Csnippet&maxResults=20&q=trap&key=[YOUR_API_KEY]'
 
-            int i=0;
+            String link ="https://www.googleapis.com/youtube/v3/search?part=id%2Csnippet&type=video&maxResults=20&q=+"+URLEncoder.encode(textToSearch);
+            APIResponse response = new APIResponse(link);
+            String json = response.getJson();
+           /* int i=0;
             int apiLength = API_KEYS.length;
-            String json;
+            String json = response.getJson();
             do {
                 json = jsonResponse(i);
                 i++;
-            }while (json.contains("\"error\":") && i<apiLength);
+            }while (json.contains("\"error\":") && i<apiLength);*/
 
-            if (json.contains("\"error\":")) {
+            if (json.contains("\"error\"")) {
                 ytSearch = new YTSearch(textToSearch);
                 if (ytSearch.getVideoIDs().size()<=0) return null;
                 for (String videoID: ytSearch.getVideoIDs()) {
@@ -352,7 +356,7 @@ public class SFragment extends Fragment implements AppInterface {
                 try {
                     JSONObject obj = new JSONObject(json);
                     JSONArray array = obj.getJSONArray("items");
-                    for (i=0;i<array.length();i++) {
+                    for (int i=0;i<array.length();i++) {
                         JSONObject object = array.getJSONObject(i);
 
                         String videoID = object.getJSONObject("id").getString("videoId");

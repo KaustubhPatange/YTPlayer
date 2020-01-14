@@ -29,6 +29,7 @@ import com.github.hiteshsondhi88.libffmpeg.Util;
 import com.kpstv.youtube.adapters.DownloadAdapter;
 import com.kpstv.youtube.receivers.SongBroadCast;
 import com.kpstv.youtube.services.DownloadService;
+import com.kpstv.youtube.services.IntentDownloadService;
 import com.kpstv.youtube.utils.YTutils;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 
@@ -86,7 +87,7 @@ public class DownloadActivity extends AppCompatActivity {
             });
         }
 
-        if (DownloadService.currentModel !=null) {
+        if (IntentDownloadService.currentModel !=null) {
 
             int accentColor = ContextCompat.getColor(this,R.color.colorAccent);
 
@@ -95,7 +96,7 @@ public class DownloadActivity extends AppCompatActivity {
             popupMenu.setOnMenuItemClickListener(menuItem -> {
                 switch (menuItem.getItemId()) {
                     case R.id.cancel_action:
-                        if (DownloadService.pendingJobs.size()<=0)
+                        if (IntentDownloadService.pendingJobs.size()<=0)
                         {
                             Intent newintent = new Intent(context, SongBroadCast.class);
                             newintent.setAction("com.kpstv.youtube.STOP_SERVICE");
@@ -116,14 +117,14 @@ public class DownloadActivity extends AppCompatActivity {
                             Log.e(TAG, "onCreate: Cancelling current task");
                             downloadTask.cancel(true);
                         }
-                        if (!Util.isProcessCompleted(DownloadService.process))
+                        if (!Util.isProcessCompleted(IntentDownloadService.process))
                         {
                             Log.e(TAG, "onCreate: Destroying process" );
                             process.destroy();
                         }
-                        DownloadService.currentsize=0;
-                        DownloadService.totalsize=0;
-                        DownloadService.progress=0;
+                        IntentDownloadService.currentsize=0;
+                        IntentDownloadService.totalsize=0;
+                        IntentDownloadService.progress=0;
                         break;
                 }
                 return true;
@@ -139,7 +140,7 @@ public class DownloadActivity extends AppCompatActivity {
                     }
                     case MotionEvent.ACTION_UP:
 
-                        if (DownloadService.currentModel==null)
+                        if (IntentDownloadService.currentModel==null)
                             return false;
 
                         popupMenu.show();
@@ -155,8 +156,8 @@ public class DownloadActivity extends AppCompatActivity {
             });
 
             runTask();
-            lastJobUpdate = DownloadService.pendingJobs.size();
-            adapter = new DownloadAdapter(DownloadService.pendingJobs,this);
+            lastJobUpdate = IntentDownloadService.pendingJobs.size();
+            adapter = new DownloadAdapter(IntentDownloadService.pendingJobs,this);
             recyclerView.setAdapter(adapter);
             mHandler.postDelayed(mUpdateTimeTask, 1000);
         }else finish();
@@ -164,9 +165,9 @@ public class DownloadActivity extends AppCompatActivity {
     }
 
     void runTask() {
-        if (DownloadService.currentModel !=null) {
-            txtTitle.setText(DownloadService.currentModel.getTitle()+" - "+DownloadService.currentModel.getChannelTitle());
-           switch (DownloadService.currentModel.getTaskExtra()) {
+        if (IntentDownloadService.currentModel !=null) {
+            txtTitle.setText(IntentDownloadService.currentModel.getTitle()+" - "+IntentDownloadService.currentModel.getChannelTitle());
+           switch (IntentDownloadService.currentModel.getTaskExtra()) {
                case "mp3task":
                    currentImageView.setImageDrawable(getDrawable(R.drawable.ic_audio_download));
                    break;
@@ -174,11 +175,11 @@ public class DownloadActivity extends AppCompatActivity {
                    currentImageView.setImageDrawable(getDrawable(R.drawable.ic_movie_download));
                    break;
             }
-            String currentSize = YTutils.getSize(DownloadService.currentsize);
-            String totalSIze = YTutils.getSize(DownloadService.totalsize);
-            //int percent = ((int) DownloadService.currentsize*100 / (int)DownloadService.totalsize);
+            String currentSize = YTutils.getSize(IntentDownloadService.currentsize);
+            String totalSIze = YTutils.getSize(IntentDownloadService.totalsize);
+            //int percent = ((int) IntentDownloadService.currentsize*100 / (int)IntentDownloadService.totalsize);
 
-            int percent = DownloadService.progress;
+            int percent = IntentDownloadService.progress;
 
             if (percent==-1) {
                 txtPercent.setText(percent+"%");
@@ -191,7 +192,7 @@ public class DownloadActivity extends AppCompatActivity {
 
             txtSize.setText(String.format("%s / %s", currentSize, totalSIze));
 
-            if (DownloadService.pendingJobs.size() <= 0)
+            if (IntentDownloadService.pendingJobs.size() <= 0)
             {
                 recyclerView.setVisibility(View.GONE);
                 pendingText.setVisibility(View.GONE);
@@ -202,12 +203,12 @@ public class DownloadActivity extends AppCompatActivity {
                 pendingText.setText("Pending");
             }
 
-            if(adapter!=null && (DownloadService.pendingJobs.size() != lastJobUpdate))
+            if(adapter!=null && (IntentDownloadService.pendingJobs.size() != lastJobUpdate))
             {
                 adapter.notifyDataSetChanged();
-                lastJobUpdate = DownloadService.pendingJobs.size();
+                lastJobUpdate = IntentDownloadService.pendingJobs.size();
             }
-            /*if (adapter!=null && (DownloadService.pendingJobs.size() != adapter.getItemCount())) {
+            /*if (adapter!=null && (IntentDownloadService.pendingJobs.size() != adapter.getItemCount())) {
                 Log.e(TAG, "runTask: Need to change the data");
                 adapter.notifyDataSetChanged();
             }*/
@@ -216,7 +217,7 @@ public class DownloadActivity extends AppCompatActivity {
 
     public Runnable mUpdateTimeTask = new Runnable() {
         public void run() {
-            if (DownloadService.currentModel !=null) {
+            if (IntentDownloadService.currentModel !=null) {
                 runTask();
                 mHandler.postDelayed(this,1000);
             }else {

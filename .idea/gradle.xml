@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$/MyID3_for_Android" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/isoparser-1.9.39" />
+            <option value="$PROJECT_DIR$/slf4j-android" />
             <option value="$PROJECT_DIR$/spotify-auth-release" />
           </set>
         </option>

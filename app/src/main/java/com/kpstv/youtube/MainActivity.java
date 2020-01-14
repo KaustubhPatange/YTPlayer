@@ -108,6 +108,7 @@ import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.receivers.SongBroadCast;
+import com.kpstv.youtube.utils.APIResponse;
 import com.kpstv.youtube.utils.DataUtils;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.LyricsApi;
@@ -394,10 +395,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 @Override
                 public void onFinish() {}
             });
-        } catch (FFmpegNotSupportedException e) {
+        } catch (Exception ignored) {
             Log.e(TAG, "onCreate: FFMpeg not supported");
-            e.printStackTrace();
-
         }
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -410,6 +409,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         if (!isSet) {
             SharedPreferences.Editor editor = settingPref.edit();
             int sessionId = player.getAudioComponent().getAudioSessionId();
+
             mEqualizer = new Equalizer(1000,sessionId);
             short numberFrequencyBands = mEqualizer.getNumberOfBands();
             final short lowerEqualizerBandLevel = mEqualizer.getBandLevelRange()[0];
@@ -666,11 +666,6 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             ft.setCustomAnimations(R.anim.fade_in,R.anim.fade_out);
             ft.replace(R.id.fragment_container,fragment)
                     .commit();
-           /* fragmentManager
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
-                    .commit();
-            fragmentManager.executePendingTransactions();*/
             return true;
         }
         return false;
@@ -712,15 +707,18 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             notificationManager.deleteNotificationChannel("channel_01");
         }
-        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
         notificationManagerCompat.cancel(1);
        try {
-           if (PlayerActivity.datasync.getStatus() == AsyncTask.Status.RUNNING)
-               PlayerActivity.datasync.cancel(true);
+
+           if (mEqualizer!=null) mEqualizer.release();
+           if (bassBoost!=null) bassBoost.release();
+           if (loudnessEnhancer!=null) loudnessEnhancer.release();
+           if (virtualizer!=null) virtualizer.release();
+
            player.stop();
            player.release();
 
-           PlayerActivity.mHandler.removeCallbacks(PlayerActivity.mUpdateTimeTask);
+          // PlayerActivity.mHandler.removeCallbacks(PlayerActivity.mUpdateTimeTask);
        }catch (Exception e) { e.printStackTrace(); }
         super.onDestroy();
     }
@@ -1169,13 +1167,18 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 Log.e(TAG, "doInBackground: Here I am: " +soundCloud.getModel().getStreamUrl());*/
             } else {
 
-                int i = 0;
+
+                String link = "https://www.googleapis.com/youtube/v3/videos?id=" + videoID + "&part=statistics";
+                APIResponse response = new APIResponse(link);
+                String json = response.getJson();
+
+                /*int i = 0;
                 int apiLength = API_KEYS.length;
                 String json;
                 do {
                     json = jsonResponse(videoID, i);
                     i++;
-                } while (json.contains("\"error\":") && i < apiLength);
+                } while (json.contains("\"error\":") && i < apiLength);*/
 
                 YTMeta ytMeta = new YTMeta(videoID);
                 if (ytMeta.getVideMeta() != null) {
@@ -1185,7 +1188,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                     MainActivity.imgUrl = ytMeta.getVideMeta().getImgUrl();
                 }
 
-                if (json.contains("\"error\":")) {
+                if (json.contains("\"error\"")) {
                     YTStatistics ytStatistics = new YTStatistics(videoID);
                     MainActivity.viewCounts = ytStatistics.getViewCount();
                     MainActivity.likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
@@ -1230,6 +1233,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         String jsonResponse(String videoID, int apinumber) {
             HttpHandler httpHandler = new HttpHandler();
             String link = "https://www.googleapis.com/youtube/v3/videos?id=" + videoID + "&key=" + API_KEYS[apinumber] + "&part=statistics";
+            Log.e(TAG, "jsonResponse: Link: "+link);
             return httpHandler.makeServiceCall(link);
         }
 
@@ -1250,7 +1254,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             }
         }catch (Exception ignored){}
         if (AppSettings.showAds) {
-            AdRequest adRequest = new AdRequest.Builder().build();
+            AdRequest adRequest = new AdRequest.Builder().addTestDevice("07153BA64BB64F7C3F726B71C4AE30B9").build();
             adView.loadAd(adRequest);
             adView.setAdListener(new AdListener(){
                 @Override
@@ -1304,6 +1308,14 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 }
 
                 Log.e("Method2","Extracted using new method");
+                if (muxedStream.size()>0)
+                {
+                    Log.e(TAG, "onExtractionDone: Muxed exist" );
+                    for (int i=0;i<muxedStream.size();i++) {
+                        Log.e(TAG, "onExtractionDone: Muxed ("+i+"): "+muxedStream.get(i).getUrl() );
+                    }
+                }
+                else Log.e(TAG, "onExtractionDone: Muxed error" );
 
                 ytConfigs.clear();
             //    List<YTMedia> bestStream = getBestStream(adativeStream);
@@ -1656,16 +1668,27 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 ext = "mp4";
                 ytText = (media.getFps() == 60) ? "Video " + media.getHeight() + "p60" :
                         "Video " + media.getHeight() + "p";
+                ytText += " + merge audio";
+               /* Log.e(TAG, "addVideoToList: "+ytText+" sampleRate:"+media.getAudioSampleRate()+", Bitrate: "+media.getBitrate());
                 if (media.getBitrate() == -1) {
                     ytText += " (no audio)";
-                }
+                }*/
             }
             Log.e(TAG, "addVideoToList: MediaSampleRate: "+media.getAudioSampleRate() );
         }catch (Exception e){e.printStackTrace();}
+        String audioSet=null;
         if (isaudio) {
-            Log.e(TAG, "addVideoToList: AudioUrlSet true" );
-            audioLink = media.getUrl();
+            /*Log.e(TAG, "addVideoToList: Sample Rate: "+media.getAudioSampleRate()+", Average bit: "+media.getAverageBitrate()
+            +", Mime/type: "+media.getMimeType()+", Audio Quality: "+media.getAudioQuality()+", ProjectionType: "+media.getProjectionType()
+            +", Quality: "+media.getQuality());*/
+
+            audioSet = media.getUrl();
+            if (media.getMimeType().contains("audio/mp4")) {
+                Log.e(TAG, "addVideoToList: AudioUrlSet true" );
+                audioLink = media.getUrl();
+            }
         }
+        if (audioLink==null) audioLink = audioSet;
 
         ytConfigs.add(new YTConfig(ytText, media.getUrl(), ext, videoTitle, channelTitle,isaudio,imgUrl));
     }
@@ -1994,7 +2017,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
               try {
                   InterstitialAd mInterstitialAd = new InterstitialAd(con);
                   mInterstitialAd.setAdUnitId("ca-app-pub-1164424526503510/4801416648");
-                  mInterstitialAd.loadAd(new AdRequest.Builder().build());
+                  mInterstitialAd.loadAd(new AdRequest.Builder().addTestDevice("07153BA64BB64F7C3F726B71C4AE30B9").build());
                   mInterstitialAd.setAdListener(new AdListener() {
                       @Override
                       public void onAdFailedToLoad(int i) {

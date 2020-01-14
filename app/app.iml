@@ -108,7 +108,7 @@
     <orderEntry type="library" name="Gradle: org.jsoup:jsoup:1.11.1@jar" level="project" />
     <orderEntry type="library" name="Gradle: com.facebook.network.connectionclass:connectionclass:1.0.1@jar" level="project" />
     <orderEntry type="library" name="Gradle: org.aspectj:aspectjrt:1.8.13@jar" level="project" />
-    <orderEntry type="library" name="Gradle: com.googlecode.mp4parser:isoparser:1.1.22@jar" level="project" />
+    <orderEntry type="library" name="Gradle: com.googlecode.mp4parser:isoparser:1.1.9@jar" level="project" />
     <orderEntry type="library" name="Gradle: com.squareup.okhttp3:logging-interceptor:3.10.0@jar" level="project" />
     <orderEntry type="library" name="Gradle: com.squareup.okhttp3:okhttp:3.10.0@jar" level="project" />
     <orderEntry type="library" name="Gradle: org.json:json:20180130@jar" level="project" />

@@ -1,0 +1,2 @@
+configurations.maybeCreate("default")
+artifacts.add("default", file('slf4j-android-1.6.1-RC1.jar'))

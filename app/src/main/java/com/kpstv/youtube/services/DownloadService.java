@@ -75,8 +75,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static com.github.hiteshsondhi88.libffmpeg.FFmpeg.concatenate;
-import static com.kpstv.youtube.AppNotify.CHANNEL_ID;
-import static com.kpstv.youtube.AppNotify.appnotification;
 import static com.kpstv.youtube.MainActivity.notificationManagerCompat;
 import static com.kpstv.youtube.MainActivity.supportFFmpeg;
 
@@ -84,13 +82,14 @@ public class DownloadService extends Service {
 
     public static String TAG = "DownloadService";
     public static ArrayList<YTConfig> pendingJobs;
+    private static String CHANNEL_ID = "channel_01";
     public static long totalsize;
     public static long currentsize; NotificationManagerCompat notificationManager;
     public static Process process; Bitmap icon;
     public static YTConfig currentModel; long oldbytes;
     boolean isDownloaded=false;
     Context context; YTMeta ytMeta;long total=0; public static int progress;
-    Notification notification,notification1; Handler handler;
+    Notification notification; Handler handler;
     public static AsyncTask<Void,Integer,Void> downloadTask;PowerManager.WakeLock wakeLock;
 
     @Override
@@ -147,22 +146,6 @@ public class DownloadService extends Service {
                 downloadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
-
-
-      /*  downloadTask = new parseData(pendingJobs.get(0));
-        downloadTask.execute();*/
-
-       /* AndroidAudioConverter.load(context, new ILoadCallback() {
-            @Override
-            public void onSuccess() {
-                supportFFmpeg=true;
-            }
-            @Override
-            public void onFailure(Exception error) {
-                Log.e(TAG, "onFailure: FFMPEG not loaded" );
-            }
-        });
-*/
 
         handler = new Handler();
         handler.postDelayed(updateTask,550);
@@ -252,11 +235,11 @@ public class DownloadService extends Service {
 
             Intent openSong = new Intent(context, SongBroadCast.class);
             openSong.setAction("com.kpstv.youtube.OPEN_SONG");
-            openSong.putExtra("filePath",filePath);
+            openSong.putExtra("fx_path",filePath);
 
             Intent openShare = new Intent(context, SongBroadCast.class);
             openShare.setAction("com.kpstv.youtube.OPEN_SHARE_SONG");
-            openShare.putExtra("filePath",filePath);
+            openShare.putExtra("fx_path",filePath);
 
             PendingIntent opensongService =
                     PendingIntent.getBroadcast(context, 6, openSong, 0);
@@ -264,7 +247,7 @@ public class DownloadService extends Service {
             PendingIntent openshareService =
                     PendingIntent.getBroadcast(context, 7, openShare, 0);
 
-            notification1 = new NotificationCompat.Builder(context, CHANNEL_ID)
+            Notification not = new NotificationCompat.Builder(context, CHANNEL_ID)
                     .setContentTitle("Download Complete")
                     .setContentText(model.getTitle()+" - "+model.getChannelTitle())
                     .setSmallIcon(R.drawable.ic_check)
@@ -274,8 +257,11 @@ public class DownloadService extends Service {
                     .addAction(R.mipmap.ic_launcher,"Share",openshareService)
                     .build();
 
-            notificationManager.notify(new Random().nextInt(400)+150,notification1);
-           // appnotification.notify(new Random().nextInt(400)+150,notification1);
+            Log.e(TAG, "onPostExecute: Intent Extra: "+openSong.getStringExtra("fx_path") );
+
+            int nos = new Random().nextInt(400)+150;
+            Log.e(TAG, "onPostExecute: Notification number: "+ nos);
+            notificationManagerCompat.notify(nos,not);
             super.onPostExecute(aVoid);
         }
 
@@ -358,16 +344,16 @@ public class DownloadService extends Service {
                                 });
 
                         Log.e(TAG, "doInBackground: Just before this" );
-                       do {
-                         //  Log.e(TAG, "doInBackground: Doing in background" );
-                       } while (!isDownloaded);
+                        do {
+                            //  Log.e(TAG, "doInBackground: Doing in background" );
+                        } while (!isDownloaded);
 
                         Log.e(TAG, "doInBackground: Loading before");
 
                         if (!supportFFmpeg) {
                             Log.e(TAG, "doInBackground: Not supported ffmpeg");
                             // Change extension...
-                            String target = model.getTargetName().split("\\.")[0]+".m4a";
+                            String target = model.getTargetName().replace(".mp3",".m4a");
                             try {
                                 YTutils.moveFile(f,YTutils.getFile(Environment.DIRECTORY_DOWNLOADS+"/"+target));
                             } catch (IOException e) {
@@ -384,6 +370,10 @@ public class DownloadService extends Service {
                         String cmd[] = new String[] { "-y","-i",f.getPath(),mp3.getPath() };
                         String[] ffmpegBinary = new String[] { FileUtils.getFFmpeg(context) };
                         String[] command = concatenate(ffmpegBinary, cmd);
+
+                        Log.e(TAG, "doInBackground: Command: ");
+                        for(int i=0;i<command.length;i++)
+                            Log.e(TAG, command[i]+" ");
 
                         ShellCommand shellCommand = new ShellCommand();
 
@@ -411,12 +401,9 @@ public class DownloadService extends Service {
                             Util.destroyProcess(process);
                         }
 
-                      /*  String mp3Size = YTutils.getSize(mp3.length()).split(" ")[1];
-                        String fLength = YTutils.getSize(f.length()).split(" ")[1];
-                        if (!mp3Size.equals(fLength))
-                            return null;*/
-
                         Log.e(TAG, "onSuccess: ONCompleted" );
+
+                        File dst = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS+"/"+model.getTargetName());
                         MusicMetadataSet src_set = null;
                         try {
                             src_set = new MyID3().read(mp3);
@@ -427,6 +414,7 @@ public class DownloadService extends Service {
                         if (src_set == null)
                         {
                             Log.i("NULL", "NULL");
+                            mp3.renameTo(dst);
                         }
                         else
                         {
@@ -444,7 +432,6 @@ public class DownloadService extends Service {
                                 e.printStackTrace();
                             }
 
-                            File dst = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS+"/"+model.getTargetName());
                             MusicMetadata meta = new MusicMetadata(YTutils.getVideoTitle(model.getTitle()));
                             if (imageData!=null) {
                                 meta.addPicture(imageData);
@@ -454,26 +441,26 @@ public class DownloadService extends Service {
                             try {
                                 new MyID3().write(mp3, dst, src_set, meta);
                                 mp3.delete();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            } catch (ID3WriteException e) {
+                            } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                            if (!dst.exists()) {
-                                File sf = new File(dst.getPath().replace(".mp3",".m4a"));
-                                f.renameTo(sf);
-                                Toast.makeText(context, "Failed to convert to mp3, overriding defaults!", Toast.LENGTH_SHORT).show();
-                            }
+
                         }
 
-                        checkforpending();
-
-                        Log.e(TAG, "doInBackground: Task ended" );
-
+                        if (!dst.exists()) {
+                            File sf = new File(dst.getPath().replace(".mp3",".m4a"));
+                            f.renameTo(sf);
+                            Toast.makeText(context, "Failed to convert to mp3, overriding defaults!", Toast.LENGTH_SHORT).show();
+                        }
 
                     } catch (Exception e) {
+                        Log.e(TAG, "doInBackground: Error: "+e.getMessage() );
                         e.printStackTrace();
                     }
+
+                    checkforpending();
+
+                    Log.e(TAG, "doInBackground: Task ended" );
                     break;
 
                 case "mergetask":
@@ -530,7 +517,7 @@ public class DownloadService extends Service {
                                                         File save = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS+"/"+model.getTargetName());
                                                         if (save.exists()) save.delete();
 
-                                                            mux("/sdcard/YTPlayer/video.download","/sdcard/YTPlayer/audio.download",
+                                                        mux("/sdcard/YTPlayer/video.download","/sdcard/YTPlayer/audio.download",
                                                                 save.getPath());
 
                                                         checkforpending();
