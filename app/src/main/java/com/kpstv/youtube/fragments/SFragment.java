@@ -202,6 +202,13 @@ public class SFragment extends Fragment implements AppInterface {
         return v;
     }
 
+    @Override
+    public void onPause() {
+        if (task.getStatus()== AsyncTask.Status.RUNNING)
+            task.cancel(true);
+        super.onPause();
+    }
+
     class getAdapter extends AsyncTask<Void,Void,String[]> {
 
         @Override
@@ -261,7 +268,7 @@ public class SFragment extends Fragment implements AppInterface {
             if (track.getTitle()==null)
                 trendingText.setText("NO RESULTS FOUND");
             recyclerView.setItemAnimator(new DefaultItemAnimator());
-            adapter = new SongAdapter(discoverModels,activity);
+            adapter = new SongAdapter(true,discoverModels,activity);
             recyclerView.setAdapter(adapter);
             progressBar.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
@@ -307,7 +314,7 @@ public class SFragment extends Fragment implements AppInterface {
             if (ytSearch!=null && ytSearch.getVideoIDs().size()<=0)
                 trendingText.setText("NO RESULTS FOUND");
             recyclerView.setItemAnimator(new DefaultItemAnimator());
-            adapter = new SongAdapter(discoverModels,activity);
+            adapter = new SongAdapter(true,discoverModels,activity);
             recyclerView.setAdapter(adapter);
             progressBar.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
@@ -401,7 +408,7 @@ public class SFragment extends Fragment implements AppInterface {
             if (showTrend)
                 trendingText.setText("TOP HIT ON SPOTIFY");
             recyclerView.setItemAnimator(new DefaultItemAnimator());
-            adapter = new SongAdapter(discoverModels,activity);
+            adapter = new SongAdapter(true,discoverModels,activity);
             recyclerView.setAdapter(adapter);
             progressBar.setVisibility(View.GONE);
             trendingText.setVisibility(View.VISIBLE);

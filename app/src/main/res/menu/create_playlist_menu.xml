@@ -8,7 +8,7 @@
         app:showAsAction="always"/>
 
     <item android:id="@+id/action_url"
-        android:title="Add song"
+        android:title="Add playlist"
         android:icon="@drawable/ic_playlist_add"
         app:showAsAction="always"/>
 

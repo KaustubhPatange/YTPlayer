@@ -15,6 +15,7 @@ import android.media.MediaMuxer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -73,6 +74,7 @@ public class IntentDownloadService extends IntentService {
     private Context context; private String CHANNEL_ID = "channel_01"; Bitmap icon;
     private final int FOREGROUND_ID=109; Notification notification;
     PendingIntent contentIntent,cancelIntent; private long oldbytes;
+    private Handler handler;
 
     /** Some static Declarations */
     public static YTConfig currentModel; public static int progress;
@@ -104,6 +106,7 @@ public class IntentDownloadService extends IntentService {
         cancelIntent =
                 PendingIntent.getBroadcast(context, 5, newintent, 0);
 
+        setUpdateNotificationTask();
         super.onCreate();
     }
 
@@ -137,6 +140,10 @@ public class IntentDownloadService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
+
+        /** Set notification update handler*/
+
+
         currentModel = (YTConfig) intent.getSerializableExtra("addJob");
 
         if (pendingJobs.size()>0)
@@ -160,7 +167,7 @@ public class IntentDownloadService extends IntentService {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                             icon = resource;
-                            updateNotification(0, true);
+                            setProgress(0, true);
                         }
 
                         @Override
@@ -198,7 +205,7 @@ public class IntentDownloadService extends IntentService {
                                     totalsize = progress1.totalBytes;
                                 }
                                 currentsize = progress1.currentBytes;
-                                updateNotification((int) (currentsize * 100 / totalsize), false);
+                                setProgress((int) (currentsize * 100 / totalsize), false);
                                 //    publishProgress(());
                             })
                             .start(new OnDownloadListener() {
@@ -250,7 +257,7 @@ public class IntentDownloadService extends IntentService {
                                     } catch (Exception e) {
                                     }
                                     currentsize = mp3.length() + f.length();
-                                    updateNotification((int) (currentsize * 100 / totalsize), false);
+                                    setProgress((int) (currentsize * 100 / totalsize), false);
                                 }
                             } while (!YTutils.isProcessCompleted(process));
                         } catch (Exception e) {
@@ -313,6 +320,7 @@ public class IntentDownloadService extends IntentService {
                         if (!dst.exists()) {
                             LOG("Overriding defaults");
                             File sf = new File(dst.getPath().replace(".mp3", ".m4a"));
+                            dst = sf;
                             f.renameTo(sf);
                             Toast.makeText(context, "Failed to convert to mp3, overriding defaults!", Toast.LENGTH_SHORT).show();
                         }
@@ -341,7 +349,7 @@ public class IntentDownloadService extends IntentService {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                             icon = resource;
-                            updateNotification(0, true);
+                            setProgress(0, true);
                         }
 
                         @Override
@@ -379,7 +387,7 @@ public class IntentDownloadService extends IntentService {
                                 currentsize = progress.currentBytes;
                                 if (totalsize==0)
                                     return;
-                                updateNotification((int) (progress.currentBytes * 100 / totalsize),false);
+                                setProgress((int) (progress.currentBytes * 100 / totalsize),false);
                                 oldbytes = currentsize;
                             })
                             .start(new OnDownloadListener() {
@@ -392,7 +400,7 @@ public class IntentDownloadService extends IntentService {
                                             .build()
                                             .setOnProgressListener(progress1 -> {
                                                 currentsize = oldbytes+progress1.currentBytes;
-                                                updateNotification((int) ((progress1.currentBytes + oldbytes) * 100 / totalsize),false);
+                                                setProgress((int) ((progress1.currentBytes + oldbytes) * 100 / totalsize),false);
                                             })
                                             .start(new OnDownloadListener() {
                                                 @Override
@@ -495,11 +503,20 @@ public class IntentDownloadService extends IntentService {
         Log.e(TAG, message);
     }
 
-    public synchronized void updateNotification(int progress,boolean indeterminate) {
+    public void setUpdateNotificationTask() {
+        if (handler!=null)
+            handler.removeCallbacks(updateNotificationTask);
+        handler = new Handler();
+        handler.post(updateNotificationTask);
+    }
 
-        IntentDownloadService.progress = progress;
+    public synchronized void setProgress(int progress, boolean indeterminate) {
 
-        notification = new NotificationCompat.Builder(context,CHANNEL_ID)
+        if (indeterminate)
+            IntentDownloadService.progress = -1;
+        else
+            IntentDownloadService.progress = progress;
+       /* notification = new NotificationCompat.Builder(context,CHANNEL_ID)
                 .setContentTitle("Download - "+currentModel.getTitle())
                 .addAction(R.mipmap.ic_launcher,"Cancel",cancelIntent)
                 .setContentText(pendingJobs.size()+1+" files downloading")
@@ -511,18 +528,43 @@ public class IntentDownloadService extends IntentService {
                 .setPriority(Notification.PRIORITY_LOW)
                 .build();
 
-        notificationManagerCompat.notify(FOREGROUND_ID,notification);
+        notificationManagerCompat.notify(FOREGROUND_ID,notification);*/
     }
 
     @Override
     public void onDestroy() {
         currentModel=null;
-        if (Build.VERSION.SDK_INT<Build.VERSION_CODES.O) {
-            notificationManagerCompat.cancel(FOREGROUND_ID);
-        }
+        handler.removeCallbacks(updateNotificationTask);
+        notificationManagerCompat.cancel(FOREGROUND_ID);
         wakeLock.release();
         super.onDestroy();
     }
+
+    private Runnable updateNotificationTask = new Runnable() {
+        @Override
+        public void run() {
+            LOG("Running... "+progress);
+            if (currentModel==null)
+                return;
+            boolean indeterminate=false;
+            if (progress==-1)
+                indeterminate=true;
+            notification = new NotificationCompat.Builder(context,CHANNEL_ID)
+                    .setContentTitle("Download - "+currentModel.getTitle())
+                    .addAction(R.mipmap.ic_launcher,"Cancel",cancelIntent)
+                    .setContentText(pendingJobs.size()+1+" files downloading")
+                    .setSmallIcon(android.R.drawable.stat_sys_download)
+                    .setLargeIcon(icon)
+                    .setContentIntent(contentIntent)
+                    .setProgress(100,progress,indeterminate)
+                    .setOngoing(true)
+                    .setPriority(Notification.PRIORITY_LOW)
+                    .build();
+
+            notificationManagerCompat.notify(FOREGROUND_ID,notification);
+            handler.postDelayed(this,1000);
+        }
+    };
 
     private void muxing(String videoFile, String audioFile, String outFile) {
 

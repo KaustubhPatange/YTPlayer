@@ -1523,7 +1523,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                                 return;
                             publishProgress(((int) (totalsize * 100 / fileLength)) + "",
                                     "Downloading Audio... 1/3");
-                       //     updateNotification((int) (progress.currentBytes * 100 / totalsize),false);
+                       //     setProgress((int) (progress.currentBytes * 100 / totalsize),false);
                             oldbytes = currentsize;
                         })
                         .start(new OnDownloadListener() {
@@ -1536,7 +1536,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                                         .build()
                                         .setOnProgressListener(progress1 -> {
                                             currentsize = oldbytes+progress1.currentBytes;
-                                         //   updateNotification((int) ((progress1.currentBytes + oldbytes) * 100 / totalsize),false);
+                                         //   setProgress((int) ((progress1.currentBytes + oldbytes) * 100 / totalsize),false);
                                         })
                                         .start(new OnDownloadListener() {
                                             @Override

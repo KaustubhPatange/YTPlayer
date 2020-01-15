@@ -1,7 +1,14 @@
 package com.kpstv.youtube;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.BatteryManager;
+import android.os.Build;
+import android.os.PowerManager;
+import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -12,6 +19,7 @@ import com.googlecode.mp4parser.authoring.Edit;
 
 public class IntroActivity extends AppCompatActivity {
 
+    AlertDialog alertDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,12 +48,37 @@ public class IntroActivity extends AppCompatActivity {
         editor.putInt("sort_type",2);
         editor.apply();
 
+
         LinearLayout buttonLayout = findViewById(R.id.buttonLayout);
         buttonLayout.setOnClickListener(v -> {
-            Intent intent = new Intent(this,MainActivity.class);
-            startActivity(intent);
-            overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
-            finish();
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Intent intent = new Intent();
+                String packageName = getPackageName();
+                PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+                if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                    alertDialog = new AlertDialog.Builder(this)
+                            .setTitle("Battery Optimization")
+                            .setMessage("You need to disable battery optimization in order to prevent unexpected app shutdowns.")
+                            .setPositiveButton("OK",(dialogInterface, i) -> {
+                                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                                intent.setData(Uri.parse("package:" + packageName));
+                                startActivity(intent);
+                            })
+                            .setCancelable(false)
+                            .create();
+                    alertDialog.show();
+                }else loadAct();
+            }else loadAct();
+
+
         });
+    }
+
+    void loadAct() {
+
+        Intent intent = new Intent(this,MainActivity.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
+        finish();
     }
 }

@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.kpstv.youtube.models.YTConfig;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -88,6 +89,13 @@ public class DataUtils {
     public static void saveUrl(Context context, String videoId, String audioUrl, ArrayList<YTConfig> ytconfigs) {
 
         long start = System.currentTimeMillis();
+
+        /** This will delete the urlList if it is more than 10MB */
+        File f = new File(context.getFilesDir(),"urlList.csv");
+        if (f.exists()) {
+            if (f.length()>10000000)
+                f.delete();
+        }
 
         String data = YTutils.readContent(context,"urlList.csv");
 

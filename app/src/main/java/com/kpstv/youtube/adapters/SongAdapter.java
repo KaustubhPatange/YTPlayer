@@ -57,7 +57,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
     private ArrayList<String> yturls;
     Context con; boolean CP_ADAPTER, O_PLAYLIST;
     View.OnClickListener playlistListener;
-    View.OnClickListener cplaylistener;
+    View.OnClickListener cplaylistener;boolean isSearchAdpater;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -81,6 +81,15 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
     }
 
     public SongAdapter(ArrayList<DiscoverModel> data, Context context) {
+        this.dataSet = data;
+        this.con = context;
+        yturls = new ArrayList<>();
+        for (DiscoverModel model: data)
+            yturls.add(0,model.getYtUrl());
+    }
+
+    public SongAdapter(boolean isSearchAdapter, ArrayList<DiscoverModel> data, Context context) {
+        this.isSearchAdpater = isSearchAdapter;
         this.dataSet = data;
         this.con = context;
         yturls = new ArrayList<>();
@@ -129,8 +138,13 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
 
         final DiscoverModel discoverModel = dataSet.get(listPosition);
 
-        holder.titleText.setText(YTutils.getVideoTitle(discoverModel.getTitle()));
-        holder.AuthorText.setText(YTutils.getChannelTitle(discoverModel.getTitle(),discoverModel.getAuthor()));
+        if (isSearchAdpater) {
+            holder.titleText.setText(discoverModel.getTitle());
+            holder.AuthorText.setText(discoverModel.getAuthor());
+        }else {
+            holder.titleText.setText(YTutils.getVideoTitle(discoverModel.getTitle()));
+            holder.AuthorText.setText(YTutils.getChannelTitle(discoverModel.getTitle(),discoverModel.getAuthor()));
+        }
 
         Glide.with(con).load(discoverModel.getImgUrl()).addListener(new RequestListener<Drawable>() {
             @Override
@@ -146,6 +160,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         }).into(holder.imageView);
 
         if (!CP_ADAPTER) {
+
 
             int greyColor = ContextCompat.getColor(con,R.color.grey);
             int white = ContextCompat.getColor(con,R.color.white);
@@ -304,7 +319,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             holder.mainLayout.setOnClickListener(cplaylistener);
         }
     }
-
 
 
     public class layoutListener extends AsyncTask<Void, Void, Void> {

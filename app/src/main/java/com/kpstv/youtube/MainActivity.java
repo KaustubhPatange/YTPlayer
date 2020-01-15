@@ -807,8 +807,20 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
     }
 
+    AlertDialog alertDialog;
     @SuppressLint("StaticFieldLeak")
     void commonIntentCheck(String yt) {
+        if (yt.contains("/playlist/")||yt.contains("/album/")||yt.contains("/playlist?")) {
+            View v = getLayoutInflater().inflate(R.layout.alert_not_playlist,null);
+
+            alertDialog = new AlertDialog.Builder(this)
+                    .setView(v)
+                    .setPositiveButton("OK",null)
+                    .create();
+
+            alertDialog.show();
+            return;
+        }
         if (YTutils.isValidID(yt) || (yt.contains("soundcloud.com"))) {
             if (yt.contains("soundcloud.com")) {
                 String[] childs = yt.split("\\s");
