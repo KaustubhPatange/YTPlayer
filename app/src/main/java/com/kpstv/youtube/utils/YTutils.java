@@ -49,12 +49,18 @@ import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.downloader.Error;
+import com.downloader.OnDownloadListener;
+import com.downloader.PRDownloader;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.gson.Gson;
 import com.karumi.dexter.Dexter;
@@ -125,6 +131,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import static android.content.Context.DOWNLOAD_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
+import static com.kpstv.youtube.MainActivity.supportFFmpeg;
 
 public class YTutils implements AppInterface {
 
@@ -985,9 +992,9 @@ public class YTutils implements AppInterface {
         boolean isAutomatic, permissionGranted;
         String json;
         @SuppressLint("StaticFieldLeak")
-        Context context;
+        Activity context;
         String updateName;
-        long downloadID;
+        long downloadID; AsyncTask<Void,Integer,Void> updateTask;
 
 
         public CheckForUpdates(Activity context, boolean isAutomatic) {
@@ -1059,7 +1066,7 @@ public class YTutils implements AppInterface {
             }else Toast.makeText(context, "Update file does not exist!", Toast.LENGTH_SHORT).show();
         }
 
-        BroadcastReceiver onComplete = new BroadcastReceiver() {
+       /* BroadcastReceiver onComplete = new BroadcastReceiver() {
             public void onReceive(Context ctxt, Intent intent) {
                 Log.e(TAG, "onReceive: Got here..." );
                 long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
@@ -1076,7 +1083,7 @@ public class YTutils implements AppInterface {
                     context.unregisterReceiver(this);
                 }
             }
-        };
+        };*/
 
 
         private Uri getApkUri(String path) {
@@ -1114,6 +1121,8 @@ public class YTutils implements AppInterface {
 
         }
 
+        @SuppressLint("StaticFieldLeak")
+        ProgressBar progressBar; AlertDialog alertDialog;
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
@@ -1132,29 +1141,34 @@ public class YTutils implements AppInterface {
                 int curVer = Integer.parseInt(pInfo.versionName.replace(".",""));
                 Log.e("VersionLOG","NewVersion: "+newVer+", currVersion: "+curVer);
                 if (newVer>curVer) {
-               // if (true) {
-                    new AlertDialog.Builder(context)
-                            .setTitle("Update Available")
-                            .setMessage(getHtml(changelogHtml))
-                            .setPositiveButton("Update", (dialog, which) -> {
-                                DownloadManager downloadManager= (DownloadManager) context.getSystemService(DOWNLOAD_SERVICE);
-                                Uri Download_Uri = Uri.parse(downloadUri);
-                                DownloadManager.Request request = new DownloadManager.Request(Download_Uri);
+              //  if (true) {
+                    LayoutInflater inflater = LayoutInflater.from(context);
+                    View v = inflater.inflate(R.layout.alert_download,null);
 
-                                request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
-                                request.setTitle("Downloading "+updateName);
-                                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,updateName);
+                    TextView showTxt = v.findViewById(R.id.textTxt);
+                    showTxt.setText(getHtml(changelogHtml));
 
-                                IntentFilter intentFilter = new IntentFilter();
-                                intentFilter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+                    progressBar= v.findViewById(R.id.progressBar);
 
-
-                                context.registerReceiver(onComplete, intentFilter);
-                                downloadID = downloadManager.enqueue(request);
-                                Toast.makeText(context, "Download Started! Check notification", Toast.LENGTH_SHORT).show();
+                    alertDialog = new AlertDialog.Builder(context)
+                            .setView(v)
+                            .setCancelable(false)
+                            .setPositiveButton("Download",null)
+                            .setNegativeButton("Cancel",(dialogInterface, i) -> {
+                                if (updateTask!=null && updateTask.getStatus()==Status.RUNNING) {
+                                    updateTask.cancel(true);
+                                }
                             })
-                            .setNegativeButton("Cancel",null)
-                            .show();
+                            .create();
+
+                            alertDialog.show();
+
+                            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
+                                progressBar.setVisibility(View.VISIBLE);
+                                alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setVisibility(View.GONE);
+                                updateTask = new downloadTask(downloadUri);
+                                updateTask.executeOnExecutor(THREAD_POOL_EXECUTOR);
+                            });
                 }else if (!isAutomatic) {
                     Toast.makeText(context, "No update available!", Toast.LENGTH_SHORT).show();
                 }
@@ -1162,6 +1176,67 @@ public class YTutils implements AppInterface {
                 e.printStackTrace();
             }
 
+        }
+
+        class downloadTask extends AsyncTask<Void,Integer,Void> {
+            String download_Uri;
+
+            public downloadTask(String download_Uri) {
+                this.download_Uri = download_Uri;
+            }
+
+            boolean isDownloaded=false;
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+               // alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setVisibility(View.GONE);
+                if (getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName).exists())
+                {
+                    alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setVisibility(View.VISIBLE);
+                    alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setText("Install");
+                    alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
+                        alertDialog.dismiss();
+                        runInstall(context,updateName);
+                    });
+                }
+                else
+                    Toast.makeText(context, "There is a problem with update package!", Toast.LENGTH_SHORT).show();
+
+                super.onPostExecute(aVoid);
+            }
+
+            @Override
+            protected void onProgressUpdate(Integer... values) {
+                if (values[0]<=100)
+                    progressBar.setProgress(values[0]);
+                super.onProgressUpdate(values);
+            }
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                PRDownloader.download(download_Uri,
+                        YTutils.getFile(Environment.DIRECTORY_DOWNLOADS).getPath(), updateName)
+                        .build()
+                        .setOnProgressListener(progress1 -> {
+                           publishProgress((int)(progress1.currentBytes*100/progress1.totalBytes));
+                        })
+                        .start(new OnDownloadListener() {
+                            @Override
+                            public void onDownloadComplete() {
+                                isDownloaded = true;
+                                Log.e(TAG, "onDownloadComplete: Completed");
+                            }
+
+                            @Override
+                            public void onError(Error error) {
+                                isDownloaded = true;
+                            }
+                        });
+
+                /** Wait till download is complete... */
+                while (!isDownloaded) ;
+                return null;
+            }
         }
 
         @Override

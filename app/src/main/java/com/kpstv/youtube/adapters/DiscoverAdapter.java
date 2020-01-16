@@ -219,7 +219,7 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
                 // Load ads on 5,15,25...
                 Log.e("ShowingAds","pos: "+position);
                 viewHolder.adLayout.setVisibility(VISIBLE);
-                AdRequest adRequest = new AdRequest.Builder().build();
+                AdRequest adRequest = new AdRequest.Builder().addTestDevice("07153BA64BB64F7C3F726B71C4AE30B9").build();
                 viewHolder.adView.loadAd(adRequest);
             }else {
                 viewHolder.adLayout.setVisibility(GONE);

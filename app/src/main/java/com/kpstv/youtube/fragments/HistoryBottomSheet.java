@@ -66,6 +66,8 @@ public class HistoryBottomSheet extends BottomSheetDialogFragment {
         ImageUrl = getArguments().getString("imageUri");
         Log.e(TAG, "onCreateView: Title: "+Title);
         ytUrl = getArguments().getString("yturl");
+        if (ytUrl.contains("soundcloud.com"))
+            watchOnYouTube.setVisibility(View.GONE);
         title_TextView.setText(Title);
 
         new getLength(ytUrl).execute();
@@ -125,7 +127,7 @@ public class HistoryBottomSheet extends BottomSheetDialogFragment {
             shareButton.setOnClickListener(v -> {
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
                 shareIntent.setType("text/plain");
-                shareIntent.putExtra(Intent.EXTRA_TEXT,ytUrl);
+                shareIntent.putExtra(Intent.EXTRA_TEXT,"Listen to "+Title+" by "+ChannelTitle+" "+ytUrl);
                 startActivity(Intent.createChooser(shareIntent, "Share using..."));
                 dismiss();
             });

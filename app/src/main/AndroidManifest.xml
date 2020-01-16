@@ -158,7 +158,11 @@
 
        <!-- <service android:name=".services.DownloadService" />-->
         <service android:name=".services.IntentDownloadService" />
-
+        <service android:name=".services.FirebaseService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -191,6 +195,9 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="com.kpstv.youtube.OPEN_SHARE_SONG" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.kpstv.youtube.SHOW_UPDATE" />
             </intent-filter>
             <intent-filter>
                 <action android:name="com.kpstv.youtube.FAVOURITE_SONG" />

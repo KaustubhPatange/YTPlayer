@@ -91,6 +91,10 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.kpstv.youtube.fragments.DiscoverFragment;
 import com.kpstv.youtube.fragments.HistoryBottomSheet;
 import com.kpstv.youtube.fragments.HistoryFragment;
@@ -177,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     Fragment NCFrag; String ytLink;
     public static List<String> playListItems;
     static SharedPreferences preferences,settingPref;
-    public static LinearLayout bottom_player, adViewLayout;
+    public static LinearLayout bottom_player, adViewLayout; static boolean isFirstLaunch=true;
     static ImageButton actionUp,actionPlay;static ProgressBar loadProgress,songProgress;
     static TextView actionTitle, actionChannelTitle; static AdView adView;
     static AsyncTask<String,String,Void> LoadVideo; public static FragmentActivity activity;
@@ -303,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 mediaButtonIntent,
                 0);
         mediaSession = new MediaSessionCompat(this,
-                "RetroMusicPlayer",
+                "MusicPlayer",
                 mediaButtonReceiverComponentName,
                 mediaButtonReceiverPendingIntent);
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
@@ -312,8 +316,6 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         mediaSession.setCallback(mMediaSessionCallback);
         mediaSession.setActive(true);
         mediaSession.setMediaButtonReceiver(mediaButtonReceiverPendingIntent);
-
-        setDefaultEqualizerValues();
 
         preferences = getSharedPreferences("history",MODE_PRIVATE);
         /*String list = preferences.getString("urls","");
@@ -403,27 +405,49 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "app:wakelockTag");
         wakeLock.acquire();
+
+       /* FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+*//*
+                        // Log and toast
+                        String msg = getString(R.string.msg_token_fmt, token);*//*
+                        Log.e(TAG, "Got token: "+token);
+                      //  Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+                    }
+                });*/
+
     }
 
-    void setDefaultEqualizerValues() {
-        boolean isSet = settingPref.getBoolean("equalizer_default",false);
-        if (!isSet) {
-            SharedPreferences.Editor editor = settingPref.edit();
-            int sessionId = player.getAudioComponent().getAudioSessionId();
+    static void setDefaultEqualizerValues() {
+       try {
+           boolean isSet = settingPref.getBoolean("equalizer_default",false);
+           if (!isSet) {
+               SharedPreferences.Editor editor = settingPref.edit();
+               int sessionId = player.getAudioComponent().getAudioSessionId();
 
-            mEqualizer = new Equalizer(1000,sessionId);
-            short numberFrequencyBands = mEqualizer.getNumberOfBands();
-            final short lowerEqualizerBandLevel = mEqualizer.getBandLevelRange()[0];
-            final short upperEqualizerBandLevel = mEqualizer.getBandLevelRange()[1];
+               mEqualizer = new Equalizer(1000,sessionId);
+               short numberFrequencyBands = mEqualizer.getNumberOfBands();
+               final short lowerEqualizerBandLevel = mEqualizer.getBandLevelRange()[0];
+               final short upperEqualizerBandLevel = mEqualizer.getBandLevelRange()[1];
 
-            editor.putInt("bandLength",numberFrequencyBands);
-            editor.putInt("lowerBand",lowerEqualizerBandLevel);
-            editor.putInt("higherBand",upperEqualizerBandLevel);
-            editor.putBoolean("equalizer_default",true);
-            editor.apply();
+               editor.putInt("bandLength",numberFrequencyBands);
+               editor.putInt("lowerBand",lowerEqualizerBandLevel);
+               editor.putInt("higherBand",upperEqualizerBandLevel);
+               editor.putBoolean("equalizer_default",true);
+               editor.apply();
 
-            mEqualizer.release();
-        }
+               mEqualizer.release();
+           }
+       }catch (Exception ignored){}
     }
 
     private static final long MEDIA_SESSION_ACTIONS = PlaybackStateCompat.ACTION_PLAY
@@ -821,6 +845,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             alertDialog.show();
             return;
         }
+        ytLink = yt;
         if (YTutils.isValidID(yt) || (yt.contains("soundcloud.com"))) {
             if (yt.contains("soundcloud.com")) {
                 String[] childs = yt.split("\\s");
@@ -1458,6 +1483,12 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                         }
                         break;
                     case ExoPlayer.STATE_READY:
+
+                        if(isFirstLaunch) {
+                            isFirstLaunch=false;
+                            setDefaultEqualizerValues();
+                        }
+
                         actionTitle.setVisibility(VISIBLE);
                         actionChannelTitle.setVisibility(VISIBLE);
                         actionTitle.setText(videoTitle);
@@ -1589,59 +1620,61 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     }*/
 
     public static void addEqualizer() {
-        int audioSessionId = player.getAudioComponent().getAudioSessionId();
-        Log.e(TAG, "onAudioSessionId: AudioSessionID: "+audioSessionId );
-        if (mEqualizer!=null) mEqualizer.release();
-        if (presetReverb!=null) presetReverb.release();
-        if (bassBoost!=null) bassBoost.release();
-        if (virtualizer!=null) virtualizer.release();
-        if (loudnessEnhancer!=null) loudnessEnhancer.release();
-        mEqualizer = new Equalizer(1000, audioSessionId);
-        mEqualizer.setEnabled(isEqualizerEnabled);
+        try {
+            int audioSessionId = player.getAudioComponent().getAudioSessionId();
+            Log.e(TAG, "onAudioSessionId: AudioSessionID: "+audioSessionId );
+            if (mEqualizer!=null) mEqualizer.release();
+            if (presetReverb!=null) presetReverb.release();
+            if (bassBoost!=null) bassBoost.release();
+            if (virtualizer!=null) virtualizer.release();
+            if (loudnessEnhancer!=null) loudnessEnhancer.release();
+            mEqualizer = new Equalizer(1000, audioSessionId);
+            mEqualizer.setEnabled(isEqualizerEnabled);
 
-        presetReverb = new PresetReverb(0,audioSessionId);
-        presetReverb.setEnabled(AppSettings.enableEqualizer);
+            presetReverb = new PresetReverb(0,audioSessionId);
+            presetReverb.setEnabled(AppSettings.enableEqualizer);
 
-        bassBoost = new BassBoost(0,audioSessionId);
-        bassBoost.setEnabled(AppSettings.enableEqualizer);
+            bassBoost = new BassBoost(0,audioSessionId);
+            bassBoost.setEnabled(AppSettings.enableEqualizer);
 
-        virtualizer = new Virtualizer(0,audioSessionId);
-        virtualizer.setEnabled(AppSettings.enableEqualizer);
+            virtualizer = new Virtualizer(0,audioSessionId);
+            virtualizer.setEnabled(AppSettings.enableEqualizer);
 
-        loudnessEnhancer = new LoudnessEnhancer(audioSessionId);
-        loudnessEnhancer.setEnabled(AppSettings.enableEqualizer);
+            loudnessEnhancer = new LoudnessEnhancer(audioSessionId);
+            loudnessEnhancer.setEnabled(AppSettings.enableEqualizer);
 
-        if (AppSettings.enableEqualizer) {
-            int default_reverb = preferences.getInt("selected_reverb", 0);
-            presetReverb.setPreset((short)default_reverb);
+            if (AppSettings.enableEqualizer) {
+                int default_reverb = preferences.getInt("selected_reverb", 0);
+                presetReverb.setPreset((short)default_reverb);
 
-            int default_bass = preferences.getInt("selected_bass", 0);
-            bassBoost.setStrength((short)default_bass);
+                int default_bass = preferences.getInt("selected_bass", 0);
+                bassBoost.setStrength((short)default_bass);
 
-            int default_virtualizer = preferences.getInt("selected_virtualizer", 0);
-            virtualizer.setStrength((short)default_virtualizer);
+                int default_virtualizer = preferences.getInt("selected_virtualizer", 0);
+                virtualizer.setStrength((short)default_virtualizer);
 
-            int default_loudness = preferences.getInt("selected_loudness", 0);
-            loudnessEnhancer.setTargetGain((short)default_loudness);
-        }
+                int default_loudness = preferences.getInt("selected_loudness", 0);
+                loudnessEnhancer.setTargetGain((short)default_loudness);
+            }
 
-        isEqualizerSet=true;
-        int current = settingPref.getInt("position", 0);
-        if (current == 0) {
-            for (short seek_id = 0; seek_id < mEqualizer.getNumberOfBands(); seek_id++) {
-                int progressBar = settingPref.getInt("seek_" + seek_id, 1500);
-                short equalizerBandIndex = seek_id;
-                final short lowerEqualizerBandLevel = mEqualizer.getBandLevelRange()[0];
-                Log.i("seek_" + seek_id, ":" + progressBar);
-                if (progressBar != 1500) {
-                    mEqualizer.setBandLevel(equalizerBandIndex,
-                            (short) (progressBar + lowerEqualizerBandLevel));
-                } else {
-                    mEqualizer.setBandLevel(equalizerBandIndex,
-                            (short) (progressBar + lowerEqualizerBandLevel));
+            isEqualizerSet=true;
+            int current = settingPref.getInt("position", 0);
+            if (current == 0) {
+                for (short seek_id = 0; seek_id < mEqualizer.getNumberOfBands(); seek_id++) {
+                    int progressBar = settingPref.getInt("seek_" + seek_id, 1500);
+                    short equalizerBandIndex = seek_id;
+                    final short lowerEqualizerBandLevel = mEqualizer.getBandLevelRange()[0];
+                    Log.i("seek_" + seek_id, ":" + progressBar);
+                    if (progressBar != 1500) {
+                        mEqualizer.setBandLevel(equalizerBandIndex,
+                                (short) (progressBar + lowerEqualizerBandLevel));
+                    } else {
+                        mEqualizer.setBandLevel(equalizerBandIndex,
+                                (short) (progressBar + lowerEqualizerBandLevel));
+                    }
                 }
             }
-        }
+        }catch (Exception ignored) {}
     }
 
     private static void addFormatToList(final String videoTitle, final YtFile ytfile, final String channelTitle) {
@@ -2149,6 +2182,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                     percent = likeCounts*100/(likeCounts+dislikeCounts);
                 }catch (Exception e){e.printStackTrace();}
             }
+
+            String videoTitle = MainActivity.videoTitle.replace("|","");
+            String channelTitle = MainActivity.channelTitle.replace("|","");
 
             String insert_data = ytID+"|"+1+"|"+videoTitle+"|"+channelTitle+"|"+imgUrl+ "|"
                     + formattedDate+"|"+percent;

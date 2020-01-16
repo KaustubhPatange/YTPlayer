@@ -300,7 +300,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                 // Load ads on 5,15,25...
                 Log.e("ShowingAds","pos: "+listPosition);
                 holder.adLayout.setVisibility(VISIBLE);
-                AdRequest adRequest = new AdRequest.Builder().build();
+                AdRequest adRequest = new AdRequest.Builder().addTestDevice("07153BA64BB64F7C3F726B71C4AE30B9").build();
                 holder.adView.loadAd(adRequest);
             }else {
                 holder.adLayout.setVisibility(GONE);

@@ -1,7 +1,7 @@
 {
 	"version":"1.0",
 	"new":"1.5",
-	"changelog":"<h3>V1.5 January 2020</h3><hr>*Fixed ffmpeg not supporting on some devices<br>*Fixed some downloading mp3 issues<br>*Fixed video downloading issue (audio not merging)<br>*Small fixes, let's see how it performs.<br>",
-	"download":"https://github.com/KaustubhPatange/YTPlayer/releases/download/1.5/YTPlayer_v1.5.apk",
+	"changelog":"<h3>V1.6 January 2020</h3><hr>*Fix: Spotify song url not parsing<br>*Fix: Saving history option<br>*Fix: Equalizer error<br>*Updated: New update manager<br><br><i>Size: 27.4 MB</i><br>",
+	"download":"https://github.com/KaustubhPatange/YTPlayer/releases/download/1.6/YTPlayer_v1.6.apk",
 	"msg":""
 }

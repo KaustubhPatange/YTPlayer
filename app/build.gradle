@@ -7,8 +7,8 @@ android {
         applicationId "com.kpstv.youtube"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 9
-        versionName "1.5"
+        versionCode 10
+        versionName "1.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     lintOptions {
@@ -55,6 +55,7 @@ dependencies {
     implementation 'com.android.support:support-media-compat:28.0.0'
 
     implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.google.firebase:firebase-messaging:17.3.4'
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
@@ -69,7 +70,7 @@ dependencies {
     //implementation 'com.github.sephiroth74:android-target-tooltip:2.0.0'
 
     /** FFMpeg library */
-   // implementation 'com.writingminds:FFmpegAndroid:0.3.2'
+    // implementation 'com.writingminds:FFmpegAndroid:0.3.2'
 
     implementation 'com.github.clans:fab:1.6.4'
     implementation 'com.android.support:design:28.0.0'
