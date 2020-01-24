@@ -17,6 +17,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -27,6 +29,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.provider.DocumentFile;
 import android.support.v4.view.MenuCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -67,6 +70,7 @@ import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
 
 import java.io.File;
+import java.net.URLDecoder;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,22 +84,36 @@ import static com.kpstv.youtube.utils.AppBarStateChangeListener.State.IDLE;
 public class OPlaylistFragment extends Fragment {
 
     View v;
-    boolean isnetworkCreated; Toolbar toolbar;
-    RecyclerView recyclerView,albumRecyclerView; ArrayList<String> yturls;
-    SongAdapter adapter; ArrayList<DiscoverModel> models;
+    boolean isnetworkCreated;
+    Toolbar toolbar;
+    RecyclerView recyclerView, albumRecyclerView;
+    ArrayList<String> yturls;
+    SongAdapter adapter;
+    ArrayList<DiscoverModel> models;
     FragmentActivity activity;
     RecyclerView.LayoutManager layoutManager;
-    ImageView oImageView; String title = "Playlist";
-    TextView TitleText,SongCountText,TimeText,albumText,songText,pathLocation;
-    PlaylistModel playlistModel; OFModel ofModel;
-    FloatingActionButton playFab; boolean localMusic=false,searchMusic=false;
-    SharedPreferences preferences; File mainFile;
-    OFAdapter ofadapter; LocalModel localModel; boolean scanAlbum=false;
-    ArrayList<OFModel> ofModels; ArrayList<LocalModel> albumModels;
-    LocalAdapter albumAdaper; GridLayoutManager gridLayoutManager;
+    ImageView oImageView;
+    String title = "Playlist";
+    TextView TitleText, SongCountText, TimeText, albumText, songText, pathLocation;
+    PlaylistModel playlistModel;
+    OFModel ofModel;
+    FloatingActionButton playFab;
+    boolean localMusic = false, searchMusic = false;
+    SharedPreferences preferences;
+    File mainFile;
+    OFAdapter ofadapter;
+    LocalModel localModel;
+    boolean scanAlbum = false;
+    ArrayList<OFModel> ofModels;
+    ArrayList<LocalModel> albumModels;
+    LocalAdapter albumAdaper;
+    GridLayoutManager gridLayoutManager;
     private static final String TAG = "OPlayListFragment";
-    boolean loadComplete =false; ProgressBar circularProgressBar;
-    public OPlaylistFragment() { }
+    boolean loadComplete = false;
+    ProgressBar circularProgressBar;
+
+    public OPlaylistFragment() {
+    }
 
     @SuppressLint("StaticFieldLeak")
     @Override
@@ -125,13 +143,13 @@ public class OPlaylistFragment extends Fragment {
             layoutManager = new LinearLayoutManager(activity);
             recyclerView.setLayoutManager(layoutManager);
 
-            gridLayoutManager = new GridLayoutManager(activity,3);
+            gridLayoutManager = new GridLayoutManager(activity, 3);
             albumRecyclerView.setLayoutManager(gridLayoutManager);
 
             preferences = activity.getSharedPreferences("settings", Context.MODE_PRIVATE);
 
-            AppSettings.sortOrder = SortOrder.values()[preferences.getInt("sort_order",0)];
-            AppSettings.sortType = SortType.values()[preferences.getInt("sort_type",2)];
+            AppSettings.sortOrder = SortOrder.values()[preferences.getInt("sort_order", 0)];
+            AppSettings.sortType = SortType.values()[preferences.getInt("sort_type", 2)];
 
             final CollapsingToolbarLayout collapsingToolbarLayout = v.findViewById(R.id.toolbar_layout);
             AppBarLayout appBarLayout = v.findViewById(R.id.app_bar);
@@ -172,77 +190,76 @@ public class OPlaylistFragment extends Fragment {
                 }
             });
 */
-            Log.e(TAG, "onCreateView: Above Bundles" );
+            Log.e(TAG, "onCreateView: Above Bundles");
 
             Bundle args = getArguments();
             String isLocal = args.getString("isLocalMusic");
 
-            if (isLocal!=null && isLocal.equals("true"))
-            {
-                Log.e(TAG, "onCreateView: Okay in localMusic" );
+            if (isLocal != null && isLocal.equals("true")) {
+                Log.e(TAG, "onCreateView: Okay in localMusic");
                 localMusic = true;
                 ofModel = (OFModel) args.getSerializable("model");
                 title = ofModel.getTitle().trim();
                 String location = ofModel.getPath();
-                mainFile = new File(activity.getFilesDir(),"locals/"+location.replace("/","_")+".csv");
-                Log.e(TAG, "onCreateView: "+mainFile.getPath());
+                mainFile = new File(activity.getFilesDir(), "locals/" + location.replace("/", "_") + ".csv");
+                Log.e(TAG, "onCreateView: " + mainFile.getPath());
                 if (mainFile.exists()) {
-                    Log.e(TAG, "onCreateView: In File Exist bro" );
+                    Log.e(TAG, "onCreateView: In File Exist bro");
                     oImageView.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_folder));
                     int song = ofModel.getSongCount();
                     TitleText.setText(ofModel.getTitle());
-                    if (song==1)
-                        SongCountText.setText(song+ " song");
+                    if (song == 1)
+                        SongCountText.setText(song + " song");
                     else
-                        SongCountText.setText(song+ " songs");
+                        SongCountText.setText(song + " songs");
                     pathLocation.setText(new File(ofModel.getPath()).getParent());
                     pathLocation.setVisibility(View.VISIBLE);
-                    Log.e(TAG, "onCreateView: "+ofModel.getDuration());
+                    Log.e(TAG, "onCreateView: " + ofModel.getDuration());
                     TimeText.setText(String.format("  %s", YTutils.milliSecondsToTimer(ofModel.getDuration() * 1000)));
-                    Log.e(TAG, "onCreateView: In localMusic" );
+                    Log.e(TAG, "onCreateView: In localMusic");
 
-                  //  new getData_Offline(mainFile.getPath()).execute();
+                    //  new getData_Offline(mainFile.getPath()).execute();
 
-                }else{
+                } else {
                     localMusic = false;
-                    Log.e(TAG, "onCreateView: Not File Exist bro" );
+                    Log.e(TAG, "onCreateView: Not File Exist bro");
                     Toast.makeText(MainActivity.activity, "Rescan library to scan songs", Toast.LENGTH_SHORT).show();
                 }
 
-            }else if (isLocal!=null && isLocal.equals("search")) {
-                localMusic = true; searchMusic=true;
+            } else if (isLocal != null && isLocal.equals("search")) {
+                localMusic = true;
+                searchMusic = true;
                 localModel = (LocalModel) args.getSerializable("model");
                 title = localModel.getTitle().trim();
                 oImageView.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_user));
 
-                if (localModel!=null){
-                    scanAlbum=false;
+                if (localModel != null) {
+                    scanAlbum = false;
                     TitleText.setText(localModel.getTitle());
-                    if (localModel.getSongList().size()>1) {
-                        SongCountText.setText(localModel.getSongList().size()+" songs");
-                    }else SongCountText.setText("1 song");
+                    if (localModel.getSongList().size() > 1) {
+                        SongCountText.setText(localModel.getSongList().size() + " songs");
+                    } else SongCountText.setText("1 song");
 
-                    Log.e(TAG, "onCreateView: AlbumCount: "+localModel.getAlbumCount());
+                    Log.e(TAG, "onCreateView: AlbumCount: " + localModel.getAlbumCount());
 
-                    if (localModel.getAlbumCount()>0) {
-                        scanAlbum=true;
+                    if (localModel.getAlbumCount() > 0) {
+                        scanAlbum = true;
                     }
-                   //new searchTask(scanAlbum,localModel).execute();
+                    //new searchTask(scanAlbum,localModel).execute();
                 }
-            }
-            else {
-                Log.e(TAG, "onCreateView: In normal OPlayFrag" );
+            } else {
+                Log.e(TAG, "onCreateView: In normal OPlayFrag");
                 playlistModel = (PlaylistModel) args.getSerializable("model");
                 title = playlistModel.getTitle().trim();
                 TitleText.setText(playlistModel.getTitle());
                 SongCountText.setText(String.format("%s songs", playlistModel.getData().size()));
                 TimeText.setText(String.format("  %s", YTutils.milliSecondsToTimer(
-                        playlistModel.getTimeseconds()*1000)));
+                        playlistModel.getTimeseconds() * 1000)));
 
 
-                if (playlistModel.getData().size()>0) {
-                     new getData().execute();
-                }else {
+                if (playlistModel.getData().size() > 0) {
+                    new getData().execute();
+                } else {
                     circularProgressBar.setVisibility(View.GONE);
                     songText.setText("NO SONG DATA");
                     songText.setVisibility(View.VISIBLE);
@@ -258,12 +275,10 @@ public class OPlaylistFragment extends Fragment {
                     MainActivity.loadLocalMusicFrag();
                     return;
                 }
-                if (MainActivity.loadedFavFrag)
-                {
-                    MainActivity.loadedFavFrag=false;
+                if (MainActivity.loadedFavFrag) {
+                    MainActivity.loadedFavFrag = false;
                     MainActivity.loadLibraryFrag();
-                }
-                else
+                } else
                     MainActivity.loadPlayFrag();
             });
 
@@ -272,13 +287,13 @@ public class OPlaylistFragment extends Fragment {
                 toolbar.getMenu().getItem(0).getSubMenu()
                         .getItem(AppSettings.sortType.ordinal()).setChecked(true);
                 toolbar.getMenu().getItem(0).getSubMenu()
-                        .getItem(4+AppSettings.sortOrder.ordinal()).setChecked(true);
+                        .getItem(4 + AppSettings.sortOrder.ordinal()).setChecked(true);
 
-                Log.e(TAG, "onCreateView: Sort Order: "+AppSettings.sortType.ordinal()+ toolbar.getMenu().getItem(0).getSubMenu()
-                        .getItem(4+AppSettings.sortOrder.ordinal()).getTitle());
-                MenuCompat.setGroupDividerEnabled(toolbar.getMenu(),true);
+                Log.e(TAG, "onCreateView: Sort Order: " + AppSettings.sortType.ordinal() + toolbar.getMenu().getItem(0).getSubMenu()
+                        .getItem(4 + AppSettings.sortOrder.ordinal()).getTitle());
+                MenuCompat.setGroupDividerEnabled(toolbar.getMenu(), true);
                 toolbar.setOnMenuItemClickListener(menuItem -> {
-                    if (menuItem.getItemId()==R.id.action_sort) return true;
+                    if (menuItem.getItemId() == R.id.action_sort) return true;
                     menuItem.setChecked(true);
                     switch (menuItem.getItemId()) {
                         case R.id.action_alphabet:
@@ -301,34 +316,35 @@ public class OPlaylistFragment extends Fragment {
                             break;
                     }
                     SharedPreferences.Editor editor = preferences.edit();
-                    editor.putInt("sort_order",AppSettings.sortOrder.ordinal());
-                    editor.putInt("sort_type",AppSettings.sortType.ordinal());
+                    editor.putInt("sort_order", AppSettings.sortOrder.ordinal());
+                    editor.putInt("sort_type", AppSettings.sortType.ordinal());
                     Log.e(TAG, "onCreateView: " + AppSettings.sortType.ordinal());
                     editor.apply();
                     if (searchMusic)
-                        new searchTask(scanAlbum,localModel).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                        new searchTask(scanAlbum, localModel).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     else
                         new getData_Offline(mainFile.getPath()).execute();
                     return true;
                 });
             }
 
-         //   collapsingToolbarLayout.setTitle(title);
+            //   collapsingToolbarLayout.setTitle(title);
             isnetworkCreated = true;
         }
         return v;
     }
 
-    class searchTask extends AsyncTask<Void,Void,Void> {
-        int seconds=0;
+    class searchTask extends AsyncTask<Void, Void, Void> {
+        int seconds = 0;
         boolean scanAlbum;
-        LocalModel model; String imageUri;
+        LocalModel model;
+        String imageUri;
         ArrayList<String> albumKey;
         ArrayList<ArrayList<String>> albumValueList;
 
 
         public searchTask(boolean scanAlbum, LocalModel model) {
-            Log.e(TAG, "searchTask: Created Task" );
+            Log.e(TAG, "searchTask: Created Task");
             this.scanAlbum = scanAlbum;
             this.model = model;
             albumKey = new ArrayList<>();
@@ -343,19 +359,19 @@ public class OPlaylistFragment extends Fragment {
 
             TimeText.setText(String.format("  %s", YTutils.milliSecondsToTimer(seconds * 1000)));
 
-            ofadapter = new OFAdapter(activity,ofModels,true);
+            ofadapter = new OFAdapter(activity, ofModels, true);
             recyclerView.setAdapter(ofadapter);
             recyclerView.setVisibility(View.VISIBLE);
 
             if (scanAlbum) {
                 pathLocation.setVisibility(View.VISIBLE);
                 int s = albumKey.size();
-                if (s==1)
+                if (s == 1)
                     pathLocation.setText("1 album");
-                else pathLocation.setText(s+ " albums");
+                else pathLocation.setText(s + " albums");
 
-                if (imageUri!=null) {
-                    Log.e(TAG, "onPostExecute: Loading data locally: "+imageUri );
+                if (imageUri != null) {
+                    Log.e(TAG, "onPostExecute: Loading data locally: " + imageUri);
                     Glide.with(activity).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
@@ -367,14 +383,13 @@ public class OPlaylistFragment extends Fragment {
                         }
                     });
                 }
-            }else {
+            } else {
                 String file = ofModels.get(0).getPath();
-                Log.e(TAG, "onPostExecute: File: "+file );
-                if (file!=null) {
+                Log.e(TAG, "onPostExecute: File: " + file);
+                if (file != null) {
                     File f = new File(file);
-                    Bitmap bmp = YTutils.getArtworkFromFile(activity,f);
-                    if (bmp!=null)
-                    {
+                    Bitmap bmp = YTutils.getArtworkFromFile(activity, f);
+                    if (bmp != null) {
                         oImageView.setImageBitmap(bmp);
                         oImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                     }
@@ -388,7 +403,7 @@ public class OPlaylistFragment extends Fragment {
             ofadapter.setSingleClickListener((v1, model1, position) -> PlayMusic_Offline(position));
 
             ofadapter.setLongClickListener((v1, model1, position) -> {
-                PopupMenu popupMenu = new PopupMenu(activity,v1);
+                PopupMenu popupMenu = new PopupMenu(activity, v1);
                 popupMenu.inflate(R.menu.local_popup_menu2);
                 popupMenu.setOnMenuItemClickListener(menuItem -> {
                     switch (menuItem.getItemId()) {
@@ -396,32 +411,32 @@ public class OPlaylistFragment extends Fragment {
                             PlayMusic_Offline(position);
                             break;
                         case R.id.action_ringtone:
-                            YTutils.setDefaultRingtone(activity,new File(model1.getPath()));
+                            YTutils.setDefaultRingtone(activity, new File(model1.getPath()));
                             break;
                         case R.id.action_details:
                             Bundle args = new Bundle();
-                            args.putString("filepath",model1.getPath());
+                            args.putString("filepath", model1.getPath());
                             DetailsBottomSheet sheet = new DetailsBottomSheet();
                             sheet.setArguments(args);
-                            sheet.show(activity.getSupportFragmentManager(),"");
+                            sheet.show(activity.getSupportFragmentManager(), "");
                             break;
                         case R.id.action_play_next:
-                            if (MainActivity.yturls.size()==0) {
+                            if (MainActivity.yturls.size() == 0) {
                                 PlayMusic_Offline(position);
-                            }else {
-                                insertPosition(model1,position,false);
+                            } else {
+                                insertPosition(model1, position, false);
                             }
                             break;
                         case R.id.action_add_queue:
-                            if (MainActivity.yturls.size()==0) {
+                            if (MainActivity.yturls.size() == 0) {
                                 PlayMusic_Offline(position);
-                            }else {
-                                insertPosition(model1,position,true);
+                            } else {
+                                insertPosition(model1, position, true);
                             }
                             break;
                         case R.id.action_share:
                             File f = new File(model1.getPath());
-                            YTutils.shareFile(MainActivity.activity,f);
+                            YTutils.shareFile(MainActivity.activity, f);
                             break;
                     }
                     return true;
@@ -429,39 +444,39 @@ public class OPlaylistFragment extends Fragment {
                 popupMenu.show();
             });
 
-            if (scanAlbum && albumModels.size()>0) {
+            if (scanAlbum && albumModels.size() > 0) {
                 albumText.setVisibility(View.VISIBLE);
 
-                albumAdaper = new LocalAdapter(activity,albumModels,true);
+                albumAdaper = new LocalAdapter(activity, albumModels, true);
                 albumRecyclerView.setVisibility(View.VISIBLE);
                 albumRecyclerView.setAdapter(albumAdaper);
 
-                albumAdaper.setSingleClickListener((view, model1,position) -> {
+                albumAdaper.setSingleClickListener((view, model1, position) -> {
                     Bundle args = new Bundle();
-                    args.putSerializable("model",model1);
-                    args.putString("isLocalMusic","search");
+                    args.putSerializable("model", model1);
+                    args.putString("isLocalMusic", "search");
 
                     OPlaylistFragment fragment = new OPlaylistFragment();
                     fragment.setArguments(args);
                     FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
                     ft.setCustomAnimations(R.anim.fade_in,
                             R.anim.fade_out);
-                    ft.addToBackStack(null).replace(R.id.fragment_container, fragment,"localMusic");
+                    ft.addToBackStack(null).replace(R.id.fragment_container, fragment, "localMusic");
                     ft.commit();
                 });
 
                 albumAdaper.setLongClickListener((view, model1, position) -> {
-                    PopupMenu popupMenu = new PopupMenu(activity,view);
+                    PopupMenu popupMenu = new PopupMenu(activity, view);
                     popupMenu.inflate(R.menu.local_popup_menu3);
                     popupMenu.setOnMenuItemClickListener(menuItem -> {
-                        switch (menuItem.getItemId()){
+                        switch (menuItem.getItemId()) {
                             case R.id.action_play:
                                 albumPlay(localModel);
                                 break;
                             case R.id.action_add_queue:
                                 if (MainActivity.yturls.isEmpty()) {
                                     albumPlay(localModel);
-                                }else {
+                                } else {
                                     AddItems(localModel);
                                 }
                                 break;
@@ -475,14 +490,13 @@ public class OPlaylistFragment extends Fragment {
         }
 
         void AddItems(LocalModel localModel) {
-            boolean someThingAdded=false;
+            boolean someThingAdded = false;
             for (String line : localModel.getSongList()) {
                 if (line.isEmpty()) continue;
                 String filePath = line.split("\\|")[0];
                 if (!MainActivity.videoID.equals(filePath)) {
-                    if (!MainActivity.yturls.contains(filePath))
-                    {
-                        someThingAdded=true;
+                    if (!MainActivity.yturls.contains(filePath)) {
+                        someThingAdded = true;
                         MainActivity.yturls.add(filePath);
                     }
                 }
@@ -502,20 +516,20 @@ public class OPlaylistFragment extends Fragment {
             MainActivity.PlayVideo_Local(YTutils.convertListToArrayMethod(urls));
         }
 
-        void insertPosition(OFModel model, int position,boolean addToLast) {
+        void insertPosition(OFModel model, int position, boolean addToLast) {
             if (MainActivity.videoID.equals(model.getPath())) {
                 Toast.makeText(activity, "Song is already playing!", Toast.LENGTH_SHORT).show();
-            }else if (MainActivity.localPlayBack) {
+            } else if (MainActivity.localPlayBack) {
                 if (addToLast) {
                     MainActivity.yturls.remove(model.getPath());
                     MainActivity.yturls.add(model.getPath());
-                }else {
+                } else {
                     int index = MainActivity.yturls.indexOf(MainActivity.videoID);
                     MainActivity.yturls.remove(model.getPath());
-                    MainActivity.yturls.add(index+1,model.getPath());
+                    MainActivity.yturls.add(index + 1, model.getPath());
                 }
                 Toast.makeText(activity, "Song added to queue", Toast.LENGTH_SHORT).show();
-            }else {
+            } else {
                 PlayMusic_Offline(position);
             }
         }
@@ -523,12 +537,12 @@ public class OPlaylistFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... voids) {
             /** Normal Displaying models */
-            for (String line: model.getSongList()) {
+            for (String line : model.getSongList()) {
                 String[] childs = line.split("\\|");
                 int s = Integer.parseInt(childs[3]);
-                seconds +=s;
+                seconds += s;
                 OFModel model = new OFModel(
-                        childs[1],childs[0],s
+                        childs[1], childs[0], s
                 );
                 yturls.add(childs[0]);
                 model.setDuration(s);
@@ -539,24 +553,24 @@ public class OPlaylistFragment extends Fragment {
             /** Sorting data */
             automateSorting();
 
-            int comparision=0;
+            int comparision = 0;
             /** Search for albums*/
             if (scanAlbum) {
-                Log.e(TAG, "doInBackground: Title: " +model.getTitle().trim());
-                imageUri = YTutils.getLocalArtworkImage(activity,model);
-            }else return null;
-            File local = new File(activity.getFilesDir(),"locals");
-            for (File file: local.listFiles()) {
-                String data = YTutils.readContent(activity,file.getPath());
+                Log.e(TAG, "doInBackground: Title: " + model.getTitle().trim());
+                imageUri = YTutils.getLocalArtworkImage(activity, model);
+            } else return null;
+            File local = new File(activity.getFilesDir(), "locals");
+            for (File file : local.listFiles()) {
+                String data = YTutils.readContent(activity, file.getPath());
                 if (data.isEmpty()) continue;
                 if (!data.contains(localModel.getTitle())) continue;
                 comparision++;
-                Log.e(TAG, "doInBackground: Album: data" );
+                Log.e(TAG, "doInBackground: Album: data");
                 String[] lines = data.split("\n|\r");
-                for (int i=0;i<lines.length;i++) {
+                for (int i = 0; i < lines.length; i++) {
                     String line = lines[i];
                     if (line.isEmpty()) continue;
-                    if (line.contains("|"+localModel.getTitle().trim()+"|")) {
+                    if (line.contains("|" + localModel.getTitle().trim() + "|")) {
                         comparision++;
                         String[] childs = line.split("\\|");
                         String album = childs[2];
@@ -564,7 +578,7 @@ public class OPlaylistFragment extends Fragment {
                             int index = albumKey.indexOf(album);
                             if (!albumValueList.get(index).contains(line))
                                 albumValueList.get(index).add(line);
-                        }else {
+                        } else {
                             albumKey.add(album);
                             ArrayList<String> strings = new ArrayList<>();
                             strings.add(line);
@@ -572,12 +586,12 @@ public class OPlaylistFragment extends Fragment {
                         }
 
                         /** This loop is for adding respective songs to album */
-                        for (int j=0;j<albumKey.size();j++) {
+                        for (int j = 0; j < albumKey.size(); j++) {
                             comparision++;
                             album = albumKey.get(j);
-                            for (int c=0;c<i;c++) {
+                            for (int c = 0; c < i; c++) {
                                 String l = lines[c];
-                                if (l.contains("|"+album+"|")&&!albumValueList.get(j).contains(l)) {
+                                if (l.contains("|" + album + "|") && !albumValueList.get(j).contains(l)) {
                                     comparision++;
                                     albumValueList.get(j).add(l);
                                 }
@@ -587,10 +601,10 @@ public class OPlaylistFragment extends Fragment {
 
                 }
             }
-            Log.e(TAG, "doInBackground: AlbumScan: "+albumKey.size() +", Total Comparision: "+comparision);
-            if (albumKey.size()>0) {
-                for (int i=0;i<albumKey.size();i++) {
-                    albumModels.add(new LocalModel(albumKey.get(i),albumValueList.get(i),0));
+            Log.e(TAG, "doInBackground: AlbumScan: " + albumKey.size() + ", Total Comparision: " + comparision);
+            if (albumKey.size() > 0) {
+                for (int i = 0; i < albumKey.size(); i++) {
+                    albumModels.add(new LocalModel(albumKey.get(i), albumValueList.get(i), 0));
                 }
             }
 
@@ -601,9 +615,9 @@ public class OPlaylistFragment extends Fragment {
         protected void onPreExecute() {
             circularProgressBar.setVisibility(View.VISIBLE);
             albumModels.clear();
-            if (albumAdaper!=null) albumAdaper.notifyDataSetChanged();
+            if (albumAdaper != null) albumAdaper.notifyDataSetChanged();
             ofModels.clear();
-            if (ofadapter!=null) ofadapter.notifyDataSetChanged();
+            if (ofadapter != null) ofadapter.notifyDataSetChanged();
             super.onPreExecute();
         }
     }
@@ -611,12 +625,12 @@ public class OPlaylistFragment extends Fragment {
     @Override
     public Animation onCreateAnimation(int transit, boolean enter, int nextAnim) {
 
-        Log.e(TAG, "onCreateAnimation: Enter: "+enter );
+        Log.e(TAG, "onCreateAnimation: Enter: " + enter);
 
         if (enter) {
             final int animatorId = R.anim.fade_in;
             final Animation anim = AnimationUtils.loadAnimation(getActivity(), animatorId);
-            if (anim==null) return null;
+            if (anim == null) return null;
             anim.setAnimationListener(new Animation.AnimationListener() {
 
                 @Override
@@ -638,19 +652,19 @@ public class OPlaylistFragment extends Fragment {
                     if (localMusic && !searchMusic)
                         new getData_Offline(mainFile.getPath()).execute();
                     else if (searchMusic)
-                        new searchTask(scanAlbum,localModel).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                    loadComplete=true;
+                        new searchTask(scanAlbum, localModel).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    loadComplete = true;
                 }
             });
 
             return anim;
         }
-        return super.onCreateAnimation(transit,enter,nextAnim);
+        return super.onCreateAnimation(transit, enter, nextAnim);
     }
 
     @Override
     public void onResume() {
-        Log.e(TAG, "onResume: Triggered onResume" );
+        Log.e(TAG, "onResume: Triggered onResume");
         super.onResume();
     }
 
@@ -660,20 +674,37 @@ public class OPlaylistFragment extends Fragment {
     };*/
 
     void PlayMusic(int position) {
-        if (yturls.size()==0) return;
-        String[] videos =YTutils.ConvertToStringArray(yturls);
-        MainActivity.PlayVideo(videos,position);
+        if (yturls.size() == 0) return;
+        String[] videos = YTutils.ConvertToStringArray(yturls);
+        MainActivity.PlayVideo(videos, position);
     }
 
     void PlayMusic_Offline(int position) {
-        if (yturls.size()==0) return;
-        String[] files =YTutils.ConvertToStringArray(yturls);
-        MainActivity.PlayVideo_Local(files,position);
+        if (yturls.size() == 0) return;
+        String[] files = YTutils.ConvertToStringArray(yturls);
+        MainActivity.PlayVideo_Local(files, position);
     }
 
-    class getData_Offline extends AsyncTask<Void,Void,Void> {
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 42) {
+            Uri treeUri = data.getData();
+            DocumentFile pickedDir = DocumentFile.fromTreeUri(activity, treeUri);
+            activity.grantUriPermission(activity.getPackageName(), treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            activity.getContentResolver().takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString("ext_sdcard", treeUri.toString());
+            editor.apply();
+
+            Toast.makeText(activity, "Permission granted, try to delete file again!", Toast.LENGTH_LONG).show();
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    class getData_Offline extends AsyncTask<Void, Void, Void> {
         String filePath;
-        int seconds=0;
+        int seconds = 0;
 
         public getData_Offline(String filePath) {
             this.filePath = filePath;
@@ -689,14 +720,14 @@ public class OPlaylistFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if (ofModels.size()>0) {
+            if (ofModels.size() > 0) {
                 circularProgressBar.setVisibility(View.GONE);
                 songText.setText("TRACKS");
                 songText.setVisibility(View.VISIBLE);
 
                 TimeText.setText(String.format("  %s", YTutils.milliSecondsToTimer(seconds * 1000)));
 
-                ofadapter = new OFAdapter(activity,ofModels,true);
+                ofadapter = new OFAdapter(activity, ofModels, true);
                 recyclerView.setAdapter(ofadapter);
                 recyclerView.setVisibility(View.VISIBLE);
 
@@ -708,8 +739,8 @@ public class OPlaylistFragment extends Fragment {
 
                 ofadapter.setLongClickListener((v1, model, position) -> {
                     File f = new File(model.getPath());
-                    Log.e(TAG, "onPostExecute: "+model.getPath());
-                    PopupMenu popupMenu = new PopupMenu(activity,v1);
+                    Log.e(TAG, "onPostExecute: " + model.getPath());
+                    PopupMenu popupMenu = new PopupMenu(activity, v1);
                     popupMenu.inflate(R.menu.local_popup_menu1);
                     popupMenu.setOnMenuItemClickListener(menuItem -> {
                         switch (menuItem.getItemId()) {
@@ -717,48 +748,46 @@ public class OPlaylistFragment extends Fragment {
                                 PlayMusic_Offline(position);
                                 break;
                             case R.id.action_play_next:
-                                if (MainActivity.yturls.size()==0)
-                                {
+                                if (MainActivity.yturls.size() == 0) {
                                     PlayMusic_Offline(position);
                                     return true;
                                 }
-                               insertPosition(model,MainActivity.ytIndex+1,false);
+                                insertPosition(model, MainActivity.ytIndex + 1, false);
                                 break;
                             case R.id.action_ringtone:
-                                YTutils.setDefaultRingtone(activity,f);
+                                YTutils.setDefaultRingtone(activity, f);
                                 break;
                             case R.id.action_details:
                                 Bundle args = new Bundle();
-                                args.putString("filepath",model.getPath());
+                                args.putString("filepath", model.getPath());
                                 DetailsBottomSheet sheet = new DetailsBottomSheet();
                                 sheet.setArguments(args);
-                                sheet.show(activity.getSupportFragmentManager(),"");
+                                sheet.show(activity.getSupportFragmentManager(), "");
                                 break;
                             case R.id.action_add_queue:
-                                if (MainActivity.yturls.size()==0)
-                                {
+                                if (MainActivity.yturls.size() == 0) {
                                     PlayMusic_Offline(position);
                                     return true;
                                 }
-                                insertPosition(model,MainActivity.yturls.size(),true);
+                                insertPosition(model, MainActivity.yturls.size(), true);
                                 break;
                             case R.id.action_edit_tag:
-                                if (MainActivity.videoID!=null && MainActivity.videoID.equals(model.getPath())) {
+                                if (MainActivity.videoID != null && MainActivity.videoID.equals(model.getPath())) {
                                     Toast.makeText(activity, "Cannot edit tags when playing", Toast.LENGTH_SHORT).show();
                                     return false;
                                 }
                                 String extension = model.getPath().split("\\.")[1].toLowerCase();
                                 if (extension.equals("mp3")) {
                                     Intent intent = new Intent(activity, EditTagActivity.class);
-                                    intent.putExtra("model",model);
+                                    intent.putExtra("model", model);
                                     startActivity(intent);
-                                }else {
-                                    Toast.makeText(activity, "Could not edit tags for ."+extension+" file type", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(activity, "Could not edit tags for ." + extension + " file type", Toast.LENGTH_SHORT).show();
                                 }
 
                                 break;
                             case R.id.action_share:
-                                YTutils.shareFile(MainActivity.activity,f);
+                                YTutils.shareFile(MainActivity.activity, f);
                                 break;
                             case R.id.action_delete:
                                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -768,21 +797,105 @@ public class OPlaylistFragment extends Fragment {
 
                                             boolean isDeleted = f.delete();
                                             if (!isDeleted) {
-                                                Toast.makeText(activity, "Unable to delete media!", Toast.LENGTH_SHORT).show();
-                                                return;
+
+                                                // try delete using Document file...
+                                                String[] volumes = YTutils.getExternalStorageDirectories(activity);
+                                                if (volumes.length > 0) {
+                                                    Log.e(TAG, "onPostExecute: Volumes: " + volumes[0]);
+                                                    if (f.getPath().contains(volumes[0])) {
+
+                                                        /* String ext_storage = "content://com.android.externalstorage.documents/tree/"
+                                                                +f.getPath().replace("/storage/","");
+
+                                                        String ext_storage = "content://com.android.externalstorage.documents/tree/"
+                                                                +f.getPath().replace("/storage/","");
+
+                                                        Uri treeUri = Uri.parse(ext_storage);
+                                                        DocumentFile file = DocumentFile.fromTreeUri(activity, treeUri);
+                                                        activity.grantUriPermission(activity.getPackageName(), treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                                        activity.getContentResolver().takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                                        */
+                                                        Log.e(TAG, "onPostExecute: Using SAF");
+                                                        String ext_sdCard = preferences.getString("ext_sdcard", null);
+                                                        String storageName = f.getPath().split("/")[2];
+                                                        Log.e(TAG, "onPostExecute: Storage: " + storageName);
+                                                        if (ext_sdCard == null) {
+
+                                                            View v = activity.getLayoutInflater().inflate(R.layout.alert_saf_info, null);
+                                                            new AlertDialog.Builder(activity)
+                                                                    .setTitle("Permission Required")
+                                                                    .setView(v)
+                                                                    .setNegativeButton("Cancel", null)
+                                                                    .setPositiveButton("OK", (dialogInterface, i) -> {
+                                                                        /** Use SAF to get uri */
+                                                                        Intent n = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                                                                        n.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                                                        n.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                                                      /*  String contentUri = "content://com.android.externalstorage.documents/tree/"+storageName+"%3ACoolpad";
+                                                                        Log.e(TAG, "onPostExecute: Content: "+contentUri );
+                                                                        n.putExtra(DocumentsContract.EXTRA_INITIAL_URI, contentUri);*/
+                                                                        //   n.setData();
+                                                                        startActivityForResult(n, 42);
+                                                                    })
+                                                                    .show();
+
+                                                            return;
+                                                        } else {
+                                                            Log.e(TAG, "onPostExecute: Decoded Path: " + ext_sdCard);
+                                                            if (ext_sdCard.contains(volumes[0].replace("/storage/", ""))) {
+                                                             /*   String fpath = f.getPath().replace("/storage/"+storageName+"/","")
+                                                                        .replace("/"+f.getName(),"");*/
+                                                                Uri treeUri = Uri.parse(ext_sdCard);
+
+                                                                DocumentFile file = DocumentFile.fromTreeUri(activity, treeUri);
+
+                                                                String deepFile = f.getPath().replace("/storage/" + storageName + "/", "");
+                                                                String[] folders = deepFile.split("/");
+
+                                                                activity.grantUriPermission(activity.getPackageName(), treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                                                activity.getContentResolver().takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+
+                                                                for (int i = 0; i < folders.length; i++) {
+                                                                     file = file.findFile(folders[i]);
+                                                                }
+
+
+                                                                Log.e(TAG, "onPostExecute: treeUri:" + file.getUri().toString());
+
+                                                                if (file != null && file.exists()) {
+                                                                    isDeleted = file.delete();
+                                                                } else sayWrongPath();
+
+                                                                //+fpath.replace("/","%2F")
+
+                                                               /* if (file!=null && file.exists()) {
+                                                                    isDeleted = file.delete();
+                                                                }else sayWrongPath();*/
+
+
+                                                            } else {
+                                                                sayWrongPath();
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                if (!isDeleted) {
+                                                    Toast.makeText(activity, "Unable to delete media!", Toast.LENGTH_SHORT).show();
+                                                    return;
+                                                }
                                             }
 
-                                            boolean wasOnlyFile=false;
+                                            boolean wasOnlyFile = false;
 
-                                            if (MainActivity.yturls.size()>0) {
+                                            if (MainActivity.yturls.size() > 0) {
                                                 int index = MainActivity.yturls.indexOf(model.getPath());
-                                                if (index<position)
+                                                if (index < position)
                                                     MainActivity.ytIndex--;
                                                 MainActivity.yturls.remove(model.getPath());
-                                                if (MainActivity.nPlayModels.size()>0)
-                                                    for (NPlayModel nPlayModel: MainActivity.nPlayModels) {
-                                                        if (nPlayModel.getUrl().equals(model.getPath()))
-                                                        {
+                                                if (MainActivity.nPlayModels.size() > 0)
+                                                    for (NPlayModel nPlayModel : MainActivity.nPlayModels) {
+                                                        if (nPlayModel.getUrl().equals(model.getPath())) {
                                                             MainActivity.nPlayModels.remove(nPlayModel);
                                                             break;
                                                         }
@@ -790,48 +903,47 @@ public class OPlaylistFragment extends Fragment {
                                             }
                                             yturls.remove(position);
                                             ofModels.remove(position);
-                                            if (MainActivity.videoID!=null&&MainActivity.videoID.equals(model.getPath()))
-                                            {
-                                                if (yturls.size()>0) {
+                                            if (MainActivity.videoID != null && MainActivity.videoID.equals(model.getPath())) {
+                                                if (yturls.size() > 0) {
                                                     PlayMusic_Offline(position);
-                                                }else {
+                                                } else {
                                                     MainActivity.onClear();
                                                     MainActivity.bottom_player.setVisibility(View.GONE);
                                                 }
                                             }
-                                            String name=ofModel.getPath().replace("/","_")+".csv";
-                                            File toSave = new File(activity.getFilesDir(),"locals/"+name);
-                                            String data = YTutils.readContent(activity,toSave.getPath());
+                                            String name = ofModel.getPath().replace("/", "_") + ".csv";
+                                            File toSave = new File(activity.getFilesDir(), "locals/" + name);
+                                            String data = YTutils.readContent(activity, toSave.getPath());
                                             String[] items = data.trim().split("\n|\r");
-                                            Log.e(TAG, "onPostExecute: "+items.length);
-                                            if (items.length==1) {
+                                            Log.e(TAG, "onPostExecute: " + items.length);
+                                            if (items.length == 1) {
                                                 Log.e(TAG, "onPostExecute: This is only file in dir");
-                                                wasOnlyFile=true;
+                                                wasOnlyFile = true;
                                             }
-                                            if (items.length>0 && !wasOnlyFile) {
+                                            if (items.length > 0 && !wasOnlyFile) {
                                                 StringBuilder builder1 = new StringBuilder();
-                                                for (int i=0;i<items.length;i++) {
+                                                for (int i = 0; i < items.length; i++) {
                                                     if (!items[i].contains(model.getPath()))
                                                         builder1.append("\n").append(items[i]);
                                                 }
-                                                YTutils.writeContent(activity,toSave.getPath(),builder1.toString().trim());
-                                            }else if (wasOnlyFile) {
+                                                YTutils.writeContent(activity, toSave.getPath(), builder1.toString().trim());
+                                            } else if (wasOnlyFile) {
                                                 {
-                                                    Log.e(TAG, "onPostExecute: OnFile deleted" );
-                                                    YTutils.writeContent(activity,toSave.getPath(),"");
+                                                    Log.e(TAG, "onPostExecute: OnFile deleted");
+                                                    YTutils.writeContent(activity, toSave.getPath(), "");
                                                 }
-                                            }else
+                                            } else
                                                 Toast.makeText(activity, "Something went wrong!", Toast.LENGTH_SHORT).show();
 
                                             // Modify fileList csv file...
                                             String parent = new File(model.getPath()).getParent();
-                                            Log.e(TAG, "onPostExecute: File modify: "+parent);
+                                            Log.e(TAG, "onPostExecute: File modify: " + parent);
 
-                                            data = YTutils.readContent(activity,"fileList.csv");
-                                            if (items.length>0) {
+                                            data = YTutils.readContent(activity, "fileList.csv");
+                                            if (items.length > 0) {
                                                 StringBuilder builder1 = new StringBuilder();
                                                 items = data.split("\n|\r");
-                                                for (String line: items) {
+                                                for (String line : items) {
                                                     if (line.isEmpty()) continue;
 
                                                     if (line.contains(parent)) {
@@ -839,8 +951,8 @@ public class OPlaylistFragment extends Fragment {
                                                         long dur = model.getDuration();
                                                         long total = ofModel.getDuration();
 
-                                                        ofModel.setDuration(total-dur);
-                                                        ofModel.setSongCount(ofModel.getSongCount()-1);
+                                                        ofModel.setDuration(total - dur);
+                                                        ofModel.setSongCount(ofModel.getSongCount() - 1);
 
                                                         if (!wasOnlyFile) {
                                                             builder1.append("\n").append(parent)
@@ -848,16 +960,16 @@ public class OPlaylistFragment extends Fragment {
                                                                     .append("|").append(ofModel.getDuration());
                                                         }
 
-                                                    }else {
+                                                    } else {
                                                         builder1.append("\n").append(line);
                                                     }
                                                 }
-                                                YTutils.writeContent(activity,"fileList.csv",builder1.toString().trim());
+                                                YTutils.writeContent(activity, "fileList.csv", builder1.toString().trim());
                                             }
 
                                             ofadapter.notifyDataSetChanged();
 
-                                            MainActivity.localMusicFrag.onActivityResult(110,8,null);
+                                            MainActivity.localMusicFrag.onActivityResult(110, 8, null);
 
                                             if (wasOnlyFile)
                                                 activity.onBackPressed();
@@ -871,20 +983,27 @@ public class OPlaylistFragment extends Fragment {
                     popupMenu.show();
                 });
 
-            }else {
+            } else {
                 Toast.makeText(MainActivity.activity, "Something went wrong!", Toast.LENGTH_SHORT).show();
             }
             super.onPostExecute(aVoid);
         }
 
-        void insertPosition(OFModel model,int position,boolean addLast) {
-            if (MainActivity.videoID.equals(model.getPath()))
-            {
+
+        void sayWrongPath() {
+            Toast.makeText(activity, "Wrong path selected, try again!", Toast.LENGTH_SHORT).show();
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString("ext_sdcard", null);
+            editor.apply();
+        }
+
+        void insertPosition(OFModel model, int position, boolean addLast) {
+            if (MainActivity.videoID.equals(model.getPath())) {
                 Toast.makeText(activity, "Song is already playing!", Toast.LENGTH_SHORT).show();
                 return;
             }
-            Log.e(TAG, "insertPosition: Path: "+model.getPath());
-            int insertAt=position;
+            Log.e(TAG, "insertPosition: Path: " + model.getPath());
+            int insertAt = position;
             if (MainActivity.yturls.contains(model.getPath())) {
                 if (addLast) {
                     Toast.makeText(activity, "Song already in queue", Toast.LENGTH_SHORT).show();
@@ -892,47 +1011,46 @@ public class OPlaylistFragment extends Fragment {
                 }
                 Log.e(TAG, "insertPosition: Item already exist");
                 int pos = MainActivity.yturls.indexOf(model.getPath());
-                if (pos < position)
-                {
+                if (pos < position) {
                     MainActivity.ytIndex--;
-                    insertAt = position-1;
+                    insertAt = position - 1;
                 }
                 MainActivity.yturls.remove(model.getPath());
             }
-            if (MainActivity.nPlayModels.size()==MainActivity.yturls.size()&&MainActivity.yturls.size()>0) {
+            if (MainActivity.nPlayModels.size() == MainActivity.yturls.size() && MainActivity.yturls.size() > 0) {
                 File f = new File(model.getPath());
                 Uri uri = Uri.fromFile(f);
-                byte [] data=null;
+                byte[] data = null;
                 try {
                     MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-                    mmr.setDataSource(activity,uri);
+                    mmr.setDataSource(activity, uri);
                     data = mmr.getEmbeddedPicture();
-                }catch (Exception e){
+                } catch (Exception e) {
                     Log.e(TAG, "insertPosition: Not a mp3 file");
                 }
                 Bitmap icon;
-                if(data != null)
+                if (data != null)
                     icon = BitmapFactory.decodeByteArray(data, 0, data.length);
                 else
-                    icon = YTutils.drawableToBitmap(ContextCompat.getDrawable(activity,R.drawable.ic_pulse));
+                    icon = YTutils.drawableToBitmap(ContextCompat.getDrawable(activity, R.drawable.ic_pulse));
                 MetaModel model1 = new MetaModel(
-                        model.getPath(),model.getTitle(),model.getPath(),null
+                        model.getPath(), model.getTitle(), model.getPath(), null
                 );
-                NPlayModel nPlayModel = new NPlayModel(model.getPath(),new YTMeta(model1),false);
+                NPlayModel nPlayModel = new NPlayModel(model.getPath(), new YTMeta(model1), false);
                 nPlayModel.setIcon(icon);
-                MainActivity.nPlayModels.add(insertAt,nPlayModel);
+                MainActivity.nPlayModels.add(insertAt, nPlayModel);
             }
-            Log.e(TAG, "insertPosition: Inserted position"+insertAt);
-            MainActivity.yturls.add(insertAt,model.getPath());
+            Log.e(TAG, "insertPosition: Inserted position" + insertAt);
+            MainActivity.yturls.add(insertAt, model.getPath());
             Toast.makeText(activity, "Song added to queue", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            String data = YTutils.readContent(activity,filePath);
+            String data = YTutils.readContent(activity, filePath);
             String[] items = data.split("\n|\r");
-            if (items.length>0) {
-                for (String line: items) {
+            if (items.length > 0) {
+                for (String line : items) {
                     if (line.isEmpty()) continue;
                     String fullLocaltion = line.split("\\|")[0];
                     if (!new File(fullLocaltion).exists()) continue;
@@ -941,7 +1059,7 @@ public class OPlaylistFragment extends Fragment {
                     long date = Long.parseLong(line.split("\\|")[4]);
                     seconds += s;
                     yturls.add(fullLocaltion);
-                    OFModel model = new OFModel(artist,fullLocaltion,s);
+                    OFModel model = new OFModel(artist, fullLocaltion, s);
                     model.setDuration(s);
                     model.setDate(date);
                     ofModels.add(model);
@@ -965,27 +1083,27 @@ public class OPlaylistFragment extends Fragment {
                 });
                 break;
             case date_added:
-                Collections.sort(ofModels, (t1, t2) -> Long.compare(t2.getDate(),t1.getDate()));
+                Collections.sort(ofModels, (t1, t2) -> Long.compare(t2.getDate(), t1.getDate()));
                 break;
             case duration:
-                Collections.sort(ofModels, (t1, t2) -> Long.compare(t1.getDuration(),t2.getDuration()));
+                Collections.sort(ofModels, (t1, t2) -> Long.compare(t1.getDuration(), t2.getDuration()));
                 break;
         }
         if (AppSettings.sortOrder == SortOrder.descending) {
             Collections.reverse(ofModels);
         }
         yturls.clear();
-        for (OFModel model: ofModels) {
+        for (OFModel model : ofModels) {
             yturls.add(model.getPath());
         }
     }
 
-    class getData extends AsyncTask<Void,Void,Void> {
+    class getData extends AsyncTask<Void, Void, Void> {
 
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            adapter = new SongAdapter(models,activity,true,null);
+            adapter = new SongAdapter(models, activity, true, null);
             recyclerView.setAdapter(adapter);
             circularProgressBar.setVisibility(View.GONE);
             songText.setVisibility(View.VISIBLE);
@@ -998,15 +1116,15 @@ public class OPlaylistFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            String data = YTutils.readContent(activity,"removedList.csv");
+            String data = YTutils.readContent(activity, "removedList.csv");
             ArrayList<String> strings = new ArrayList<>();
-            if (data!=null && !data.isEmpty()) {
+            if (data != null && !data.isEmpty()) {
                 if (data.contains(","))
                     strings = new ArrayList<>(Arrays.asList(data.split(",")));
                 else strings.add(data.trim());
             }
-            for (String line: playlistModel.getData()) {
-               if (!line.contains("|")) continue;
+            for (String line : playlistModel.getData()) {
+                if (!line.contains("|")) continue;
                 String[] childs = line.split("\\|");
                 String videoId = childs[0];
                 yturls.add(YTutils.getYtUrl(videoId));
@@ -1018,7 +1136,7 @@ public class OPlaylistFragment extends Fragment {
                         YTutils.getYtUrl(videoId)
                 );
 
-                if (strings.contains("ytID:"+videoId)||strings.contains("sd:"+videoId))
+                if (strings.contains("ytID:" + videoId) || strings.contains("sd:" + videoId))
                     discoverModel.setDisabled(true);
 
                 models.add(discoverModel);

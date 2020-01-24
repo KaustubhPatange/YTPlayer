@@ -29,6 +29,7 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.NPlaylistActivity;
+import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.PlayerActivity2;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.helper.ItemTouchHelperAdapter;
@@ -54,6 +55,7 @@ public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder
     OnCheckBoxListener onCheckBoxListener;
     private OnStartDragListener mDragStartListener;
     int accentColor;
+    private static final String TAG = "NPlayAdapter";
 
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
@@ -78,6 +80,7 @@ public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder
             MainActivity.yturls.add(models.get(i).getUrl());
             if (models.get(i).is_playing()) {
                 MainActivity.ytIndex = i;
+                Log.e(TAG, "onItemMoved: Current Index: "+i);
             }
             models.get(i).set_selected(false);
         }

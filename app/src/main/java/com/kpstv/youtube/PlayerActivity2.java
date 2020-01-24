@@ -24,6 +24,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -117,7 +118,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     static IndicatorSeekBar indicatorSeekBar;
     private static InterstitialAd mInterstitialAd;
-
+    public static boolean doNotCallAdapter=true;
     public static ImageView favouriteButton, addToPlaylist;
 
     static Handler mHandler = new Handler();
@@ -459,12 +460,24 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             callFinish();
         });
 
-        if (!MainActivity.localPlayBack) {
-            String url = MainActivity.yturls.get(MainActivity.ytIndex);
-            if (url.contains("soundcloud.com"))
-                setSoundCloudData(url);
+        try {
+            if (!MainActivity.localPlayBack) {
+                String url = MainActivity.yturls.get(MainActivity.ytIndex);
+                if (url.contains("soundcloud.com"))
+                    setSoundCloudData(url);
+            }
+        }catch (Exception e) {
+            finish();
         }
 
+    }
+
+    public static void setViewPagerData() {
+        mainPager.removeOnPageChangeListener(mainPageListener);
+        adapter = new PlayerAdapter(activity,MainActivity.yturls);
+        mainPager.setAdapter(adapter);
+        mainPager.setCurrentItem(MainActivity.ytIndex,false);
+        mainPager.addOnPageChangeListener(mainPageListener);
     }
 
     public static void setLyricData(Spanned text) {
@@ -503,14 +516,6 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                     MainActivity.ChangeVideo(pos);
                 String url = MainActivity.yturls.get(pos);
                 setSoundCloudData(url);
-              /*  if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
-                    setData.cancel(true);
-                if (!MainActivity.localPlayBack) {
-                    setData = new loadData();
-                }
-                else
-                    setData = new loadData_Offline(MainActivity.yturls.get(pos));
-                setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
             }catch (Exception e) {
                 e.printStackTrace();
             }
@@ -521,50 +526,27 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         @SuppressLint("StaticFieldLeak")
         @Override
         public void onPageScrollStateChanged(int i) {
-            /** When song is changed automatically this will keep background image...*/
-           /* String imageUri = YTutils.getImageUrl(MainActivity.yturls.get(MainActivity.ytIndex));
-            if (MainActivity.videoID.contains("soundcloud.com")) {
 
-            }
-                imageUri = MainActivity.imgUrl;
-            Log.e(TAG, "onPageScrollStateChanged: Loading Image: "+imageUri);
-            Glide.with(activity).asBitmap()
-                    .load(imageUri)
-                    .into(new CustomTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            Palette.generateAsync(resource, palette -> {
-                                int color = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
-                                MainActivity.bitmapIcon = resource;
-                                MainActivity.nColor = color;
-                                Log.e(TAG, "onPageScrolled: Changing nColor: "+MainActivity.nColor +
-                                        ", ImageUri: "+MainActivity.imgUrl );
-                                ChangeBackgroundColor(color);
-                                MainActivity.rebuildNotification();
-                            });
-                        }
-
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                        }
-                    });*/
         }
     };
 
     public static void loadAgain() {
 
-        player_common();
+        try {
+            player_common();
 
-        mainPager.removeOnPageChangeListener(mainPageListener);
-        if (mainPager.getChildCount()!=MainActivity.yturls.size()) {
-            adapter.notifyDataSetChanged();
+            mainPager.removeOnPageChangeListener(mainPageListener);
+            if (mainPager.getChildCount() != MainActivity.yturls.size()) {
+                adapter.notifyDataSetChanged();
+            }
+            if (mainPager.getCurrentItem() != MainActivity.ytIndex) {
+                mainPager.setCurrentItem(MainActivity.ytIndex, true);
+            }
+            mainPager.addOnPageChangeListener(mainPageListener);
+
+        }catch (Exception e) {
+            activity.finish();
         }
-        if (mainPager.getCurrentItem()!=MainActivity.ytIndex)
-        {
-            mainPager.setCurrentItem(MainActivity.ytIndex,true);
-        }
-        mainPager.addOnPageChangeListener(mainPageListener);
     }
 
     static void player_common() {

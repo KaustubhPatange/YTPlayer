@@ -73,7 +73,7 @@ public class Assets {
 	public String getJs() {
 		if(js.startsWith("http")&&js.contains("youtube.com")){
 			return js;
-		}else return "https://youtube.com"+js;
+		}else return "https://www.youtube.com"+js;
 	}
 
 	public void setJs(String js) {

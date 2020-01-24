@@ -2,6 +2,7 @@ package com.kpstv.youtube;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -117,6 +118,7 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                 }
                 case MotionEvent.ACTION_UP:
 
+                    boolean isCurrentOne=false;
                     if (checklist.size()>0) {
                         Integer[] pos = new Integer[checklist.size()];
                         int j=-1;
@@ -128,6 +130,9 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                         // Reversing list...
                         Arrays.sort(pos, Collections.reverseOrder());
                         for (int c : pos) {
+                            if (MainActivity.ytIndex==c) {
+                                isCurrentOne=true;
+                            }
                             removeItem(c);
                         }
                         reloadAdapter();
@@ -135,6 +140,13 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                         checklist.clear();
                         setCheckedCallbacks();
 
+                        if (isCurrentOne) {
+                            if (MainActivity.yturls.size()>0) {
+                                MainActivity.PlayVideo(YTutils.convertListToArrayMethod(MainActivity.yturls),0);
+                            }else closePlayer();
+                        }
+
+                        if (MainActivity.yturls.size()<=0) closePlayer();
                     }
 
                 case MotionEvent.ACTION_CANCEL: {
@@ -202,6 +214,14 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
 
 
+    }
+
+    void closePlayer() {
+        MainActivity.onClear();
+        MainActivity.bottom_player.setVisibility(View.GONE);
+        MainActivity.notificationManagerCompat.cancel(1);
+        startActivity(new Intent(this,MainActivity.class));
+        finish();
     }
 
     void enabled() {
@@ -376,6 +396,7 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
     @Override
     protected void onDestroy() {
+        PlayerActivity2.setViewPagerData();
         handler.removeCallbacks(runnable);
         super.onDestroy();
     }

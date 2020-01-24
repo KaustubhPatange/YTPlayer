@@ -6,25 +6,29 @@ import java.io.IOException;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
+import com.naveed.ytextractor.utils.Utils;
 
 public class CipherManager {
 	
-	private static final String RegexDesipherFunctionCode="\\{[a-zA-Z]{1,}=[a-zA-Z]{1,}\\.split\\(\"\"\\).*?\\};";
+	private static final String RegexDesipherFunctionCode="\\{[a-zA-Z]{1,}=[a-zA-Z]{1,}.split\\(\"\"\\);[a-zA-Z0-9$]{2}\\.[a-zA-Z0-9$]{2}.*?[a-zA-Z]{1,}.join\\(\"\"\\)\\};";
 	private static final String RegexVarName="[a-zA-Z0-9$]{2}\\.[a-zA-Z0-9$]{2}\\([a-zA-Z]\\,(\\d\\d|\\d)\\)";
 	private static  String RegexFindVarCode="";
 	private static String cachedDechiperFunction=null;
 	
 
 	
-	private  static String getDecipherCode(String Basejs) {
+	public  static String getDecipherCode(String Basejs) {
 		String DechipherCode;
 		String DecipherFun="decipher=function(a)" + RegexUtils.matchGroup(RegexDesipherFunctionCode, Basejs);
-		String RawName=RegexUtils.matchGroup(RegexVarName, DecipherFun).replace("$","\\$");;
+		//Utils.copyToBoard(Basejs);
+		LogUtils.log("decfun="+DecipherFun);
+		String RawName=RegexUtils.matchGroup(RegexVarName, DecipherFun).replace("$","\\$");
 		String RealVarName=RawName.split("\\.")[0];
 		RegexFindVarCode = "var\\s" + RealVarName + "=.*?\\};";	// Word 1
 		String varCode=RegexUtils.matchGroup(RegexFindVarCode, Basejs);
 		DechipherCode = DecipherFun + "\n" + varCode;
-		//LogUtils.log("code= "+DechipherCode);
+		LogUtils.log("code= "+DechipherCode);
+		
 		return DechipherCode;
 	}
 

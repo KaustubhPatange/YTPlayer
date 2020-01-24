@@ -1,7 +1,5 @@
 package com.naveed.ytextractor;
 /*
-package com.naveed.ytextractor;
-
 import android.app.Activity;
 import android.graphics.Color;
 import android.media.MediaPlayer;

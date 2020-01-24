@@ -1789,8 +1789,15 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 .setOngoing(setgoing)
                 .setSound(null)
                 .setContentIntent(clickPendingIntent)
-                .setContentText(channelTitle)
-                .setLargeIcon(bitmapIcon);
+                .setContentText(channelTitle);
+        try {
+            if (bitmapIcon.getWidth()>1700) {
+                double multiply_factor = 1700.0/(double)bitmapIcon.getWidth();
+                int height = (int)(bitmapIcon.getHeight() * multiply_factor);
+                bitmapIcon = Bitmap.createScaledBitmap(bitmapIcon,1700,height,false);
+            }
+            builder.setLargeIcon(bitmapIcon);
+        }catch (Exception ignored) { }
 
         if (!localPlayBack)
             builder.addAction(favicon,"Favourite",favouritePendingIntent);

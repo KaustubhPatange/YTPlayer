@@ -2,8 +2,6 @@ package com.naveed.ytextractor;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
-
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
 import com.naveed.ytextractor.CipherManager;
@@ -40,20 +38,9 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 	Handler han=new Handler(Looper.getMainLooper());
 	private Response response;
 	private YoutubeMeta ytmeta;
-	YTDetails ytDetails;
 
 
-	class YTDetails {
-		long expiresInSeconds;
 
-		public YTDetails(long expiresInSeconds) {
-			this.expiresInSeconds = expiresInSeconds;
-		}
-
-		public long getExpiresInSeconds() {
-			return expiresInSeconds;
-		}
-	}
 
 
 
@@ -106,7 +93,7 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 		}	
 	}
 
-	private static final String TAG = "YoutubeStreamExtractor";
+
 
 	@Override
 	protected Void doInBackground(String[] ids) {
@@ -119,11 +106,11 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 
 			PlayerResponse playerResponse=parseJson(jsonBody);
 			ytmeta = playerResponse.getVideoDetails();
-			//Utils.copyToBoard(playerResponse.getStreamingData().);
+			//Utils.copyToBoard(jsonBody);
 			if (playerResponse.getVideoDetails().getisLive()) {
 				StreamingData sd=playerResponse.getStreamingData();
 				setDefaults(sd);
-				parseLiveUrls(sd);
+				parseLiveUrls(playerResponse.getStreamingData());
 			} else {
 				StreamingData sd=playerResponse.getStreamingData();
 				setDefaults(sd);
@@ -138,7 +125,7 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 			}
 		}
 		catch (Exception e) {
-			LogUtils.log(Arrays.toString(e.getStackTrace()));// e.toString());
+			LogUtils.log(Arrays.toString(e.getStackTrace()));
 			Ex = new ExtractorException("Error While getting Youtube Data:" + e.getMessage());
 			this.cancel(true);
 		}
@@ -147,7 +134,7 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 
 	private void setDefaults(StreamingData data) {
 		try {
-		ytmeta.setExpiresInSeconds(data.getExpiresInSeconds());
+			ytmeta.setExpiresInSeconds(data.getExpiresInSeconds());
 		}catch (Exception ignored){}
 	}
 
@@ -196,7 +183,7 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 
 						if (partCipher.startsWith("url=")) {
 							tempUrl = URLDecoder.decode(partCipher.replace("url=", ""));
-
+							
 							for (String url_part:tempUrl.split("&")) {
 								if (url_part.startsWith("s=")) {
 									decodedSig = CipherManager.dechiperSig(URLDecoder.decode(url_part.replace("s=", "")), response.getAssets().getJs());
@@ -206,6 +193,7 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 					}
 
 					String	FinalUrl= tempUrl + "&sig=" + decodedSig;
+					
 					media.setUrl(FinalUrl);
 					links.add(media);
 

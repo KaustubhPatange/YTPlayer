@@ -1,17 +1,25 @@
 package com.kpstv.youtube;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -91,12 +99,6 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
                 .enableAutoManage(this,connectionResult -> {
 
         }).addApi(Auth.GOOGLE_SIGN_IN_API, gso).build();
-                /*.enableAutoManmage(this, new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-                    }
-                }).addApi(Auth.GOOGLE_SIGN_IN_API, gso).build();*/
 
         mBuybutton.setOnClickListener(view -> {
             FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -176,10 +178,34 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
                 if (code==1) {
                     View v = getLayoutInflater().inflate(R.layout.alert_payment_gateway,null);
                     ImageView razorpay = v.findViewById(R.id.razorpayButton);
+                    TextView accountId = v.findViewById(R.id.accountId);
                     ImageView paypal = v.findViewById(R.id.paypalButton);
                     Button cancelButton = v.findViewById(R.id.cancelButton);
+                    Button promoButton = v.findViewById(R.id.promoButton);
 
                     cancelButton.setOnClickListener(view -> alertDialog.dismiss());
+                    accountId.setText(String.format("Account: %s", uid));
+
+                    promoButton.setOnClickListener(view -> {
+                        // Create new alert dialog for promo codes...
+
+                        View layout = getLayoutInflater().inflate(R.layout.edittextalert,null);
+                        final EditText editText = layout.findViewById(R.id.editText);
+                        editText.setHint("Enter 5 digit promo code");
+
+                        alertDialog.dismiss();
+                        alertDialog = new AlertDialog.Builder(PurchaseActivity.this)
+                                .setTitle("Promo Code")
+                                .setCancelable(false)
+                                .setNegativeButton("Cancel",null)
+                                .setPositiveButton("OK",(dialogInterface, i) -> {
+                                    if (YTutils.convertArrayToArrayList(AppInterface.promo_codes).contains(editText.getText().toString()))
+                                        doOnSuccess();
+                                })
+                                .setView(layout)
+                                .create();
+                        alertDialog.show();
+                    });
 
                     razorpay.setOnClickListener(view -> {
                         Toast.makeText(PurchaseActivity.this, "This payment method is currently disabled!", Toast.LENGTH_SHORT).show();
@@ -226,6 +252,25 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
                 })
                 .create();
         alertDialog.show();
+    }
+
+    private boolean isOnOnlyWifi(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = null;
+        if (connectivityManager != null) {
+
+            networkInfo = connectivityManager
+                    .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+            if (!networkInfo.isAvailable()) {
+                networkInfo = connectivityManager
+                        .getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+                if (networkInfo!=null)
+                    return false;
+            }
+        }
+        return networkInfo != null && networkInfo.isConnected();
     }
 
     private void initViews() {

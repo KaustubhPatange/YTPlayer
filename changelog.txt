@@ -1,6 +1,6 @@
-Version 1.6
+Version 1.7
 
-[*] Fix: Spotify song url not parsing
-[*] Fix: Saving history option
-[*] Fix: Equalizer error
-[*] Updated: New update manager
+[*] Fix: Extraction for protected videos
+[*] Fix: Improper thumbnail loading
+[*] Fix: Delete files not working in memory card
+[*] Fix: Reported bugs

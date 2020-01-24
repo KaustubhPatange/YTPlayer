@@ -47,7 +47,7 @@ class FileUtils {
 	}
 
 	static File getFilesDirectory(Context context) {
-		// creates files directory under data/data/package name
+        android.util.Log.e("ATAGTODEFINE", "getFilesDirectory: "+context.getCacheDir());
         return context.getFilesDir();
 	}
 

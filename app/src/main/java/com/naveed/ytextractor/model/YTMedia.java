@@ -198,11 +198,11 @@ public class YTMedia
 	{
 		return url;
 	}
-	
+
 	public boolean useCipher(){
-		
+
 		return (cipher!=null && cipher.contains("s="));
-		
+
 	}
-	
+
 }
