@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaCodec;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaMuxer;
 import android.net.Uri;
 import android.os.Build;
@@ -31,7 +32,10 @@ import com.coremedia.iso.boxes.Container;
 import com.downloader.Error;
 import com.downloader.OnDownloadListener;
 import com.downloader.PRDownloader;
+import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
+import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.ShellCommand;
 import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.Track;
@@ -40,6 +44,7 @@ import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
 
 import com.kpstv.youtube.DownloadActivity;
 import com.kpstv.youtube.R;
+import com.kpstv.youtube.models.OFModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.receivers.SongBroadCast;
 import com.kpstv.youtube.utils.FileUtils;
@@ -63,6 +68,7 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Random;
 
 import static com.kpstv.youtube.MainActivity.supportFFmpeg;
@@ -80,7 +86,7 @@ public class IntentDownloadService extends IntentService {
     public static YTConfig currentModel; public static int progress;
     public static long totalsize; public static ArrayList<YTConfig> pendingJobs;
     public static long currentsize; public static Process process;
-
+    FFmpeg ffmpeg;
     public IntentDownloadService() {
         super("IntentDownloadService");
         setIntentRedelivery(true);
@@ -90,6 +96,30 @@ public class IntentDownloadService extends IntentService {
     public void onCreate() {
         context = getApplicationContext();
         pendingJobs = new ArrayList<>();
+
+        /** Load FFMPEG binary again */
+        try {
+            ffmpeg = FFmpeg.getInstance(this);
+            ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
+
+                @Override
+                public void onStart() {}
+
+                @Override
+                public void onFailure() {}
+
+                @Override
+                public void onSuccess() {
+                    supportFFmpeg=true;
+                   LOG("FFMPEG Loaded");
+                }
+
+                @Override
+                public void onFinish() {}
+            });
+        } catch (Exception ignored) {
+            LOG("FFMpeg not supported");
+        }
 
         /** Setting Power Manager and Wakelock */
 
@@ -242,29 +272,61 @@ public class IntentDownloadService extends IntentService {
                         String[] ffmpegBinary = new String[]{FileUtils.getFFmpeg(context)};
                         String[] command = FFmpeg.concatenate(ffmpegBinary, cmd);
 
+                        isDownloaded=false;
 
-                        ShellCommand shellCommand = new ShellCommand();
+                        ffmpeg.execute(cmd, new FFmpegExecuteResponseHandler() {
+                            @Override
+                            public void onSuccess(String message) {
+                                LOG("Sucess: "+message);
+                                isDownloaded=true;
+                            }
 
-                        LOG("Running ffmpeg");
+                            @Override
+                            public void onProgress(String message) {
+                            //    LOG("Progress: "+message);
+                            }
+
+                            @Override
+                            public void onFailure(String message) {
+                                LOG("Failed");
+                                isDownloaded=true;
+                            }
+
+                            @Override
+                            public void onStart() {
+                                LOG("Start: ");
+                            }
+
+                            @Override
+                            public void onFinish() {
+                                LOG("Finish: ");
+                                isDownloaded=true;
+                            }
+                        });
+
+                      //  ShellCommand shellCommand = new ShellCommand();
+
+                        LOG("Running ffmpeg: "+ffmpeg.isFFmpegCommandRunning());
                         try {
                             /** Run ffmpeg... */
-                            process = shellCommand.run(command);
+                          //  process = shellCommand.run(command);
                             /** Wait for ffmpeg ffmpeg... */
                             do {
                                 if (mp3.exists()) {
                                     try {
                                         Thread.sleep(550);
                                     } catch (Exception e) {
+
                                     }
                                     currentsize = mp3.length() + f.length();
                                     setProgress((int) (currentsize * 100 / totalsize), false);
                                 }
-                            } while (!YTutils.isProcessCompleted(process));
+                            } while (!isDownloaded);
                         } catch (Exception e) {
                             LOG("Error: " + e.getMessage());
                             e.printStackTrace();
                         } finally {
-                            YTutils.destroyProcess(process);
+                        //    YTutils.destroyProcess(process);
                         }
 
                         LOG("FFMPEG Run complete");
@@ -324,7 +386,7 @@ public class IntentDownloadService extends IntentService {
                             f.renameTo(sf);
                             Toast.makeText(context, "Failed to convert to mp3, overriding defaults!", Toast.LENGTH_SHORT).show();
                         }
-
+                        addFiletoLocalDevice(dst,currentModel);
                     }
 
 
@@ -444,10 +506,10 @@ public class IntentDownloadService extends IntentService {
 
                     setFinalNotification(save);
 
-                   /* if (video.exists())
+                    if (video.exists())
                         video.delete();
                     if (audio.exists())
-                        audio.delete();*/
+                        audio.delete();
 
                     Log.e(TAG, "doInBackground: Task Finished" );
                     break;
@@ -510,6 +572,68 @@ public class IntentDownloadService extends IntentService {
         handler.post(updateNotificationTask);
     }
 
+    private void addFiletoLocalDevice(File f, YTConfig model) {
+        if (f.exists()) {
+            /** Generate file name */
+            File fileList = new File(getFilesDir(),"fileList.csv");
+            String fileName = f.getParent().replace("/","_")+".csv";
+            File file = new File(getFilesDir(),"locals/"+fileName);
+            Log.e(TAG, "FileList: "+fileList.getPath() );
+            Log.e(TAG, "File: "+file.getPath() );
+            if (fileList.exists()) {
+                String author = model.getChannelTitle();
+                String album = "Unknown album";
+                String durationStr = "0";
+                String lastModified = YTutils.getDate(new Date(f.lastModified()));
+                try {
+                    MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                    mmr.setDataSource(context,Uri.fromFile(f));
+                    durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                    String album_local = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+                    if (album_local!=null)
+                        album = album_local;
+                }catch (Exception ignored) {
+
+                }
+                int s = Integer.parseInt(durationStr)/1000;
+
+                String line = f.getPath()+"|"+author+"|"+album+"|"+s+"|"+lastModified;
+
+                if (!file.exists()) {
+                    YTutils.writeContent(context,file.getPath(),line);
+                    String data = YTutils.readContent(context,"fileList.csv");
+                    String fileContent = data+"\n"+ f.getParent()+"|1|"+s;
+                    YTutils.writeContent(context,fileList.getPath(),"\n"+fileContent);
+                }else {
+                    /** Modify fileList */
+                    String fileData = YTutils.readContent(context,"fileList.csv");
+                    if (fileData!=null && !fileData.isEmpty()) {
+                        String[] items = fileData.split("\n|\r");
+                        StringBuilder builder = new StringBuilder();
+                        LOG("Parent: "+f.getParent());
+                        for (int i=0;i<items.length;i++) {
+                            String l = items[i];
+                            if (l.isEmpty()) continue;
+                            LOG("Line: "+l);
+                            if (l.contains(f.getParent()+"|")) {
+                                LOG("I came here...");
+                                String[] childs = l.split("\\|");
+                                int numberOfSong = Integer.parseInt(childs[1])+1;
+                                int duration = Integer.parseInt(childs[2])+s;
+                                builder.append("\n").append(f.getParent()).append("|").append(numberOfSong).append("|")
+                                .append(duration);
+                            }else builder.append("\n").append(l);
+                        }
+                        YTutils.writeContent(context,"fileList.csv",builder.toString());
+                    }
+
+                    String data = YTutils.readContent(context,file.getPath()) +"\n"+line;
+                    YTutils.writeContent(context,file.getPath(),data);
+                }
+            }
+        }
+    }
+
     public synchronized void setProgress(int progress, boolean indeterminate) {
 
         if (indeterminate)
@@ -533,6 +657,11 @@ public class IntentDownloadService extends IntentService {
 
     @Override
     public void onDestroy() {
+
+        File file = new File(getFilesDir(),"ffmpeg");
+        if (file.exists())
+            file.delete();
+
         currentModel=null;
         handler.removeCallbacks(updateNotificationTask);
         notificationManagerCompat.cancel(FOREGROUND_ID);

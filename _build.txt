@@ -1,0 +1,10 @@
+Build YTPlayer
+--------------
+* Change version & version code number in gradle
+* Generate a signed apk
+* Update update.json file "changelog" tag. Also <h3> tag
+* Commit changes on git & push
+* Draft a new release and attach app-release.apk in binary with proper name
+* Copy the link of attach apk and modify update.json "download" and index.html
+* Also update update.json "new" tag
+* Commit changes on git & push

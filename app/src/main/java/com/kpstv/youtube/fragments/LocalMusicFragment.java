@@ -292,6 +292,7 @@ public class LocalMusicFragment extends Fragment {
                     alertdialog.dismiss();
                     loadTask.cancel(true);
                     models.clear();
+                    if (adapter!=null)
                     adapter.notifyDataSetChanged();
                     try {
                         File f = activity.getFilesDir();

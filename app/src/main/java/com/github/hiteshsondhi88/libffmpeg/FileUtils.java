@@ -47,7 +47,6 @@ class FileUtils {
 	}
 
 	static File getFilesDirectory(Context context) {
-        android.util.Log.e("ATAGTODEFINE", "getFilesDirectory: "+context.getCacheDir());
         return context.getFilesDir();
 	}
 

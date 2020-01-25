@@ -260,8 +260,9 @@ public class YTutils implements AppInterface {
         try {
             if (FILE_NAME.contains("/")) {
                 fos = new FileOutputStream(new File(FILE_NAME));
-            }else
-            fos = activity.openFileOutput(FILE_NAME, MODE_PRIVATE);
+            }else {
+                fos = activity.openFileOutput(FILE_NAME,MODE_PRIVATE);
+            }
             fos.write(content.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
@@ -805,7 +806,7 @@ public class YTutils implements AppInterface {
 
     public static void destroyProcess(Process process) {
         if (process != null)
-            process.destroy();
+            process.destroyForcibly();
     }
 
     static boolean killAsync(AsyncTask asyncTask) {
