@@ -152,6 +152,7 @@ public class YTutils implements AppInterface {
         return imageUrl;
     }
 
+
     public static String getImageUrlID_HQ(String videoID) {
         return "https://i.ytimg.com/vi/"+videoID+"/hqdefault.jpg";
     }
@@ -987,6 +988,24 @@ public class YTutils implements AppInterface {
     public static int getRandomColor(){
         Random rnd = new Random();
         return Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+    }
+
+    public static long getFileSize(URL url) {
+        URLConnection conn = null;
+        try {
+            conn = url.openConnection();
+            if(conn instanceof HttpURLConnection) {
+                ((HttpURLConnection)conn).setRequestMethod("HEAD");
+            }
+            conn.getInputStream();
+            return conn.getContentLength();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if(conn instanceof HttpURLConnection) {
+                ((HttpURLConnection)conn).disconnect();
+            }
+        }
     }
 
     public static class CheckForUpdates extends AsyncTask<Void,Void,Void> {

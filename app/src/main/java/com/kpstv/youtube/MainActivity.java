@@ -958,7 +958,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     static NotificationManager notificationManager;
     static NotificationChannel notificationChannel;
     static PendingIntent prevPendingIntent,pausePendingIntent,nextPendingIntent,clickPendingIntent,favouritePendingIntent;
-    public static Bitmap bitmapIcon; static ArrayList<YTConfig> ytConfigs;
+    public static Bitmap bitmapIcon; public static ArrayList<YTConfig> ytConfigs;
     static NotificationCompat.Builder builder;
     public static boolean isplaying, sleepEndTrack=false,localPlayBack=false, soundCloudPlayBack,isFavourite=false,isEqualizerEnabled=false;
     public static boolean isLoop=false,isEqualizerSet=false,loadedFromData=false;
@@ -1684,11 +1684,11 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         if (ytFrVideo.getHeight() == -1)
         {
             isaudio = true;
-            ytText = "Audio " + ytFrVideo.getAudioBitrate() + " kbit/s";
+            ytText =  ytFrVideo.getAudioBitrate() + " kbit/s";
         }
         else {
-            ytText = (ytFrVideo.getFps() == 60) ? "Video " + ytFrVideo.getHeight() + "p60" :
-                    "Video " + ytFrVideo.getHeight() + "p";
+            ytText = (ytFrVideo.getFps() == 60) ? ytFrVideo.getHeight() + "p60" :
+                     ytFrVideo.getHeight() + "p";
             if (ytfile.getFormat().getAudioBitrate() == -1) {
                 ytText += " (no audio)";
             }
@@ -1699,35 +1699,28 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         ytConfigs.add(new YTConfig(ytText, ytfile.getUrl(), ytfile.getFormat().getExt(), videoTitle, channelTitle,isaudio,imgUrl));
     }
 
-    private static void addVideoToList(final YTMedia media, final String videoTitle, final String channelTitle) { ;
+    private static void addVideoToList(final YTMedia media, final String videoTitle, final String channelTitle) {
 
         String ytText=""; boolean isaudio=false;
         String ext = "m4a";
         try {
-
             if (media.getAudioSampleRate() != 0)
             {
                 isaudio = true;
-                ytText = "Audio " + media.getBitrate()/1000 + " kbit/s";
+                ytText = media.getBitrate()/1000 + " kbps";
             }
             else {
                 ext = "mp4";
-                ytText = (media.getFps() == 60) ? "Video " + media.getHeight() + "p60" :
-                        "Video " + media.getHeight() + "p";
-                ytText += " + merge audio";
-               /* Log.e(TAG, "addVideoToList: "+ytText+" sampleRate:"+media.getAudioSampleRate()+", Bitrate: "+media.getBitrate());
-                if (media.getBitrate() == -1) {
-                    ytText += " (no audio)";
-                }*/
+                ytText = (media.getFps() == 60) ?  media.getHeight() + "p60" : media.getHeight() + "p";
+                for(YTConfig config: ytConfigs) {
+                    if (config.getText().equals(ytText))
+                        return;
+                }
             }
-            Log.e(TAG, "addVideoToList: MediaSampleRate: "+media.getAudioSampleRate() );
+            Log.e(TAG, "addVideoToList: Title: "+ytText);
         }catch (Exception e){e.printStackTrace();}
         String audioSet=null;
         if (isaudio) {
-            /*Log.e(TAG, "addVideoToList: Sample Rate: "+media.getAudioSampleRate()+", Average bit: "+media.getAverageBitrate()
-            +", Mime/type: "+media.getMimeType()+", Audio Quality: "+media.getAudioQuality()+", ProjectionType: "+media.getProjectionType()
-            +", Quality: "+media.getQuality());*/
-
             audioSet = media.getUrl();
             if (media.getMimeType().contains("audio/mp4")) {
                 Log.e(TAG, "addVideoToList: AudioUrlSet true" );
@@ -1736,7 +1729,11 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         }
         if (audioLink==null) audioLink = audioSet;
 
-        ytConfigs.add(new YTConfig(ytText, media.getUrl(), ext, videoTitle, channelTitle,isaudio,imgUrl));
+        YTConfig ytConfig = new YTConfig(ytText, media.getUrl(), ext, videoTitle, channelTitle,isaudio,imgUrl);
+        if (ytConfig.isAudio()) {
+            ytConfig.setBitRate(media.getBitrate()/1000);
+        }else ytConfig.setExt("mp4");
+        ytConfigs.add(ytConfig);
     }
 
    /* private static void addVideoToList(final YTMedia media, final String videoTitle, final String channelTitle) {

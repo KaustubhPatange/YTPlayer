@@ -59,7 +59,9 @@ import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
+import com.kpstv.youtube.adapters.DownloadAdpater2;
 import com.kpstv.youtube.adapters.PlayerAdapter;
+import com.kpstv.youtube.fragments.DownloadBottomSheet;
 import com.kpstv.youtube.fragments.LyricBottomSheet;
 import com.kpstv.youtube.models.LyricModel;
 import com.kpstv.youtube.models.YTConfig;
@@ -631,6 +633,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     private static final String TAG = "PlayerActivity2";
 
+
     static class soundcloud_data extends AsyncTask<Void,Void,Void> {
         SoundCloud soundCloud;String url;
 
@@ -994,7 +997,13 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         });
     }
 
-    void showListDialog() {
+
+    private void showListDialog() {
+        DownloadBottomSheet downloadBottomSheet = new DownloadBottomSheet();
+        downloadBottomSheet.show(getSupportFragmentManager(),"");
+    }
+
+    void showListDialog2() {
 
         ArrayList<String> tmplist = new ArrayList<>();
         final ArrayList<YTConfig> configs = new ArrayList<>();

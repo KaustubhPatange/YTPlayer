@@ -221,7 +221,7 @@ public class IntentDownloadService extends IntentService {
                     if (f.exists()) f.delete();
                     File mp3 = YTutils.getFile("YTPlayer/" + prefixName + ".mp3");
                     if (mp3.exists()) mp3.delete();
-                    File dst = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS + "/" + currentModel.getTargetName());
+                    File dst = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS + "/" + currentModel.getTargetName()+"."+currentModel.getExt());
                     if (dst.exists()) dst.delete();
 
                     /** Actually downloading it... */
@@ -403,119 +403,13 @@ public class IntentDownloadService extends IntentService {
 
                 case "mergetask":
 
-                    if (currentModel.getVideoID().contains("soundcloud.com"))
-                        imageUri = currentModel.getImageUrl();
-                    else imageUri = YTutils.getImageUrlID_HQ(currentModel.getVideoID());
+                    mergeTask();
 
-                    Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            icon = resource;
-                            setProgress(0, true);
-                        }
-
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                        }
-                    });
-
-                    String audioUrl = currentModel.getAudioUrl();
-                    String videoUrl = currentModel.getUrl();
-
-                    File audio = YTutils.getFile("/YTPlayer/audio.m4a");
-                    if (audio.exists()) audio.delete();
-                    File video = YTutils.getFile("/YTPlayer/video.download");
-                    if (video.exists()) video.delete();
-
-                    /** Calculate total file size... */
-                    URL url = new URL(videoUrl);
-                    URLConnection connection = url.openConnection();
-                    connection.connect();
-
-                    long fileLength = connection.getContentLength();
-
-                    /** Download audio file first... */
-                    url = new URL(audioUrl);
-                    connection = url.openConnection();
-                    connection.connect();
-
-                    fileLength += connection.getContentLength();
-                    totalsize = fileLength;
-
-                    PRDownloader.download(videoUrl, YTutils.getFile("YTPlayer").getPath(), "video.mp4")
-                            .build()
-                            .setOnProgressListener(progress -> {
-                                currentsize = progress.currentBytes;
-                                if (totalsize==0)
-                                    return;
-                                setProgress((int) (progress.currentBytes * 100 / totalsize),false);
-                                oldbytes = currentsize;
-                            })
-                            .start(new OnDownloadListener() {
-                                @Override
-                                public void onDownloadComplete() {
-                                    Log.e(TAG, "onDownloadComplete: Audio Download Complete" );
-
-                                    /** Download video file now... */
-                                    PRDownloader.download(audioUrl,YTutils.getFile("YTPlayer").getPath(),"audio.m4a")
-                                            .build()
-                                            .setOnProgressListener(progress1 -> {
-                                                currentsize = oldbytes+progress1.currentBytes;
-                                                setProgress((int) ((progress1.currentBytes + oldbytes) * 100 / totalsize),false);
-                                            })
-                                            .start(new OnDownloadListener() {
-                                                @Override
-                                                public void onDownloadComplete() {
-                                                    Log.e(TAG, "onDownloadComplete: Video Download Complete" );
-
-
-
-                                                   /* muxing(YTutils.getFile("YTPlayer/video.mp4").getPath(),
-                                                            YTutils.getFile("YTPlayer/audio.m4a").getPath(),
-                                                            save.getPath());*/
-
-                                                    /** Show notification... */
-
-
-                                                    isDownloaded=true;
-                                                }
-
-                                                @Override
-                                                public void onError(Error error) {
-                                                  isDownloaded=true;
-                                                }
-                                            });
-                                }
-
-                                @Override
-                                public void onError(Error error) {
-                                   isDownloaded=true;
-                                }
-
-                            });
-
-                    do {} while (!isDownloaded);
-
-                    File save = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS+"/"+currentModel.getTargetName());
-                    if (save.exists()) save.delete();
-
-                    mux(YTutils.getFile("YTPlayer/video.mp4").getPath(),
-                            YTutils.getFile("YTPlayer/audio.m4a").getPath(),
-                            save.getPath());
-
-                    setFinalNotification(save);
-
-                    if (video.exists())
-                        video.delete();
-                    if (audio.exists())
-                        audio.delete();
-
-                    Log.e(TAG, "doInBackground: Task Finished" );
                     break;
 
             }
         } catch (Exception e) {
+            e.printStackTrace();
             Log.e(TAG,"Error:"+e.getMessage());
         }
     }
@@ -653,6 +547,124 @@ public class IntentDownloadService extends IntentService {
                 .build();
 
         notificationManagerCompat.notify(FOREGROUND_ID,notification);*/
+    }
+
+    private void mergeTask() {
+       try {
+           String imageUri;
+           if (currentModel.getVideoID().contains("soundcloud.com"))
+               imageUri = currentModel.getImageUrl();
+           else imageUri = YTutils.getImageUrlID_HQ(currentModel.getVideoID());
+
+           Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
+               @Override
+               public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                   icon = resource;
+                   setProgress(0, true);
+               }
+
+               @Override
+               public void onLoadCleared(@Nullable Drawable placeholder) {
+
+               }
+           });
+
+           String audioUrl = currentModel.getAudioUrl();
+           String videoUrl = currentModel.getUrl();
+
+           File audio = YTutils.getFile("/YTPlayer/audio.m4a");
+           if (audio.exists()) audio.delete();
+           File video = YTutils.getFile("/YTPlayer/video.download");
+           if (video.exists()) video.delete();
+
+           /** Calculate total file size... */
+           URL url = new URL(videoUrl);
+           URLConnection connection = url.openConnection();
+           connection.connect();
+
+           long fileLength = connection.getContentLength();
+
+           /** Download audio file first... */
+           url = new URL(audioUrl);
+           connection = url.openConnection();
+           connection.connect();
+
+           fileLength += connection.getContentLength();
+           totalsize = fileLength;
+
+           PRDownloader.download(videoUrl, YTutils.getFile("YTPlayer").getPath(), "video.mp4")
+                   .build()
+                   .setOnProgressListener(progress -> {
+                       currentsize = progress.currentBytes;
+                       if (totalsize==0)
+                           return;
+                       setProgress((int) (progress.currentBytes * 100 / totalsize),false);
+                       oldbytes = currentsize;
+                   })
+                   .start(new OnDownloadListener() {
+                       @Override
+                       public void onDownloadComplete() {
+                           Log.e(TAG, "onDownloadComplete: Audio Download Complete" );
+
+                           /** Download video file now... */
+                           PRDownloader.download(audioUrl,YTutils.getFile("YTPlayer").getPath(),"audio.m4a")
+                                   .build()
+                                   .setOnProgressListener(progress1 -> {
+                                       currentsize = oldbytes+progress1.currentBytes;
+                                       setProgress((int) ((progress1.currentBytes + oldbytes) * 100 / totalsize),false);
+                                   })
+                                   .start(new OnDownloadListener() {
+                                       @Override
+                                       public void onDownloadComplete() {
+                                           Log.e(TAG, "onDownloadComplete: Video Download Complete" );
+
+
+
+                                                   /* muxing(YTutils.getFile("YTPlayer/video.mp4").getPath(),
+                                                            YTutils.getFile("YTPlayer/audio.m4a").getPath(),
+                                                            save.getPath());*/
+
+                                           /** Show notification... */
+
+
+                                           isDownloaded=true;
+                                       }
+
+                                       @Override
+                                       public void onError(Error error) {
+                                           isDownloaded=true;
+                                       }
+                                   });
+                       }
+
+                       @Override
+                       public void onError(Error error) {
+                           isDownloaded=true;
+                       }
+
+                   });
+
+           do {} while (!isDownloaded);
+
+           File save = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS+"/"+currentModel.getTargetName()+"."+currentModel.getExt());
+           if (save.exists()) save.delete();
+
+           mux(YTutils.getFile("YTPlayer/video.mp4").getPath(),
+                   YTutils.getFile("YTPlayer/audio.m4a").getPath(),
+                   save.getPath());
+
+           setFinalNotification(save);
+
+           if (video.exists())
+               video.delete();
+           if (audio.exists())
+               audio.delete();
+
+           Log.e(TAG, "doInBackground: Task Finished" );
+       }catch (Exception  e){
+           e.printStackTrace();
+           Log.e(TAG, "Error: "+e.getMessage());
+       }
     }
 
     @Override

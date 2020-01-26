@@ -6,7 +6,7 @@ public class YTConfig implements Serializable {
 
     String Text,Url,Ext,Title,ChannelTitle,taskExtra;
     String targetName, videoID, audioUrl, imageUrl;
-    boolean audio; long length;
+    boolean audio; long length; int bitRate;
 
     public YTConfig(String text, String linkurl,String ext,String videoTitle, String channelTitle,boolean audio,String imageUrl) {
         Text = text;
@@ -16,6 +16,14 @@ public class YTConfig implements Serializable {
         ChannelTitle = channelTitle;
         this.imageUrl = imageUrl;
         this.audio = audio;
+    }
+
+    public int getBitRate() {
+        return bitRate;
+    }
+
+    public void setBitRate(int bitRate) {
+        this.bitRate = bitRate;
     }
 
     public String getImageUrl() {
@@ -76,6 +84,10 @@ public class YTConfig implements Serializable {
 
     public String getUrl() {
         return Url;
+    }
+
+    public void setExt(String ext) {
+        Ext = ext;
     }
 
     public String getExt() {
