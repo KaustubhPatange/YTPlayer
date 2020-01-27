@@ -1,5 +1,6 @@
 package com.kpstv.youtube.services;
 
+import android.annotation.SuppressLint;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -14,17 +15,21 @@ import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaMuxer;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.JobIntentService;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.arthenica.mobileffmpeg.Config;
+import com.arthenica.mobileffmpeg.FFmpeg;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -32,11 +37,7 @@ import com.coremedia.iso.boxes.Container;
 import com.downloader.Error;
 import com.downloader.OnDownloadListener;
 import com.downloader.PRDownloader;
-import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
-import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.ShellCommand;
+
 import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
@@ -71,24 +72,38 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
 
-import static com.kpstv.youtube.MainActivity.supportFFmpeg;
+import static com.arthenica.mobileffmpeg.FFmpeg.RETURN_CODE_CANCEL;
+import static com.arthenica.mobileffmpeg.FFmpeg.RETURN_CODE_SUCCESS;
+
 
 public class IntentDownloadService extends IntentService {
     private static final String TAG = "IntentDownloadService";
-    private boolean isDownloaded=false;
-    private PowerManager.WakeLock wakeLock; NotificationManagerCompat notificationManagerCompat;
-    private Context context; private String CHANNEL_ID = "channel_01"; Bitmap icon;
-    private final int FOREGROUND_ID=109; Notification notification;
-    PendingIntent contentIntent,cancelIntent; private long oldbytes;
+    private boolean isDownloaded = false;
+    private PowerManager.WakeLock wakeLock;
+    NotificationManagerCompat notificationManagerCompat;
+    private Context context;
+    private String CHANNEL_ID = "channel_01";
+    Bitmap icon;
+    private final int FOREGROUND_ID = 109;
+    Notification notification;
+    PendingIntent contentIntent, cancelIntent;
+    private long oldbytes;
     private Handler handler;
 
-    /** Some static Declarations */
-    public static YTConfig currentModel; public static int progress;
-    public static long totalsize; public static ArrayList<YTConfig> pendingJobs;
-    public static long currentsize; public static Process process;
-    FFmpeg ffmpeg;
+    /**
+     * Some static Declarations
+     */
+    public static YTConfig currentModel;
+    public static int progress;
+    public static long totalsize;
+    public static ArrayList<YTConfig> pendingJobs;
+    public static long currentsize;
+  //  public static Process process;
+   // FFmpeg ffmpeg;
+
     public IntentDownloadService() {
         super("IntentDownloadService");
+        ;
         setIntentRedelivery(true);
     }
 
@@ -97,34 +112,39 @@ public class IntentDownloadService extends IntentService {
         context = getApplicationContext();
         pendingJobs = new ArrayList<>();
 
+        PRDownloader.initialize(context);
+
         /** Load FFMPEG binary again */
-        try {
+        /*try {
             ffmpeg = FFmpeg.getInstance(this);
             ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
 
                 @Override
-                public void onStart() {}
-
-                @Override
-                public void onFailure() {}
-
-                @Override
-                public void onSuccess() {
-                    supportFFmpeg=true;
-                   LOG("FFMPEG Loaded");
+                public void onStart() {
                 }
 
                 @Override
-                public void onFinish() {}
+                public void onFailure() {
+                }
+
+                @Override
+                public void onSuccess() {
+                    supportFFmpeg = true;
+                    LOG("FFMPEG Loaded");
+                }
+
+                @Override
+                public void onFinish() {
+                }
             });
         } catch (Exception ignored) {
             LOG("FFMpeg not supported");
-        }
+        }*/
 
         /** Setting Power Manager and Wakelock */
 
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"app:Wakelock");
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "app:Wakelock");
         wakeLock.acquire();
 
         Intent notificationIntent = new Intent(context, DownloadActivity.class);
@@ -149,270 +169,60 @@ public class IntentDownloadService extends IntentService {
 
         notificationManagerCompat = NotificationManagerCompat.from(context);
 
-        notification = new NotificationCompat.Builder(context,CHANNEL_ID)
+        notification = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setContentTitle("Download")
-                .addAction(R.mipmap.ic_launcher,"Cancel",cancelIntent)
-                .setContentText(pendingJobs.size()+" files downloading")
+                .addAction(R.mipmap.ic_launcher, "Cancel", cancelIntent)
+                .setContentText(pendingJobs.size() + " files downloading")
                 .setSmallIcon(android.R.drawable.stat_sys_download)
                 .setContentIntent(contentIntent)
                 .setOngoing(true)
                 .setPriority(Notification.PRIORITY_LOW)
                 .build();
 
-        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
-            startForeground(FOREGROUND_ID,notification);
-        }else {
-            notificationManagerCompat.notify(FOREGROUND_ID,notification);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForeground(FOREGROUND_ID, notification);
+        } else {
+            notificationManagerCompat.notify(FOREGROUND_ID, notification);
         }
 
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
+    protected void onHandleIntent(@NonNull Intent intent) {
+        currentModel = (YTConfig) intent.getSerializableExtra("addJob");
+
+        if (pendingJobs.size() > 0)
+            pendingJobs.remove(0);
+        switch (currentModel.getTaskExtra()) {
+            case "mp3task":
+                mp3Task();
+                break;
+            case "mergetask":
+                mergeTask();
+                break;
+        }
+    }
+
+    /*@Override
     protected void onHandleIntent(@Nullable Intent intent) {
 
-        /** Set notification update handler*/
+        *//** Set notification update handler*//*
 
 
         currentModel = (YTConfig) intent.getSerializableExtra("addJob");
 
-        if (pendingJobs.size()>0)
+        if (pendingJobs.size() > 0)
             pendingJobs.remove(0);
-
-        try {
-
-            switch (currentModel.getTaskExtra()) {
-                case "mp3task":
-
-                    LOG("Task detected MP3");
-
-                    /** Set Image Url first and save to BitMap ICON... */
-
-                    String imageUri;
-                    if (currentModel.getVideoID().contains("soundcloud.com"))
-                        imageUri = currentModel.getImageUrl();
-                    else imageUri = YTutils.getImageUrlID_HQ(currentModel.getVideoID());
-
-                    Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            icon = resource;
-                            setProgress(0, true);
-                        }
-
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                        }
-                    });
-
-                    /** Set Prefix for path... */
-                    String prefixName = (currentModel.getTitle().trim() + "_" + currentModel.getChannelTitle().trim())
-                            .replace(" ", "_").replace("]", "").replace("[", "")
-                            .replace("{", "").replace("}", "").replace("/", "");
-
-                    /** This is our download stream... */
-                    String download_Uri = currentModel.getUrl();
-
-                    isDownloaded = false;
-
-                    /** Setting some file info... */
-                    File f = YTutils.getFile("YTPlayer/" + prefixName + ".file");
-                    if (f.exists()) f.delete();
-                    File mp3 = YTutils.getFile("YTPlayer/" + prefixName + ".mp3");
-                    if (mp3.exists()) mp3.delete();
-                    File dst = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS + "/" + currentModel.getTargetName()+"."+currentModel.getExt());
-                    if (dst.exists()) dst.delete();
-
-                    /** Actually downloading it... */
-                    PRDownloader.download(download_Uri,
-                            YTutils.getFile("YTPlayer").getPath(), f.getName())
-                            .build()
-                            .setOnProgressListener(progress1 -> {
-                                if (supportFFmpeg)
-                                    totalsize = progress1.totalBytes * 2;
-                                else {
-                                    totalsize = progress1.totalBytes;
-                                }
-                                currentsize = progress1.currentBytes;
-                                setProgress((int) (currentsize * 100 / totalsize), false);
-                                //    publishProgress(());
-                            })
-                            .start(new OnDownloadListener() {
-                                @Override
-                                public void onDownloadComplete() {
-                                    isDownloaded = true;
-                                    Log.e(TAG, "onDownloadComplete: Completed");
-                                }
-
-                                @Override
-                                public void onError(Error error) {
-                                    isDownloaded = true;
-                                }
-                            });
-
-                    /** Wait till download is complete... */
-                    while (!isDownloaded) ;
-
-                    LOG("Download Completed");
-
-                    if (!supportFFmpeg) {
-                        LOG("FFMPEG not supported");
-                        String target = currentModel.getTargetName().replace(".mp3", ".m4a");
-                        dst = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS + "/" + target);
-                        try {
-                            YTutils.moveFile(f, YTutils.getFile(Environment.DIRECTORY_DOWNLOADS + "/" + target));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-
-                        /** Setup ffmpeg commands... */
-                        String[] cmd = new String[]{"-y", "-i", f.getPath(), mp3.getPath()};
-                        String[] ffmpegBinary = new String[]{FileUtils.getFFmpeg(context)};
-                        String[] command = FFmpeg.concatenate(ffmpegBinary, cmd);
-
-                        isDownloaded=false;
-
-                        ffmpeg.execute(cmd, new FFmpegExecuteResponseHandler() {
-                            @Override
-                            public void onSuccess(String message) {
-                                LOG("Sucess: "+message);
-                                isDownloaded=true;
-                            }
-
-                            @Override
-                            public void onProgress(String message) {
-                            //    LOG("Progress: "+message);
-                            }
-
-                            @Override
-                            public void onFailure(String message) {
-                                LOG("Failed");
-                                isDownloaded=true;
-                            }
-
-                            @Override
-                            public void onStart() {
-                                LOG("Start: ");
-                            }
-
-                            @Override
-                            public void onFinish() {
-                                LOG("Finish: ");
-                                isDownloaded=true;
-                            }
-                        });
-
-                      //  ShellCommand shellCommand = new ShellCommand();
-
-                        LOG("Running ffmpeg: "+ffmpeg.isFFmpegCommandRunning());
-                        try {
-                            /** Run ffmpeg... */
-                          //  process = shellCommand.run(command);
-                            /** Wait for ffmpeg ffmpeg... */
-                            do {
-                                if (mp3.exists()) {
-                                    try {
-                                        Thread.sleep(550);
-                                    } catch (Exception e) {
-
-                                    }
-                                    currentsize = mp3.length() + f.length();
-                                    setProgress((int) (currentsize * 100 / totalsize), false);
-                                }
-                            } while (!isDownloaded);
-                        } catch (Exception e) {
-                            LOG("Error: " + e.getMessage());
-                            e.printStackTrace();
-                        } finally {
-                        //    YTutils.destroyProcess(process);
-                        }
-
-                        LOG("FFMPEG Run complete");
-
-                        YTMeta ytMeta = new YTMeta(currentModel.getVideoID());
-
-                        /** Set mp3 tags... */
-                        MusicMetadataSet src_set = null;
-                        try {
-                            src_set = new MyID3().read(mp3);
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                        }
-
-                        if (src_set == null) {
-                            Log.i("NULL", "NULL");
-                            mp3.renameTo(dst);
-                        } else {
-                            URL uri = null;
-                            ImageData imageData = null;
-
-                            try {
-                                Log.e(TAG, "doInBackground: ImageUri: " + imageUri);
-                                uri = new URL(imageUri);
-                                Bitmap bitmap = BitmapFactory.decodeStream(uri.openConnection().getInputStream());
-                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                                byte[] bitmapdata = stream.toByteArray();
-                                imageData = new ImageData(bitmapdata, "image/jpeg", "background", 1);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-
-                            MusicMetadata meta = new MusicMetadata(YTutils.getVideoTitle(currentModel.getTitle()));
-                            if (imageData != null) {
-                                meta.addPicture(imageData);
-                            }
-                            meta.setAlbum(ytMeta.getVideMeta().getAuthor());
-                            meta.setArtist(YTutils.getChannelTitle(currentModel.getTitle(), currentModel.getChannelTitle()));
-
-                            try {
-                                new MyID3().write(mp3, dst, src_set, meta);
-
-                                LOG("MP3 Saved!");
-
-                                mp3.delete();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-
-                        }
-
-                        if (!dst.exists()) {
-                            LOG("Overriding defaults");
-                            File sf = new File(dst.getPath().replace(".mp3", ".m4a"));
-                            dst = sf;
-                            f.renameTo(sf);
-                            Toast.makeText(context, "Failed to convert to mp3, overriding defaults!", Toast.LENGTH_SHORT).show();
-                        }
-                        addFiletoLocalDevice(dst,currentModel);
-                    }
-
-
-                    /** Show notification... */
-
-                    setFinalNotification(dst);
-
-                    if (f.exists())
-                        f.delete();
-                    if (mp3.exists())
-                        mp3.delete();
-                    break;
-
-
-                case "mergetask":
-
-                    mergeTask();
-
-                    break;
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e(TAG,"Error:"+e.getMessage());
+        switch (currentModel.getTaskExtra()) {
+            case "mp3task":
+                mp3Task();
+                break;
+            case "mergetask":
+                mergeTask();
+                break;
         }
-    }
+    }*/
 
     public void setFinalNotification(File dst) {
         Notification not;
@@ -460,7 +270,7 @@ public class IntentDownloadService extends IntentService {
     }
 
     public void setUpdateNotificationTask() {
-        if (handler!=null)
+        if (handler != null)
             handler.removeCallbacks(updateNotificationTask);
         handler = new Handler();
         handler.post(updateNotificationTask);
@@ -469,11 +279,11 @@ public class IntentDownloadService extends IntentService {
     private void addFiletoLocalDevice(File f, YTConfig model) {
         if (f.exists()) {
             /** Generate file name */
-            File fileList = new File(getFilesDir(),"fileList.csv");
-            String fileName = f.getParent().replace("/","_")+".csv";
-            File file = new File(getFilesDir(),"locals/"+fileName);
-            Log.e(TAG, "FileList: "+fileList.getPath() );
-            Log.e(TAG, "File: "+file.getPath() );
+            File fileList = new File(getFilesDir(), "fileList.csv");
+            String fileName = f.getParent().replace("/", "_") + ".csv";
+            File file = new File(getFilesDir(), "locals/" + fileName);
+            Log.e(TAG, "FileList: " + fileList.getPath());
+            Log.e(TAG, "File: " + file.getPath());
             if (fileList.exists()) {
                 String author = model.getChannelTitle();
                 String album = "Unknown album";
@@ -481,48 +291,48 @@ public class IntentDownloadService extends IntentService {
                 String lastModified = YTutils.getDate(new Date(f.lastModified()));
                 try {
                     MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-                    mmr.setDataSource(context,Uri.fromFile(f));
+                    mmr.setDataSource(context, Uri.fromFile(f));
                     durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
                     String album_local = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-                    if (album_local!=null)
+                    if (album_local != null)
                         album = album_local;
-                }catch (Exception ignored) {
+                } catch (Exception ignored) {
 
                 }
-                int s = Integer.parseInt(durationStr)/1000;
+                int s = Integer.parseInt(durationStr) / 1000;
 
-                String line = f.getPath()+"|"+author+"|"+album+"|"+s+"|"+lastModified;
+                String line = f.getPath() + "|" + author + "|" + album + "|" + s + "|" + lastModified;
 
                 if (!file.exists()) {
-                    YTutils.writeContent(context,file.getPath(),line);
-                    String data = YTutils.readContent(context,"fileList.csv");
-                    String fileContent = data+"\n"+ f.getParent()+"|1|"+s;
-                    YTutils.writeContent(context,fileList.getPath(),"\n"+fileContent);
-                }else {
+                    YTutils.writeContent(context, file.getPath(), line);
+                    String data = YTutils.readContent(context, "fileList.csv");
+                    String fileContent = data + "\n" + f.getParent() + "|1|" + s;
+                    YTutils.writeContent(context, fileList.getPath(), "\n" + fileContent);
+                } else {
                     /** Modify fileList */
-                    String fileData = YTutils.readContent(context,"fileList.csv");
-                    if (fileData!=null && !fileData.isEmpty()) {
+                    String fileData = YTutils.readContent(context, "fileList.csv");
+                    if (fileData != null && !fileData.isEmpty()) {
                         String[] items = fileData.split("\n|\r");
                         StringBuilder builder = new StringBuilder();
-                        LOG("Parent: "+f.getParent());
-                        for (int i=0;i<items.length;i++) {
+                        LOG("Parent: " + f.getParent());
+                        for (int i = 0; i < items.length; i++) {
                             String l = items[i];
                             if (l.isEmpty()) continue;
-                            LOG("Line: "+l);
-                            if (l.contains(f.getParent()+"|")) {
+                            LOG("Line: " + l);
+                            if (l.contains(f.getParent() + "|")) {
                                 LOG("I came here...");
                                 String[] childs = l.split("\\|");
-                                int numberOfSong = Integer.parseInt(childs[1])+1;
-                                int duration = Integer.parseInt(childs[2])+s;
+                                int numberOfSong = Integer.parseInt(childs[1]) + 1;
+                                int duration = Integer.parseInt(childs[2]) + s;
                                 builder.append("\n").append(f.getParent()).append("|").append(numberOfSong).append("|")
-                                .append(duration);
-                            }else builder.append("\n").append(l);
+                                        .append(duration);
+                            } else builder.append("\n").append(l);
                         }
-                        YTutils.writeContent(context,"fileList.csv",builder.toString());
+                        YTutils.writeContent(context, "fileList.csv", builder.toString());
                     }
 
-                    String data = YTutils.readContent(context,file.getPath()) +"\n"+line;
-                    YTutils.writeContent(context,file.getPath(),data);
+                    String data = YTutils.readContent(context, file.getPath()) + "\n" + line;
+                    YTutils.writeContent(context, file.getPath(), data);
                 }
             }
         }
@@ -534,147 +344,275 @@ public class IntentDownloadService extends IntentService {
             IntentDownloadService.progress = -1;
         else
             IntentDownloadService.progress = progress;
-       /* notification = new NotificationCompat.Builder(context,CHANNEL_ID)
-                .setContentTitle("Download - "+currentModel.getTitle())
-                .addAction(R.mipmap.ic_launcher,"Cancel",cancelIntent)
-                .setContentText(pendingJobs.size()+1+" files downloading")
-                .setSmallIcon(android.R.drawable.stat_sys_download)
-                .setLargeIcon(icon)
-                .setContentIntent(contentIntent)
-                .setProgress(100,progress,indeterminate)
-                .setOngoing(true)
-                .setPriority(Notification.PRIORITY_LOW)
-                .build();
-
-        notificationManagerCompat.notify(FOREGROUND_ID,notification);*/
     }
 
-    private void mergeTask() {
-       try {
-           String imageUri;
-           if (currentModel.getVideoID().contains("soundcloud.com"))
-               imageUri = currentModel.getImageUrl();
-           else imageUri = YTutils.getImageUrlID_HQ(currentModel.getVideoID());
+    @SuppressLint("StaticFieldLeak")
+    private void mp3Task() {
+        try {
+            LOG("Task detected MP3");
 
-           Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
-               @Override
-               public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                   icon = resource;
-                   setProgress(0, true);
-               }
+            /** Set Image Url first and save to BitMap ICON... */
 
-               @Override
-               public void onLoadCleared(@Nullable Drawable placeholder) {
+            String imageUri;
+            if (currentModel.getVideoID().contains("soundcloud.com"))
+                imageUri = currentModel.getImageUrl();
+            else imageUri = YTutils.getImageUrlID_HQ(currentModel.getVideoID());
 
-               }
-           });
+            Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                    icon = resource;
+                    setProgress(0, true);
+                }
 
-           String audioUrl = currentModel.getAudioUrl();
-           String videoUrl = currentModel.getUrl();
+                @Override
+                public void onLoadCleared(@Nullable Drawable placeholder) {
 
-           File audio = YTutils.getFile("/YTPlayer/audio.m4a");
-           if (audio.exists()) audio.delete();
-           File video = YTutils.getFile("/YTPlayer/video.download");
-           if (video.exists()) video.delete();
+                }
+            });
 
-           /** Calculate total file size... */
-           URL url = new URL(videoUrl);
-           URLConnection connection = url.openConnection();
-           connection.connect();
+            /** Set Prefix for path... */
+            String prefixName = (currentModel.getTitle().trim() + "_" + currentModel.getChannelTitle().trim())
+                    .replace(" ", "_").replace("]", "").replace("[", "")
+                    .replace("{", "").replace("}", "").replace("/", "");
 
-           long fileLength = connection.getContentLength();
+            /** This is our download stream... */
+            String download_Uri = currentModel.getUrl();
 
-           /** Download audio file first... */
-           url = new URL(audioUrl);
-           connection = url.openConnection();
-           connection.connect();
+            isDownloaded = false;
 
-           fileLength += connection.getContentLength();
-           totalsize = fileLength;
+            /** Setting some file info... */
+            File f = YTutils.getFile("YTPlayer/" + prefixName + ".file");
+            if (f.exists()) f.delete();
+            File mp3 = YTutils.getFile("YTPlayer/" + prefixName + "." +currentModel.getExt());
+            if (mp3.exists()) mp3.delete();
+            File dst = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS + "/" + currentModel.getTargetName() + "." + currentModel.getExt());
+            if (dst.exists()) dst.delete();
 
-           PRDownloader.download(videoUrl, YTutils.getFile("YTPlayer").getPath(), "video.mp4")
-                   .build()
-                   .setOnProgressListener(progress -> {
-                       currentsize = progress.currentBytes;
-                       if (totalsize==0)
-                           return;
-                       setProgress((int) (progress.currentBytes * 100 / totalsize),false);
-                       oldbytes = currentsize;
-                   })
-                   .start(new OnDownloadListener() {
-                       @Override
-                       public void onDownloadComplete() {
-                           Log.e(TAG, "onDownloadComplete: Audio Download Complete" );
+            /** Actually downloading it... */
+            PRDownloader.download(download_Uri,
+                    YTutils.getFile("YTPlayer").getPath(), f.getName())
+                    .build()
+                    .setOnProgressListener(progress1 -> {
+                        if (currentModel.getExt().equals("mp3"))
+                            totalsize = progress1.totalBytes * 2;
+                        else {
+                            totalsize = progress1.totalBytes;
+                        }
+                        currentsize = progress1.currentBytes;
+                        setProgress((int) (currentsize * 100 / totalsize), false);
+                        //    publishProgress(());
+                    })
+                    .start(new OnDownloadListener() {
+                        @Override
+                        public void onDownloadComplete() {
+                            isDownloaded = true;
+                            Log.e(TAG, "onDownloadComplete: Completed");
+                        }
 
-                           /** Download video file now... */
-                           PRDownloader.download(audioUrl,YTutils.getFile("YTPlayer").getPath(),"audio.m4a")
-                                   .build()
-                                   .setOnProgressListener(progress1 -> {
-                                       currentsize = oldbytes+progress1.currentBytes;
-                                       setProgress((int) ((progress1.currentBytes + oldbytes) * 100 / totalsize),false);
-                                   })
-                                   .start(new OnDownloadListener() {
-                                       @Override
-                                       public void onDownloadComplete() {
-                                           Log.e(TAG, "onDownloadComplete: Video Download Complete" );
+                        @Override
+                        public void onError(Error error) {
+                            isDownloaded = true;
+                        }
+                    });
+
+            /** Wait till download is complete... */
+
+            Log.e(TAG, "mp3Task: Download Running");
+
+            do { LOG("isDownloaded="+isDownloaded);} while (!isDownloaded);
+
+            LOG("Download Completed");
+
+            YTMeta ytMeta = new YTMeta(currentModel.getVideoID());
 
 
 
-                                                   /* muxing(YTutils.getFile("YTPlayer/video.mp4").getPath(),
-                                                            YTutils.getFile("YTPlayer/audio.m4a").getPath(),
-                                                            save.getPath());*/
+            switch (currentModel.getExt()) {
+                case "m4a":
+                    processM4A(ytMeta,f,dst);
 
-                                           /** Show notification... */
+                    /*dst = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS + "/" + target);
+                    try {
+                        YTutils.moveFile(f, YTutils.getFile(Environment.DIRECTORY_DOWNLOADS + "/" + target));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }*/
+                break;
 
+                case "mp3":
 
-                                           isDownloaded=true;
-                                       }
+                    /** Run ffmpeg... */
 
-                                       @Override
-                                       public void onError(Error error) {
-                                           isDownloaded=true;
-                                       }
-                                   });
-                       }
+                    LOG("Executing FFMPEG");
 
-                       @Override
-                       public void onError(Error error) {
-                           isDownloaded=true;
-                       }
+                    isDownloaded = false;
+                    new AsyncTask<File,Void,Void>() {
 
-                   });
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            isDownloaded=true;
+                            super.onPostExecute(aVoid);
+                        }
 
-           do {} while (!isDownloaded);
+                        @Override
+                        protected Void doInBackground(File... files) {
+                            LOG("Running FFMPEG now...");
+                            String[] cmd = new String[]{"-i", files[0].getPath(), "-y" ,files[1].getPath()};
+                            int rc = FFmpeg.execute(cmd);
+                            processRC(rc);
+                            return null;
+                        }
+                    }.execute(f,mp3);
+                    try {
+                        /** Wait for ffmpeg ffmpeg... */
+                        do {
+                            if (mp3.exists()) {
+                                try {
+                                    Thread.sleep(550);
+                                } catch (Exception e) {
 
-           File save = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS+"/"+currentModel.getTargetName()+"."+currentModel.getExt());
-           if (save.exists()) save.delete();
+                                }
+                                currentsize = mp3.length() + f.length();
+                                setProgress((int) (currentsize * 100 / totalsize), false);
+                            }
+                        } while (!isDownloaded);
+                    } catch (Exception e) {
+                        LOG("Error: " + e.getMessage());
+                        e.printStackTrace();
+                    }
 
-           mux(YTutils.getFile("YTPlayer/video.mp4").getPath(),
-                   YTutils.getFile("YTPlayer/audio.m4a").getPath(),
-                   save.getPath());
+                    LOG("FFMPEG Run complete");
 
-           setFinalNotification(save);
+                    /** Set mp3 tags... */
 
-           if (video.exists())
-               video.delete();
-           if (audio.exists())
-               audio.delete();
+                    setID3Tags(ytMeta,mp3,dst,imageUri);
 
-           Log.e(TAG, "doInBackground: Task Finished" );
-       }catch (Exception  e){
-           e.printStackTrace();
-           Log.e(TAG, "Error: "+e.getMessage());
-       }
+                    if (!dst.exists()) {
+                        LOG("Overriding defaults");
+                        File sf = new File(dst.getPath().replace(".mp3", ".m4a"));
+                        dst = sf;
+                        f.renameTo(sf);
+                        Toast.makeText(context, "Failed to convert to mp3, overriding defaults!", Toast.LENGTH_SHORT).show();
+                    }
+                    addFiletoLocalDevice(dst, currentModel);
+                    break;
+            }
+
+            /** Show notification... */
+
+            setFinalNotification(dst);
+
+            if (f.exists())
+                f.delete();
+            if (mp3.exists())
+                mp3.delete();
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOG("Error: " + e.getMessage());
+        }
+    }
+
+    private void setID3Tags(YTMeta ytMeta,File mp3, File dst, String imageUri) {
+        MusicMetadataSet src_set = null;
+        try {
+            src_set = new MyID3().read(mp3);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
+        if (src_set == null) {
+            Log.i("NULL", "NULL");
+            mp3.renameTo(dst);
+        } else {
+            URL uri = null;
+            ImageData imageData = null;
+
+            try {
+                Log.e(TAG, "doInBackground: ImageUri: " + imageUri);
+                uri = new URL(imageUri);
+                Bitmap bitmap = BitmapFactory.decodeStream(uri.openConnection().getInputStream());
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                byte[] bitmapdata = stream.toByteArray();
+                imageData = new ImageData(bitmapdata, "image/jpeg", "background", 1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            MusicMetadata meta = new MusicMetadata(YTutils.getVideoTitle(currentModel.getTitle()));
+            if (imageData != null) {
+                meta.addPicture(imageData);
+            }
+            meta.setAlbum(ytMeta.getVideMeta().getAuthor());
+            meta.setArtist(YTutils.getChannelTitle(currentModel.getTitle(), currentModel.getChannelTitle()));
+
+            try {
+                new MyID3().write(mp3, dst, src_set, meta);
+
+                LOG("MP3 Saved!");
+
+                mp3.delete();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private void processM4A(YTMeta ytMeta, File f, File dst) {
+        /** Add meta data tags to m4a.. */
+        isDownloaded=false;
+        new AsyncTask<File,Void,Void>() {
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                isDownloaded=true;
+                super.onPostExecute(aVoid);
+            }
+
+            @Override
+            protected Void doInBackground(File... files) {
+                String album = ytMeta.getVideMeta().getAuthor();
+                String artist = YTutils.getChannelTitle(currentModel.getTitle(), currentModel.getChannelTitle());
+
+                String[] command = new String[] {"-i",files[0].getPath(),"-metadata","artist="+artist,
+                        "-metadata","album="+album,"-y",files[1].getPath()};
+                int rc = FFmpeg.execute(command);
+                processRC(rc);
+                return null;
+            }
+        }.execute(f,dst);
+        while(!isDownloaded);
+    }
+
+    private void processRC(int rc) {
+        if (rc == RETURN_CODE_SUCCESS) {
+            Log.e(Config.TAG, "Command execution completed successfully.");
+        } else if (rc == RETURN_CODE_CANCEL) {
+            Log.e(Config.TAG, "Command execution cancelled by user.");
+        } else {
+            Log.e(Config.TAG, String.format("Command execution failed with rc=%d and the output below.", rc));
+        }
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        LOG("Task removed");
+        super.onTaskRemoved(rootIntent);
     }
 
     @Override
     public void onDestroy() {
 
-        File file = new File(getFilesDir(),"ffmpeg");
-        if (file.exists())
-            file.delete();
+        LOG("ON Destroyed");
 
-        currentModel=null;
+        FFmpeg.cancel();
+        pendingJobs.clear();
+        totalsize=0;
+        currentsize=0;
+        progress=0;
+        currentModel = null;
         handler.removeCallbacks(updateNotificationTask);
         notificationManagerCompat.cancel(FOREGROUND_ID);
         wakeLock.release();
@@ -684,28 +622,148 @@ public class IntentDownloadService extends IntentService {
     private Runnable updateNotificationTask = new Runnable() {
         @Override
         public void run() {
-            LOG("Running... "+progress);
-            if (currentModel==null)
+            LOG("Running... " + progress);
+            if (currentModel == null)
                 return;
-            boolean indeterminate=false;
-            if (progress==-1)
-                indeterminate=true;
-            notification = new NotificationCompat.Builder(context,CHANNEL_ID)
-                    .setContentTitle("Download - "+currentModel.getTitle())
-                    .addAction(R.mipmap.ic_launcher,"Cancel",cancelIntent)
-                    .setContentText(pendingJobs.size()+1+" files downloading")
+            boolean indeterminate = false;
+            if (progress == -1)
+                indeterminate = true;
+            notification = new NotificationCompat.Builder(context, CHANNEL_ID)
+                    .setContentTitle("Download - " + currentModel.getTitle())
+                    .addAction(R.mipmap.ic_launcher, "Cancel", cancelIntent)
+                    .setContentText(pendingJobs.size() + 1 + " files downloading")
                     .setSmallIcon(android.R.drawable.stat_sys_download)
                     .setLargeIcon(icon)
                     .setContentIntent(contentIntent)
-                    .setProgress(100,progress,indeterminate)
+                    .setProgress(100, progress, indeterminate)
                     .setOngoing(true)
                     .setPriority(Notification.PRIORITY_LOW)
                     .build();
 
-            notificationManagerCompat.notify(FOREGROUND_ID,notification);
-            handler.postDelayed(this,1000);
+            notificationManagerCompat.notify(FOREGROUND_ID, notification);
+            handler.postDelayed(this, 1000);
         }
     };
+
+    private void mergeTask() {
+        try {
+            String imageUri;
+            if (currentModel.getVideoID().contains("soundcloud.com"))
+                imageUri = currentModel.getImageUrl();
+            else imageUri = YTutils.getImageUrlID_HQ(currentModel.getVideoID());
+
+            Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                    icon = resource;
+                    setProgress(0, true);
+                }
+
+                @Override
+                public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                }
+            });
+
+            String audioUrl = currentModel.getAudioUrl();
+            String videoUrl = currentModel.getUrl();
+
+            File audio = YTutils.getFile("/YTPlayer/audio.m4a");
+            if (audio.exists()) audio.delete();
+            File video = YTutils.getFile("/YTPlayer/video.download");
+            if (video.exists()) video.delete();
+
+            /** Calculate total file size... */
+            URL url = new URL(videoUrl);
+            URLConnection connection = url.openConnection();
+            connection.connect();
+
+            long fileLength = connection.getContentLength();
+
+            /** Download audio file first... */
+            url = new URL(audioUrl);
+            connection = url.openConnection();
+            connection.connect();
+
+            fileLength += connection.getContentLength();
+            totalsize = fileLength;
+
+
+
+            PRDownloader.download(videoUrl, YTutils.getFile("YTPlayer").getPath(), "video.mp4")
+                    .build()
+                    .setOnProgressListener(progress -> {
+                        currentsize = progress.currentBytes;
+                        if (totalsize == 0)
+                            return;
+                        setProgress((int) (progress.currentBytes * 100 / totalsize), false);
+                        oldbytes = currentsize;
+                    })
+                    .start(new OnDownloadListener() {
+                        @Override
+                        public void onDownloadComplete() {
+                            Log.e(TAG, "onDownloadComplete: Audio Download Complete");
+
+                            /** Download video file now... */
+                            PRDownloader.download(audioUrl, YTutils.getFile("YTPlayer").getPath(), "audio.m4a")
+                                    .build()
+                                    .setOnProgressListener(progress1 -> {
+                                        currentsize = oldbytes + progress1.currentBytes;
+                                        setProgress((int) ((progress1.currentBytes + oldbytes) * 100 / totalsize), false);
+                                    })
+                                    .start(new OnDownloadListener() {
+                                        @Override
+                                        public void onDownloadComplete() {
+                                            Log.e(TAG, "onDownloadComplete: Video Download Complete");
+
+
+
+                                                   /* muxing(YTutils.getFile("YTPlayer/video.mp4").getPath(),
+                                                            YTutils.getFile("YTPlayer/audio.m4a").getPath(),
+                                                            save.getPath());*/
+
+                                            /** Show notification... */
+
+
+                                            isDownloaded = true;
+                                        }
+
+                                        @Override
+                                        public void onError(Error error) {
+                                            isDownloaded = true;
+                                        }
+                                    });
+                        }
+
+                        @Override
+                        public void onError(Error error) {
+                            isDownloaded = true;
+                        }
+
+                    });
+
+            do { LOG("isDownloaded="+isDownloaded);} while (!isDownloaded);
+
+            File save = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS + "/" + currentModel.getTargetName() + "." + currentModel.getExt());
+            if (save.exists()) save.delete();
+
+            mux(YTutils.getFile("YTPlayer/video.mp4").getPath(),
+                    YTutils.getFile("YTPlayer/audio.m4a").getPath(),
+                    save.getPath());
+
+            setFinalNotification(save);
+
+            if (video.exists())
+                video.delete();
+            if (audio.exists())
+                audio.delete();
+
+            Log.e(TAG, "doInBackground: Task Finished");
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, "Error: " + e.getMessage());
+        }
+    }
 
     private void muxing(String videoFile, String audioFile, String outFile) {
 
@@ -744,21 +802,17 @@ public class IntentDownloadService extends IntentService {
 
             muxer.start();
 
-            while (!sawEOS)
-            {
+            while (!sawEOS) {
                 videoBufferInfo.offset = offset;
                 videoBufferInfo.size = videoExtractor.readSampleData(videoBuf, offset);
 
 
-                if (videoBufferInfo.size < 0 || audioBufferInfo.size < 0)
-                {
+                if (videoBufferInfo.size < 0 || audioBufferInfo.size < 0) {
                     // Log.d(TAG, "saw input EOS.");
                     sawEOS = true;
                     videoBufferInfo.size = 0;
 
-                }
-                else
-                {
+                } else {
                     videoBufferInfo.presentationTimeUs = videoExtractor.getSampleTime();
                     videoBufferInfo.flags = videoExtractor.getSampleFlags();
                     muxer.writeSampleData(videoTrack, videoBuf, videoBufferInfo);
@@ -770,28 +824,24 @@ public class IntentDownloadService extends IntentService {
                 }
             }
 
-          //  Toast.makeText(getApplicationContext() ,  , Toast.LENGTH_SHORT).show();
+            //  Toast.makeText(getApplicationContext() ,  , Toast.LENGTH_SHORT).show();
 
             LOG("frame:" + frameCount);
 
 
             boolean sawEOS2 = false;
-            int frameCount2 =0;
-            while (!sawEOS2)
-            {
+            int frameCount2 = 0;
+            while (!sawEOS2) {
                 frameCount2++;
 
                 audioBufferInfo.offset = offset;
                 audioBufferInfo.size = audioExtractor.readSampleData(audioBuf, offset);
 
-                if (videoBufferInfo.size < 0 || audioBufferInfo.size < 0)
-                {
+                if (videoBufferInfo.size < 0 || audioBufferInfo.size < 0) {
                     //  Log.d(TAG, "saw input EOS.");
                     sawEOS2 = true;
                     audioBufferInfo.size = 0;
-                }
-                else
-                {
+                } else {
                     audioBufferInfo.presentationTimeUs = audioExtractor.getSampleTime();
                     audioBufferInfo.flags = audioExtractor.getSampleFlags();
                     muxer.writeSampleData(audioTrack, audioBuf, audioBufferInfo);

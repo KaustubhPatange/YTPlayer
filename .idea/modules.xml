@@ -8,6 +8,7 @@
       <module fileurl="file://$PROJECT_DIR$/MyID3_for_Android/YTPlayer-MyID3_for_Android.iml" filepath="$PROJECT_DIR$/MyID3_for_Android/YTPlayer-MyID3_for_Android.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/isoparser-1.9.39/isoparser-1.9.39.iml" filepath="$PROJECT_DIR$/isoparser-1.9.39/isoparser-1.9.39.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mobile-ffmpeg-audio-3.1/mobile-ffmpeg-audio-3.1.iml" filepath="$PROJECT_DIR$/mobile-ffmpeg-audio-3.1/mobile-ffmpeg-audio-3.1.iml" />
       <module fileurl="file://$PROJECT_DIR$/slf4j-android/slf4j-android.iml" filepath="$PROJECT_DIR$/slf4j-android/slf4j-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/spotify-auth-release/spotify-auth-release.iml" filepath="$PROJECT_DIR$/spotify-auth-release/spotify-auth-release.iml" />
     </modules>

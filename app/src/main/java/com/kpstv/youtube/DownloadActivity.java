@@ -32,7 +32,6 @@ import com.kpstv.youtube.services.IntentDownloadService;
 import com.kpstv.youtube.utils.YTutils;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 
-import static com.kpstv.youtube.services.IntentDownloadService.process;
 
 //import static com.kpstv.youtube.services.DownloadService.downloadTask;
 //import static com.kpstv.youtube.services.DownloadService.process;
@@ -118,11 +117,11 @@ public class DownloadActivity extends AppCompatActivity {
                             Log.e(TAG, "onCreate: Cancelling current task");
                             downloadTask.cancel(true);
                         }*/
-                        if (!YTutils.isProcessCompleted(process))
+                       /* if (!YTutils.isProcessCompleted(process))
                         {
                             Log.e(TAG, "onCreate: Destroying process" );
                             process.destroy();
-                        }
+                        }*/
                         IntentDownloadService.currentsize=0;
                         IntentDownloadService.totalsize=0;
                         IntentDownloadService.progress=0;

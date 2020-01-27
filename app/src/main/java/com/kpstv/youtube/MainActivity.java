@@ -65,9 +65,6 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.facebook.network.connectionclass.ConnectionClassManager;
 import com.facebook.network.connectionclass.ConnectionQuality;
-
-import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
-import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -378,7 +375,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             loadFragment(NCFrag);
         }
 
-        try {
+        /*try {
             FFmpeg ffmpeg = FFmpeg.getInstance(this);
             ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
 
@@ -399,7 +396,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             });
         } catch (Exception ignored) {
             Log.e(TAG, "onCreate: FFMpeg not supported");
-        }
+        }*/
 
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);

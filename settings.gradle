@@ -1,1 +1,1 @@
-include ':app', ':isoparser-1.9.39', ':MyID3_for_Android', ':spotify-auth-release', ':slf4j-android'
+include ':app', ':isoparser-1.9.39', ':MyID3_for_Android', ':spotify-auth-release', ':slf4j-android', ':mobile-ffmpeg-audio-3.1'
