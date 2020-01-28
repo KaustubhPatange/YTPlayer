@@ -145,11 +145,6 @@ import java.util.Objects;
 
 import javax.security.auth.login.LoginException;
 
-import at.huber.youtubeExtractor.Format;
-import at.huber.youtubeExtractor.VideoMeta;
-import at.huber.youtubeExtractor.YouTubeExtractor;
-import at.huber.youtubeExtractor.YouTubeUriExtractor;
-import at.huber.youtubeExtractor.YtFile;
 import cat.ereza.customactivityoncrash.config.CaocConfig;
 
 import static android.view.View.VISIBLE;
@@ -1674,7 +1669,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         }catch (Exception ignored) {}
     }
 
-    private static void addFormatToList(final String videoTitle, final YtFile ytfile, final String channelTitle) {
+   /* private static void addFormatToList(final String videoTitle, final YtFile ytfile, final String channelTitle) {
         Format ytFrVideo = ytfile.getFormat();
 
         String ytText; boolean isaudio=false;
@@ -1694,7 +1689,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             audioLink = ytfile.getUrl();
 
         ytConfigs.add(new YTConfig(ytText, ytfile.getUrl(), ytfile.getFormat().getExt(), videoTitle, channelTitle,isaudio,imgUrl));
-    }
+    }*/
 
     private static void addVideoToList(final YTMedia media, final String videoTitle, final String channelTitle) {
 
@@ -2107,7 +2102,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         }
         notificationManagerCompat.notify(1, builder.build());*/
     }
-    private static YtFile getBestStream(SparseArray<YtFile> ytFiles) {
+    /*private static YtFile getBestStream(SparseArray<YtFile> ytFiles) {
         ConnectionQuality connectionQuality = ConnectionQuality.MODERATE;
         connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQuality();
         int[] itags = new int[]{251, 141, 140, 17};
@@ -2137,7 +2132,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             return ytFiles.get(itags[2]);
         }
         return ytFiles.get(itags[3]);
-    }
+    }*/
 
     private static List<YTMedia> getBestStream(List<YTMedia> streams) {
         List<YTMedia> medias = new ArrayList<>();

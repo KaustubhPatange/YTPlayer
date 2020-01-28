@@ -26,6 +26,10 @@ public class YTConfig implements Serializable {
         this.bitRate = bitRate;
     }
 
+    public void setUrl(String url) {
+        Url = url;
+    }
+
     public String getImageUrl() {
         return imageUrl;
     }

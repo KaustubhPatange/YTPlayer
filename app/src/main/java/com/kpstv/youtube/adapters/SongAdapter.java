@@ -254,6 +254,11 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                                 holder.mainLayout.performClick();
                             }
                             break;
+                        case R.id.action_download:
+                            MetaModel model = new MetaModel(YTutils.getVideoID(discoverModel.getYtUrl()),
+                                    discoverModel.getTitle(),discoverModel.getAuthor(),discoverModel.getImgUrl());
+                            YTutils.downloadDialog(con,model);
+                            break;
                         case R.id.action_share:
                             Intent shareIntent = new Intent(Intent.ACTION_SEND);
                             shareIntent.setType("text/plain");

@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kpstv.youtube.R;
+import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.utils.YTLength;
 import com.kpstv.youtube.utils.YTutils;
 
@@ -31,7 +32,7 @@ import static android.content.Context.CLIPBOARD_SERVICE;
 public class HistoryBottomSheet extends BottomSheetDialogFragment {
 
     public static final String TAG = "HistoryBottomSheet";
-    LinearLayout addToPlaylist, removeList, copyLink, shareButton, mainLayout, watchOnYouTube;
+    LinearLayout addToPlaylist, removeList, copyLink, shareButton, mainLayout, watchOnYouTube, downloadButton;
     String ytUrl, Title,ChannelTitle,ImageUrl; BottomSheetListener mListener; ProgressBar progressBar;
     Activity activity; int position;
     long ytseconds; View v; TextView title_TextView;
@@ -50,11 +51,13 @@ public class HistoryBottomSheet extends BottomSheetDialogFragment {
         progressBar = v.findViewById(R.id.progressBar);
         title_TextView = v.findViewById(R.id.btitle);
         watchOnYouTube = v.findViewById(R.id.bwatch);
+        downloadButton = v.findViewById(R.id.bdownload);
 
         if (getTag().equals("discover"))
             removeList.setVisibility(View.GONE);
 
         ChangetoDefaultColor(R.id.baddToPlaylist_textView);
+        ChangetoDefaultColor(R.id.bdownload_textView);
         ChangetoDefaultColor(R.id.bwatch_textView);
         ChangetoDefaultColor(R.id.bcopyLink_textView);
         ChangetoDefaultColor(R.id.bshare_textView);
@@ -116,6 +119,12 @@ public class HistoryBottomSheet extends BottomSheetDialogFragment {
                 ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(CLIPBOARD_SERVICE);
                 clipboard.setText(ytUrl);
                 Toast.makeText(activity, "Link copied to clipboard", Toast.LENGTH_SHORT).show();
+                dismiss();
+            });
+
+            downloadButton.setOnClickListener(view -> {
+                MetaModel metaModel = new MetaModel(YTutils.getVideoID(ytUrl),Title,ChannelTitle,ImageUrl);
+                YTutils.downloadDialog(activity,metaModel);
                 dismiss();
             });
 

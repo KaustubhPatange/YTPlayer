@@ -45,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.concurrent.ExecutionException;
 
-import at.huber.youtubeExtractor.YouTubeUriExtractor;
 
 public class SearchActivity extends AppCompatActivity {
 

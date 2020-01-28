@@ -51,6 +51,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.kpstv.youtube.AppSettings;
+import com.kpstv.youtube.DPlaylistActivity;
 import com.kpstv.youtube.EditTagActivity;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
@@ -324,6 +325,21 @@ public class OPlaylistFragment extends Fragment {
                         new searchTask(scanAlbum, localModel).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     else
                         new getData_Offline(mainFile.getPath()).execute();
+                    return true;
+                });
+            }else {
+                /** Online Playlist or Favourites */
+                toolbar.inflateMenu(R.menu.playlist_popup);
+                toolbar.setOnMenuItemClickListener(menuItem -> {
+                    switch (menuItem.getItemId()) {
+                        case R.id.action_download:
+                            Intent intent = new Intent(activity, DPlaylistActivity.class);
+                            intent.putExtra("list",playlistModel.getData());
+                            startActivity(intent);
+
+
+                            break;
+                    }
                     return true;
                 });
             }

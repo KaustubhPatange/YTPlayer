@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_selectAll"
+        android:title="Select All"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_unselectAll"
+        android:title="Deselect All"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_download_as"
+        android:title="Download as...">
+        <menu>
+            <group
+                android:id="@+id/grp1"
+                android:checkableBehavior="single">
+                <item
+                    android:id="@+id/action_m4a"
+                    android:title="M4A"
+                    app:showAsAction="never" />
+                <item
+                    android:id="@+id/action_mp3"
+                    android:title="MP3"
+                    app:showAsAction="never" />
+                <item
+                    android:id="@+id/action_1080p"
+                    android:title="1080P"
+                    app:showAsAction="never" />
+                <item
+                    android:id="@+id/action_720p"
+                    android:title="720P"
+                    app:showAsAction="never" />
+                <item
+                    android:id="@+id/action_480p"
+                    android:title="480P"
+                    app:showAsAction="never" />
+            </group>
+        </menu>
+    </item>
+</menu>

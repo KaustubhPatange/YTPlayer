@@ -1033,12 +1033,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         builder.setItems(arrays, (dialog, which) -> {
 
             if (AppSettings.downloadCount<=0 && AppSettings.setDownloads) {
-                View v = getLayoutInflater().inflate(R.layout.alert_buy_premium,null);
-                new AlertDialog.Builder(this)
-                        .setView(v).setPositiveButton("Purchase",(dialogInterface, i) -> {
-                    YTutils.openPurchaseActivity(this);
-                        }).setNegativeButton("Cancel",null)
-                        .show();
+                YTutils.showPurchaseDialog(this);
                 return;
             }else if (AppSettings.setDownloads) AppSettings.downloadCount--;
             YTConfig config = configs.get(which);
@@ -1054,13 +1049,13 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             final String fileCurrent = filename; // Using this since current filename cannot be placed as final
             if (arrays[which].contains("+ merge audio")) {
                 config.setTargetName(fileCurrent.split("\\.")[0]+".mp4");
-                config.setTaskExtra("mergetask");
+                config.setTaskExtra("mergeTask");
                 startService(config);
 
             } else if (arrays[which].contains("Audio ")) {
 
                 config.setTargetName(fileCurrent.split("\\.")[0]+".mp3");
-                config.setTaskExtra("mp3task");
+                config.setTaskExtra("mp3Task");
                 startService(config);
 
             }else

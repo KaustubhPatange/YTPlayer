@@ -175,8 +175,6 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 					String decodedSig = "";
 					for (String partCipher:media.getCipher().split("&")) {
 
-
-
 						if (partCipher.startsWith("s=")) {
 							decodedSig = CipherManager.dechiperSig(URLDecoder.decode(partCipher.replace("s=", "")), response.getAssets().getJs());
 						}

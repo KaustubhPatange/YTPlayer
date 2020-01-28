@@ -102,10 +102,10 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import at.huber.youtubeExtractor.Format;
+/*import at.huber.youtubeExtractor.Format;
 import at.huber.youtubeExtractor.VideoMeta;
 import at.huber.youtubeExtractor.YouTubeExtractor;
-import at.huber.youtubeExtractor.YtFile;
+import at.huber.youtubeExtractor.YtFile;*/
 
 import static com.kpstv.youtube.AppInterface.API_KEYS;
 
@@ -610,7 +610,7 @@ public class PlayerActivity extends AppCompatActivity {
                         }
                     });
 
-            new YouTubeExtractor(PlayerActivity.this) {
+         /*   new YouTubeExtractor(PlayerActivity.this) {
 
                 @Override
                 protected void onPostExecute(SparseArray<YtFile> ytFiles) {
@@ -661,7 +661,7 @@ public class PlayerActivity extends AppCompatActivity {
                         expandedView.setTextViewText(R.id.nAuthor, channelTitle);
                     }
                 }
-            }.execute(YouTubeUrl);
+            }.execute(YouTubeUrl);*/
 
             super.onPostExecute(aVoid);
         }
@@ -921,7 +921,7 @@ public class PlayerActivity extends AppCompatActivity {
         return medias;
     }
 
-    private YtFile getBestStream(SparseArray<YtFile> ytFiles) {
+  /*  private YtFile getBestStream(SparseArray<YtFile> ytFiles) {
         connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQuality();
         int[] itags = new int[]{251, 141, 140, 17};
 
@@ -949,7 +949,7 @@ public class PlayerActivity extends AppCompatActivity {
         }
         return ytFiles.get(itags[3]);
     }
-
+*/
 
 
     @Override
@@ -1104,7 +1104,7 @@ public class PlayerActivity extends AppCompatActivity {
 
     }
 
-    private void addFormatToList(final String videoTitle, final YtFile ytfile) {
+   /* private void addFormatToList(final String videoTitle, final YtFile ytfile) {
         Format ytFrVideo = ytfile.getFormat();
 
         String ytText;
@@ -1120,7 +1120,7 @@ public class PlayerActivity extends AppCompatActivity {
         if (ytText.contains("128 kbit/s"))
             audioLink = ytfile.getUrl();
       //  ytConfigs.add(new YTConfig(ytText, ytfile.getUrl(), ytfile.getFormat().getExt(), videoTitle));
-    }
+    }*/
 
     void callFinish() {
         String toput = "true";

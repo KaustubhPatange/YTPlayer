@@ -168,10 +168,10 @@ public class DownloadActivity extends AppCompatActivity {
         if (IntentDownloadService.currentModel !=null) {
             txtTitle.setText(IntentDownloadService.currentModel.getTitle()+" - "+IntentDownloadService.currentModel.getChannelTitle());
            switch (IntentDownloadService.currentModel.getTaskExtra()) {
-               case "mp3task":
+               case "mp3Task":
                    currentImageView.setImageDrawable(getDrawable(R.drawable.ic_audio_download));
                    break;
-               case "mergetask":
+               case "mergeTask":
                    currentImageView.setImageDrawable(getDrawable(R.drawable.ic_movie_download));
                    break;
             }

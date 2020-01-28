@@ -53,10 +53,10 @@ public class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.MyView
         final YTConfig model = models.get(pos);
 
         switch (model.getTaskExtra()) {
-            case "mp3task":
+            case "mp3Task":
                 myViewHolder.imageView.setImageDrawable(context.getDrawable(R.drawable.ic_audio_download));
                 break;
-            case "mergetask":
+            case "mergeTask":
                 myViewHolder.imageView.setImageDrawable(context.getDrawable(R.drawable.ic_movie_download));
                 break;
         }

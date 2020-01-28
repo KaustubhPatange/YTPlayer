@@ -283,7 +283,7 @@ public class DownloadService extends Service {
         protected Void doInBackground(Void... voids) {
 
             switch (model.getTaskExtra()) {
-                case "mp3task":
+                case "mp3Task":
                     String imageUri=null;
                     if (model.getVideoID().contains("soundcloud.com"))
                         imageUri = model.getImageUrl();
@@ -465,7 +465,7 @@ public class DownloadService extends Service {
                     Log.e(TAG, "doInBackground: Task ended" );
                     break;
 
-                case "mergetask":
+                case "mergeTask":
                     try {
                         currentModel = model;
 

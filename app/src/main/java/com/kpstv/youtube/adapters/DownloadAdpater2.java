@@ -65,8 +65,10 @@ public class DownloadAdpater2 extends RecyclerView.Adapter<DownloadAdpater2.Down
         holder.btn_format.setOnClickListener(view -> {
             String text = holder.btn_format.getText().toString().toLowerCase();
             if (text.equals("mp3")) {
+                config.setExt("m4a");
                 holder.btn_format.setText("m4a");
             }else if (text.equals("m4a")) {
+                config.setExt("mp3");
                 holder.btn_format.setText("mp3");
             }
             setButtonColor(holder.btn_format);

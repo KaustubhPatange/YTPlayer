@@ -53,6 +53,7 @@ public class CPlaylistActivity extends AppCompatActivity {
     static RecyclerView.LayoutManager layoutManager;
     String playlist_csv; String date; ProgressBar progressBar;
     LinearLayout mainLayout; int current_to_save=-1;
+    private int beforeItems;
 
     ArrayList<TrackModel> trackModels;
     private static final int REQUEST_CODE = 1337;
@@ -135,6 +136,7 @@ public class CPlaylistActivity extends AppCompatActivity {
                 model.setSeconds(seconds);
                 models.add(model);
             }
+            beforeItems = models.size();
             return null;
         }
 
@@ -158,30 +160,7 @@ public class CPlaylistActivity extends AppCompatActivity {
         }else if (item.getItemId()==R.id.action_url) {
             showAlertWithEditText1();
         }else if (item.getItemId()==R.id.action_save) {
-            String title = playlistText.getText().toString();
-            if (!title.isEmpty()) {
-                String[] lines = playlist_csv.split("\n|\r");
-                if (playlist_csv!=null && playlist_csv.contains(","+title)) {
-                    // Update playList
-                    StringBuilder builder = new StringBuilder();
-                    for (int i=0;i<lines.length;i++) {
-                        if (lines[i].contains(","+title)) {
-                            lines[i] = createPlayListLine(title);
-                        }
-                        builder.append(lines[i]).append("\n");
-                    }
-                    YTutils.writeContent(this,"playlist.csv",builder.toString());
-                }else {
-                    // Add to new playlist
-                    if (current_to_save!=-1) {
-                        Log.e("UpdatingList","true");
-                       lines[current_to_save] = createPlayListLine(title);
-                       playlist_csv = YTutils.convertArrayToStringMethod(lines);
-                    }else playlist_csv+=createPlayListLine(title);
-                    YTutils.writeContent(this,"playlist.csv",playlist_csv);
-                }
-                finish();
-            }else Toast.makeText(this, "Playlist name cannot be empty", Toast.LENGTH_SHORT).show();
+           savePlaylist();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -191,8 +170,8 @@ public class CPlaylistActivity extends AppCompatActivity {
         Log.e("PositionTORemove",position+"");
         int icon = android.R.drawable.ic_dialog_alert;
         new AlertDialog.Builder(CPlaylistActivity.this)
-                .setTitle("Delete")
-                .setMessage("Are you sure to delete selected item?")
+                .setTitle("Remove")
+                .setMessage("Are you sure to remove selected item?")
                 .setPositiveButton("Yes", (dialog, which) -> {
                     models.remove(position);
                     adapter.notifyDataSetChanged();
@@ -202,6 +181,32 @@ public class CPlaylistActivity extends AppCompatActivity {
                 .show();
     };
 
+    private void savePlaylist() {
+        String title = playlistText.getText().toString();
+        if (!title.isEmpty()) {
+            String[] lines = playlist_csv.split("\n|\r");
+            if (playlist_csv!=null && playlist_csv.contains(","+title)) {
+                // Update playList
+                StringBuilder builder = new StringBuilder();
+                for (int i=0;i<lines.length;i++) {
+                    if (lines[i].contains(","+title)) {
+                        lines[i] = createPlayListLine(title);
+                    }
+                    builder.append(lines[i]).append("\n");
+                }
+                YTutils.writeContent(this,"playlist.csv",builder.toString());
+            }else {
+                // Add to new playlist
+                if (current_to_save!=-1) {
+                    Log.e("UpdatingList","true");
+                    lines[current_to_save] = createPlayListLine(title);
+                    playlist_csv = YTutils.convertArrayToStringMethod(lines);
+                }else playlist_csv+=createPlayListLine(title);
+                YTutils.writeContent(this,"playlist.csv",playlist_csv);
+            }
+            finish();
+        }else Toast.makeText(this, "Playlist name cannot be empty", Toast.LENGTH_SHORT).show();
+    }
 
     String createPlayListLine(String title) {
         if (date==null) {
@@ -697,8 +702,27 @@ public class CPlaylistActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        callbeforeExit();
+    }
+
+    @Override
     public boolean onSupportNavigateUp() {
-        finish();
+        callbeforeExit();
         return super.onSupportNavigateUp();
+    }
+
+    private void callbeforeExit() {
+        if (beforeItems!=models.size()) {
+            alertDialog = new AlertDialog.Builder(this)
+                    .setTitle("Save")
+                    .setMessage("Playlist items have change, do you want to save it?")
+                    .setNegativeButton("Cancel",(dialogInterface, i) -> finish())
+                    .setPositiveButton("OK",(dialogInterface, i) -> {
+                        savePlaylist();
+                    })
+                    .create();
+            alertDialog.show();
+        }else finish();
     }
 }

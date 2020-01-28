@@ -15,7 +15,6 @@
         android:layout_height="wrap_content" />
     <LinearLayout
         android:visibility="gone"
-
         android:id="@+id/mainlayout"
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -121,6 +120,34 @@
                 android:fontFamily="@font/dmsans_font"
                 android:layout_width="match_parent"
                 android:text="Watch on YouTube"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+        <LinearLayout
+            android:background="@drawable/history_background"
+            android:id="@+id/bdownload"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="7dp"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="53dp">
+            <ImageView
+                android:layout_marginStart="5dp"
+                android:layout_gravity="center_vertical"
+                android:tint="@color/light_white"
+                android:src="@drawable/ic_download"
+                android:layout_width="32dp"
+                android:layout_height="32dp" />
+            <TextView
+                android:id="@+id/bdownload_textView"
+                android:layout_marginStart="20dp"
+                android:gravity="center_vertical"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:tint="@color/light_white"
+                android:fontFamily="@font/dmsans_font"
+                android:layout_width="match_parent"
+                android:text="Download as..."
                 android:layout_height="match_parent" />
         </LinearLayout>
         <LinearLayout

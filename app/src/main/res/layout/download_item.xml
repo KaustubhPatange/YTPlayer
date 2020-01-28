@@ -52,6 +52,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:text="Title"
         android:layout_marginTop="5dp"
         android:layout_marginStart="20dp"
         app:layout_constraintStart_toEndOf="@id/DFrame"

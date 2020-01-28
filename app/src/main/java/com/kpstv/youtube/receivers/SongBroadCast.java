@@ -97,6 +97,17 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                     }
 
                     if (f.exists()) {
+
+                        if (uri.toString().contains(".mp4")) {
+                            Intent i = new Intent();
+                            i.setAction(Intent.ACTION_VIEW);
+                            i.setDataAndType(uri, "video/*");
+                            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(i);
+                            return;
+                        }
+
                         File downloads = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS);
                         File[] files = downloads.listFiles(new FileFilter() {
                             @Override

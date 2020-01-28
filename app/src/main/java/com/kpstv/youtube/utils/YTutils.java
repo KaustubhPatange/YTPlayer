@@ -55,6 +55,7 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -70,13 +71,19 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 import com.kpstv.youtube.AppInterface;
+import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.BuildConfig;
 import com.kpstv.youtube.CPlaylistActivity;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.PurchaseActivity;
 import com.kpstv.youtube.R;
+import com.kpstv.youtube.fragments.DownloadBottomSheet;
 import com.kpstv.youtube.models.LocalModel;
+import com.kpstv.youtube.models.MetaModel;
+import com.kpstv.youtube.models.YTConfig;
+import com.kpstv.youtube.services.IntentDownloadService;
+import com.naveed.ytextractor.model.YTMedia;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -130,6 +137,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import static android.content.Context.DOWNLOAD_SERVICE;
+import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
 import static com.kpstv.youtube.MainActivity.supportFFmpeg;
 
@@ -1269,6 +1277,56 @@ public class YTutils implements AppInterface {
             json = handler.makeServiceCall(updateLink);
             return null;
         }
+    }
+
+    public static void showPurchaseDialog(Context context) {
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
+        View v = inflater.inflate(R.layout.alert_buy_premium,null);
+        new AlertDialog.Builder(context)
+                .setView(v).setPositiveButton("Purchase",(dialogInterface, i) -> {
+            YTutils.openPurchaseActivity(context);
+        }).setNegativeButton("Cancel",null)
+                .show();
+    }
+
+    public static void downloadDialog(Context context, MetaModel meta) {
+
+        if (AppSettings.downloadCount<=0 && AppSettings.setDownloads) {
+            YTutils.showPurchaseDialog(context);
+            return;
+        }else if (AppSettings.setDownloads) AppSettings.downloadCount--;
+
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
+        View v = inflater.inflate(R.layout.alert_download_filter,null);
+
+        RadioButton m4aRadio = v.findViewById(R.id.radio_m4a);
+        RadioButton v1080Radio = v.findViewById(R.id.radio_1080p);
+        RadioButton v720pRadio = v.findViewById(R.id.radio_720p);
+        RadioButton v480pRadio = v.findViewById(R.id.radio_480p);
+
+        alertDialog = new AlertDialog.Builder(context)
+                .setView(v)
+                .setNegativeButton("Cancel",null)
+                .setPositiveButton("OK",(dialogInterface, i) -> {
+                    String ext="mp3";
+                    if (m4aRadio.isChecked()) ext = "m4a";
+                    else if (v1080Radio.isChecked()) ext = "1080p";
+                    else if (v720pRadio.isChecked()) ext = "720p";
+                    else if (v480pRadio.isChecked()) ext = "480p";
+
+                    YTConfig config = new YTConfig("auto-generate","auto-generate",ext
+                    ,meta.getTitle(),meta.getAuthor(),true,meta.getImgUrl());
+                    config.setVideoID(meta.getVideoID());
+                    config.setTargetName(DownloadBottomSheet.getTargetName(config));
+                    config.setTaskExtra("autoTask");
+
+                    Intent serviceIntent = new Intent(context, IntentDownloadService.class);
+                    serviceIntent.putExtra("addJob", config);
+                    ContextCompat.startForegroundService(context, serviceIntent);
+                })
+                .create();
+
+        alertDialog.show();
     }
 
     public static void moveFile(File file, File dest) throws IOException {

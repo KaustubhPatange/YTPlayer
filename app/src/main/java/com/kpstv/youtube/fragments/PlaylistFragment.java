@@ -136,7 +136,6 @@ public class PlaylistFragment extends Fragment {
             Bundle args = new Bundle();
             args.putSerializable("model",model);
             if (model.getData().size()>0) {
-                Log.e(TAG, "Data1: " + model.getData().get(0));
                 OPlayFrag.setArguments(args);
                 FragmentTransaction ft = fragmentManager.beginTransaction();
                 ft.setCustomAnimations(R.anim.fade_in,

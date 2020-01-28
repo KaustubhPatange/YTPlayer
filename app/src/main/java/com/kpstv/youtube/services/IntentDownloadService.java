@@ -49,8 +49,13 @@ import com.kpstv.youtube.models.OFModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.receivers.SongBroadCast;
 import com.kpstv.youtube.utils.FileUtils;
+import com.kpstv.youtube.utils.SoundCloud;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
+import com.naveed.ytextractor.ExtractorException;
+import com.naveed.ytextractor.YoutubeStreamExtractor;
+import com.naveed.ytextractor.model.YTMedia;
+import com.naveed.ytextractor.model.YoutubeMeta;
 
 import org.cmc.music.metadata.ImageData;
 import org.cmc.music.metadata.MusicMetadata;
@@ -70,6 +75,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 import static com.arthenica.mobileffmpeg.FFmpeg.RETURN_CODE_CANCEL;
@@ -195,10 +201,14 @@ public class IntentDownloadService extends IntentService {
         if (pendingJobs.size() > 0)
             pendingJobs.remove(0);
         switch (currentModel.getTaskExtra()) {
-            case "mp3task":
+
+            case "autoTask":
+                autoTask();
+                break;
+            case "mp3Task":
                 mp3Task();
                 break;
-            case "mergetask":
+            case "mergeTask":
                 mergeTask();
                 break;
         }
@@ -215,10 +225,10 @@ public class IntentDownloadService extends IntentService {
         if (pendingJobs.size() > 0)
             pendingJobs.remove(0);
         switch (currentModel.getTaskExtra()) {
-            case "mp3task":
+            case "mp3Task":
                 mp3Task();
                 break;
-            case "mergetask":
+            case "mergeTask":
                 mergeTask();
                 break;
         }
@@ -253,6 +263,7 @@ public class IntentDownloadService extends IntentService {
                     .build();
         } else {
             not = new NotificationCompat.Builder(context, CHANNEL_ID)
+                    .setDefaults(Notification.DEFAULT_ALL)
                     .setSmallIcon(R.drawable.ic_error_outline)
                     .setContentTitle("Download Failed")
                     .setContentText(contentText)
@@ -346,6 +357,104 @@ public class IntentDownloadService extends IntentService {
             IntentDownloadService.progress = progress;
     }
 
+    private void autoTask() {
+        /** Generate a download link */
+
+        if (currentModel.getVideoID().contains("soundcloud.com")) {
+            SoundCloud soundCloud = new SoundCloud(currentModel.getVideoID());
+            if (soundCloud.getModel()!=null) {
+                currentModel.setExt("mp3");
+                currentModel.setUrl(soundCloud.getModel().getStreamUrl());
+            }
+        }else {
+            isDownloaded=false;
+
+            new YoutubeStreamExtractor(new YoutubeStreamExtractor.ExtractorListner() {
+                @Override
+                public void onExtractionGoesWrong(ExtractorException e) {
+                    LOG("Stream Error");
+                    isDownloaded = true;
+                }
+
+                @Override
+                public void onExtractionDone(List<YTMedia> adativeStream, List<YTMedia> muxedStream, YoutubeMeta meta) {
+                    /** Find the download link for suitable format */
+                    if (adativeStream.isEmpty()) {
+                        LOG("AdativeStream Empty");
+                        setFinalNotification(new File("null"));
+                        isDownloaded = true;
+                        return;
+                    }
+                    Log.e(TAG, "onExtractionDone: Current Ext: "+currentModel.getExt() );
+                    switch (currentModel.getExt()) {
+                        case "mp3":
+                            currentModel.setExt("mp3");
+                            currentModel.setUrl(getAudioStream(adativeStream));
+                            break;
+                        case "m4a":
+                            currentModel.setExt("m4a");
+                            currentModel.setUrl(getAudioStream(adativeStream));
+                            break;
+                        case "1080p":
+                            currentModel.setExt("mp4");
+                            currentModel.setAudioUrl(getAudioStream(adativeStream));
+                            currentModel.setUrl(getVideoStream(adativeStream, 1080));
+                            break;
+                        case "720p":
+                            currentModel.setExt("mp4");
+                            currentModel.setAudioUrl(getAudioStream(adativeStream));
+                            currentModel.setUrl(getVideoStream(adativeStream, 720));
+
+                            break;
+                        case "480p":
+                            currentModel.setExt("mp4");
+                            currentModel.setAudioUrl(getAudioStream(adativeStream));
+                            currentModel.setUrl(getVideoStream(adativeStream, 480));
+                            break;
+                    }
+                    isDownloaded = true;
+                }
+            }).useDefaultLogin().Extract(currentModel.getVideoID());
+
+            do { LOG("isDownloaded="+isDownloaded); }while (!isDownloaded);
+
+            LOG("Normal Url: "+currentModel.getUrl());
+            LOG("Audio Url: "+currentModel.getAudioUrl());
+        }
+
+        isDownloaded=false;
+
+        if (currentModel.getUrl()!=null && !currentModel.getUrl().equals("auto-generate")) {
+            if (currentModel.getExt().equals("mp3")||currentModel.getExt().equals("m4a")) {
+                mp3Task();
+            }else if (currentModel.getExt().equals("mp4")) {
+                mergeTask();
+            }
+        }else LOG("Failed autoTask for: "+currentModel.getTargetName());
+    }
+
+    private String getAudioStream(List<YTMedia> adativeStream) {
+        for (YTMedia media : adativeStream) {
+            if (media.getMimeType().contains("audio/mp4")) {
+                return media.getUrl();
+            }
+        }
+        return null;
+    }
+
+    private String getVideoStream(List<YTMedia> adativeStream,int quality) {
+        String backupUri=null;
+        for (YTMedia media : adativeStream) {
+            if (media.getAudioSampleRate() == 0) {
+                backupUri = media.getUrl();
+                if (media.getHeight()==quality) {
+                    return media.getUrl();
+                }
+            }
+        }
+        return backupUri;
+    }
+
     @SuppressLint("StaticFieldLeak")
     private void mp3Task() {
         try {
@@ -394,7 +503,7 @@ public class IntentDownloadService extends IntentService {
                     YTutils.getFile("YTPlayer").getPath(), f.getName())
                     .build()
                     .setOnProgressListener(progress1 -> {
-                        if (currentModel.getExt().equals("mp3"))
+                        if (currentModel.getExt().equals("mp3")||currentModel.getExt().equals("m4a"))
                             totalsize = progress1.totalBytes * 2;
                         else {
                             totalsize = progress1.totalBytes;
@@ -426,7 +535,7 @@ public class IntentDownloadService extends IntentService {
 
             YTMeta ytMeta = new YTMeta(currentModel.getVideoID());
 
-
+            Log.e(TAG, "mp3Task: Extension="+currentModel.getExt());
 
             switch (currentModel.getExt()) {
                 case "m4a":
@@ -563,6 +672,9 @@ public class IntentDownloadService extends IntentService {
     @SuppressLint("StaticFieldLeak")
     private void processM4A(YTMeta ytMeta, File f, File dst) {
         /** Add meta data tags to m4a.. */
+
+        Log.e(TAG, "processM4A: Processing: "+f.getPath()+", Dest: "+dst.getPath() );
+
         isDownloaded=false;
         new AsyncTask<File,Void,Void>() {
             @Override
@@ -583,7 +695,24 @@ public class IntentDownloadService extends IntentService {
                 return null;
             }
         }.execute(f,dst);
-        while(!isDownloaded);
+        try {
+            /** Wait for ffmpeg ffmpeg... */
+            do {
+                if (dst.exists()) {
+                    try {
+                        Thread.sleep(550);
+                    } catch (Exception e) {
+
+                    }
+                    currentsize = dst.length() + f.length();
+                    setProgress((int) (currentsize * 100 / totalsize), false);
+                }
+            } while (!isDownloaded);
+        } catch (Exception e) {
+            LOG("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+        //do { LOG("isDownload="+isDownloaded); }while (!isDownloaded);
     }
 
     private void processRC(int rc) {
@@ -646,7 +775,15 @@ public class IntentDownloadService extends IntentService {
     };
 
     private void mergeTask() {
+
+        File audio = YTutils.getFile("/YTPlayer/audio.m4a");
+        if (audio.exists()) audio.delete();
+        File video = YTutils.getFile("/YTPlayer/video.download");
+        if (video.exists()) video.delete();
         try {
+
+            isDownloaded=false;
+
             String imageUri;
             if (currentModel.getVideoID().contains("soundcloud.com"))
                 imageUri = currentModel.getImageUrl();
@@ -668,11 +805,6 @@ public class IntentDownloadService extends IntentService {
             String audioUrl = currentModel.getAudioUrl();
             String videoUrl = currentModel.getUrl();
 
-            File audio = YTutils.getFile("/YTPlayer/audio.m4a");
-            if (audio.exists()) audio.delete();
-            File video = YTutils.getFile("/YTPlayer/video.download");
-            if (video.exists()) video.delete();
-
             /** Calculate total file size... */
             URL url = new URL(videoUrl);
             URLConnection connection = url.openConnection();
@@ -687,8 +819,6 @@ public class IntentDownloadService extends IntentService {
 
             fileLength += connection.getContentLength();
             totalsize = fileLength;
-
-
 
             PRDownloader.download(videoUrl, YTutils.getFile("YTPlayer").getPath(), "video.mp4")
                     .build()
@@ -742,7 +872,7 @@ public class IntentDownloadService extends IntentService {
 
                     });
 
-            do { LOG("isDownloaded="+isDownloaded);} while (!isDownloaded);
+            do { LOG("isDownload="+isDownloaded); } while (!isDownloaded);
 
             File save = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS + "/" + currentModel.getTargetName() + "." + currentModel.getExt());
             if (save.exists()) save.delete();
@@ -753,16 +883,23 @@ public class IntentDownloadService extends IntentService {
 
             setFinalNotification(save);
 
-            if (video.exists())
-                video.delete();
-            if (audio.exists())
-                audio.delete();
-
-            Log.e(TAG, "doInBackground: Task Finished");
         } catch (Exception e) {
             e.printStackTrace();
             Log.e(TAG, "Error: " + e.getMessage());
         }
+
+        IntentDownloadService.currentsize=0;
+        IntentDownloadService.totalsize=0;
+        IntentDownloadService.progress=0;
+        IntentDownloadService.currentModel = null;
+        isDownloaded=false;
+
+        if (video.exists())
+            video.delete();
+        if (audio.exists())
+            audio.delete();
+
+        Log.e(TAG, "doInBackground: Task Finished");
     }
 
     private void muxing(String videoFile, String audioFile, String outFile) {
@@ -863,6 +1000,16 @@ public class IntentDownloadService extends IntentService {
     }
 
     public boolean mux(String videoFile, String audioFile, String outputFile) {
+
+       try {
+           if (!new File(videoFile).exists())
+               return false;
+           if (!new File(audioFile).exists())
+               return false;
+       }catch (Exception e) {
+           return false;
+       }
+
         Movie video;
         try {
             video = MovieCreator.build(videoFile);
