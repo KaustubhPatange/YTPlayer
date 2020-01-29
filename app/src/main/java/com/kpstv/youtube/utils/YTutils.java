@@ -35,6 +35,7 @@ import android.os.Vibrator;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.app.ShareCompat;
@@ -63,6 +64,9 @@ import com.downloader.Error;
 import com.downloader.OnDownloadListener;
 import com.downloader.PRDownloader;
 import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.gson.Gson;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
@@ -286,14 +290,24 @@ public class YTutils implements AppInterface {
         }
     }
 
+    static String formatString(String t) {
+        t = t.replace(",","");
+        t = t.replace("|"," ");
+        return t;
+    }
+
     static AlertDialog alertDialog;
-    public static void addToPlayList(Activity activity,String videoID, String videoTitle, String channelTitle, String imageUrl, long seconds) {
+    public static void addToPlayList(Context activity,String videoID, String videoTitle, String channelTitle, String imageUrl, long seconds) {
+
+        Log.e(TAG, "addToPlayList: VideoId" +videoID+ ",Seconds: "+seconds );
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
        // builder.setTitle("Add to playlist");
         ArrayList<String> configs = new ArrayList<>();
 
-        View view = activity.getLayoutInflater().inflate(R.layout.alert_playlist_layout,null);
+        LayoutInflater inflater = (LayoutInflater) activity.getSystemService(LAYOUT_INFLATER_SERVICE);
+
+        View view = inflater.inflate(R.layout.alert_playlist_layout,null);
 
         ListView listView = view.findViewById(R.id.recyclerView);
         ConstraintLayout constraintLayout = view.findViewById(R.id.mainLayout);
@@ -323,7 +337,7 @@ public class YTutils implements AppInterface {
                 String name = configs.get(which);
                 for (int i=0;i<configs.size();i++) {
                     if (allPlaylist[i].contains(","+name) && !allPlaylist[i].contains(videoID+"|")) {
-                        allPlaylist[i]+=","+videoID+"|"+seconds+"|"+videoTitle+"|"+channelTitle+"|"+imageUrl;
+                        allPlaylist[i]+=","+videoID+"|"+seconds+"|"+formatString(videoTitle)+"|"+channelTitle+"|"+imageUrl;
                         writeContent(activity,"playlist.csv",
                                 join(allPlaylist,'\n'));
                         added=true;
@@ -813,6 +827,7 @@ public class YTutils implements AppInterface {
         return null;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public static void destroyProcess(Process process) {
         if (process != null)
             process.destroyForcibly();
@@ -1327,6 +1342,28 @@ public class YTutils implements AppInterface {
                 .create();
 
         alertDialog.show();
+    }
+
+    public static void showInterstitialAd(Context activity) {
+        if (!AppSettings.showAds)
+            return;
+        //TODO: Change ad unit ID, Sample ca-app-pub-3940256099942544/1033173712
+        InterstitialAd mInterstitialAd = new InterstitialAd(activity);
+        mInterstitialAd.setAdUnitId("ca-app-pub-1164424526503510/4801416648");
+        mInterstitialAd.loadAd(new AdRequest.Builder().addTestDevice("07153BA64BB64F7C3F726B71C4AE30B9").build());
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdFailedToLoad(int i) {
+                super.onAdFailedToLoad(i);
+                Log.e(TAG, "onAdFailedToLoad: Ad failed to load: " + i);
+            }
+
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                mInterstitialAd.show();
+            }
+        });
     }
 
     public static void moveFile(File file, File dest) throws IOException {

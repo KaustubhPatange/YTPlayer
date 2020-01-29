@@ -2,6 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <item android:id="@+id/action_add_playlist"
+        android:title="Add to playlist"
+        app:showAsAction="never"/>
     <item android:id="@+id/action_add_queue"
         android:title="Add to queue"
         app:showAsAction="never"/>

@@ -100,9 +100,6 @@ public class PlaylistFragment extends Fragment {
                 }
             });
 
-            if (YTutils.isInternetAvailable())
-            new getData(activity).execute();
-
             networkCreated=true;
         }
         return v;
@@ -119,7 +116,8 @@ public class PlaylistFragment extends Fragment {
     @Override
     public void onResume() {
         Log.e("onResume","true");
-        new getData(activity).execute();
+        if (YTutils.isInternetAvailable())
+            new getData(activity).execute();
         super.onResume();
     }
 
@@ -220,8 +218,10 @@ public class PlaylistFragment extends Fragment {
                         ArrayList<String> list = new ArrayList<>();
                         String[] lines = line.split(",");
                         for(int i=2;i<lines.length;i++) {
+                            Log.e(TAG, "doInBackground: "+lines[i] );
                             list.add(lines[i]);
                         }
+                        //Log.e(TAG, "doInBackground: "+lines[1] );
                         data.add(0,new PlaylistModel(
                                 lines[0],
                                 lines[1],

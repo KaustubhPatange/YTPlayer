@@ -723,6 +723,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             notificationManager.deleteNotificationChannel("channel_01");
+            notificationManager.deleteNotificationChannel("channel_02");
         }
         notificationManagerCompat.cancel(1);
        try {
@@ -1828,6 +1829,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             notificationChannel.setDescription(description);
             notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(notificationChannel);
+
+            NotificationChannel channel = new NotificationChannel("channel_02","Download",importance);
+            notificationManager.createNotificationChannel(channel);
         }
 
         notificationManagerCompat = NotificationManagerCompat.from(this);

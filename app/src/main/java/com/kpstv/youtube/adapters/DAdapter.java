@@ -58,8 +58,12 @@ public class DAdapter extends RecyclerView.Adapter<DAdapter.DHolder> {
         }else holder.checkBox.setChecked(false);
 
         holder.title.setText(dModel.getTitle());
-        holder.subtitle.setText(YTutils.milliSecondsToTimer(dModel.getSeconds()*1000)+" "+
-                Html.fromHtml("&#8226;")+" "+dModel.getSubtitle());
+
+        if (dModel.getSeconds()>0) {
+            holder.subtitle.setText(YTutils.milliSecondsToTimer(dModel.getSeconds()*1000)+" "+
+                    Html.fromHtml("&#8226;")+" "+dModel.getSubtitle());
+        }else
+            holder.subtitle.setText(dModel.getSubtitle());
 
         Glide.with(context).asBitmap().load(dModel.getImageUrl()).into(new CustomTarget<Bitmap>(){
             @Override

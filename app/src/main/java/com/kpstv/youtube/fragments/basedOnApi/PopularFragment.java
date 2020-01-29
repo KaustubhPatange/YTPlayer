@@ -1,15 +1,12 @@
 package com.kpstv.youtube.fragments.basedOnApi;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.ColorFilter;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.Shape;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -32,18 +29,16 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.downloader.Progress;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.kpstv.youtube.AppInterface;
-import com.kpstv.youtube.AppSettings;
+import com.kpstv.youtube.DPlaylistActivity;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.SongAdapter;
-import com.kpstv.youtube.fragments.OPlaylistFragment;
 import com.kpstv.youtube.models.DiscoverModel;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
@@ -52,11 +47,9 @@ import com.kpstv.youtube.utils.AppBarStateChangeListener;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
-import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -64,16 +57,12 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.security.auth.login.LoginException;
-
-import top.defaults.drawabletoolbox.DrawableBuilder;
-
 import static com.kpstv.youtube.utils.AppBarStateChangeListener.State.COLLAPSED;
 import static com.kpstv.youtube.utils.AppBarStateChangeListener.State.EXPANDED;
 import static com.kpstv.youtube.utils.AppBarStateChangeListener.State.IDLE;
 
 public class PopularFragment extends Fragment {
-    private Toolbar mToolbar;
+    private Toolbar toolbar;
     FragmentActivity activity;
     private CollapsingToolbarLayout mToolbarLayout;
     private AppBarLayout mAppBar;
@@ -116,12 +105,12 @@ public class PopularFragment extends Fragment {
                     @Override
                     public void run() {
                         if (state == COLLAPSED) {
-                            mToolbar.setTitle(title);
+                            toolbar.setTitle(title);
                             mToolbarLayout.setTitle(title);
                             mOplayfab.setVisibility(View.GONE);
                         } else if (state == EXPANDED || state == IDLE) {
                             mToolbarLayout.setTitle(" ");
-                            mToolbar.setTitle(" ");
+                            toolbar.setTitle(" ");
                             mOplayfab.setVisibility(View.VISIBLE);
                         }
                     }
@@ -129,7 +118,28 @@ public class PopularFragment extends Fragment {
             }
         });
 
-        mToolbar.setNavigationOnClickListener(view -> MainActivity.loadSearchFrag());
+        toolbar.setNavigationOnClickListener(view -> MainActivity.loadSearchFrag());
+        toolbar.inflateMenu(R.menu.playlist_popup);
+        toolbar.setOnMenuItemClickListener(menuItem -> {
+            if (menuItem.getItemId() == R.id.action_download) {
+                if (models.size() > 0) {
+                    ArrayList<String> list = new ArrayList<>();
+                    for (DiscoverModel model : models) {
+                        String item = new StringBuilder().append(YTutils.getVideoID(model.getYtUrl())).append(">").append("0")
+                                .append(">").append(model.getTitle()).append(">").append(model.getAuthor()).append(">")
+                                .append(model.getImgUrl()).toString();
+                        list.add(item);
+                    }
+
+                    Intent i = new Intent(activity, DPlaylistActivity.class);
+                    i.putExtra("list", list);
+                    startActivityForResult(i, 101);
+
+                } else
+                    Toast.makeText(activity, "Item list is empty!", Toast.LENGTH_SHORT).show();
+            }
+            return true;
+        });
 
         models = new ArrayList<>();
         strings = new ArrayList<>();
@@ -243,6 +253,13 @@ public class PopularFragment extends Fragment {
             Log.e(TAG, "onCreateView: Url to calculate: "+url);
         }
         return v;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode==101 && resultCode == Activity.RESULT_OK)
+            YTutils.showInterstitialAd(activity);
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -600,7 +617,7 @@ public class PopularFragment extends Fragment {
     }
 
     private void initViews(View view) {
-        mToolbar = view.findViewById(R.id.toolbar);
+        toolbar = view.findViewById(R.id.toolbar);
         progressBar = view.findViewById(R.id.progressBar);
         mToolbarLayout = view.findViewById(R.id.toolbar_layout);
         mAppBar = view.findViewById(R.id.app_bar);

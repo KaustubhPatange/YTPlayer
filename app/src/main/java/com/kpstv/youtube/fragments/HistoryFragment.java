@@ -1,5 +1,6 @@
 package com.kpstv.youtube.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,15 +30,13 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.kpstv.youtube.AppSettings;
-import com.kpstv.youtube.MainActivity;
-import com.kpstv.youtube.PurchaseActivity;
+import com.kpstv.youtube.DPlaylistActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.HistoryAdapter;
 import com.kpstv.youtube.models.HistoryModel;
 import com.kpstv.youtube.utils.YTutils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -48,11 +47,17 @@ public class HistoryFragment extends Fragment {
     static RecyclerView recyclerView;
     static RecyclerView.LayoutManager layoutManager;
     static HistoryAdapter adapter;
-    View v; boolean networkCreated,onCreateViewCalled;
+    private Toolbar toolbar;
+    View v;
+    boolean networkCreated, onCreateViewCalled;
     static SharedPreferences sharedPreferences, settingspref;
-    static ArrayList<HistoryModel> urls; static LinearLayout hiddenLayout;
-    ConstraintLayout tipLayout; LinearLayout historyButton;
-    static FragmentActivity activity; boolean showedOnce=false,showedUpdateOnce=false;
+    static ArrayList<HistoryModel> urls;
+    static LinearLayout hiddenLayout;
+    ConstraintLayout tipLayout;
+    LinearLayout historyButton;
+    static FragmentActivity activity;
+    boolean showedOnce = false, showedUpdateOnce = false;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,17 +67,16 @@ public class HistoryFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        onCreateViewCalled=true;
+        onCreateViewCalled = true;
         if (!networkCreated) {
             v = inflater.inflate(R.layout.fragment_history, container, false);
 
             activity = getActivity();
 
-            sharedPreferences = getContext().getSharedPreferences("history",Context.MODE_PRIVATE);
-            settingspref = getContext().getSharedPreferences("settings",Context.MODE_PRIVATE);
+            sharedPreferences = getContext().getSharedPreferences("history", Context.MODE_PRIVATE);
+            settingspref = getContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
 
-            Toolbar toolbar = v.findViewById(R.id.toolbar);
-
+            toolbar = v.findViewById(R.id.toolbar);
             toolbar.setTitle("History");
 
             urls = new ArrayList<>();
@@ -91,7 +95,7 @@ public class HistoryFragment extends Fragment {
 
             swipeRefreshLayout.setOnLongClickListener(v -> false);
 
-            networkCreated=true;
+            networkCreated = true;
 
             LoadMainMethod();
         }
@@ -99,39 +103,46 @@ public class HistoryFragment extends Fragment {
         return v;
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 101 && resultCode == Activity.RESULT_OK)
+            YTutils.showInterstitialAd(activity);
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     private View.OnLongClickListener recyclerItemLongListener = v1 -> {
-        Object[] objects = (Object[])v1.getTag();
+        Object[] objects = (Object[]) v1.getTag();
         int position = (int) objects[0];
         String title = (String) objects[1];
         String yturl = (String) objects[2];
         String author = (String) objects[3];
         String imageUri = (String) objects[4];
-        Log.e(TAG, "YTURL: "+yturl );
+        Log.e(TAG, "YTURL: " + yturl);
         HistoryBottomSheet bottomSheet = new HistoryBottomSheet();
         Bundle bundle = new Bundle();
-        bundle.putInt("pos",position);
-        bundle.putString("title",title);
-        bundle.putString("yturl",yturl);
-        bundle.putString("channelTitle",author);
-        bundle.putString("imageUri",imageUri);
-        bundle.putString("yturl",yturl);
+        bundle.putInt("pos", position);
+        bundle.putString("title", title);
+        bundle.putString("yturl", yturl);
+        bundle.putString("channelTitle", author);
+        bundle.putString("imageUri", imageUri);
+        bundle.putString("yturl", yturl);
         bottomSheet.setArguments(bundle);
         bottomSheet.show(getActivity().getSupportFragmentManager(), "");
         return false;
     };
 
     public static void removeFromHistory(int position) {
-        String history = YTutils.readContent(activity,"history.csv");
-        if (history!=null&&!history.isEmpty()) {
+        String history = YTutils.readContent(activity, "history.csv");
+        if (history != null && !history.isEmpty()) {
             String[] items = history.split("\n|\r");
             StringBuilder builder = new StringBuilder();
             String videoId = YTutils.getVideoID(urls.get(position).getVideoId());
-            for (String item: items) {
+            for (String item : items) {
                 if (!item.startsWith(videoId)) {
                     builder.append(item).append("\n");
                 }
             }
-           YTutils.writeContent(activity,"history.csv",builder.toString().trim());
+            YTutils.writeContent(activity, "history.csv", builder.toString().trim());
         }
         urls.remove(position);
         adapter.notifyDataSetChanged();
@@ -144,13 +155,13 @@ public class HistoryFragment extends Fragment {
     public void onResume() {
         if (!onCreateViewCalled)
             LoadMainMethod();
-        onCreateViewCalled=false;
+        onCreateViewCalled = false;
         super.onResume();
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.history_menu,menu);
+        inflater.inflate(R.menu.history_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -164,12 +175,29 @@ public class HistoryFragment extends Fragment {
                         .setTitle("Clear History")
                         .setMessage("Are you sure? This can't be undone.")
                         .setPositiveButton("Yes", (dialog, which) -> {
-                            YTutils.writeContent(activity,"history.csv","");
+                            YTutils.writeContent(activity, "history.csv", "");
                             LoadMainMethod();
                         })
-                        .setNegativeButton("No",null)
+                        .setNegativeButton("No", null)
                         .setIcon(icon)
                         .show();
+                break;
+            case R.id.action_download:
+                if (urls.size() > 0) {
+                    ArrayList<String> list = new ArrayList<>();
+                    for (HistoryModel model : urls) {
+                        String item1 = new StringBuilder().append(model.getVideoId()).append(">").append("0")
+                                .append(">").append(model.getTitle()).append(">").append(model.getChannelTitle()).append(">")
+                                .append(model.getImageUrl()).toString();
+                        list.add(item1);
+                    }
+
+                    Intent i = new Intent(activity, DPlaylistActivity.class);
+                    i.putExtra("list", list);
+                    startActivityForResult(i, 101);
+
+                } else
+                    Toast.makeText(activity, "Item list is empty!", Toast.LENGTH_SHORT).show();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -186,14 +214,14 @@ public class HistoryFragment extends Fragment {
         layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-       // String items = sharedPreferences.getString("urls","");
-        String data = YTutils.readContent(activity,"history.csv");
-        if (data!=null&&!data.isEmpty()) {
+        // String items = sharedPreferences.getString("urls","");
+        String data = YTutils.readContent(activity, "history.csv");
+        if (data != null && !data.isEmpty()) {
             String[] lines = data.split("\n|\r");
-            for (String line: lines) {
+            for (String line : lines) {
                 String[] childs = line.split("\\|");
                 urls.add(new HistoryModel(
-                        childs[0],childs[2],childs[3],childs[4],childs[5],childs[6]
+                        childs[0], childs[2], childs[3], childs[4], childs[5], childs[6]
                 ));
             }
         }
@@ -201,9 +229,9 @@ public class HistoryFragment extends Fragment {
             String[] urlarray = items.split(",");
             urls.addAll(Arrays.asList(urlarray));
         }*/
-        if (urls.size()>0) {
+        if (urls.size() > 0) {
             swipeRefreshLayout.setRefreshing(true);
-            adapter = new HistoryAdapter(urls,getActivity(),recyclerItemLongListener);
+            adapter = new HistoryAdapter(urls, getActivity(), recyclerItemLongListener);
             recyclerView.setAdapter(adapter);
 
             hiddenLayout.setVisibility(View.GONE);
@@ -211,67 +239,66 @@ public class HistoryFragment extends Fragment {
             swipeRefreshLayout.setRefreshing(false);
             swipeRefreshLayout.setEnabled(true);
 
-            if (!settingspref.getBoolean("showHTip",false)) {
+            if (!settingspref.getBoolean("showHTip", false)) {
                 tipLayout.setVisibility(View.VISIBLE);
                 historyButton.setOnClickListener(view -> {
                     tipLayout.setVisibility(View.GONE);
                     SharedPreferences.Editor editor = settingspref.edit();
-                    editor.putBoolean("showHTip",true);
+                    editor.putBoolean("showHTip", true);
                     editor.apply();
                 });
             }
-        }else {
+        } else {
             // It is empty
             urls.clear();
-            adapter = new HistoryAdapter(urls,getActivity(),recyclerItemLongListener);
+            adapter = new HistoryAdapter(urls, getActivity(), recyclerItemLongListener);
             recyclerView.setAdapter(adapter);
-           hiddenLayout.setVisibility(View.VISIBLE);
+            hiddenLayout.setVisibility(View.VISIBLE);
         }
 
 
         SharedPreferences preferences = activity.getSharedPreferences("appSettings", MODE_PRIVATE);
         boolean checkForUpdates = preferences.getBoolean("pref_update_check", true);
-        if (checkForUpdates && !showedUpdateOnce)
-        {
-            Log.e(TAG, "LoadMainMethod: In show update..." );
-            if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.O) {
+        if (checkForUpdates && !showedUpdateOnce) {
+            Log.e(TAG, "LoadMainMethod: In show update...");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 boolean canInstallpackage;
                 canInstallpackage = activity.getPackageManager().canRequestPackageInstalls();
                 if (canInstallpackage)
-                    new YTutils.CheckForUpdates(activity,true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    new YTutils.CheckForUpdates(activity, true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 else {
                     AlertDialog alertDialog = new AlertDialog.Builder(activity)
                             .setTitle("Permission")
                             .setCancelable(false)
                             .setMessage("You need to allow install unknown source permission from settings for installing updates!")
-                            .setPositiveButton("OK",(dialogInterface, i) -> {
+                            .setPositiveButton("OK", (dialogInterface, i) -> {
                                 startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
                                         .setData(Uri.parse(String.format("package:%s", activity.getPackageName()))));
                             })
                             .create();
                     alertDialog.show();
                 }
-            }else
-                new YTutils.CheckForUpdates(activity,true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            showedUpdateOnce=true;
+            } else
+                new YTutils.CheckForUpdates(activity, true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            showedUpdateOnce = true;
         }
-        if (preferences.getBoolean("pref_show_purchase",true) && !showedOnce && !AppSettings.contentActivated) {
-            Log.e(TAG, "LoadMainMethod: Showing alert..." );
-            View view = getLayoutInflater().inflate(R.layout.alert_buy,null);
+        if (preferences.getBoolean("pref_show_purchase", true) && !showedOnce && !AppSettings.contentActivated) {
+            Log.e(TAG, "LoadMainMethod: Showing alert...");
+            View view = getLayoutInflater().inflate(R.layout.alert_buy, null);
             AlertDialog alertDialog = new AlertDialog.Builder(activity)
                     .setView(view)
-                    .setPositiveButton("Purchase",(dialogInterface, i) -> {
+                    .setPositiveButton("Purchase", (dialogInterface, i) -> {
                         YTutils.openPurchaseActivity(activity);
                     })
-                    .setNegativeButton("Later",null)
-                    .setNeutralButton("No Thanks",(dialogInterface, i) -> {
+                    .setNegativeButton("Later", null)
+                    .setNeutralButton("No Thanks", (dialogInterface, i) -> {
                         SharedPreferences.Editor editor = preferences.edit();
-                        editor.putBoolean("pref_show_purchase",false);
+                        editor.putBoolean("pref_show_purchase", false);
                         editor.apply();
                     })
                     .create();
             alertDialog.show();
-            showedOnce=true;
+            showedOnce = true;
         }
     }
 

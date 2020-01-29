@@ -39,10 +39,12 @@ import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.DiscoverModel;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
+import com.kpstv.youtube.utils.YTLength;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -132,14 +134,14 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         return position;
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint({"ClickableViewAccessibility", "StaticFieldLeak"})
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int listPosition) {
 
         final DiscoverModel discoverModel = dataSet.get(listPosition);
 
         if (isSearchAdpater) {
-            holder.titleText.setText(discoverModel.getTitle());
+            holder.titleText.setText(discoverModel.getTitle().replace("&amp;","&"));
             holder.AuthorText.setText(discoverModel.getAuthor());
         }else {
             holder.titleText.setText(YTutils.getVideoTitle(discoverModel.getTitle()));
@@ -229,6 +231,34 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                 popupMenu.inflate(R.menu.song_popup_menu);
                 popupMenu.setOnMenuItemClickListener(menuItem -> {
                     switch (menuItem.getItemId()) {
+                        case R.id.action_add_playlist:
+                            if (discoverModel.getSeconds()<=0) {
+                                ProgressDialog dialog = new ProgressDialog(con);
+                                dialog.setMessage("Processing...");
+                                dialog.show();
+                                new AsyncTask<Void,Void,Void>() {
+                                    YTLength length;
+                                    @Override
+                                    protected Void doInBackground(Void... voids) {
+                                        length = new YTLength(YTutils.getVideoID(discoverModel.getYtUrl()));
+                                        return null;
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(Void aVoid) {
+                                        dialog.dismiss();
+                                        if (length.getSeconds()>0) {
+                                            YTutils.addToPlayList(con,YTutils.getVideoID(discoverModel.getYtUrl()),discoverModel.getTitle(),discoverModel.getAuthor(),
+                                                    discoverModel.getImgUrl(),length.getSeconds());
+                                        }else
+                                            Toast.makeText(con, "Error: Generating playlist!", Toast.LENGTH_SHORT).show();
+                                        super.onPostExecute(aVoid);
+                                    }
+                                }.execute();
+                            }else
+                                YTutils.addToPlayList(con,YTutils.getVideoID(discoverModel.getYtUrl()),discoverModel.getTitle(),discoverModel.getAuthor(),
+                                    discoverModel.getImgUrl(),discoverModel.getSeconds());
+                            break;
                         case R.id.action_add_queue:
                             if (MainActivity.yturls.size()>0 && !MainActivity.localPlayBack) {
                                 final String ytUri = YTutils.getVideoID(discoverModel.getYtUrl());

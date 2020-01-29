@@ -81,7 +81,9 @@ public class DownloadAdpater2 extends RecyclerView.Adapter<DownloadAdpater2.Down
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                holder.txt_size.setText(YTutils.getSize(size));
+                try {
+                    holder.txt_size.setText(YTutils.getSize(size));
+                }catch (Exception ignored){}
                 super.onPostExecute(aVoid);
             }
 

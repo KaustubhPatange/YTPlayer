@@ -88,7 +88,7 @@ public class IntentDownloadService extends IntentService {
     private PowerManager.WakeLock wakeLock;
     NotificationManagerCompat notificationManagerCompat;
     private Context context;
-    private String CHANNEL_ID = "channel_01";
+    private String CHANNEL_ID = "channel_02";
     Bitmap icon;
     private final int FOREGROUND_ID = 109;
     Notification notification;

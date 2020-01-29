@@ -5,4 +5,7 @@
        android:id="@+id/action_remove"
        android:title="Clear History"
        app:showAsAction="never"/>
+   <item android:title="Download"
+       android:id="@+id/action_download"
+       app:showAsAction="never"/>
 </menu>

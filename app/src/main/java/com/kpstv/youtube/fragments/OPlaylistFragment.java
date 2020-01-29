@@ -3,6 +3,7 @@ package com.kpstv.youtube.fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -50,6 +51,9 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.DPlaylistActivity;
 import com.kpstv.youtube.EditTagActivity;
@@ -335,7 +339,7 @@ public class OPlaylistFragment extends Fragment {
                         case R.id.action_download:
                             Intent intent = new Intent(activity, DPlaylistActivity.class);
                             intent.putExtra("list",playlistModel.getData());
-                            startActivity(intent);
+                            startActivityForResult(intent,101);
 
 
                             break;
@@ -701,8 +705,14 @@ public class OPlaylistFragment extends Fragment {
         MainActivity.PlayVideo_Local(files, position);
     }
 
+
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 101) {
+            if (resultCode== Activity.RESULT_OK)
+                YTutils.showInterstitialAd(activity);
+        }
         if (requestCode == 42) {
             Uri treeUri = data.getData();
             DocumentFile pickedDir = DocumentFile.fromTreeUri(activity, treeUri);
@@ -1140,22 +1150,27 @@ public class OPlaylistFragment extends Fragment {
                 else strings.add(data.trim());
             }
             for (String line : playlistModel.getData()) {
-                if (!line.contains("|")) continue;
-                String[] childs = line.split("\\|");
-                String videoId = childs[0];
-                yturls.add(YTutils.getYtUrl(videoId));
+               try {
+                   if (!line.contains("|")) continue;
+                   String[] childs = line.split("\\|");
+                   String videoId = childs[0];
+                   yturls.add(YTutils.getYtUrl(videoId));
 
-                DiscoverModel discoverModel = new DiscoverModel(
-                        childs[2],
-                        childs[3],
-                        childs[4],
-                        YTutils.getYtUrl(videoId)
-                );
+                   DiscoverModel discoverModel = new DiscoverModel(
+                           childs[2],
+                           childs[3],
+                           childs[4],
+                           YTutils.getYtUrl(videoId)
+                   );
 
-                if (strings.contains("ytID:" + videoId) || strings.contains("sd:" + videoId))
-                    discoverModel.setDisabled(true);
+                   if (strings.contains("ytID:" + videoId) || strings.contains("sd:" + videoId))
+                       discoverModel.setDisabled(true);
 
-                models.add(discoverModel);
+                   models.add(discoverModel);
+               }catch (Exception e) {
+                   e.printStackTrace();
+                   Log.e(TAG, "Error: "+e.getMessage());
+               }
             }
            /* for (String yturl : yturls) {
                 YTMeta ytMeta = new YTMeta(YTutils.getVideoID(yturl));

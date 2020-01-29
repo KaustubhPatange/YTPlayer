@@ -1,5 +1,6 @@
 package com.kpstv.youtube;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -8,6 +9,7 @@ import android.support.v4.view.MenuCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,6 +33,7 @@ public class DPlaylistActivity extends AppCompatActivity {
     private ArrayList<YTConfig> ytConfigs;
     private String ext = "mp3";
     private RelativeLayout mPurchaselayout;
+    private static final String TAG = "DPlaylistActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,11 +45,20 @@ public class DPlaylistActivity extends AppCompatActivity {
 
         setTitle("Download (Mp3)");
 
-        // gxE4ngu78Ro|241|Blackbear - Idfc (Tarro Remix)|Chill Nation|https://i.ytimg.com/vi/gxE4ngu78Ro/mqdefault.jpg
+        // gxE4ngu78Ro>241>Blackbear - Idfc (Tarro Remix)>Chill Nation>https://i.ytimg.com/vi/gxE4ngu78Ro/mqdefault.jpg
         ArrayList<String> list = getIntent().getStringArrayListExtra("list");
         for (String item : list) {
-            String[] childs = item.split("\\|");
-            models.add(new DModel(childs[0], childs[2], childs[3], childs[4], childs[1]));
+            try {
+                String[] childs;
+                if (item.contains(">"))
+                    childs = item.split(">");
+                else childs = item.split("\\|");
+
+                models.add(new DModel(childs[0], childs[2], childs[3], childs[4], childs[1]));
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e(TAG, "Error: " + e.getMessage());
+            }
         }
 
         setRecyclerView();
@@ -99,6 +111,7 @@ public class DPlaylistActivity extends AppCompatActivity {
                 Toast.makeText(this, "Select some item first!", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Downloading started, check notification", Toast.LENGTH_SHORT).show();
+                setResult(Activity.RESULT_OK);
                 finish();
             }
         });

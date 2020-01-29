@@ -1,7 +1,9 @@
 package com.kpstv.youtube.fragments;
 
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,9 +19,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.kpstv.youtube.DPlaylistActivity;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.DiscoverAdapter;
@@ -38,7 +41,8 @@ import java.util.List;
  */
 public class DiscoverFragment extends Fragment {
 
-    boolean networkCreated;View v;
+    boolean networkCreated;
+    View v;
     Toolbar toolbar;
     private RecyclerView mRecyclerView;
     private DiscoverAdapter mAdapter;
@@ -46,22 +50,29 @@ public class DiscoverFragment extends Fragment {
 
     private List<DiscoverModel> discoverModels;
 
-    ArrayList<String> csvlines, directItems; int totalItems;
+    ArrayList<String> csvlines, directItems;
+    int totalItems;
 
-    CircularProgressBar progressBar; boolean isdirectData;
+    CircularProgressBar progressBar;
+    boolean isdirectData;
 
-    AsyncTask<Void,Void,Void> loadTask;
-    AsyncTask<Void,Float,Void> loadInitialTask;
+    AsyncTask<Void, Void, Void> loadTask;
+    AsyncTask<Void, Float, Void> loadInitialTask;
 
-    SharedPreferences preferences; String region="global";
+    SharedPreferences preferences;
+    String region = "global";
 
-    protected Handler handler; String fileName, intentTitle,csvString;
+    protected Handler handler;
+    String fileName, intentTitle, csvString;
 
-    LinearLayout bottom_player; FragmentActivity activity;
-    ImageButton actionUp,actionPlay;
-    TextView actionTitle; String bTitle,isPlaying;
+    LinearLayout bottom_player;
+    FragmentActivity activity;
+    ImageButton actionUp, actionPlay;
+    TextView actionTitle;
+    String bTitle, isPlaying;
 
-    public DiscoverFragment() {}
+    public DiscoverFragment() {
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -69,14 +80,36 @@ public class DiscoverFragment extends Fragment {
         if (!networkCreated) {
             v = inflater.inflate(R.layout.fragment_discover, container, false);
 
+            activity = getActivity();
+
             toolbar = v.findViewById(R.id.toolbar);
             toolbar.setNavigationOnClickListener(view -> MainActivity.loadSearchFrag());
 
-            activity = getActivity();
+            toolbar.inflateMenu(R.menu.playlist_popup);
+            toolbar.setOnMenuItemClickListener(menuItem -> {
+                if (menuItem.getItemId() == R.id.action_download) {
+                    if (discoverModels.size() > 0) {
+                        ArrayList<String> list = new ArrayList<>();
+                        for (DiscoverModel model : discoverModels) {
+                            String item = new StringBuilder().append(YTutils.getVideoID(model.getYtUrl())).append(">").append("0")
+                                    .append(">").append(model.getTitle()).append(">").append(model.getAuthor()).append(">")
+                                    .append(model.getImgUrl()).toString();
+                            list.add(item);
+                        }
 
-            preferences = activity.getSharedPreferences("appSettings",Context.MODE_PRIVATE);
-            if (preferences!=null) {
-                region = preferences.getString("pref_select_region","global");
+                        Intent i = new Intent(activity, DPlaylistActivity.class);
+                        i.putExtra("list", list);
+                        startActivityForResult(i, 101);
+
+                    } else
+                        Toast.makeText(activity, "Item list is empty!", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            });
+
+            preferences = activity.getSharedPreferences("appSettings", Context.MODE_PRIVATE);
+            if (preferences != null) {
+                region = preferences.getString("pref_select_region", "global");
             }
 
             // Get required views...
@@ -93,7 +126,7 @@ public class DiscoverFragment extends Fragment {
             csvString = args.getString("data_csv");
             intentTitle = args.getString("title");
 
-            toolbar.setTitle(intentTitle+" ("+ csvlines.size() +")");
+            toolbar.setTitle(intentTitle + " (" + csvlines.size() + ")");
             discoverModels = new ArrayList<>();
             handler = new Handler();
             mRecyclerView = v.findViewById(R.id.my_recycler_view);
@@ -101,15 +134,15 @@ public class DiscoverFragment extends Fragment {
             progressBar.setIndeterminateMode(true);
 
             if (intentTitle.contains("Viral")) {
-                totalItems=50;
-                fileName = "viral_"+region+".csv";
-            }else {
-                totalItems=200;
-                fileName="trending_"+region+".csv";
+                totalItems = 50;
+                fileName = "viral_" + region + ".csv";
+            } else {
+                totalItems = 200;
+                fileName = "trending_" + region + ".csv";
             }
 
-            if (csvString!=null) {
-                toolbar.setTitle(intentTitle+" ("+ csvlines.size() +")");
+            if (csvString != null) {
+                toolbar.setTitle(intentTitle + " (" + csvlines.size() + ")");
             }
             loadInitialTask = new loadInitialData();
             loadInitialTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -123,14 +156,23 @@ public class DiscoverFragment extends Fragment {
         String[] lines = csvString.split("\n|\r");
         int startnumber = 2;
         if (intentTitle.contains("Viral")) startnumber = 1;
-        for(int i=startnumber;i<lines.length;i++) {
+        for (int i = startnumber; i < lines.length; i++) {
             csvlines.add(lines[i]);
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 101) {
+            if (resultCode == Activity.RESULT_OK) {
+                YTutils.showInterstitialAd(activity);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
     private View.OnLongClickListener recyclerItemLongListener = v1 -> {
-        Object[] objects = (Object[])v1.getTag();
+        Object[] objects = (Object[]) v1.getTag();
         int position = (int) objects[0];
         String title = (String) objects[1];
         String yturl = (String) objects[2];
@@ -138,25 +180,25 @@ public class DiscoverFragment extends Fragment {
         String imageUri = (String) objects[4];
         HistoryBottomSheet bottomSheet = new HistoryBottomSheet();
         Bundle bundle = new Bundle();
-        bundle.putInt("pos",position);
-        bundle.putString("title",title);
-        bundle.putString("channelTitle",author);
-        bundle.putString("imageUri",imageUri);
-        bundle.putString("yturl",yturl);
+        bundle.putInt("pos", position);
+        bundle.putString("title", title);
+        bundle.putString("channelTitle", author);
+        bundle.putString("imageUri", imageUri);
+        bundle.putString("yturl", yturl);
         bottomSheet.setArguments(bundle);
         bottomSheet.show(activity.getSupportFragmentManager(), "discover");
         return false;
     };
 
-    class loadInitialData extends AsyncTask<Void,Float,Void> {
+    class loadInitialData extends AsyncTask<Void, Float, Void> {
 
         @Override
         protected void onPostExecute(Void aVoid) {
 
             if (intentTitle.contains("Viral"))
-                toolbar.setTitle(intentTitle+" ("+ 50 +")");
+                toolbar.setTitle(intentTitle + " (" + 50 + ")");
             else
-                toolbar.setTitle(intentTitle+" ("+ 200 +")");
+                toolbar.setTitle(intentTitle + " (" + 200 + ")");
 
             progressBar.setVisibility(View.GONE);
             mRecyclerView.setHasFixedSize(true);
@@ -164,7 +206,7 @@ public class DiscoverFragment extends Fragment {
             mLayoutManager = new LinearLayoutManager(activity);
             mRecyclerView.setLayoutManager(mLayoutManager);
             mAdapter = new DiscoverAdapter(activity, discoverModels, mRecyclerView,
-                    recyclerItemLongListener,csvString,intentTitle,totalItems);
+                    recyclerItemLongListener, csvString, intentTitle, totalItems);
             mRecyclerView.setAdapter(mAdapter);
 
             mRecyclerView.setVisibility(View.VISIBLE);
@@ -202,16 +244,13 @@ public class DiscoverFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... voids) {
             HttpHandler handler = new HttpHandler();
-            if (intentTitle.contains("Viral"))
-            {
-                csvString = handler.makeServiceCall("https://spotifycharts.com/viral/"+region+"/daily/latest/download");
+            if (intentTitle.contains("Viral")) {
+                csvString = handler.makeServiceCall("https://spotifycharts.com/viral/" + region + "/daily/latest/download");
+            } else {
+                csvString = handler.makeServiceCall("https://spotifycharts.com/regional/" + region + "/daily/latest/download");
             }
-            else
-            {
-                csvString = handler.makeServiceCall("https://spotifycharts.com/regional/"+region+"/daily/latest/download");
-            }
-            String dataString = YTutils.readContent(activity,fileName);
-            if (dataString!=null&&!dataString.isEmpty()) {
+            String dataString = YTutils.readContent(activity, fileName);
+            if (dataString != null && !dataString.isEmpty()) {
                 String[] lines = dataString.split("\n|\r");
                 if (lines[0].contains(YTutils.getTodayDate())) {
                     directItems.addAll(Arrays.asList(lines).subList(1, lines.length));
@@ -219,11 +258,11 @@ public class DiscoverFragment extends Fragment {
                     int sizeofItems = directItems.size();
                     String[] newLines = csvString.split("\n|\r");
                     if (intentTitle.contains("Viral")) {
-                        if (sizeofItems!=newLines.length-1) {
+                        if (sizeofItems != newLines.length - 1) {
                             csvlines.addAll(Arrays.asList(newLines).subList(sizeofItems + 1, newLines.length));
                         }
-                    }else {
-                        if (sizeofItems!=newLines.length-2) {
+                    } else {
+                        if (sizeofItems != newLines.length - 2) {
                             csvlines.addAll(Arrays.asList(newLines).subList(sizeofItems + 2, newLines.length));
                         }
                     }
@@ -237,47 +276,46 @@ public class DiscoverFragment extends Fragment {
         }
 
         void CommonLoadData() {
-            String main = YTutils.readContent(activity,fileName);
-            if (main==null||main.isEmpty()) {
-                main=YTutils.getTodayDate();
-            }else if (!main.split("\n|\r")[0].contains(YTutils.getTodayDate())) {
-                main=YTutils.getTodayDate();
+            String main = YTutils.readContent(activity, fileName);
+            if (main == null || main.isEmpty()) {
+                main = YTutils.getTodayDate();
+            } else if (!main.split("\n|\r")[0].contains(YTutils.getTodayDate())) {
+                main = YTutils.getTodayDate();
             }
             StringBuilder builder = new StringBuilder();
             builder.append(main);
             for (int i = 0; i < 10; i++) {
                 String line = csvlines.get(i);
-                String title = line.split(",")[1].replace("\"","");
-                String author = line.split(",")[2].replace("\"","");
+                String title = line.split(",")[1].replace("\"", "");
+                String author = line.split(",")[2].replace("\"", "");
 
-                String search_text = title.replace(" ","+")
-                        + "+by+" + author.replace(" ","+");
+                String search_text = title.replace(" ", "+")
+                        + "+by+" + author.replace(" ", "+");
 
                 YTSearch ytSearch = new YTSearch(search_text);
 
                 final String videoId = ytSearch.getVideoIDs().get(0);
                 String imgurl = YTutils.getImageUrlID(videoId);
-                if (!main.startsWith(title+"|"))
-                {
+                if (!main.startsWith(title + "|")) {
                     builder.append("\n").append(title).append("|").append(author).append("|")
                             .append(videoId);
-                    Log.e("AddedItem",title+", YTUrl: "+ytSearch.getVideoIDs().get(0)+"");
+                    Log.e("AddedItem", title + ", YTUrl: " + ytSearch.getVideoIDs().get(0) + "");
                 }
                 discoverModels.add(new DiscoverModel(
-                        title,author,imgurl,"https://www.youtube.com/watch?v="+videoId
+                        title, author, imgurl, "https://www.youtube.com/watch?v=" + videoId
                 ));
 
-                publishProgress((float)i*100/10);
+                publishProgress((float) i * 100 / 10);
             }
 
 
-            YTutils.writeContent(activity,fileName,
+            YTutils.writeContent(activity, fileName,
                     builder.toString().replaceAll("(?m)^[ \t]*\r?\n", ""));
-            csvlines.subList(0,10).clear();
+            csvlines.subList(0, 10).clear();
         }
     }
 
-    class loadFurtherData extends AsyncTask<Void,Void,Void> {
+    class loadFurtherData extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPostExecute(Void aVoid) {
@@ -298,61 +336,60 @@ public class DiscoverFragment extends Fragment {
 
     void CommonLoad_direct() {
         if (isdirectData) {
-            if (directItems.isEmpty()&&!csvlines.isEmpty()) {
+            if (directItems.isEmpty() && !csvlines.isEmpty()) {
                 CommonLoad();
                 return;
             }
             int default_load = 10;
-            if (directItems.size()<=9)
+            if (directItems.size() <= 9)
                 default_load = directItems.size();
-            for (int i=0;i<default_load;i++) {
+            for (int i = 0; i < default_load; i++) {
                 String[] infos = directItems.get(i).split("\\|");
-                String videoID =infos[2];
+                String videoID = infos[2];
                 discoverModels.add(new DiscoverModel(
-                        infos[0],infos[1],YTutils.getImageUrlID(videoID),
+                        infos[0], infos[1], YTutils.getImageUrlID(videoID),
                         YTutils.getYtUrl(videoID)
                 ));
             }
-            directItems.subList(0,default_load).clear();
-        }else CommonLoad();
+            directItems.subList(0, default_load).clear();
+        } else CommonLoad();
     }
 
     void CommonLoad() {
-        String main = YTutils.readContent(activity,fileName);
-        if (main==null||main.isEmpty()) {
-            main=YTutils.getTodayDate();
-        }else if (!main.split("\n|\r")[0].contains(YTutils.getTodayDate())) {
-            main=YTutils.getTodayDate();
+        String main = YTutils.readContent(activity, fileName);
+        if (main == null || main.isEmpty()) {
+            main = YTutils.getTodayDate();
+        } else if (!main.split("\n|\r")[0].contains(YTutils.getTodayDate())) {
+            main = YTutils.getTodayDate();
         }
         StringBuilder builder = new StringBuilder();
         builder.append(main);
         ArrayList<DiscoverModel> dModels = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             String line = csvlines.get(i);
-            String title = line.split(",")[1].replace("\"","");
-            String author = line.split(",")[2].replace("\"","");
+            String title = line.split(",")[1].replace("\"", "");
+            String author = line.split(",")[2].replace("\"", "");
 
-            String search_text = title.replace(" ","+")
-                    + "+by+" + author.replace(" ","+");
+            String search_text = title.replace(" ", "+")
+                    + "+by+" + author.replace(" ", "+");
 
             YTSearch ytSearch = new YTSearch(search_text);
 
             final String videoId = ytSearch.getVideoIDs().get(0);
             String imgurl = YTutils.getImageUrlID(videoId);
-            if (!main.startsWith(title+"|"))
-            {
+            if (!main.startsWith(title + "|")) {
                 builder.append("\n").append(title).append("|").append(author).append("|")
                         .append(videoId);
-                Log.e("AddedItem",title+", YTUrl: "+ytSearch.getVideoIDs().get(0)+"");
+                Log.e("AddedItem", title + ", YTUrl: " + ytSearch.getVideoIDs().get(0) + "");
             }
 
             dModels.add(new DiscoverModel(
-                    title,author,imgurl,"https://www.youtube.com/watch?v="+videoId
+                    title, author, imgurl, "https://www.youtube.com/watch?v=" + videoId
             ));
         }
         discoverModels.addAll(dModels);
-        YTutils.writeContent(activity,fileName,
+        YTutils.writeContent(activity, fileName,
                 builder.toString().replaceAll("(?m)^[ \t]*\r?\n", ""));
-        csvlines.subList(0,10).clear();
+        csvlines.subList(0, 10).clear();
     }
 }

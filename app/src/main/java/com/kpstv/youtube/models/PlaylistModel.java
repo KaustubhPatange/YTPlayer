@@ -17,7 +17,9 @@ public class PlaylistModel implements Serializable {
 
         for (String line : data) {
             if (line.isEmpty()) continue;
-            Timeseconds+=Integer.parseInt(line.split("\\|")[1]);
+            try {
+                Timeseconds+=Integer.parseInt(line.split("\\|")[1]);
+            }catch (Exception ignored) { Timeseconds=0; }
         }
     }
 

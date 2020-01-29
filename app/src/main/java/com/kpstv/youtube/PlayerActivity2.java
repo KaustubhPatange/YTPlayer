@@ -548,6 +548,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             mainPager.addOnPageChangeListener(mainPageListener);
 
         }catch (Exception e) {
+            Toast.makeText(activity, "Error: Something went wrong!", Toast.LENGTH_SHORT).show();
             activity.finish();
         }
     }

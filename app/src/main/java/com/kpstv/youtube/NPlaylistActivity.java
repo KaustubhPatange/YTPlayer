@@ -451,12 +451,17 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
     void removeItem(int position) {
       //  models.remove(position);
-        if (MainActivity.videoID.equals(MainActivity.yturls.get(position))) {
-            Toast.makeText(this, "Cannot remove currently playing song!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        MainActivity.nPlayModels.remove(position);
-        MainActivity.yturls.remove(position);
+       try {
+           if (MainActivity.videoID.equals(MainActivity.yturls.get(position))) {
+               Toast.makeText(this, "Cannot remove currently playing song!", Toast.LENGTH_SHORT).show();
+               return;
+           }
+           MainActivity.nPlayModels.remove(position);
+           MainActivity.yturls.remove(position);
+       }catch (Exception e) {
+           e.printStackTrace();
+           Log.e(TAG, "removeItem: Error: "+e.getMessage() );
+       }
     }
 
     @Override
