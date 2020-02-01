@@ -21,6 +21,7 @@ import com.kpstv.youtube.fragments.DownloadBottomSheet;
 import com.kpstv.youtube.models.DModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.services.IntentDownloadService;
+import com.kpstv.youtube.utils.YTutils;
 
 import java.util.ArrayList;
 
@@ -91,7 +92,7 @@ public class DPlaylistActivity extends AppCompatActivity {
                         YTConfig config = new YTConfig("auto-generate", "auto-generate",
                                 ext, title, author, true, dModel.getImageUrl());
                         config.setVideoID(dModel.getVideoId());
-                        config.setTargetName(DownloadBottomSheet.getTargetName(config));
+                        config.setTargetName(YTutils.getTargetName(config));
                         config.setTaskExtra("autoTask");
 
                         Intent serviceIntent = new Intent(this, IntentDownloadService.class);

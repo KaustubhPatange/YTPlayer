@@ -576,10 +576,12 @@ public class SearchFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            loadImageGlide(images.get(0),imageView1);
-            loadImageGlide(images.get(1),imageView2);
-            loadImageGlide(images.get(2),imageView3);
-            loadImageGlide(images.get(3),imageView4);
+           try {
+               loadImageGlide(images.get(0),imageView1);
+               loadImageGlide(images.get(1),imageView2);
+               loadImageGlide(images.get(2),imageView3);
+               loadImageGlide(images.get(3),imageView4);
+           }catch (Exception ignored){ }
 
             isdiscoverloaded=true;
             super.onPostExecute(aVoid);
@@ -634,7 +636,7 @@ public class SearchFragment extends Fragment {
     }
 
     void loadImageGlide(String url,final ImageView imageView) {
-        Glide.with(v).load(url).addListener(new RequestListener<Drawable>() {
+        Glide.with(activity).load(url).addListener(new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                 return false;

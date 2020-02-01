@@ -110,7 +110,7 @@ public class DownloadBottomSheet extends BottomSheetDialogFragment {
         if (config.getText().length() > 55) {
             filename = config.getTitle().substring(0, 55).trim();
         } else {
-            filename = config.getChannelTitle().trim() + " - " + config.getTitle();
+            filename = config.getChannelTitle().trim() + " - " + config.getTitle().trim();
         }
         return filename.replaceAll("[\\\\><\"|*?%:#/]", "");
     }

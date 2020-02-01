@@ -164,9 +164,85 @@
         <activity
             android:name=".ErrorActivity"
             android:launchMode="singleTask"
-            android:noHistory="true" /> <!-- <service android:name=".services.DownloadService" /> -->
+            android:noHistory="true" />
+        <activity
+            android:autoVerify="false"
+            android:label="YTDownload"
+            android:excludeFromRecents="true"
+            android:theme="@style/DialogTheme"
+            android:name=".SilentDownloadActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <intent-filter >
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http"/>
+                <data android:scheme="https"/>
+                <data android:host="youtube.com"/>
+                <data android:host="*.youtube.com"/>
+                <data android:host="youtu.be"/>
+                <data android:host="open.spotify.com"/>
+                <data android:host="*.open.spotify.com"/>
+                <data android:host="*.soundcloud.com"/>
+                <data android:host="soundcloud.com"/>
+<!--
+                <data
+                    android:host="youtube.com"
+                    android:scheme="http" />
+                <data
+                    android:host="open.spotify.com"
+                    android:scheme="http" />
+                <data
+                    android:host="open.spotify.com"
+                    android:scheme="https" />
+                <data
+                    android:host="www.open.spotify.com"
+                    android:scheme="http" />
+                <data
+                    android:host="www.open.spotify.com"
+                    android:scheme="https" />
+                <data
+                    android:host="youtube.com"
+                    android:scheme="https" />
+                <data
+                    android:host="soundcloud.com"
+                    android:scheme="https" />
+                <data
+                    android:host="soundcloud.com"
+                    android:scheme="http" />
+                <data
+                    android:host="www.soundcloud.com"
+                    android:scheme="https" />
+                <data
+                    android:host="www.soundcloud.com"
+                    android:scheme="http" />
+                <data
+                    android:host="www.youtube.com"
+                    android:scheme="https" />
+                <data
+                    android:host="www.youtube.com"
+                    android:scheme="http" />
+                <data
+                    android:host="www.youtu.be"
+                    android:scheme="http" />
+                <data
+                    android:host="www.youtu.be"
+                    android:scheme="https" />
+                <data
+                    android:host="youtu.be"
+                    android:scheme="http" />
+                <data
+                    android:host="youtu.be"
+                    android:scheme="https" />-->
+            </intent-filter>
+        </activity> <!-- <service android:name=".services.DownloadService" /> -->
         <service android:name=".services.IntentDownloadService" />
-        <service android:name=".services.FirebaseService">
+        <service
+            android:name=".services.FirebaseService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

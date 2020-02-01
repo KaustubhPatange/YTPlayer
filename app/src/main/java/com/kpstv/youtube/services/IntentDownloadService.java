@@ -322,6 +322,8 @@ public class IntentDownloadService extends IntentService {
                 } else {
                     /** Modify fileList */
                     String fileData = YTutils.readContent(context, "fileList.csv");
+                    if (fileData != null && fileData.contains(line))
+                        return;
                     if (fileData != null && !fileData.isEmpty()) {
                         String[] items = fileData.split("\n|\r");
                         StringBuilder builder = new StringBuilder();
@@ -363,9 +365,22 @@ public class IntentDownloadService extends IntentService {
         if (currentModel.getVideoID().contains("soundcloud.com")) {
             SoundCloud soundCloud = new SoundCloud(currentModel.getVideoID());
             if (soundCloud.getModel()!=null) {
+                if (currentModel.getTitle().equals("auto-generate")) {
+                    String title = soundCloud.getModel().getTitle();
+                    String author = soundCloud.getModel().getAuthorName();
+                    String imgUrl = soundCloud.getModel().getImageUrl();
+                    currentModel.setExt("mp3");
+                    currentModel.setTitle(title);
+                    currentModel.setChannelTitle(author);
+                    currentModel.setImageUrl(imgUrl);
+                    currentModel.setTargetName(YTutils.getTargetName(currentModel));
+
+                    Log.e(TAG, "autoTask: CurrentModel: " +currentModel.getTitle());
+                }
                 currentModel.setExt("mp3");
                 currentModel.setUrl(soundCloud.getModel().getStreamUrl());
-            }
+            }else
+                Toast.makeText(context, "Failed to extract soundcloud link!", Toast.LENGTH_SHORT).show();
         }else {
             isDownloaded=false;
 
@@ -712,6 +727,7 @@ public class IntentDownloadService extends IntentService {
             LOG("Error: " + e.getMessage());
             e.printStackTrace();
         }
+        addFiletoLocalDevice(dst,currentModel);
         //do { LOG("isDownload="+isDownloaded); }while (!isDownloaded);
     }
 

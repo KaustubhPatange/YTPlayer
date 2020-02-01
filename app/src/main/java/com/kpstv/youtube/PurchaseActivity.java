@@ -6,16 +6,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -25,15 +22,11 @@ import android.widget.Toast;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
@@ -54,7 +47,7 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
     private static final int RC_SIGN_IN = 103;
     private Button mBuybutton; BillingClient client;
     private static final String TAG = "PurchaseActivity";
-    GoogleApiClient mGoogleSignInClient;
+    GoogleApiClient mGoogleSignInClient; private boolean is_gpay_disabled=false;
     private FirebaseAuth mAuth; FirebaseDatabase database;
     @SuppressLint("StaticFieldLeak")
     @Override
@@ -65,6 +58,24 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
         initViews();
 
         database = FirebaseDatabase.getInstance();
+
+        database.getReference("is_gpay_disable").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                try {
+                    if ((Boolean) dataSnapshot.getValue()) {
+                        is_gpay_disabled=true;
+                    }
+                }catch (Exception ignored){
+                    is_gpay_disabled=true;
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
         database.getReference("is_payment_disable").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -177,7 +188,7 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
             public void onVerficationFailed(RazorpayClient razorpayClient, int code) {
                 if (code==1) {
                     View v = getLayoutInflater().inflate(R.layout.alert_payment_gateway,null);
-                    ImageView razorpay = v.findViewById(R.id.razorpayButton);
+                    ImageView gpay = v.findViewById(R.id.gpayButton);
                     TextView accountId = v.findViewById(R.id.accountId);
                     ImageView paypal = v.findViewById(R.id.paypalButton);
                     Button cancelButton = v.findViewById(R.id.cancelButton);
@@ -207,8 +218,21 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
                         alertDialog.show();
                     });
 
-                    razorpay.setOnClickListener(view -> {
-                        Toast.makeText(PurchaseActivity.this, "This payment method is currently disabled!", Toast.LENGTH_SHORT).show();
+                    gpay.setOnClickListener(view -> {
+                        if (is_gpay_disabled) 
+                            Toast.makeText(PurchaseActivity.this, "This payment method is currently disabled!", Toast.LENGTH_SHORT).show();
+                        else {
+                            alertDialog.dismiss();
+                            alertDialog = new AlertDialog.Builder(PurchaseActivity.this)
+                                    .setTitle("G-Pay payment")
+                                    .setMessage("Payment procedure will be carried out in different app. Click learn more on how it works.")
+                                    .setPositiveButton("OK", null)
+                                    .setNeutralButton("Learn More",(dialogInterface, i) -> {
+                                        YTutils.StartURL("https://github.com/KaustubhPatange/YTPlayer/wiki/GPay-Payment-Flow",PurchaseActivity.this);
+                                    })
+                                    .create();
+                            alertDialog.show();
+                        }
 
                         /*alertDialog.dismiss();
                         client.quickCheckout();*/

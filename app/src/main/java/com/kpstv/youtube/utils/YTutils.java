@@ -171,9 +171,11 @@ public class YTutils implements AppInterface {
 
     public static String getImageUrlID(String videoID) {
         String imageUrl = "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg";
-        if (MainActivity.activity.getSharedPreferences("appSettings",MODE_PRIVATE)
-                .getString("pref_image_quality","mq").equals("hq"))
-            imageUrl = "https://i.ytimg.com/vi/"+videoID+"/hqdefault.jpg";
+        try {
+            if (MainActivity.activity.getSharedPreferences("appSettings",MODE_PRIVATE)
+                    .getString("pref_image_quality","mq").equals("hq"))
+                imageUrl = "https://i.ytimg.com/vi/"+videoID+"/hqdefault.jpg";
+        }catch (Exception e){e.printStackTrace();}
 
         return imageUrl;
     }
@@ -385,7 +387,7 @@ public class YTutils implements AppInterface {
         Log.e("VideoTitle",title);
         String t = title;
         if (t.contains("-")) {
-            t = t.split("\\-")[1].trim();
+            t = t.split("-")[1].trim();
             MainActivity.channelTitle = title.split("-")[0];
         } // (Mark orision)
         if (t.contains("(")) {
@@ -1332,7 +1334,7 @@ public class YTutils implements AppInterface {
                     YTConfig config = new YTConfig("auto-generate","auto-generate",ext
                     ,meta.getTitle(),meta.getAuthor(),true,meta.getImgUrl());
                     config.setVideoID(meta.getVideoID());
-                    config.setTargetName(DownloadBottomSheet.getTargetName(config));
+                    config.setTargetName(YTutils.getTargetName(config));
                     config.setTaskExtra("autoTask");
 
                     Intent serviceIntent = new Intent(context, IntentDownloadService.class);
@@ -1342,6 +1344,16 @@ public class YTutils implements AppInterface {
                 .create();
 
         alertDialog.show();
+    }
+
+    public static String getTargetName(YTConfig config) {
+        String filename;
+        if (config.getText().length() > 55) {
+            filename = config.getTitle().substring(0, 55).trim();
+        } else {
+            filename = config.getChannelTitle().trim() + " - " + config.getTitle().trim();
+        }
+        return filename.replaceAll("[\\\\><\"|*?%:#/]", "");
     }
 
     public static void showInterstitialAd(Context activity) {

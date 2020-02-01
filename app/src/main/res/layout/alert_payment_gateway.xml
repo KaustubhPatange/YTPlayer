@@ -56,12 +56,13 @@
         android:background="@color/colorScreen"/>
 
     <ImageView
+
         android:clickable="true"
         android:focusable="true"
         android:background="@drawable/history_background"
-        android:id="@+id/razorpayButton"
-        android:src="@drawable/razorpay"
-        android:padding="10dp"
+        android:id="@+id/gpayButton"
+        android:src="@drawable/gpay"
+        android:padding="12dp"
         android:layout_width="match_parent"
         android:layout_height="60dp"/>
 

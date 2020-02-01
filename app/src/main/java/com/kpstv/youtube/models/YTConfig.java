@@ -18,6 +18,18 @@ public class YTConfig implements Serializable {
         this.audio = audio;
     }
 
+    public void setTitle(String title) {
+        Title = title;
+    }
+
+    public void setChannelTitle(String channelTitle) {
+        ChannelTitle = channelTitle;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
     public int getBitRate() {
         return bitRate;
     }
