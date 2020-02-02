@@ -213,16 +213,16 @@ public class PlayerActivity2 extends AppCompatActivity {
 
         getAllViews();
 
-        playFab.setOnClickListener(v -> changePlayBack(!MainActivity.isplaying));
+        playFab.setOnClickListener(v -> changePlayBack(!MusicService.isplaying));
         nextFab.setOnClickListener(v -> {
-            MainActivity.playNext();
+           MusicService.playNext();
             if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                 setData.cancel(true);
             setData = new loadData();
             setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         });
         previousFab.setOnClickListener(v -> {
-            MainActivity.playPrevious();
+            MusicService.playPrevious();
             if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                 setData.cancel(true);
             setData = new loadData();
@@ -246,9 +246,9 @@ public class PlayerActivity2 extends AppCompatActivity {
             public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
                 mHandler.removeCallbacks(mUpdateTimeTask);
 
-                long progresstoSeek = YTutils.progressToTimer(seekBar.getProgress(), MainActivity.total_duration);
+                long progresstoSeek = YTutils.progressToTimer(seekBar.getProgress(), MusicService.total_duration);
                 Log.e("ProgresstoSeek", progresstoSeek + "");
-                MainActivity.player.seekTo(progresstoSeek);
+                MusicService.player.seekTo(progresstoSeek);
 
                 updateProgressBar();
             }
@@ -279,14 +279,14 @@ public class PlayerActivity2 extends AppCompatActivity {
     public static void loadAgain() {
         mainlayout.setVisibility(View.VISIBLE);
         mprogressBar.setVisibility(View.GONE);
-        mainTitle.setText(MainActivity.videoTitle);
-        viewCount.setText(MainActivity.viewCounts);
-        backImage.setImageBitmap(MainActivity.bitmapIcon);
+        mainTitle.setText(MusicService.videoTitle);
+        viewCount.setText(MusicService.viewCounts);
+        backImage.setImageBitmap(MusicService.bitmapIcon);
         backImage.setBlur(5);
-        mainImageView.setImageBitmap(MainActivity.bitmapIcon);
-        totalDuration.setText(YTutils.milliSecondsToTimer(MainActivity.total_duration));
+        mainImageView.setImageBitmap(MusicService.bitmapIcon);
+        totalDuration.setText(YTutils.milliSecondsToTimer(MusicService.total_duration));
         detectPlayback();
-        YouTubeUrl = YTutils.getYtUrl(MainActivity.videoID);
+        YouTubeUrl = YTutils.getYtUrl(MusicService.videoID);
         updateProgressBar();
     }
 
@@ -295,13 +295,13 @@ public class PlayerActivity2 extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             Glide.with(activity)
                     .asBitmap()
-                    .load(MainActivity.imgUrl)
+                    .load(MusicService.imgUrl)
                     .into(new CustomTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            MainActivity.bitmapIcon = resource;
+                            MusicService.bitmapIcon = resource;
                             loadAgain();
-                            MainActivity.rebuildNotification();
+                            MusicService.rebuildNotification();
                         }
 
                         @Override
@@ -321,23 +321,23 @@ public class PlayerActivity2 extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            String videoID = MainActivity.videoID;
+            String videoID = MusicService.videoID;
             String json = jsonResponse(videoID, 0);
 
             YTMeta ytMeta = new YTMeta(videoID);
             if (ytMeta.getVideMeta() != null) {
-                MainActivity.videoTitle = ytMeta.getVideMeta().getTitle();
-                MainActivity.channelTitle = ytMeta.getVideMeta().getAuthor();
-                MainActivity.imgUrl = ytMeta.getVideMeta().getImgUrl();
+                MusicService.videoTitle = ytMeta.getVideMeta().getTitle();
+                MusicService.channelTitle = ytMeta.getVideMeta().getAuthor();
+                MusicService.imgUrl = ytMeta.getVideMeta().getImgUrl();
             }
 
             if (json != null && json.contains("\"error\":")) {
                 json = jsonResponse(videoID, 1);
                 if (json.contains("\"error\":")) {
                     YTStatistics ytStatistics = new YTStatistics(videoID);
-                    MainActivity.viewCounts = ytStatistics.getViewCount();
-                    MainActivity.likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
-                    MainActivity.dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
+                    MusicService.viewCounts = ytStatistics.getViewCount();
+                    MusicService.likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
+                    MusicService.dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
                     json = null;
                 }
             }
@@ -345,12 +345,12 @@ public class PlayerActivity2 extends AppCompatActivity {
                 try {
                     JSONObject statistics = new JSONObject(json).getJSONArray("items")
                             .getJSONObject(0).getJSONObject("statistics");
-                    MainActivity.viewCounts = YTutils.getViewCount(Long.parseLong(statistics.getString("viewCount")));
-                    MainActivity.likeCounts = 100;
-                    MainActivity.dislikeCounts = 0;
+                    MusicService.viewCounts = YTutils.getViewCount(Long.parseLong(statistics.getString("viewCount")));
+                    MusicService.likeCounts = 100;
+                    MusicService.dislikeCounts = 0;
                     try {
-                        MainActivity.likeCounts = Integer.parseInt(statistics.getString("likeCount"));
-                        MainActivity.dislikeCounts = Integer.parseInt(statistics.getString("dislikeCount"));
+                        MusicService.likeCounts = Integer.parseInt(statistics.getString("likeCount"));
+                        MusicService.dislikeCounts = Integer.parseInt(statistics.getString("dislikeCount"));
                     }catch (Exception e){e.printStackTrace();}
 
                 } catch (JSONException e) {
@@ -415,10 +415,10 @@ public class PlayerActivity2 extends AppCompatActivity {
             shareIntent.putExtra(Intent.EXTRA_TEXT, YouTubeUrl);
             startActivity(Intent.createChooser(shareIntent, "Share using..."));
         } else if (itemId == R.id.action_add) {
-            YTutils.addToPlayList(this, YouTubeUrl, MainActivity.total_duration / 1000);
+            YTutils.addToPlayList(this, YouTubeUrl, MusicService.total_duration / 1000);
         } else if (itemId == R.id.action_loop) {
-            MainActivity.isLoop = !MainActivity.isLoop;
-            item.setChecked(MainActivity.isLoop);
+            MusicService.isLoop = !MusicService.isLoop;
+            item.setChecked(MusicService.isLoop);
         }
 
         return super.onOptionsItemSelected(item);
@@ -432,23 +432,23 @@ public class PlayerActivity2 extends AppCompatActivity {
     }
 
     public static void detectPlayback() {
-        if (MainActivity.isplaying)
+        if (MusicService.isplaying)
             makePause();
         else makePlay();
     }
 
     public void changePlayBack(boolean isplay) {
-        MainActivity.changePlayBack(isplay);
-        Log.e("PlayingState", "Playing State: " + MainActivity.isplaying + ", isPlay:" + isplay);
+        MusicService.changePlayBack(isplay);
+        Log.e("PlayingState", "Playing State: " + MusicService.isplaying + ", isPlay:" + isplay);
         if (isplay) {
             makePause();
-            MainActivity.player.setPlayWhenReady(true);
+            MusicService.player.setPlayWhenReady(true);
         } else {
             makePlay();
-            MainActivity.player.setPlayWhenReady(false);
+            MusicService.player.setPlayWhenReady(false);
         }
-        Log.e("CurrentDur", MainActivity.player.getCurrentPosition() + "");
-        MainActivity.isplaying = isplay;
+        Log.e("CurrentDur", MusicService.player.getCurrentPosition() + "");
+        MusicService.isplaying = isplay;
     }
 
     public static void makePlay() {
@@ -479,7 +479,7 @@ public class PlayerActivity2 extends AppCompatActivity {
 
     void callFinish() {
         String toput = "true";
-        if (!MainActivity.isplaying) toput = "false";
+        if (!MusicService.isplaying) toput = "false";
         Intent i = new Intent(this, MainActivity.class);
         i.putExtra("videoID",YouTubeUrl);
         i.putExtra("is_playing",toput);
@@ -514,16 +514,16 @@ public class PlayerActivity2 extends AppCompatActivity {
         ArrayList<String> tmplist = new ArrayList<>();
         final ArrayList<YTConfig> configs = new ArrayList<>();
 
-        for (int i = 0; i < MainActivity.ytConfigs.size(); i++) {
-            String text = MainActivity.ytConfigs.get(i).getText();
+        for (int i = 0; i < MusicService.ytConfigs.size(); i++) {
+            String text = MusicService.ytConfigs.get(i).getText();
             boolean isalreadyadded = false;
             for (int j = 0; j < tmplist.size(); j++) {
                 if (tmplist.get(j).contains(text))
                     isalreadyadded = true;
             }
             if (!isalreadyadded) {
-                tmplist.add(MainActivity.ytConfigs.get(i).getText());
-                configs.add(MainActivity.ytConfigs.get(i));
+                tmplist.add(MusicService.ytConfigs.get(i).getText());
+                configs.add(MusicService.ytConfigs.get(i));
             }
         }
 
@@ -618,8 +618,8 @@ public class PlayerActivity2 extends AppCompatActivity {
     public static Runnable mUpdateTimeTask = new Runnable() {
         public void run() {
 
-            long totalDuration = MainActivity.player.getDuration();
-            long currentDur = MainActivity.player.getCurrentPosition();
+            long totalDuration = MusicService.player.getDuration();
+            long currentDur = MusicService.player.getCurrentPosition();
 
             // Displaying time completed playing
             currentDuration.setText("" + YTutils.milliSecondsToTimer(currentDur));

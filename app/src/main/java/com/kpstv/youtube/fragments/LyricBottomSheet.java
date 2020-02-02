@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.LyricModel;
+import com.kpstv.youtube.services.MusicService;
 
 import top.defaults.drawabletoolbox.DrawableBuilder;
 
@@ -38,7 +39,7 @@ public class LyricBottomSheet extends BottomSheetDialogFragment {
         Bundle args = getArguments();
         if (args != null) {
 
-            Palette.from(MainActivity.bitmapIcon).generate(palette -> {
+            Palette.from(MusicService.bitmapIcon).generate(palette -> {
                 int black_color = ContextCompat.getColor(getActivity(), R.color.black);
                 int vibrant_color = palette.getVibrantColor(black_color);
 

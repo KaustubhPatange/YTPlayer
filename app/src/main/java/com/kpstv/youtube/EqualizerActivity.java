@@ -1,7 +1,6 @@
 package com.kpstv.youtube;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -21,17 +20,18 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.YTutils;
 import com.warkiz.widget.IndicatorSeekBar;
 import com.warkiz.widget.OnSeekChangeListener;
 import com.warkiz.widget.SeekParams;
 
-import static com.kpstv.youtube.MainActivity.bassBoost;
-import static com.kpstv.youtube.MainActivity.loudnessEnhancer;
-import static com.kpstv.youtube.MainActivity.mEqualizer;
-import static com.kpstv.youtube.MainActivity.presetReverb;
 import static com.kpstv.youtube.MainActivity.settingPref;
-import static com.kpstv.youtube.MainActivity.virtualizer;
+import static com.kpstv.youtube.services.MusicService.bassBoost;
+import static com.kpstv.youtube.services.MusicService.loudnessEnhancer;
+import static com.kpstv.youtube.services.MusicService.mEqualizer;
+import static com.kpstv.youtube.services.MusicService.presetReverb;
+import static com.kpstv.youtube.services.MusicService.virtualizer;
 
 public class EqualizerActivity extends AppCompatActivity {
 
@@ -297,10 +297,10 @@ public class EqualizerActivity extends AppCompatActivity {
 
             /*case R.id.equalizer_enabled:
                 Switch switch_item = item.getActionView().findViewById(R.id.switch_item_view);
-                MainActivity.isEqualizerEnabled = switch_item.isChecked();
+                MusicService.isEqualizerEnabled = switch_item.isChecked();
                 setEqualizerLayout();
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.putBoolean("equalizer_enabled",MainActivity.isEqualizerEnabled);
+                editor.putBoolean("equalizer_enabled",MusicService.isEqualizerEnabled);
                 editor.apply();
                 break;*/
         }
@@ -308,9 +308,9 @@ public class EqualizerActivity extends AppCompatActivity {
     }
 
     void setEqualizerLayout() {
-        Log.e(TAG, "setEqualizerLayout: Enabled" + MainActivity.isEqualizerEnabled);
+        Log.e(TAG, "setEqualizerLayout: Enabled" + MusicService.isEqualizerEnabled);
         RelativeLayout layout = findViewById(R.id.mainlayout);
-        if (MainActivity.isEqualizerEnabled) {
+        if (MusicService.isEqualizerEnabled) {
             Log.e(TAG, "setEqualizerLayout: And I got here too");
             layout.setClickable(false);
             equalizerSpinner.setEnabled(true);
@@ -355,11 +355,11 @@ public class EqualizerActivity extends AppCompatActivity {
         final Switch sw = menuItem.getActionView().findViewById(R.id.action_switch);
         sw.setChecked(settingPref.getBoolean("equalizer_enabled", false));
         sw.setOnCheckedChangeListener((compoundButton, b) -> {
-            MainActivity.isEqualizerEnabled = b;
+            MusicService.isEqualizerEnabled = b;
             setEqualizerLayout();
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("equalizer_enabled", MainActivity.isEqualizerEnabled);
-            mEqualizer.setEnabled(MainActivity.isEqualizerEnabled);
+            editor.putBoolean("equalizer_enabled", MusicService.isEqualizerEnabled);
+            mEqualizer.setEnabled(MusicService.isEqualizerEnabled);
             editor.apply();
         });
         return super.onCreateOptionsMenu(menu);

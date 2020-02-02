@@ -3,6 +3,8 @@ package com.kpstv.youtube.services;
 import android.annotation.SuppressLint;
 import android.app.IntentService;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -44,6 +46,7 @@ import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
 
 import com.kpstv.youtube.DownloadActivity;
+import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.OFModel;
 import com.kpstv.youtube.models.YTConfig;
@@ -80,7 +83,6 @@ import java.util.Random;
 
 import static com.arthenica.mobileffmpeg.FFmpeg.RETURN_CODE_CANCEL;
 import static com.arthenica.mobileffmpeg.FFmpeg.RETURN_CODE_SUCCESS;
-
 
 public class IntentDownloadService extends IntentService {
     private static final String TAG = "IntentDownloadService";
@@ -120,32 +122,20 @@ public class IntentDownloadService extends IntentService {
 
         PRDownloader.initialize(context);
 
-        /** Load FFMPEG binary again */
-        /*try {
-            ffmpeg = FFmpeg.getInstance(this);
-            ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
+        /** Create notification channel if not present */
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
+            CharSequence name = context.getString(R.string.channel_name);
+            String description = context.getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            NotificationChannel notificationChannel = new NotificationChannel("channel_01", name, importance);
+            notificationChannel.setDescription(description);
+            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(notificationChannel);
 
-                @Override
-                public void onStart() {
-                }
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,"Download",importance);
+            notificationManager.createNotificationChannel(channel);
+        }
 
-                @Override
-                public void onFailure() {
-                }
-
-                @Override
-                public void onSuccess() {
-                    supportFFmpeg = true;
-                    LOG("FFMPEG Loaded");
-                }
-
-                @Override
-                public void onFinish() {
-                }
-            });
-        } catch (Exception ignored) {
-            LOG("FFMpeg not supported");
-        }*/
 
         /** Setting Power Manager and Wakelock */
 
@@ -196,6 +186,8 @@ public class IntentDownloadService extends IntentService {
 
     @Override
     protected void onHandleIntent(@NonNull Intent intent) {
+        isDownloaded=false;
+
         currentModel = (YTConfig) intent.getSerializableExtra("addJob");
 
         if (pendingJobs.size() > 0)
@@ -320,10 +312,14 @@ public class IntentDownloadService extends IntentService {
                     String fileContent = data + "\n" + f.getParent() + "|1|" + s;
                     YTutils.writeContent(context, fileList.getPath(), "\n" + fileContent);
                 } else {
+
+                    /** Check if file already exist in main File...*/
+                    String mainData = YTutils.readContent(context,file.getPath());
+                    if (mainData != null && mainData.contains(f.getPath()+"|"))
+                        return;
+
                     /** Modify fileList */
                     String fileData = YTutils.readContent(context, "fileList.csv");
-                    if (fileData != null && fileData.contains(line))
-                        return;
                     if (fileData != null && !fileData.isEmpty()) {
                         String[] items = fileData.split("\n|\r");
                         StringBuilder builder = new StringBuilder();
@@ -518,6 +514,9 @@ public class IntentDownloadService extends IntentService {
                     YTutils.getFile("YTPlayer").getPath(), f.getName())
                     .build()
                     .setOnProgressListener(progress1 -> {
+                        if (currentModel==null) {
+                            return;
+                        }
                         if (currentModel.getExt().equals("mp3")||currentModel.getExt().equals("m4a"))
                             totalsize = progress1.totalBytes * 2;
                         else {
@@ -525,7 +524,6 @@ public class IntentDownloadService extends IntentService {
                         }
                         currentsize = progress1.currentBytes;
                         setProgress((int) (currentsize * 100 / totalsize), false);
-                        //    publishProgress(());
                     })
                     .start(new OnDownloadListener() {
                         @Override
@@ -753,6 +751,9 @@ public class IntentDownloadService extends IntentService {
         LOG("ON Destroyed");
 
         FFmpeg.cancel();
+        PRDownloader.cancelAll();
+        PRDownloader.shutDown();
+        isDownloaded=true;
         pendingJobs.clear();
         totalsize=0;
         currentsize=0;

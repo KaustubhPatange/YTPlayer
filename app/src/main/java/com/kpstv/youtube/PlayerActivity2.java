@@ -68,6 +68,7 @@ import com.kpstv.youtube.models.LyricModel;
 import com.kpstv.youtube.models.YTConfig;
 //import com.kpstv.youtube.services.DownloadService;
 import com.kpstv.youtube.services.IntentDownloadService;
+import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.SoundCloud;
 import com.kpstv.youtube.utils.YTMeta;
@@ -104,9 +105,13 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     static ConstraintLayout mainlayout;
 
-    static TextView mainTitle, viewCount, currentDuration, totalDuration, channelTitle;
+    static TextView mainTitle;
+    static TextView viewCount;
+    static TextView currentDuration;
+    public static TextView totalDuration;
+    static TextView channelTitle;
 
-    static Activity activity; public static ProgressBar progressBar;
+    public static Activity activity; public static ProgressBar progressBar;
 
     static ImageButton previousFab, playFab, nextFab, repeatButton, downloadButton, playlistButton, youTubeButton,lyricButton;
 
@@ -164,7 +169,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
         getAllViews();
 
-        playFab.setOnClickListener(v -> changePlayBack(!MainActivity.isplaying));
+        playFab.setOnClickListener(v -> changePlayBack(!MusicService.isplaying));
 
         nextFab.setOnTouchListener((v, motionEvent) -> {
             switch (motionEvent.getAction()) {
@@ -176,12 +181,12 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 }
                 case MotionEvent.ACTION_UP:
 
-                    MainActivity.playNext();
+                   MusicService.playNext();
                    /* if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                         setData.cancel(true);
-                    if (!MainActivity.localPlayBack)
+                    if (!MusicService.localPlayBack)
                         setData = new loadData();
-                    else setData = new loadData_Offline(MainActivity.videoID);
+                    else setData = new loadData_Offline(MusicService.videoID);
                     setData.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);*/
 
                 case MotionEvent.ACTION_CANCEL: {
@@ -204,7 +209,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 }
                 case MotionEvent.ACTION_UP:
 
-                    MainActivity.playPrevious();
+                    MusicService.playPrevious();
                    /* if (setData!=null && setData.getStatus() == AsyncTask.Status.RUNNING)
                         setData.cancel(true);
                     setData = new loadData();
@@ -231,7 +236,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 case MotionEvent.ACTION_UP:
 
                     Bundle args = new Bundle();
-                    args.putSerializable("model",new LyricModel(MainActivity.videoTitle,lyricText));
+                    args.putSerializable("model",new LyricModel(MusicService.videoTitle,lyricText));
                     LyricBottomSheet bottomSheet = new LyricBottomSheet();
                     bottomSheet.setArguments(args);
                     bottomSheet.show(getSupportFragmentManager(),"");
@@ -259,13 +264,13 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                    // shareButton.setVisibility();
                     Log.e(TAG, "onCreate: ShareButtonState:"+shareButton.getVisibility());
 
-                   if (MainActivity.localPlayBack) {
-                       YTutils.shareFile(PlayerActivity2.activity,new File(MainActivity.videoID));
+                   if (MusicService.localPlayBack) {
+                       YTutils.shareFile(PlayerActivity2.activity,new File(MusicService.videoID));
                    }else {
                        Intent intent = new Intent(Intent.ACTION_SEND);
                        intent.setType("text/plain");
-                       intent.putExtra(Intent.EXTRA_TEXT,"Listen to "+MainActivity.videoTitle+" by "+MainActivity.channelTitle+" "+
-                               YTutils.getYtUrl(MainActivity.videoID));
+                       intent.putExtra(Intent.EXTRA_TEXT,"Listen to "+MusicService.videoTitle+" by "+MusicService.channelTitle+" "+
+                               YTutils.getYtUrl(MusicService.videoID));
                        activity.startActivity(Intent.createChooser(intent,"Share"));
                    }
 
@@ -294,10 +299,10 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
                 mHandler.removeCallbacks(mUpdateTimeTask);
 
-                long progresstoSeek = YTutils.progressToTimer(seekBar.getProgress(), MainActivity.total_duration);
+                long progresstoSeek = YTutils.progressToTimer(seekBar.getProgress(), MusicService.total_duration);
                 Log.e("ProgresstoSeek", progresstoSeek + "");
-                MainActivity.mMediaSessionCallback.onSeekTo(progresstoSeek);
-               // MainActivity.player.seekTo(progresstoSeek);
+                MusicService.mMediaSessionCallback.onSeekTo(progresstoSeek);
+               // MusicService.player.seekTo(progresstoSeek);
 
                 updateProgressBar();
             }
@@ -305,16 +310,16 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
         mainPager.addOnPageChangeListener(mainPageListener);
 
-        adapter = new PlayerAdapter(activity,MainActivity.yturls);
+        adapter = new PlayerAdapter(activity,MusicService.yturls);
         mainPager.setAdapter(adapter);
 
         loadAgain();
 
-        Palette.generateAsync(MainActivity.bitmapIcon, palette -> {
-            MainActivity.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
-            Log.e(TAG, "onCreate: Changing nColor: "+MainActivity.nColor );
-            backImage.setColorFilter(MainActivity.nColor);
-            backImage1.setColorFilter(MainActivity.nColor);
+        Palette.generateAsync(MusicService.bitmapIcon, palette -> {
+            MusicService.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+            Log.e(TAG, "onCreate: Changing nColor: "+MusicService.nColor );
+            backImage.setColorFilter(MusicService.nColor);
+            backImage1.setColorFilter(MusicService.nColor);
         });
 
         addToPlaylist.setOnTouchListener((v, motionEvent) -> {
@@ -327,12 +332,12 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 }
                 case MotionEvent.ACTION_UP:
 
-                    if (MainActivity.total_seconds==0)
+                    if (MusicService.total_seconds==0)
                     {
                         Toast.makeText(activity, "Player is still processing!", Toast.LENGTH_SHORT).show();
                     }else
-                    YTutils.addToPlayList(activity,MainActivity.videoID,MainActivity.videoTitle,
-                            MainActivity.channelTitle,MainActivity.imgUrl,MainActivity.total_seconds);
+                    YTutils.addToPlayList(activity,MusicService.videoID,MusicService.videoTitle,
+                            MusicService.channelTitle,MusicService.imgUrl,MusicService.total_seconds);
 
                 case MotionEvent.ACTION_CANCEL: {
                     ImageView view = (ImageView) v;
@@ -354,7 +359,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 }
                 case MotionEvent.ACTION_UP:
 
-                   MainActivity.actionFavouriteClicked();
+                   MusicService.actionFavouriteClicked();
 
                 case MotionEvent.ACTION_CANCEL: {
                     ImageView view = (ImageView) v;
@@ -377,8 +382,8 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 case MotionEvent.ACTION_UP:
 
                     /** For local playback stuff */
-                    if (MainActivity.localPlayBack) {
-                        if (MainActivity.yturls.size()>1)
+                    if (MusicService.localPlayBack) {
+                        if (MusicService.yturls.size()>1)
                             startActivity(new Intent(activity,NPlaylistActivity.class));
                     }else {
                         if (Build.VERSION.SDK_INT>Build.VERSION_CODES.M) {
@@ -441,7 +446,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 }
                 case MotionEvent.ACTION_UP:
 
-                    if (MainActivity.yturls.size()>1)
+                    if (MusicService.yturls.size()>1)
                         startActivity(new Intent(this,NPlaylistActivity.class));
 
                 case MotionEvent.ACTION_CANCEL: {
@@ -455,8 +460,8 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         });
 
         repeatButton.setOnClickListener(v1->{
-            MainActivity.isLoop = !MainActivity.isLoop;
-            makeRepeat(MainActivity.isLoop);
+            MusicService.isLoop = !MusicService.isLoop;
+            makeRepeat(MusicService.isLoop);
         });
 
         navigationDown.setOnClickListener(view -> {
@@ -464,8 +469,8 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         });
 
         try {
-            if (!MainActivity.localPlayBack) {
-                String url = MainActivity.yturls.get(MainActivity.ytIndex);
+            if (!MusicService.localPlayBack) {
+                String url = MusicService.yturls.get(MusicService.ytIndex);
                 if (url.contains("soundcloud.com"))
                     setSoundCloudData(url);
             }
@@ -477,9 +482,9 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     public static void setViewPagerData() {
         mainPager.removeOnPageChangeListener(mainPageListener);
-        adapter = new PlayerAdapter(activity,MainActivity.yturls);
+        adapter = new PlayerAdapter(activity,MusicService.yturls);
         mainPager.setAdapter(adapter);
-        mainPager.setCurrentItem(MainActivity.ytIndex,false);
+        mainPager.setCurrentItem(MusicService.ytIndex,false);
         mainPager.addOnPageChangeListener(mainPageListener);
     }
 
@@ -512,12 +517,12 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         @Override
         public void onPageSelected(int pos) {
             try {
-                Log.e(TAG, "onPageSelected: "+MainActivity.yturls.get(pos) );
-                if (MainActivity.localPlayBack)
+                Log.e(TAG, "onPageSelected: "+MusicService.yturls.get(pos) );
+                if (MusicService.localPlayBack)
                     MainActivity.ChangeVideoOffline(pos);
                 else
                     MainActivity.ChangeVideo(pos);
-                String url = MainActivity.yturls.get(pos);
+                String url = MusicService.yturls.get(pos);
                 setSoundCloudData(url);
             }catch (Exception e) {
                 e.printStackTrace();
@@ -539,11 +544,11 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             player_common();
 
             mainPager.removeOnPageChangeListener(mainPageListener);
-            if (mainPager.getChildCount() != MainActivity.yturls.size()) {
+            if (mainPager.getChildCount() != MusicService.yturls.size()) {
                 adapter.notifyDataSetChanged();
             }
-            if (mainPager.getCurrentItem() != MainActivity.ytIndex) {
-                mainPager.setCurrentItem(MainActivity.ytIndex, true);
+            if (mainPager.getCurrentItem() != MusicService.ytIndex) {
+                mainPager.setCurrentItem(MusicService.ytIndex, true);
             }
             mainPager.addOnPageChangeListener(mainPageListener);
 
@@ -556,12 +561,12 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
     static void player_common() {
         mainlayout.setVisibility(View.VISIBLE);
       //  mprogressBar.setVisibility(View.GONE);
-        mainTitle.setText(MainActivity.videoTitle);
-        channelTitle.setText(MainActivity.channelTitle);
-        if (!MainActivity.localPlayBack)
+        mainTitle.setText(MusicService.videoTitle);
+        channelTitle.setText(MusicService.channelTitle);
+        if (!MusicService.localPlayBack)
         {
             viewCount.setVisibility(View.VISIBLE);
-            viewCount.setText(MainActivity.viewCounts);
+            viewCount.setText(MusicService.viewCounts);
             viewImage.setVisibility(View.VISIBLE);
             favouriteButton.setVisibility(View.VISIBLE);
             addToPlaylist.setVisibility(View.VISIBLE);
@@ -569,14 +574,14 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             youTubeButton.setVisibility(View.VISIBLE);
             playlistButton.setVisibility(View.VISIBLE);
 
-            YouTubeUrl = YTutils.getYtUrl(MainActivity.videoID);
+            YouTubeUrl = YTutils.getYtUrl(MusicService.videoID);
 
             String data = YTutils.readContent(activity,"favourite.csv");
-            if (data!=null && data.contains(MainActivity.videoID)) {
-                MainActivity.isFavourite = true;
+            if (data!=null && data.contains(MusicService.videoID)) {
+                MusicService.isFavourite = true;
                 favouriteButton.setImageDrawable(activity.getDrawable(R.drawable.ic_favorite_full));
             }else {
-                MainActivity.isFavourite=false;
+                MusicService.isFavourite=false;
                 favouriteButton.setImageDrawable(activity.getDrawable(R.drawable.ic_favorite));
             }
         }else {
@@ -591,7 +596,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             playlistButton.setVisibility(View.GONE);
         }
 
-        if (MainActivity.viewCounts.equals("-1")) {
+        if (MusicService.viewCounts.equals("-1")) {
             viewCount.setVisibility(View.GONE);
             viewImage.setVisibility(View.GONE);
         }else {
@@ -599,26 +604,26 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             viewImage.setVisibility(View.VISIBLE);
         }
 
-        if (MainActivity.yturls.size()>1)
+        if (MusicService.yturls.size()>1)
             playlistButton.setEnabled(true);
         else playlistButton.setEnabled(false);
 
         // Loading color with animation...
 
-        int colorTo = MainActivity.nColor;
+        int colorTo = MusicService.nColor;
         if (backImage.getTag()!=null) {
             ChangeBackgroundColor(colorTo);
         }else {
-            backImage.setColorFilter(MainActivity.nColor);
-            backImage1.setColorFilter(MainActivity.nColor);
+            backImage.setColorFilter(MusicService.nColor);
+            backImage1.setColorFilter(MusicService.nColor);
         }
         backImage.setTag(colorTo);
 
-        makeRepeat(MainActivity.isLoop);
+        makeRepeat(MusicService.isLoop);
 
-        setLyricData(MainActivity.lyricText);
+        setLyricData(MusicService.lyricText);
 
-        totalDuration.setText(YTutils.milliSecondsToTimer(MainActivity.total_duration));
+        totalDuration.setText(YTutils.milliSecondsToTimer(MusicService.total_duration));
         detectPlayback();
         updateProgressBar();
     }
@@ -646,10 +651,10 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         @Override
         protected void onPostExecute(Void aVoid) {
             if (soundCloud.getViewCount()!=null && !soundCloud.getViewCount().isEmpty()) {
-                MainActivity.viewCounts = YTutils.getViewCount(Long.parseLong(soundCloud.getViewCount()));
+                MusicService.viewCounts = YTutils.getViewCount(Long.parseLong(soundCloud.getViewCount()));
                 viewImage.setVisibility(View.VISIBLE);
                 viewCount.setVisibility(View.VISIBLE);
-                viewCount.setText(MainActivity.viewCounts);
+                viewCount.setText(MusicService.viewCounts);
             }
             super.onPostExecute(aVoid);
         }
@@ -671,11 +676,11 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            Palette.generateAsync(MainActivity.bitmapIcon, palette -> {
-                MainActivity.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+            Palette.generateAsync(MusicService.bitmapIcon, palette -> {
+                MusicService.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
 
                 loadAgain();
-                MainActivity.rebuildNotification();
+                MusicService.rebuildNotification();
             });
             super.onPostExecute(aVoid);
         }
@@ -699,12 +704,12 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 if (title.contains("."))
                     title = title.split("\\.")[0];
 
-                MainActivity.videoTitle = title;
-                MainActivity.channelTitle = artist;
-                MainActivity.likeCounts = -1; MainActivity.dislikeCounts = -1;
-                MainActivity.viewCounts = "-1";
+                MusicService.videoTitle = title;
+                MusicService.channelTitle = artist;
+                MusicService.likeCounts = -1; MusicService.dislikeCounts = -1;
+                MusicService.viewCounts = "-1";
 
-                MainActivity.total_seconds = Integer.parseInt(durationStr);
+                MusicService.total_seconds = Integer.parseInt(durationStr);
 
             }catch (Exception e) {
                 // TODO: Do something when cannot played...
@@ -716,8 +721,8 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
     static class loadData extends AsyncTask<Void,Void,Void> {
         @Override
         protected void onPostExecute(Void aVoid) {
-            String imageUri = YTutils.getImageUrl(MainActivity.yturls.get(MainActivity.ytIndex));
-            if (MainActivity.videoID.contains("soundcloud.com"))
+            String imageUri = YTutils.getImageUrl(MusicService.yturls.get(MusicService.ytIndex));
+            if (MusicService.videoID.contains("soundcloud.com"))
                 imageUri = soundCloud.getModel().getImageUrl();
             Glide.with(activity)
                     .asBitmap()
@@ -726,12 +731,12 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                             Palette.generateAsync(resource, palette -> {
-                                MainActivity.bitmapIcon = resource;
-                                MainActivity.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
-                                Log.e(TAG, "loadData: Changing nColor: "+MainActivity.nColor +
-                                        ", ImageUri: "+MainActivity.imgUrl );
+                                MusicService.bitmapIcon = resource;
+                                MusicService.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+                                Log.e(TAG, "loadData: Changing nColor: "+MusicService.nColor +
+                                        ", ImageUri: "+MusicService.imgUrl );
                                 loadAgain();
-                                MainActivity.rebuildNotification();
+                                MusicService.rebuildNotification();
                             });
                         }
 
@@ -752,7 +757,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         SoundCloud soundCloud;
         @Override
         protected Void doInBackground(Void... voids) {
-            String videoID = MainActivity.videoID;
+            String videoID = MusicService.videoID;
 
             if (videoID.contains("soundcloud.com")) {
                 soundCloud = new SoundCloud(videoID);
@@ -760,14 +765,14 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                     return null;
                 }
               //  soundCloud.captureViews();
-                MainActivity.soundCloudPlayBack=true;
-                MainActivity.videoTitle = soundCloud.getModel().getTitle();
-                MainActivity.channelTitle = soundCloud.getModel().getAuthorName();
-                MainActivity.imgUrl = soundCloud.getModel().getImageUrl();
-                MainActivity.likeCounts = -1; MainActivity.dislikeCounts = -1;
-                MainActivity.viewCounts = "-1";
+                MusicService.soundCloudPlayBack=true;
+                MusicService.videoTitle = soundCloud.getModel().getTitle();
+                MusicService.channelTitle = soundCloud.getModel().getAuthorName();
+                MusicService.imgUrl = soundCloud.getModel().getImageUrl();
+                MusicService.likeCounts = -1; MusicService.dislikeCounts = -1;
+                MusicService.viewCounts = "-1";
                 /*if (soundCloud.getViewCount()!=null && !soundCloud.getViewCount().isEmpty())
-                    MainActivity.viewCounts =YTutils.getViewCount( Long.parseLong(soundCloud.getViewCount()));*/
+                    MusicService.viewCounts =YTutils.getViewCount( Long.parseLong(soundCloud.getViewCount()));*/
                 return null;
             }
 
@@ -781,18 +786,18 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
             YTMeta ytMeta = new YTMeta(videoID);
             if (ytMeta.getVideMeta() != null) {
-                MainActivity.channelTitle = YTutils.getChannelTitle(ytMeta.getVideMeta().getTitle(),
+                MusicService.channelTitle = YTutils.getChannelTitle(ytMeta.getVideMeta().getTitle(),
                         ytMeta.getVideMeta().getAuthor());
-                MainActivity.videoTitle = YTutils.setVideoTitle(ytMeta.getVideMeta().getTitle());
-                MainActivity.imgUrl = ytMeta.getVideMeta().getImgUrl();
+                MusicService.videoTitle = YTutils.setVideoTitle(ytMeta.getVideMeta().getTitle());
+                MusicService.imgUrl = ytMeta.getVideMeta().getImgUrl();
             }
 
 
             if (json.contains("\"error\":")) {
                 YTStatistics ytStatistics = new YTStatistics(videoID);
-                MainActivity.viewCounts = ytStatistics.getViewCount();
-                MainActivity.likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
-                MainActivity.dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
+                MusicService.viewCounts = ytStatistics.getViewCount();
+                MusicService.likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
+                MusicService.dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
                 json = null;
             }
 
@@ -800,12 +805,12 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 try {
                     JSONObject statistics = new JSONObject(json).getJSONArray("items")
                             .getJSONObject(0).getJSONObject("statistics");
-                    MainActivity.viewCounts = YTutils.getViewCount(Long.parseLong(statistics.getString("viewCount")));
-                    MainActivity.likeCounts = 100;
-                    MainActivity.dislikeCounts = 0;
+                    MusicService.viewCounts = YTutils.getViewCount(Long.parseLong(statistics.getString("viewCount")));
+                    MusicService.likeCounts = 100;
+                    MusicService.dislikeCounts = 0;
                     try {
-                        MainActivity.likeCounts = Integer.parseInt(statistics.getString("likeCount"));
-                        MainActivity.dislikeCounts = Integer.parseInt(statistics.getString("dislikeCount"));
+                        MusicService.likeCounts = Integer.parseInt(statistics.getString("likeCount"));
+                        MusicService.dislikeCounts = Integer.parseInt(statistics.getString("dislikeCount"));
                     }catch (Exception e){e.printStackTrace();}
 
                 } catch (JSONException e) {
@@ -870,10 +875,10 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             shareIntent.putExtra(Intent.EXTRA_TEXT, YouTubeUrl);
             startActivity(Intent.createChooser(shareIntent, "Share using..."));
         } else if (itemId == R.id.action_add) {
-            YTutils.addToPlayList(this, YouTubeUrl, MainActivity.total_duration / 1000);
+            YTutils.addToPlayList(this, YouTubeUrl, MusicService.total_duration / 1000);
         } else if (itemId == R.id.action_loop) {
-            MainActivity.isLoop = !MainActivity.isLoop;
-            item.setChecked(MainActivity.isLoop);
+            MusicService.isLoop = !MusicService.isLoop;
+            item.setChecked(MusicService.isLoop);
         }
 
         return super.onOptionsItemSelected(item);
@@ -894,20 +899,20 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
     }
 
     public static void detectPlayback() {
-        if (MainActivity.isplaying)
+        if (MusicService.isplaying)
             makePause();
         else makePlay();
     }
 
     public void changePlayBack(boolean isplay) {
-        MainActivity.changePlayBack(isplay);
-        Log.e("PlayingState", "Playing State: " + MainActivity.isplaying + ", isPlay:" + isplay);
+        MusicService.changePlayBack(isplay);
+        Log.e("PlayingState", "Playing State: " + MusicService.isplaying + ", isPlay:" + isplay);
         if (isplay) {
             makePause();
         } else {
             makePlay();
         }
-        Log.e("CurrentDur", MainActivity.player.getCurrentPosition() + "");
+        Log.e("CurrentDur", MusicService.player.getCurrentPosition() + "");
     }
 
     public static void hidePlayButton() {
@@ -968,7 +973,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
     void callFinish() {
         String toput = "true";
-        if (!MainActivity.isplaying) toput = "false";
+        if (!MusicService.isplaying) toput = "false";
         Intent i = new Intent(this, MainActivity.class);
         i.putExtra("videoID",YouTubeUrl);
         i.putExtra("is_playing",toput);
@@ -1010,16 +1015,16 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         ArrayList<String> tmplist = new ArrayList<>();
         final ArrayList<YTConfig> configs = new ArrayList<>();
 
-        for (int i = 0; i < MainActivity.ytConfigs.size(); i++) {
-            String text = MainActivity.ytConfigs.get(i).getText();
+        for (int i = 0; i < MusicService.ytConfigs.size(); i++) {
+            String text = MusicService.ytConfigs.get(i).getText();
             boolean isalreadyadded = false;
             for (int j = 0; j < tmplist.size(); j++) {
                 if (tmplist.get(j).contains(text))
                     isalreadyadded = true;
             }
             if (!isalreadyadded) {
-                tmplist.add(MainActivity.ytConfigs.get(i).getText());
-                configs.add(MainActivity.ytConfigs.get(i));
+                tmplist.add(MusicService.ytConfigs.get(i).getText());
+                configs.add(MusicService.ytConfigs.get(i));
             }
         }
 
@@ -1038,8 +1043,8 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
                 return;
             }else if (AppSettings.setDownloads) AppSettings.downloadCount--;
             YTConfig config = configs.get(which);
-            config.setVideoID(MainActivity.videoID);
-            config.setAudioUrl(MainActivity.audioLink);
+            config.setVideoID(MusicService.videoID);
+            config.setAudioUrl(MusicService.audioLink);
             String filename;
             if (config.getText().length() > 55) {
                 filename = config.getTitle().substring(0, 55).trim() + "." + config.getExt();
@@ -1084,7 +1089,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
                 String targetName = fileName.split("\\.")[0]+".mp3";
 
-                mp3Task = new MP3Task(PlayerActivity2.this,targetName,config, MainActivity.videoID);
+                mp3Task = new MP3Task(PlayerActivity2.this,targetName,config, MusicService.videoID);
                 mp3Task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,config.getUrl());
             });
             alert.setNegativeButton("No", (dialog12, which12) -> {
@@ -1696,8 +1701,8 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
     public static Runnable mUpdateTimeTask = new Runnable() {
         public void run() {
 
-            long totalDuration = MainActivity.player.getDuration();
-            long currentDur = MainActivity.player.getCurrentPosition();
+            long totalDuration = MusicService.player.getDuration();
+            long currentDur = MusicService.player.getCurrentPosition();
 
             // Displaying time completed playing
             currentDuration.setText("" + YTutils.milliSecondsToTimer(currentDur));

@@ -1,8 +1,8 @@
 package com.kpstv.youtube;
 
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,14 +14,19 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-import com.kpstv.youtube.fragments.DownloadBottomSheet;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.services.IntentDownloadService;
-import com.kpstv.youtube.utils.SoundCloud;
 import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
+
+import static android.view.View.VISIBLE;
+import static com.kpstv.youtube.AppSettings.showAds;
 
 public class SilentDownloadActivity extends AppCompatActivity {
 
@@ -30,10 +35,12 @@ public class SilentDownloadActivity extends AppCompatActivity {
     private RadioButton mRadio720p;
     private RadioButton mRadio480p;
     private MetaModel meta;
-    private String url;
+    private String url; private boolean adComplete=false,interstitialLoad=false;
     private LinearLayout mLoadlayout;
     private LinearLayout mMainlayout;
     private static final String TAG = "SilentDownloadActivity";
+    private AdView mAdview; InterstitialAd ad;
+    private LinearLayout mAdviewlayout;
 
 
     @Override
@@ -43,13 +50,57 @@ public class SilentDownloadActivity extends AppCompatActivity {
         initViews();
         setTitle("");
 
-        Log.e(TAG, "onCreate: Let's check Action: "+getIntent().getAction()+", data: "+getIntent().getData() );
+        YTutils.commonBilling(this);
 
+        Log.e(TAG, "onCreate: Let's check Action: " + getIntent().getAction() + ", data: " + getIntent().getData());
+
+        if (showAds) {
+            AdRequest adRequest = new AdRequest.Builder().addTestDevice("07153BA64BB64F7C3F726B71C4AE30B9").build();
+            mAdview.loadAd(adRequest);
+            mAdview.setAdListener(new AdListener(){
+                @Override
+                public void onAdLoaded() {
+                    adComplete=true;
+                    mAdview.setVisibility(VISIBLE);
+                    super.onAdLoaded();
+                }
+
+                @Override
+                public void onAdFailedToLoad(int i) {
+                    adComplete=true;
+                    mAdviewlayout.setVisibility(View.GONE);
+                    Log.e(TAG, "onAdFailedToLoad: Failed to load Ad"+i );
+                    super.onAdFailedToLoad(i);
+                }
+            });
+
+            ad = new InterstitialAd(this);
+            ad.setAdUnitId("ca-app-pub-1164424526503510/4801416648");
+            ad.loadAd(new AdRequest.Builder().addTestDevice("07153BA64BB64F7C3F726B71C4AE30B9").build());
+            ad.setAdListener(new AdListener() {
+                @Override
+                public void onAdFailedToLoad(int i) {
+                    super.onAdFailedToLoad(i);
+                    interstitialLoad=true;
+                }
+
+                @Override
+                public void onAdLoaded() {
+                    super.onAdLoaded();
+                    interstitialLoad = true;
+                }
+            });
+
+        }else {
+            interstitialLoad=true;
+            mAdview.setVisibility(View.GONE);
+            adComplete=true;
+        }
 
         if (getIntent().getData() != null) {
             url = getIntent().getData().toString();
             commonIntentLaunch();
-        }else if (Intent.ACTION_SEND.equals(getIntent().getAction())
+        } else if (Intent.ACTION_SEND.equals(getIntent().getAction())
                 && getIntent().getType() != null && "text/plain".equals(getIntent().getType())) {
             url = getIntent().getStringExtra(Intent.EXTRA_TEXT);
             commonIntentLaunch();
@@ -59,7 +110,7 @@ public class SilentDownloadActivity extends AppCompatActivity {
     @SuppressLint("StaticFieldLeak")
     private void commonIntentLaunch() {
         url = parseLinkfromText(url);
-        Log.e(TAG, "onCreate: Action: "+getIntent().getAction()+", Url: "+url );
+        Log.e(TAG, "onCreate: Action: " + getIntent().getAction() + ", Url: " + url);
 
         new AsyncTask<Void, Void, Void>() {
 
@@ -68,29 +119,35 @@ public class SilentDownloadActivity extends AppCompatActivity {
                 if (url.contains("youtube.com") || url.contains("youtu.be")) {
                     YTMeta ytMeta = new YTMeta(YTutils.getVideoID(url));
                     meta = ytMeta.getVideMeta();
-                } else if (url.contains("open.spotify.com")&&url.contains("/track/")) {
+                } else if (url.contains("open.spotify.com") && url.contains("/track/")) {
                     SpotifyTrack track = new SpotifyTrack(YTutils.getSpotifyID(url));
-                    if (track.getYtUrl()==null) return null;
-                    meta = new MetaModel(YTutils.getVideoID(track.getYtUrl()),track.getTitle(),track.getAuthor(),track.getImageUrl());
-                }else if (url.contains("soundcloud.com")) {
-                    meta = new MetaModel(url,"auto-generate","auto-generate","auto-generate");
+                    if (track.getYtUrl() == null) return null;
+                    meta = new MetaModel(YTutils.getVideoID(track.getYtUrl()), track.getTitle(), track.getAuthor(), track.getImageUrl());
+                } else if (url.contains("soundcloud.com")) {
+                    meta = new MetaModel(url, "auto-generate", "auto-generate", "auto-generate");
                     mRadio480p.setEnabled(false);
                     mRadio720p.setEnabled(false);
                     mRadio1080p.setEnabled(false);
                     mRadioM4a.setEnabled(false);
                 }
+                do {
+                    Log.e(TAG, "doInBackground: Waiting for ADComplete: "+adComplete );
+                }while (!adComplete);
+                do {
+                    Log.e(TAG, "doInBackground: Waiting for InterstitialAd: "+interstitialLoad );
+                }while (!interstitialLoad);
                 return null;
             }
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                if (meta==null) {
+                if (meta == null) {
                     Toast.makeText(SilentDownloadActivity.this, "Error: Failed to extract this link!", Toast.LENGTH_SHORT).show();
                     finish();
                     return;
                 }
                 mLoadlayout.setVisibility(View.GONE);
-                mMainlayout.setVisibility(View.VISIBLE);
+                mMainlayout.setVisibility(VISIBLE);
                 super.onPostExecute(aVoid);
             }
         }.execute();
@@ -132,13 +189,16 @@ public class SilentDownloadActivity extends AppCompatActivity {
         }
 
         YTConfig config = new YTConfig("auto-generate", "auto-generate", ext
-                , title,author, true, meta.getImgUrl());
+                , title, author, true, meta.getImgUrl());
         config.setVideoID(meta.getVideoID());
 
-        Log.e(TAG, "okClick: Download Name: "+YTutils.getTargetName(config) );
+        Log.e(TAG, "okClick: Download Name: " + YTutils.getTargetName(config));
 
         config.setTargetName(YTutils.getTargetName(config));
         config.setTaskExtra("autoTask");
+
+        if (showAds&&ad.isLoaded())
+            ad.show();
 
         Intent serviceIntent = new Intent(this, IntentDownloadService.class);
         serviceIntent.putExtra("addJob", config);
@@ -153,5 +213,7 @@ public class SilentDownloadActivity extends AppCompatActivity {
         mRadio480p = findViewById(R.id.radio_480p);
         mLoadlayout = findViewById(R.id.loadLayout);
         mMainlayout = findViewById(R.id.mainLayout);
+        mAdview = findViewById(R.id.adView);
+        mAdviewlayout = findViewById(R.id.adViewLayout);
     }
 }

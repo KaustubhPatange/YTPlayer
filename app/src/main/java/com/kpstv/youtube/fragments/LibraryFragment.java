@@ -41,6 +41,7 @@ import com.kpstv.youtube.SettingsActivity;
 import com.kpstv.youtube.adapters.SearchAdapter;
 import com.kpstv.youtube.models.PlaylistModel;
 import com.kpstv.youtube.models.SearchModel;
+import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.LyricsApi;
 import com.kpstv.youtube.utils.YTutils;
@@ -306,7 +307,7 @@ public class LibraryFragment extends Fragment implements AppInterface {
         boolean newChange = activity.getSharedPreferences("appSettings",Context.MODE_PRIVATE)
                 .getBoolean("pref_audioChange",true);
         if (newChange!=AppSettings.listenAudioChange) {
-            if (MainActivity.videoID!=null)
+            if (MusicService.videoID!=null)
                 Toast.makeText(activity, "App will start listening changes when next song will be played.", Toast.LENGTH_LONG).show();
             AppSettings.listenAudioChange = newChange;
         }
@@ -319,18 +320,18 @@ public class LibraryFragment extends Fragment implements AppInterface {
     public Runnable sleepTimerTask = new Runnable() {
         @Override
         public void run() {
-            if (MainActivity.isplaying && MainActivity.sleepSeconds!=0) {
-                Log.e(TAG, "SleepTimerTask run: "+MainActivity.sleepSeconds);
+            if (MusicService.isplaying && MusicService.sleepSeconds!=0) {
+                Log.e(TAG, "SleepTimerTask run: "+MusicService.sleepSeconds);
 
-                if (MainActivity.sleepSeconds == -2) {
-                    MainActivity.sleepEndTrack=true;
+                if (MusicService.sleepSeconds == -2) {
+                    MusicService.sleepEndTrack=true;
                     return;
-                }else MainActivity.sleepEndTrack=false;
-                MainActivity.sleepSeconds = MainActivity.sleepSeconds-1;
+                }else MusicService.sleepEndTrack=false;
+                MusicService.sleepSeconds = MusicService.sleepSeconds-1;
 
                 try {
-                    if (MainActivity.sleepSeconds%60==0) {
-                        int time = (MainActivity.sleepSeconds/60);
+                    if (MusicService.sleepSeconds%60==0) {
+                        int time = (MusicService.sleepSeconds/60);
                         if (time==1)
                             sleepTimerTextview.setText("Sleep Timer - " + time +" minute");
                         else   sleepTimerTextview.setText("Sleep Timer - " + time +" minutes");
@@ -339,12 +340,12 @@ public class LibraryFragment extends Fragment implements AppInterface {
                     Log.e(TAG, "run: Failed to calculate seconds" );
                 }
 
-                if (MainActivity.sleepSeconds == 0)
+                if (MusicService.sleepSeconds == 0)
                 {
-                    MainActivity.changePlayBack(false);
+                    MusicService.changePlayBack(false);
                     timerWentOff();
                 }
-            }else if (MainActivity.sleepSeconds==0) return;
+            }else if (MusicService.sleepSeconds==0) return;
             mHandler.postDelayed(this,1000);
         }
     };
@@ -365,14 +366,14 @@ public class LibraryFragment extends Fragment implements AppInterface {
                 }
                 break;
             case 100: //Request code for sleep Timer
-                if (!MainActivity.selectedItemText.isEmpty()) {
+                if (!MusicService.selectedItemText.isEmpty()) {
                     moonId.setColorFilter(getResources().getColor(R.color.colorAccent));
-                    sleepTimerTextview.setText("Sleep Timer - " + MainActivity.selectedItemText);
+                    sleepTimerTextview.setText("Sleep Timer - " + MusicService.selectedItemText);
 
-                    if (MainActivity.sleepSeconds==-2)
+                    if (MusicService.sleepSeconds==-2)
                         Toast.makeText(activity, "Pausing at End of track!", Toast.LENGTH_SHORT).show();
-                    else if (MainActivity.sleepSeconds!=0)
-                        Toast.makeText(activity, "Pausing in "+MainActivity.selectedItemText+"!", Toast.LENGTH_SHORT).show();
+                    else if (MusicService.sleepSeconds!=0)
+                        Toast.makeText(activity, "Pausing in "+MusicService.selectedItemText+"!", Toast.LENGTH_SHORT).show();
 
                     mHandler.postDelayed(sleepTimerTask,1000);
                 }else {
@@ -389,8 +390,9 @@ public class LibraryFragment extends Fragment implements AppInterface {
     void timerWentOff() {
         moonId.clearColorFilter();
         sleepTimerTextview.setText("Sleep Timer");
-        MainActivity.selectedItemText="";
+        MusicService.selectedItemText="";
         Toast.makeText(activity, "Timer went off!", Toast.LENGTH_SHORT).show();
+        activity.stopService(new Intent(activity,MusicService.class));
     }
 
     private void startEditor(String filePathUri) {
@@ -426,7 +428,7 @@ public class LibraryFragment extends Fragment implements AppInterface {
 
         sleepLayout.setOnClickListener(view -> {
             SleepBottomSheet bottomSheet = new SleepBottomSheet();
-            bottomSheet.show(activity.getSupportFragmentManager(),MainActivity.selectedItemText);
+            bottomSheet.show(activity.getSupportFragmentManager(),MusicService.selectedItemText);
         });
 
         audioCutterLayout.setOnClickListener(view -> {
@@ -468,7 +470,7 @@ public class LibraryFragment extends Fragment implements AppInterface {
             Bundle args = new Bundle();
             args.putSerializable("model",playlistModel);
             MainActivity.FavouriteFrag.setArguments(args);
-            MainActivity.loadedFavFrag=true;
+            MusicService.loadedFavFrag=true;
             FragmentManager manager = getActivity().getSupportFragmentManager();
             FragmentTransaction ft = manager.beginTransaction();
             ft.setCustomAnimations(R.anim.fade_in,
@@ -487,7 +489,7 @@ public class LibraryFragment extends Fragment implements AppInterface {
         });
 
         equalizerLayout.setOnClickListener(view -> {
-            if (!MainActivity.isEqualizerSet) {
+            if (!MusicService.isEqualizerSet) {
                 Toast.makeText(activity, "Equalizer will be enable when you play a song!", Toast.LENGTH_SHORT).show();
             }else
             startActivity(new Intent(activity, EqualizerActivity.class));

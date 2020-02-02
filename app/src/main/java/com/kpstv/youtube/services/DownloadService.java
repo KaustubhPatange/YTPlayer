@@ -96,7 +96,7 @@ public class DownloadService extends Service {
 
         if (pendingJobs==null) pendingJobs = new ArrayList<>();
 
-        icon = MainActivity.bitmapIcon;
+        icon = MusicService.bitmapIcon;
 
         notificationManager = NotificationManagerCompat.from(context);
 

@@ -2,7 +2,7 @@
 	"version":"1.0",
 	"demopay":"1.5",
 	"new":"1.7",
-	"changelog":"<h3>V1.7 January 2020</h3><hr>*Fix: Extraction for protected videos<br>*Fix: Improper thumbnail loading<br>*Fix: Delete files not working in memory card<br>*Fix: Reported bugs<br><br><i>Size: 27.4 MB</i>",
+	"changelog":"<h3>V1.8 February 2020</h3><hr>*Add: G-Pay mode of payment<br>*Add: Batch download playlist with one click<br>*Add: Direct download using share button<br>*Update: New and better download dialog<br>*Fix: Background playback stops automatically<br>*Fix: Download stops at 50 percent bug<br>*Fix: Reported bugs & other fixes<br><br><i>Size: 47.1 MB</i>",
 	"download":"https://github.com/KaustubhPatange/YTPlayer/releases/download/1.7/YTPlayer_v1.7.apk",
 	"msg":""
 }

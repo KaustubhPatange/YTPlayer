@@ -20,6 +20,7 @@ import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.DownloadAdpater2;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.services.IntentDownloadService;
+import com.kpstv.youtube.services.MusicService;
 
 import java.util.ArrayList;
 
@@ -47,10 +48,10 @@ public class DownloadBottomSheet extends BottomSheetDialogFragment {
         mAudioRecyclerview.setLayoutManager(layoutManager1);
         mVideoRecyclerview.setLayoutManager(layoutManager2);
 
-        for (YTConfig config : MainActivity.ytConfigs) {
+        for (YTConfig config : MusicService.ytConfigs) {
             config.setTargetName(getTargetName(config));
-            config.setVideoID(MainActivity.videoID);
-            config.setAudioUrl(MainActivity.audioLink);
+            config.setVideoID(MusicService.videoID);
+            config.setAudioUrl(MusicService.audioLink);
             if (config.isAudio()) {
                 Log.e(TAG, "Audio: " + config.getText());
                 config.setTaskExtra("mp3Task");

@@ -36,7 +36,9 @@ import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity2;
 import com.kpstv.youtube.R;
 //import com.kpstv.youtube.services.DownloadService;
+import com.kpstv.youtube.SplashActivity;
 import com.kpstv.youtube.services.IntentDownloadService;
+import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.SoundCloud;
 import com.kpstv.youtube.utils.YTMeta;
@@ -61,19 +63,19 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
         switch (action) {
             case "com.kpstv.youtube.ACTION_NEXT":
                 try {
-                MainActivity.playNext();
+                    MusicService.playNext();
                 }catch (Exception ignored){disableContext(context);}
                 break;
             case "com.kpstv.youtube.ACTION_PREVIOUS":
                 try {
-                MainActivity.playPrevious();
+                MusicService.playPrevious();
                 }catch (Exception ignored){disableContext(context);}
                 break;
             case "com.kpstv.youtube.ACTION_PLAY":
                 try {
-                MainActivity.changePlayBack(!MainActivity.isplaying);
+                MusicService.changePlayBack(!MusicService.isplaying);
                 try {
-                    if (MainActivity.isplaying) {
+                    if (MusicService.isplaying) {
                         PlayerActivity2.makePause();
                     } else {
                         PlayerActivity2.makePlay();
@@ -86,72 +88,20 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                 context.stopService(serviceIntent);
                 break;
             case "com.kpstv.youtube.OPEN_SONG":
-                try {
-                    Log.e(TAG, "onReceive: triggered" );
-                    Log.e(TAG, "onReceive: "+intent.getData().toString());
-                    Uri uri = intent.getData();
-                    Log.e(TAG, "onReceive: "+uri.toString() );
-                    File f = new File(uri.getPath());
-                    if (!f.exists()) {
-                        f = new File(uri.toString().replace(".mp3",".m4a"));
-                    }
-
-                    if (f.exists()) {
-
-                        if (uri.toString().contains(".mp4")) {
-                            Intent i = new Intent();
-                            i.setAction(Intent.ACTION_VIEW);
-                            i.setDataAndType(uri, "video/*");
-                            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            context.startActivity(i);
-                            return;
-                        }
-
-                        File downloads = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS);
-                        File[] files = downloads.listFiles(new FileFilter() {
-                            @Override
-                            public boolean accept(File file)
-                            {
-                                return (file.getPath().endsWith(".mp3")||file.getPath().endsWith(".m4a")
-                                        ||file.getPath().endsWith(".wav")||file.getPath().endsWith(".aac")
-                                        ||file.getPath().endsWith(".ogg")||file.getPath().endsWith(".flac"));
-                            }
-                        });
-                        if (files.length>0) {
-                            String[] ids = new String[files.length];
-                            int position = 0;
-                            for (int i=0;i<files.length;i++) {
-                                File id = files[i];
-                                ids[i] = files[i].getPath();
-                                if (id.getPath().equals(f.getPath())) {
-                                    position=0;
-                                }
-                            }
-                            MainActivity.PlayVideo_Local(ids,position);
-                        }else
-                            Toast.makeText(context, "There seems to be an error in parsing downloads!", Toast.LENGTH_SHORT).show();
-
-                    }else Toast.makeText(context, "Error: File not found!", Toast.LENGTH_SHORT).show();
-
-                   /* String mime = context.getContentResolver().getType(uri);
-
-                    // Open file with user selected app
-                    Intent i = new Intent();
-                    i.setAction(Intent.ACTION_VIEW);
-                    i.setDataAndType(uri, "audio/*");
-                    i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(i);
-                   // ContextCompat.startActivity(context,i,null);*/
-                }catch (Exception e){
-                    e.printStackTrace();
-                    Toast.makeText(context, "Error: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
+                Log.e(TAG, "onReceive: Coming Right here..." );
+                if (MainActivity.activity==null) {
+                    Log.e(TAG, "onReceive: Let's launch mainactivity" );
+                    Intent intent1 = new Intent(context,MainActivity.class);
+                    intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent1.setAction("com.kpstv.youtube.OPEN_SONG");
+                    intent1.setData(intent.getData());
+                    context.startActivity(intent1);
+                }else
+                    YTutils.openSong(context,intent);
                 break;
             case "com.kpstv.youtube.FAVOURITE_SONG":
                 try {
-                    MainActivity.actionFavouriteClicked();
+                    MusicService.actionFavouriteClicked();
                 }catch (Exception ignored){disableContext(context);}
                 break;
             case "com.kpstv.youtube.OPEN_SHARE_SONG":
@@ -217,11 +167,11 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            Palette.generateAsync(MainActivity.bitmapIcon, palette -> {
-                MainActivity.nColor = palette.getVibrantColor(context.getResources().getColor(R.color.light_white));
-                Log.e(TAG, "loadData_OFFLINE Changing nColor: "+MainActivity.nColor +
-                        ", ImageUri: "+MainActivity.imgUrl);
-                MainActivity.rebuildNotification();
+            Palette.generateAsync(MusicService.bitmapIcon, palette -> {
+                MusicService.nColor = palette.getVibrantColor(context.getResources().getColor(R.color.light_white));
+                Log.e(TAG, "loadData_OFFLINE Changing nColor: "+MusicService.nColor +
+                        ", ImageUri: "+MusicService.imgUrl);
+                MusicService.rebuildNotification();
                 try {
                     PlayerActivity2.loadAgain();
                 }catch (Exception e) {
@@ -233,7 +183,7 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            File f = new File(MainActivity.videoID);
+            File f = new File(MusicService.videoID);
             Uri uri = Uri.fromFile(f);
             try {
                 MediaMetadataRetriever mmr = new MediaMetadataRetriever();
@@ -245,9 +195,9 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                 byte [] data = mmr.getEmbeddedPicture();
 
                 if(data != null)
-                    MainActivity.bitmapIcon = BitmapFactory.decodeByteArray(data, 0, data.length);
+                    MusicService.bitmapIcon = BitmapFactory.decodeByteArray(data, 0, data.length);
                 else
-                    MainActivity.bitmapIcon = YTutils.drawableToBitmap(ContextCompat.getDrawable(context,R.drawable.ic_pulse));
+                    MusicService.bitmapIcon = YTutils.drawableToBitmap(ContextCompat.getDrawable(context,R.drawable.ic_pulse));
 
                 if (artist==null) artist ="Unknown artist";
                 if (title==null) title = YTutils.getVideoTitle(f.getName());
@@ -255,12 +205,12 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                 if (title.contains("."))
                     title = title.split("\\.")[0];
 
-                MainActivity.videoTitle = title;
-                MainActivity.channelTitle = artist;
-                MainActivity.likeCounts = -1; MainActivity.dislikeCounts = -1;
-                MainActivity.viewCounts = "-1";
+                MusicService.videoTitle = title;
+                MusicService.channelTitle = artist;
+                MusicService.likeCounts = -1; MusicService.dislikeCounts = -1;
+                MusicService.viewCounts = "-1";
 
-                MainActivity.total_seconds = Integer.parseInt(durationStr);
+                MusicService.total_seconds = Integer.parseInt(durationStr);
 
             }catch (Exception e) {
                 // TODO: Do something when cannot played...
@@ -281,16 +231,16 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
         protected void onPostExecute(Void aVoid) {
             Glide.with(context)
                     .asBitmap()
-                    .load(MainActivity.imgUrl)
+                    .load(MusicService.imgUrl)
                     .into(new CustomTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                             Palette.generateAsync(resource, palette -> {
-                                MainActivity.nColor = palette.getVibrantColor(context.getResources().getColor(R.color.light_white));
-                                MainActivity.bitmapIcon = resource;
-                                Log.e(TAG, "loadData: Changing nColor: "+MainActivity.nColor +
-                                        ", ImageUri: "+MainActivity.imgUrl );
-                                MainActivity.rebuildNotification();
+                                MusicService.nColor = palette.getVibrantColor(context.getResources().getColor(R.color.light_white));
+                                MusicService.bitmapIcon = resource;
+                                Log.e(TAG, "loadData: Changing nColor: "+MusicService.nColor +
+                                        ", ImageUri: "+MusicService.imgUrl );
+                                MusicService.rebuildNotification();
                                 try {
                                     PlayerActivity2.loadAgain();
                                 }catch (Exception ignored) {
@@ -316,7 +266,7 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
         SoundCloud soundCloud;
         @Override
         protected Void doInBackground(Void... voids) {
-            String videoID = MainActivity.videoID;
+            String videoID = MusicService.videoID;
 
             if (videoID.contains("soundcloud.com")) {
                 soundCloud = new SoundCloud(videoID);
@@ -324,12 +274,12 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                     return null;
                 }
                 // soundCloud.captureViews();
-                MainActivity.soundCloudPlayBack=true;
-                MainActivity.videoTitle = soundCloud.getModel().getTitle();
-                MainActivity.channelTitle = soundCloud.getModel().getAuthorName();
-                MainActivity.imgUrl = soundCloud.getModel().getImageUrl();
-                MainActivity.likeCounts = -1; MainActivity.dislikeCounts = -1;
-                MainActivity.viewCounts = "-1";
+                MusicService.soundCloudPlayBack=true;
+                MusicService.videoTitle = soundCloud.getModel().getTitle();
+                MusicService.channelTitle = soundCloud.getModel().getAuthorName();
+                MusicService.imgUrl = soundCloud.getModel().getImageUrl();
+                MusicService.likeCounts = -1; MusicService.dislikeCounts = -1;
+                MusicService.viewCounts = "-1";
                 return null;
             }
 
@@ -342,18 +292,18 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
             }while (json.contains("\"error\":") && i<apiLength);
             YTMeta ytMeta = new YTMeta(videoID);
             if (ytMeta.getVideMeta() != null) {
-                MainActivity.channelTitle = YTutils.getChannelTitle(ytMeta.getVideMeta().getTitle(),
+                MusicService.channelTitle = YTutils.getChannelTitle(ytMeta.getVideMeta().getTitle(),
                         ytMeta.getVideMeta().getAuthor());
-                MainActivity.videoTitle = YTutils.setVideoTitle(ytMeta.getVideMeta().getTitle());
-                MainActivity.imgUrl = ytMeta.getVideMeta().getImgUrl();
+                MusicService.videoTitle = YTutils.setVideoTitle(ytMeta.getVideMeta().getTitle());
+                MusicService.imgUrl = ytMeta.getVideMeta().getImgUrl();
             }
 
 
             if (json.contains("\"error\":")) {
                 YTStatistics ytStatistics = new YTStatistics(videoID);
-                MainActivity.viewCounts = ytStatistics.getViewCount();
-                MainActivity.likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
-                MainActivity.dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
+                MusicService.viewCounts = ytStatistics.getViewCount();
+                MusicService.likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
+                MusicService.dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
                 json = null;
             }
 
@@ -361,12 +311,12 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                 try {
                     JSONObject statistics = new JSONObject(json).getJSONArray("items")
                             .getJSONObject(0).getJSONObject("statistics");
-                    MainActivity.viewCounts = YTutils.getViewCount(Long.parseLong(statistics.getString("viewCount")));
-                    MainActivity.likeCounts = 100;
-                    MainActivity.dislikeCounts = 0;
+                    MusicService.viewCounts = YTutils.getViewCount(Long.parseLong(statistics.getString("viewCount")));
+                    MusicService.likeCounts = 100;
+                    MusicService.dislikeCounts = 0;
                     try {
-                        MainActivity.likeCounts = Integer.parseInt(statistics.getString("likeCount"));
-                        MainActivity.dislikeCounts = Integer.parseInt(statistics.getString("dislikeCount"));
+                        MusicService.likeCounts = Integer.parseInt(statistics.getString("likeCount"));
+                        MusicService.dislikeCounts = Integer.parseInt(statistics.getString("dislikeCount"));
                     }catch (Exception e){e.printStackTrace();}
 
                 } catch (JSONException e) {

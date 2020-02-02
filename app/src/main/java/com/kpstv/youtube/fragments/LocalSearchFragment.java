@@ -33,6 +33,7 @@ import com.kpstv.youtube.adapters.OFAdapter;
 import com.kpstv.youtube.models.LocalModel;
 import com.kpstv.youtube.models.LocalSearchModel;
 import com.kpstv.youtube.models.OFModel;
+import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.YTutils;
 
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
@@ -283,7 +284,7 @@ public class LocalSearchFragment extends Fragment {
                             albumPlay(model);
                             break;
                         case R.id.action_add_queue:
-                            if (MainActivity.yturls.isEmpty()) {
+                            if (MusicService.yturls.isEmpty()) {
                                 albumPlay(model);
                             }else {
                                 AddItems(model);
@@ -301,11 +302,11 @@ public class LocalSearchFragment extends Fragment {
             for (String line : localModel.getSongList()) {
                 if (line.isEmpty()) continue;
                 String filePath = line.split("\\|")[0];
-                if (!MainActivity.videoID.equals(filePath)) {
-                    if (!MainActivity.yturls.contains(filePath))
+                if (!MusicService.videoID.equals(filePath)) {
+                    if (!MusicService.yturls.contains(filePath))
                     {
                         someThingAdded=true;
-                        MainActivity.yturls.add(filePath);
+                        MusicService.yturls.add(filePath);
                     }
                 }
             }
@@ -338,7 +339,7 @@ public class LocalSearchFragment extends Fragment {
                             albumPlay(model);
                             break;
                         case R.id.action_add_queue:
-                            if (MainActivity.yturls.isEmpty()) {
+                            if (MusicService.yturls.isEmpty()) {
                                 albumPlay(model);
                             }else {
                                 AddItems(model);
@@ -389,14 +390,14 @@ public class LocalSearchFragment extends Fragment {
                             sheet.show(activity.getSupportFragmentManager(),"");
                             break;
                         case R.id.action_play_next:
-                            if (MainActivity.yturls.size()==0) {
+                            if (MusicService.yturls.size()==0) {
                                 PlayMusic_Offline(position);
                             }else {
                                 insertPosition(model,position,false);
                             }
                             break;
                         case R.id.action_add_queue:
-                            if (MainActivity.yturls.size()==0) {
+                            if (MusicService.yturls.size()==0) {
                                 PlayMusic_Offline(position);
                             }else {
                                 insertPosition(model,position,true);
@@ -414,16 +415,16 @@ public class LocalSearchFragment extends Fragment {
         }
 
         void insertPosition(OFModel model, int position,boolean addToLast) {
-            if (MainActivity.videoID.equals(model.getPath())) {
+            if (MusicService.videoID.equals(model.getPath())) {
                 Toast.makeText(activity, "Song is already playing!", Toast.LENGTH_SHORT).show();
-            }else if (MainActivity.localPlayBack) {
+            }else if (MusicService.localPlayBack) {
                 if (addToLast) {
-                    MainActivity.yturls.remove(model.getPath());
-                    MainActivity.yturls.add(model.getPath());
+                    MusicService.yturls.remove(model.getPath());
+                    MusicService.yturls.add(model.getPath());
                 }else {
-                    int index = MainActivity.yturls.indexOf(MainActivity.videoID);
-                    MainActivity.yturls.remove(model.getPath());
-                    MainActivity.yturls.add(index+1,model.getPath());
+                    int index = MusicService.yturls.indexOf(MusicService.videoID);
+                    MusicService.yturls.remove(model.getPath());
+                    MusicService.yturls.add(index+1,model.getPath());
                 }
                 Toast.makeText(activity, "Song added to queue", Toast.LENGTH_SHORT).show();
             }else {

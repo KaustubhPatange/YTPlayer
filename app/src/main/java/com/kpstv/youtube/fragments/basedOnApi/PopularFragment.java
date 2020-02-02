@@ -42,6 +42,7 @@ import com.kpstv.youtube.adapters.SongAdapter;
 import com.kpstv.youtube.models.DiscoverModel;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
+import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.APIResponse;
 import com.kpstv.youtube.utils.AppBarStateChangeListener;
 import com.kpstv.youtube.utils.HttpHandler;
@@ -415,7 +416,7 @@ public class PopularFragment extends Fragment {
             if (models.size()>0) {
                 mOplayfab.setOnClickListener(view -> {
                     String[] yturls = new String[models.size()];
-                    MainActivity.nPlayModels.clear();
+                    MusicService.nPlayModels.clear();
                     for (int i=0;i<models.size();i++) {
                         MetaModel metaModel = new MetaModel(
                                 YTutils.getVideoID(models.get(i).getYtUrl()),
@@ -425,7 +426,7 @@ public class PopularFragment extends Fragment {
                         );
                         NPlayModel model = new NPlayModel(models.get(i).getYtUrl(),new YTMeta(metaModel),false);
 
-                        MainActivity.nPlayModels.add(model);
+                        MusicService.nPlayModels.add(model);
                         yturls[i] = models.get(i).getYtUrl();
                     }
                     MainActivity.PlayVideo(yturls);

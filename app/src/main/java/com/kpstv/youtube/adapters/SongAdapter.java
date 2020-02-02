@@ -4,8 +4,6 @@ package com.kpstv.youtube.adapters;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -16,7 +14,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -34,21 +31,17 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.MainActivity;
-import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.DiscoverModel;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
+import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.YTLength;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
 
-import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -217,9 +210,9 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
 
                     notifyItemChanged(listPosition);
 
-                    if (MainActivity.yturls.size()>0 && !MainActivity.localPlayBack) {
-                        if (MainActivity.videoID.contains(ytID))
-                            MainActivity.playNext();
+                    if (MusicService.yturls.size()>0 && !MusicService.localPlayBack) {
+                        if (MusicService.videoID.contains(ytID))
+                           MusicService.playNext();
                     }
 
                     Toast.makeText(con, "Song is hidden in all list!", Toast.LENGTH_SHORT).show();
@@ -260,10 +253,10 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                                     discoverModel.getImgUrl(),discoverModel.getSeconds());
                             break;
                         case R.id.action_add_queue:
-                            if (MainActivity.yturls.size()>0 && !MainActivity.localPlayBack) {
+                            if (MusicService.yturls.size()>0 && !MusicService.localPlayBack) {
                                 final String ytUri = YTutils.getVideoID(discoverModel.getYtUrl());
                                 boolean toAdd=true;
-                                for (String url: MainActivity.yturls) {
+                                for (String url: MusicService.yturls) {
                                     if (YTutils.getVideoID(url).equals(ytUri)) {
                                         toAdd=false;
                                         Toast.makeText(con, "Song exists in queue!", Toast.LENGTH_SHORT).show();
@@ -271,13 +264,13 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                                     }
                                 }
                                 if (toAdd) {
-                                    if (MainActivity.nPlayModels.size()>0 && MainActivity.nPlayModels.size()== MainActivity.yturls.size()) {
+                                    if (MusicService.nPlayModels.size()>0 && MusicService.nPlayModels.size()== MusicService.yturls.size()) {
                                         MetaModel metaModel = new MetaModel(YTutils.getVideoID(discoverModel.getYtUrl()),discoverModel.getTitle()
                                                 ,discoverModel.getAuthor(),discoverModel.getImgUrl());
                                         NPlayModel nPlayModel = new NPlayModel(discoverModel.getYtUrl(),new YTMeta(metaModel),false);
-                                        MainActivity.nPlayModels.add(nPlayModel);
+                                        MusicService.nPlayModels.add(nPlayModel);
                                     }
-                                    MainActivity.yturls.add(discoverModel.getYtUrl());
+                                    MusicService.yturls.add(discoverModel.getYtUrl());
                                     Toast.makeText(con, "Song queue updated!", Toast.LENGTH_SHORT).show();
                                 }
                             }else {
@@ -311,7 +304,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             holder.mainLayout.setOnClickListener(v -> {
                 if (discoverModel.isDisabled()) return;
 
-                MainActivity.nPlayModels.clear();
+                MusicService.nPlayModels.clear();
                 ArrayList<String> yturls = new ArrayList<>();
 
                 for (DiscoverModel dModel : dataSet) {
@@ -324,7 +317,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                     );
                     NPlayModel nPlayModel = new NPlayModel(dModel.getYtUrl(),new YTMeta(metaModel),false);
 
-                    MainActivity.nPlayModels.add(nPlayModel);
+                    MusicService.nPlayModels.add(nPlayModel);
 
                     yturls.add(dModel.getYtUrl());
                 }

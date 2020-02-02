@@ -1,6 +1,9 @@
-Version 1.7
+Version 1.8
 
-[*] Fix: Extraction for protected videos
-[*] Fix: Improper thumbnail loading
-[*] Fix: Delete files not working in memory card
-[*] Fix: Reported bugs
+[*] Add: G-Pay mode of payment
+[*] Add: Batch download playlist with one click
+[*] Add: Direct download using share button
+[*] Update: New and better download dialog
+[*] Fix: Background playback stops automatically
+[*] Fix: Download stops at 50 percent bug
+[*] Fix: Reported bugs & other fixes

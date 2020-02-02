@@ -37,6 +37,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.jakewharton.processphoenix.ProcessPhoenix;
 import com.kpstv.youtube.helper.BillingClient;
 import com.kpstv.youtube.helper.BillingUtils;
+import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.YTutils;
 import com.razorpay.PaymentData;
 import com.razorpay.PaymentResultWithDataListener;
@@ -47,7 +48,7 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
     private static final int RC_SIGN_IN = 103;
     private Button mBuybutton; BillingClient client;
     private static final String TAG = "PurchaseActivity";
-    GoogleApiClient mGoogleSignInClient; private boolean is_gpay_disabled=false;
+    GoogleApiClient mGoogleSignInClient;
     private FirebaseAuth mAuth; FirebaseDatabase database;
     @SuppressLint("StaticFieldLeak")
     @Override
@@ -58,24 +59,6 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
         initViews();
 
         database = FirebaseDatabase.getInstance();
-
-        database.getReference("is_gpay_disable").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                try {
-                    if ((Boolean) dataSnapshot.getValue()) {
-                        is_gpay_disabled=true;
-                    }
-                }catch (Exception ignored){
-                    is_gpay_disabled=true;
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
 
         database.getReference("is_payment_disable").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -219,20 +202,16 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
                     });
 
                     gpay.setOnClickListener(view -> {
-                        if (is_gpay_disabled) 
-                            Toast.makeText(PurchaseActivity.this, "This payment method is currently disabled!", Toast.LENGTH_SHORT).show();
-                        else {
-                            alertDialog.dismiss();
-                            alertDialog = new AlertDialog.Builder(PurchaseActivity.this)
-                                    .setTitle("G-Pay payment")
-                                    .setMessage("Payment procedure will be carried out in different app. Click learn more on how it works.")
-                                    .setPositiveButton("OK", null)
-                                    .setNeutralButton("Learn More",(dialogInterface, i) -> {
-                                        YTutils.StartURL("https://github.com/KaustubhPatange/YTPlayer/wiki/GPay-Payment-Flow",PurchaseActivity.this);
-                                    })
-                                    .create();
-                            alertDialog.show();
-                        }
+                        alertDialog.dismiss();
+                        alertDialog = new AlertDialog.Builder(PurchaseActivity.this)
+                                .setTitle("G-Pay payment")
+                                .setMessage("Payment procedure will be carried out in different app. Click learn more on how it works.")
+                                .setPositiveButton("OK", null)
+                                .setNeutralButton("Learn More",(dialogInterface, i) -> {
+                                    YTutils.StartURL("https://github.com/KaustubhPatange/YTPlayer/wiki/GPay-Payment-Flow",PurchaseActivity.this);
+                                })
+                                .create();
+                        alertDialog.show();
 
                         /*alertDialog.dismiss();
                         client.quickCheckout();*/
@@ -336,6 +315,7 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
                 .setView(v)
                 .setCancelable(false)
                 .setPositiveButton("Restart",(dialogInterface, i) -> {
+                    MusicService.activity = null;
                     ProcessPhoenix.triggerRebirth(PurchaseActivity.this);
                 })
                 .create();

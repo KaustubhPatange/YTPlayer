@@ -38,6 +38,7 @@ import com.kpstv.youtube.PlayerActivity2;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.OFAdapter;
 import com.kpstv.youtube.models.OFModel;
+import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.YTutils;
 
 import java.io.File;
@@ -206,7 +207,7 @@ public class LocalMusicFragment extends Fragment {
                                             /*File csv = new File(model.getPath()); /storage/emulated/0/Download
                                             Log.e(TAG, "onMenuItemClick: "+csv.getPath());*/
                                             File folder = new File(model.getPath());
-                                            if (MainActivity.yturls.size()>0 && MainActivity.yturls.get(0).contains(model.getPath())) {
+                                            if (MusicService.yturls.size()>0 && MusicService.yturls.get(0).contains(model.getPath())) {
                                                 Toast.makeText(activity, "Folder is in use for playing song!", Toast.LENGTH_LONG).show();
                                                 return;
                                             }

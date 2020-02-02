@@ -68,6 +68,7 @@ import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.models.OFModel;
 import com.kpstv.youtube.models.PlaylistModel;
+import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.AppBarStateChangeListener;
 import com.kpstv.youtube.utils.SortOrder;
 import com.kpstv.youtube.utils.SortType;
@@ -280,8 +281,8 @@ public class OPlaylistFragment extends Fragment {
                     MainActivity.loadLocalMusicFrag();
                     return;
                 }
-                if (MainActivity.loadedFavFrag) {
-                    MainActivity.loadedFavFrag = false;
+                if (MusicService.loadedFavFrag) {
+                    MusicService.loadedFavFrag = false;
                     MainActivity.loadLibraryFrag();
                 } else
                     MainActivity.loadPlayFrag();
@@ -441,14 +442,14 @@ public class OPlaylistFragment extends Fragment {
                             sheet.show(activity.getSupportFragmentManager(), "");
                             break;
                         case R.id.action_play_next:
-                            if (MainActivity.yturls.size() == 0) {
+                            if (MusicService.yturls.size() == 0) {
                                 PlayMusic_Offline(position);
                             } else {
                                 insertPosition(model1, position, false);
                             }
                             break;
                         case R.id.action_add_queue:
-                            if (MainActivity.yturls.size() == 0) {
+                            if (MusicService.yturls.size() == 0) {
                                 PlayMusic_Offline(position);
                             } else {
                                 insertPosition(model1, position, true);
@@ -494,7 +495,7 @@ public class OPlaylistFragment extends Fragment {
                                 albumPlay(localModel);
                                 break;
                             case R.id.action_add_queue:
-                                if (MainActivity.yturls.isEmpty()) {
+                                if (MusicService.yturls.isEmpty()) {
                                     albumPlay(localModel);
                                 } else {
                                     AddItems(localModel);
@@ -514,10 +515,10 @@ public class OPlaylistFragment extends Fragment {
             for (String line : localModel.getSongList()) {
                 if (line.isEmpty()) continue;
                 String filePath = line.split("\\|")[0];
-                if (!MainActivity.videoID.equals(filePath)) {
-                    if (!MainActivity.yturls.contains(filePath)) {
+                if (!MusicService.videoID.equals(filePath)) {
+                    if (!MusicService.yturls.contains(filePath)) {
                         someThingAdded = true;
-                        MainActivity.yturls.add(filePath);
+                        MusicService.yturls.add(filePath);
                     }
                 }
             }
@@ -537,16 +538,16 @@ public class OPlaylistFragment extends Fragment {
         }
 
         void insertPosition(OFModel model, int position, boolean addToLast) {
-            if (MainActivity.videoID.equals(model.getPath())) {
+            if (MusicService.videoID.equals(model.getPath())) {
                 Toast.makeText(activity, "Song is already playing!", Toast.LENGTH_SHORT).show();
-            } else if (MainActivity.localPlayBack) {
+            } else if (MusicService.localPlayBack) {
                 if (addToLast) {
-                    MainActivity.yturls.remove(model.getPath());
-                    MainActivity.yturls.add(model.getPath());
+                    MusicService.yturls.remove(model.getPath());
+                    MusicService.yturls.add(model.getPath());
                 } else {
-                    int index = MainActivity.yturls.indexOf(MainActivity.videoID);
-                    MainActivity.yturls.remove(model.getPath());
-                    MainActivity.yturls.add(index + 1, model.getPath());
+                    int index = MusicService.yturls.indexOf(MusicService.videoID);
+                    MusicService.yturls.remove(model.getPath());
+                    MusicService.yturls.add(index + 1, model.getPath());
                 }
                 Toast.makeText(activity, "Song added to queue", Toast.LENGTH_SHORT).show();
             } else {
@@ -774,11 +775,11 @@ public class OPlaylistFragment extends Fragment {
                                 PlayMusic_Offline(position);
                                 break;
                             case R.id.action_play_next:
-                                if (MainActivity.yturls.size() == 0) {
+                                if (MusicService.yturls.size() == 0) {
                                     PlayMusic_Offline(position);
                                     return true;
                                 }
-                                insertPosition(model, MainActivity.ytIndex + 1, false);
+                                insertPosition(model, MusicService.ytIndex + 1, false);
                                 break;
                             case R.id.action_ringtone:
                                 YTutils.setDefaultRingtone(activity, f);
@@ -791,14 +792,14 @@ public class OPlaylistFragment extends Fragment {
                                 sheet.show(activity.getSupportFragmentManager(), "");
                                 break;
                             case R.id.action_add_queue:
-                                if (MainActivity.yturls.size() == 0) {
+                                if (MusicService.yturls.size() == 0) {
                                     PlayMusic_Offline(position);
                                     return true;
                                 }
-                                insertPosition(model, MainActivity.yturls.size(), true);
+                                insertPosition(model, MusicService.yturls.size(), true);
                                 break;
                             case R.id.action_edit_tag:
-                                if (MainActivity.videoID != null && MainActivity.videoID.equals(model.getPath())) {
+                                if (MusicService.videoID != null && MusicService.videoID.equals(model.getPath())) {
                                     Toast.makeText(activity, "Cannot edit tags when playing", Toast.LENGTH_SHORT).show();
                                     return false;
                                 }
@@ -914,26 +915,26 @@ public class OPlaylistFragment extends Fragment {
 
                                             boolean wasOnlyFile = false;
 
-                                            if (MainActivity.yturls.size() > 0) {
-                                                int index = MainActivity.yturls.indexOf(model.getPath());
+                                            if (MusicService.yturls.size() > 0) {
+                                                int index = MusicService.yturls.indexOf(model.getPath());
                                                 if (index < position)
-                                                    MainActivity.ytIndex--;
-                                                MainActivity.yturls.remove(model.getPath());
-                                                if (MainActivity.nPlayModels.size() > 0)
-                                                    for (NPlayModel nPlayModel : MainActivity.nPlayModels) {
+                                                    MusicService.ytIndex--;
+                                                MusicService.yturls.remove(model.getPath());
+                                                if (MusicService.nPlayModels.size() > 0)
+                                                    for (NPlayModel nPlayModel : MusicService.nPlayModels) {
                                                         if (nPlayModel.getUrl().equals(model.getPath())) {
-                                                            MainActivity.nPlayModels.remove(nPlayModel);
+                                                            MusicService.nPlayModels.remove(nPlayModel);
                                                             break;
                                                         }
                                                     }
                                             }
                                             yturls.remove(position);
                                             ofModels.remove(position);
-                                            if (MainActivity.videoID != null && MainActivity.videoID.equals(model.getPath())) {
+                                            if (MusicService.videoID != null && MusicService.videoID.equals(model.getPath())) {
                                                 if (yturls.size() > 0) {
                                                     PlayMusic_Offline(position);
                                                 } else {
-                                                    MainActivity.onClear();
+                                                    MusicService.onClear();
                                                     MainActivity.bottom_player.setVisibility(View.GONE);
                                                 }
                                             }
@@ -1024,26 +1025,26 @@ public class OPlaylistFragment extends Fragment {
         }
 
         void insertPosition(OFModel model, int position, boolean addLast) {
-            if (MainActivity.videoID.equals(model.getPath())) {
+            if (MusicService.videoID.equals(model.getPath())) {
                 Toast.makeText(activity, "Song is already playing!", Toast.LENGTH_SHORT).show();
                 return;
             }
             Log.e(TAG, "insertPosition: Path: " + model.getPath());
             int insertAt = position;
-            if (MainActivity.yturls.contains(model.getPath())) {
+            if (MusicService.yturls.contains(model.getPath())) {
                 if (addLast) {
                     Toast.makeText(activity, "Song already in queue", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 Log.e(TAG, "insertPosition: Item already exist");
-                int pos = MainActivity.yturls.indexOf(model.getPath());
+                int pos = MusicService.yturls.indexOf(model.getPath());
                 if (pos < position) {
-                    MainActivity.ytIndex--;
+                    MusicService.ytIndex--;
                     insertAt = position - 1;
                 }
-                MainActivity.yturls.remove(model.getPath());
+                MusicService.yturls.remove(model.getPath());
             }
-            if (MainActivity.nPlayModels.size() == MainActivity.yturls.size() && MainActivity.yturls.size() > 0) {
+            if (MusicService.nPlayModels.size() == MusicService.yturls.size() && MusicService.yturls.size() > 0) {
                 File f = new File(model.getPath());
                 Uri uri = Uri.fromFile(f);
                 byte[] data = null;
@@ -1064,10 +1065,10 @@ public class OPlaylistFragment extends Fragment {
                 );
                 NPlayModel nPlayModel = new NPlayModel(model.getPath(), new YTMeta(model1), false);
                 nPlayModel.setIcon(icon);
-                MainActivity.nPlayModels.add(insertAt, nPlayModel);
+                MusicService.nPlayModels.add(insertAt, nPlayModel);
             }
             Log.e(TAG, "insertPosition: Inserted position" + insertAt);
-            MainActivity.yturls.add(insertAt, model.getPath());
+            MusicService.yturls.add(insertAt, model.getPath());
             Toast.makeText(activity, "Song added to queue", Toast.LENGTH_SHORT).show();
         }
 

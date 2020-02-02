@@ -32,6 +32,7 @@ import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.HistoryModel;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
+import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.YTLength;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
@@ -156,7 +157,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.MyViewHo
         viewHolder.mainCard.setOnLongClickListener(longClickListener);
 
         viewHolder.mainCard.setOnClickListener(v -> {
-            MainActivity.nPlayModels.clear();
+            MusicService.nPlayModels.clear();
             String[] arr = new String[models.size()];
             for (int i = 0; i < arr.length; i++) {
                 HistoryModel mod = models.get(i);
@@ -167,7 +168,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.MyViewHo
                     Log.e(TAG, "onBindViewHolder: Made playing: "+listPosition );
                 }
                 NPlayModel nPlayModel = new NPlayModel(YTutils.getYtUrl(mod.getVideoId()),new YTMeta(metaModel),false);
-                MainActivity.nPlayModels.add(nPlayModel);
+                MusicService.nPlayModels.add(nPlayModel);
 
                 arr[i] = YTutils.getYtUrl(mod.getVideoId());
             }

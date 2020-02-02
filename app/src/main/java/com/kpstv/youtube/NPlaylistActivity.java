@@ -39,6 +39,7 @@ import com.kpstv.youtube.helper.OnStartDragListener;
 import com.kpstv.youtube.helper.SimpleItemTouchHelperCallback;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
+import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
@@ -90,15 +91,14 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
         // Set current song...
 
-        cTitle.setText(MainActivity.videoTitle);
-        cAuthor.setText(MainActivity.channelTitle);
-        cImageView.setImageBitmap(MainActivity.bitmapIcon);
+        cTitle.setText(MusicService.videoTitle);
+        cAuthor.setText(MusicService.channelTitle);
+        cImageView.setImageBitmap(MusicService.bitmapIcon);
 
         // Set recycler view...
 
         manager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(manager);
-        recyclerView.setHasFixedSize(true);
 
         // Set Data and set which one is playing right now...
 
@@ -130,7 +130,7 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                         // Reversing list...
                         Arrays.sort(pos, Collections.reverseOrder());
                         for (int c : pos) {
-                            if (MainActivity.ytIndex==c) {
+                            if (MusicService.ytIndex==c) {
                                 isCurrentOne=true;
                             }
                             removeItem(c);
@@ -141,12 +141,12 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                         setCheckedCallbacks();
 
                         if (isCurrentOne) {
-                            if (MainActivity.yturls.size()>0) {
-                                MainActivity.PlayVideo(YTutils.convertListToArrayMethod(MainActivity.yturls),0);
+                            if (MusicService.yturls.size()>0) {
+                                MainActivity.PlayVideo(YTutils.convertListToArrayMethod(MusicService.yturls),0);
                             }else closePlayer();
                         }
 
-                        if (MainActivity.yturls.size()<=0) closePlayer();
+                        if (MusicService.yturls.size()<=0) closePlayer();
                     }
 
                 case MotionEvent.ACTION_CANCEL: {
@@ -180,26 +180,36 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
         runnable = new Runnable() {
             @Override
             public void run() {
-                if (!MainActivity.videoTitle.equals(cTitle.getText().toString())) {
-                    cTitle.setText(MainActivity.videoTitle);
+                Log.e(TAG, "run: LocalPlayBack: "+MusicService.localPlayBack);
+                if (!MusicService.videoTitle.equals(cTitle.getText().toString())) {
+                    cTitle.setText(MusicService.videoTitle);
                 }
-                if  (!MainActivity.channelTitle.equals(cAuthor.getText().toString())) {
-                    cAuthor.setText(MainActivity.channelTitle);
-                    cImageView.setImageBitmap(MainActivity.bitmapIcon);
+
+                if  (!MusicService.channelTitle.equals(cAuthor.getText().toString())) {
+                    Log.e(TAG, "run: Beginning of the end" );
+                    cAuthor.setText(MusicService.channelTitle);
+                    //cImageView.setColorFilter(ContextCompat.getColor(NPlaylistActivity.this,R.color.black));
+                    Bitmap localBitMap = YTutils.drawableToBitmap(ContextCompat.getDrawable(NPlaylistActivity.this,R.drawable.ic_pulse));
+                    if (MusicService.bitmapIcon.sameAs(localBitMap))
+                        cImageView.setColorFilter(ContextCompat.getColor(NPlaylistActivity.this,R.color.black));
+                    else {
+                        cImageView.clearColorFilter();
+                        cImageView.setImageBitmap(MusicService.bitmapIcon);
+                    }
 
                     for (NPlayModel model : models) {
 
                         /** For local playback stuff */
-                        if (MainActivity.localPlayBack) {
+                        if (MusicService.localPlayBack) {
                             //TODO: Remove this color filter when you find a suitable offline image
-                            cImageView.setColorFilter(ContextCompat.getColor(NPlaylistActivity.this,R.color.black));
-                            if (MainActivity.videoID.equals(model.getUrl()))
+                         //   cImageView.setColorFilter(ContextCompat.getColor(NPlaylistActivity.this,R.color.black));
+                            if (MusicService.videoID.equals(model.getUrl()))
                                 model.set_playing(true);
                             else model.set_playing(false);
                             continue;
                         }
 
-                        if (YTutils.getVideoID(model.getUrl()).equals(MainActivity.videoID)) {
+                        if (YTutils.getVideoID(model.getUrl()).equals(MusicService.videoID)) {
                             model.set_playing(true);
                         }else model.set_playing(false);
                     }
@@ -217,9 +227,9 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
     }
 
     void closePlayer() {
-        MainActivity.onClear();
+        MusicService.onClear();
         MainActivity.bottom_player.setVisibility(View.GONE);
-        MainActivity.notificationManagerCompat.cancel(1);
+        MusicService.notificationManagerCompat.cancel(1);
         startActivity(new Intent(this,MainActivity.class));
         finish();
     }
@@ -239,11 +249,11 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
     @Override
     protected void onStart() {
         super.onStart();
-        if (MainActivity.yturls.size()>0) {
+        if (MusicService.yturls.size()>0) {
             models.clear();
             // Check for old data....
-            Log.e(TAG, "onStart: Data Size: "+MainActivity.nPlayModels.size()+", YTUrl size: "+MainActivity.yturls.size() );
-            if (MainActivity.nPlayModels.size()>0 && MainActivity.yturls.size() == MainActivity.nPlayModels.size()) {
+            Log.e(TAG, "onStart: Data Size: "+MusicService.nPlayModels.size()+", YTUrl size: "+MusicService.yturls.size() );
+            if (MusicService.nPlayModels.size()>0 && MusicService.yturls.size() == MusicService.nPlayModels.size()) {
                 new AsyncTask<Void,Float,Void>() {
                     boolean sameData=true;
 
@@ -261,25 +271,25 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
                     @Override
                     protected Void doInBackground(Void... voids) {
-                        final int totalSize = MainActivity.nPlayModels.size();
-                        for(int i=0;i<MainActivity.nPlayModels.size();i++) {
-                            MainActivity.nPlayModels.get(i).set_playing(false);
-                            String yturl = MainActivity.yturls.get(i);
-                            String nurl = MainActivity.nPlayModels.get(i).getUrl();
+                        final int totalSize = MusicService.nPlayModels.size();
+                        for(int i=0;i<MusicService.nPlayModels.size();i++) {
+                            MusicService.nPlayModels.get(i).set_playing(false);
+                            String yturl = MusicService.yturls.get(i);
+                            String nurl = MusicService.nPlayModels.get(i).getUrl();
 
                             String videoID;
 
                             /** For local playback stuff */
-                            MetaModel metaData = MainActivity.nPlayModels.get(i).getModel().getVideMeta();
-                            if (MainActivity.localPlayBack)
-                                videoID = MainActivity.nPlayModels.get(i).getUrl();
+                            MetaModel metaData = MusicService.nPlayModels.get(i).getModel().getVideMeta();
+                            if (MusicService.localPlayBack)
+                                videoID = MusicService.nPlayModels.get(i).getUrl();
                            /* else if (metaData.getVideoID()!=null && metaData.getVideoID().contains("soundcloud.com")) videoID = metaData.getVideoID();
                           */  else videoID = metaData.getVideoID();
 
-                            Log.e(TAG, "doInBackground: MainId: "+MainActivity.videoID+", LocalId: "+videoID );
-                            if (MainActivity.videoID.equals(videoID)) {
+                            Log.e(TAG, "doInBackground: MainId: "+MusicService.videoID+", LocalId: "+videoID );
+                            if (MusicService.videoID.equals(videoID)) {
                                 Log.e(TAG, "doInBackground: This is playing..." );
-                                MainActivity.nPlayModels.get(i).set_playing(true);
+                                MusicService.nPlayModels.get(i).set_playing(true);
                             }
 
                             publishProgress((float)((float)i*(float)100.0/(float)(totalSize)));
@@ -311,7 +321,7 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
 
     void runCommonTask() {
-        if (MainActivity.localPlayBack)
+        if (MusicService.localPlayBack)
             new getAllOfflineData(this).execute();
         else {
             new getData(this).execute();
@@ -346,10 +356,10 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (MainActivity.localPlayBack) {
+            if (MusicService.localPlayBack) {
                 int i=0;
-                final int totalSize = MainActivity.yturls.size();
-                for (String url: MainActivity.yturls) {
+                final int totalSize = MusicService.yturls.size();
+                for (String url: MusicService.yturls) {
                     File f = new File(url);
                     Uri uri = Uri.fromFile(f);
                     try {
@@ -376,7 +386,7 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
                         MetaModel model = new MetaModel(url,title,artist,null);
                         YTMeta meta = new YTMeta(model);
-                        if (MainActivity.videoID.equals(url))
+                        if (MusicService.videoID.equals(url))
                             models.add(new NPlayModel(url,meta,true));
                         else  models.add(new NPlayModel(url,meta,false));
 
@@ -402,12 +412,13 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
     }
 
     void reloadAdapter() {
-        models = new ArrayList<>(MainActivity.nPlayModels);
+        models = new ArrayList<>(MusicService.nPlayModels);
         adapter = new NPlayAdapter(models,this, this);
         setAdapterClicks();
         recyclerView.setAdapter(adapter);
     }
 
+    @SuppressLint("StaticFieldLeak")
     void setAdapterClicks() {
 
         callback = new SimpleItemTouchHelperCallback(adapter);
@@ -416,15 +427,14 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
         adapter.setOnSingleClickListener((view, position ,model, holder) -> {
             // Remove current queue song and make it current...
+
             for(int i=0;i<models.size();i++) {
                 models.get(i).set_playing(false);
             }
             models.get(position).set_playing(true);
-            String url = model.getUrl();
-            new setCurrentData(url).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
             /** For local playback stuff */
-            if (!MainActivity.localPlayBack)
+            if (!MusicService.localPlayBack)
                 MainActivity.ChangeVideo(position);
             else MainActivity.ChangeVideoOffline(position);
             adapter.notifyDataSetChanged();
@@ -452,12 +462,12 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
     void removeItem(int position) {
       //  models.remove(position);
        try {
-           if (MainActivity.videoID.equals(MainActivity.yturls.get(position))) {
+           if (MusicService.videoID.equals(MusicService.yturls.get(position))) {
                Toast.makeText(this, "Cannot remove currently playing song!", Toast.LENGTH_SHORT).show();
                return;
            }
-           MainActivity.nPlayModels.remove(position);
-           MainActivity.yturls.remove(position);
+           MusicService.nPlayModels.remove(position);
+           MusicService.yturls.remove(position);
        }catch (Exception e) {
            e.printStackTrace();
            Log.e(TAG, "removeItem: Error: "+e.getMessage() );
@@ -503,13 +513,13 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
         @Override
         protected Void doInBackground(Void... voids) {
             int i=0;
-            final int totalSize = MainActivity.yturls.size();
-            for (String url: MainActivity.yturls) {
+            final int totalSize = MusicService.yturls.size();
+            for (String url: MusicService.yturls) {
                 Log.e(TAG, "doInBackground: NPlayListActivity: " + url);
 
                 meta = new YTMeta(YTutils.getVideoID(url));
                 if (meta.getVideMeta() != null) {
-                    if (meta.getVideMeta().getVideoID().equals(MainActivity.videoID)) {
+                    if (meta.getVideMeta().getVideoID().equals(MusicService.videoID)) {
                         models.add(new NPlayModel(url, meta, true));
                     } else
                         models.add(new NPlayModel(url, meta, false));
@@ -532,7 +542,10 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if (meta.getVideMeta()!=null) {
+            if (MusicService.localPlayBack) {
+
+            }
+            if (meta.getVideMeta()!=null && !MusicService.localPlayBack) {
                 cTitle.setText(YTutils.getVideoTitle(meta.getVideMeta().getTitle()));
                 cAuthor.setText(YTutils.getChannelTitle(meta.getVideMeta().getTitle(),meta.getVideMeta().getAuthor()));
                 Glide.with(NPlaylistActivity.this)
@@ -544,12 +557,12 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
                                 Palette.generateAsync(resource, palette -> {
                                     cImageView.setImageBitmap(resource);
 
-                                    MainActivity.bitmapIcon = resource;
-                                    MainActivity.nColor = palette.getVibrantColor(NPlaylistActivity.this
+                                    MusicService.bitmapIcon = resource;
+                                    MusicService.nColor = palette.getVibrantColor(NPlaylistActivity.this
                                             .getResources().getColor(R.color.light_white));
-                                    Log.e(TAG, "setCurrentData: Changing nColor: "+MainActivity.nColor +
-                                            ", ImageUri: "+MainActivity.imgUrl );
-                                    MainActivity.rebuildNotification();
+                                    Log.e(TAG, "setCurrentData: Changing nColor: "+MusicService.nColor +
+                                            ", ImageUri: "+MusicService.imgUrl );
+                                    MusicService.rebuildNotification();
                                 });
 
                             }

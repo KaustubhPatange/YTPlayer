@@ -3,20 +3,14 @@ package com.kpstv.youtube.utils;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Application;
-import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -44,11 +38,8 @@ import android.support.v4.content.FileProvider;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.os.EnvironmentCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.graphics.Palette;
-import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.Spanned;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,7 +58,6 @@ import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
-import com.google.gson.Gson;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -79,15 +69,15 @@ import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.BuildConfig;
 import com.kpstv.youtube.CPlaylistActivity;
 import com.kpstv.youtube.MainActivity;
-import com.kpstv.youtube.PlayerActivity;
+import com.kpstv.youtube.PlayerActivity2;
 import com.kpstv.youtube.PurchaseActivity;
 import com.kpstv.youtube.R;
-import com.kpstv.youtube.fragments.DownloadBottomSheet;
+import com.kpstv.youtube.helper.BillingUtils;
 import com.kpstv.youtube.models.LocalModel;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.services.IntentDownloadService;
-import com.naveed.ytextractor.model.YTMedia;
+import com.kpstv.youtube.services.MusicService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -104,10 +94,10 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -124,15 +114,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -140,10 +125,10 @@ import java.util.zip.ZipOutputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import static android.content.Context.DOWNLOAD_SERVICE;
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
-import static com.kpstv.youtube.MainActivity.supportFFmpeg;
+import static com.kpstv.youtube.services.MusicService.showAd;
+import static com.kpstv.youtube.services.MusicService.supportFFmpeg;
 
 public class YTutils implements AppInterface {
 
@@ -169,6 +154,10 @@ public class YTutils implements AppInterface {
         return "https://i.ytimg.com/vi/"+videoID+"/hqdefault.jpg";
     }
 
+    public static String getImageUrlID_MQ(String videoID) {
+        return "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg";
+    }
+
     public static String getImageUrlID(String videoID) {
         String imageUrl = "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg";
         try {
@@ -189,6 +178,80 @@ public class YTutils implements AppInterface {
 
         return imageUrl;
     }*/
+
+    public static void openSong(Context context, Intent intent) {
+        try {
+
+                   /* if (MainActivity.activity==null) {
+                        Intent im = new Intent(context, MainActivity.class);
+                        im.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(im);
+                    }*/
+
+            Log.e(TAG, "onReceive: triggered" );
+            Log.e(TAG, "onReceive: "+intent.getData().toString());
+            Uri uri = intent.getData();
+            Log.e(TAG, "onReceive: "+uri.toString() );
+            File f = new File(uri.getPath());
+            Log.e(TAG, "onReceive: File: "+f.getPath());
+            if (!f.exists()) {
+                f = new File(uri.toString().replace(".mp3",".m4a"));
+            }
+
+            if (f.exists()) {
+
+                if (uri.toString().contains(".mp4")) {
+                    Intent i = new Intent();
+                    i.setAction(Intent.ACTION_VIEW);
+                    i.setDataAndType(uri, "video/*");
+                    i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(i);
+                    return;
+                }
+
+                File downloads = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS);
+                File[] files = downloads.listFiles(new FileFilter() {
+                    @Override
+                    public boolean accept(File file)
+                    {
+                        return (file.getPath().endsWith(".mp3")||file.getPath().endsWith(".m4a")
+                                ||file.getPath().endsWith(".wav")||file.getPath().endsWith(".aac")
+                                ||file.getPath().endsWith(".ogg")||file.getPath().endsWith(".flac"));
+                    }
+                });
+                if (files.length>0) {
+                    String[] ids = new String[files.length];
+                    int position = 0;
+                    for (int i=0;i<files.length;i++) {
+                        File id = files[i];
+                        ids[i] = files[i].getPath();
+                        Log.e(TAG, "onReceive: ID PATH: "+id.getPath());
+                        if (id.getPath().equals(f.getPath())) {
+                            position=i;
+                            break;
+                        }
+                    }
+                    MainActivity.PlayVideo_Local(context,ids,position);
+                }else
+                    Toast.makeText(context, "There seems to be an error in parsing downloads!", Toast.LENGTH_SHORT).show();
+
+            }else Toast.makeText(context, "Error: File not found!", Toast.LENGTH_SHORT).show();
+
+        }catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(context, "Error: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public static void commonBilling(Context context) {
+        SharedPreferences pref = context.getSharedPreferences("appSettings",MODE_PRIVATE);
+        if (!pref.getBoolean("pref_audioChange",true))
+            AppSettings.listenAudioChange = false;
+
+        if (pref.getBoolean("pref_purchase",false))
+            BillingUtils.publishPremium();
+    }
 
     public static String getYtUrl(String videoID) {
         if (videoID.contains("soundcloud.com"))
@@ -388,7 +451,7 @@ public class YTutils implements AppInterface {
         String t = title;
         if (t.contains("-")) {
             t = t.split("-")[1].trim();
-            MainActivity.channelTitle = title.split("-")[0];
+            MusicService.channelTitle = title.split("-")[0];
         } // (Mark orision)
         if (t.contains("(")) {
             t = t.split("\\(")[0].trim();
@@ -1096,40 +1159,8 @@ public class YTutils implements AppInterface {
                     act.startActivityForResult(intent, 100);
 
                 }
-            /*//    if (Build.VERSION.SDK_INT >=29) {
-                if (true) {
-
-
-                    return;
-                }
-                Intent install = new Intent(Intent.ACTION_VIEW)
-                        .setDataAndType(data,
-                                "application/vnd.android.package-archive");
-                install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(install);*/
             }else Toast.makeText(context, "Update file does not exist!", Toast.LENGTH_SHORT).show();
         }
-
-       /* BroadcastReceiver onComplete = new BroadcastReceiver() {
-            public void onReceive(Context ctxt, Intent intent) {
-                Log.e(TAG, "onReceive: Got here..." );
-                long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-                if (downloadID == id) {
-                    Log.e("FileDownloadLink",Uri.fromFile(getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName)).toString());
-
-                    if (getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName).exists())
-                    {
-                        runInstall(ctxt,updateName);
-                    }
-                    else
-                        Toast.makeText(ctxt, "There is a problem with update package!", Toast.LENGTH_SHORT).show();
-
-                    context.unregisterReceiver(this);
-                }
-            }
-        };*/
-
 
         private Uri getApkUri(String path) {
 
@@ -1179,6 +1210,7 @@ public class YTutils implements AppInterface {
                 JSONObject object = new JSONObject(json);
                 String changelogHtml = object.getString("changelog");
                 String downloadUri = object.getString("download");
+
                 int newVer = Integer.parseInt(object.getString("new")
                         .replace(".",""));
                 updateName = "YTPlayer_v"+newVer+".apk";
@@ -1237,6 +1269,7 @@ public class YTutils implements AppInterface {
                // alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setVisibility(View.GONE);
                 if (getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName).exists())
                 {
+                    Toast.makeText(context, "Download complete, Click Install!", Toast.LENGTH_SHORT).show();
                     alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setVisibility(View.VISIBLE);
                     alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setText("Install");
                     alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
@@ -1337,6 +1370,9 @@ public class YTutils implements AppInterface {
                     config.setTargetName(YTutils.getTargetName(config));
                     config.setTaskExtra("autoTask");
 
+                    if (AppSettings.showAds)
+                        showAd(context);
+
                     Intent serviceIntent = new Intent(context, IntentDownloadService.class);
                     serviceIntent.putExtra("addJob", config);
                     ContextCompat.startForegroundService(context, serviceIntent);
@@ -1344,6 +1380,28 @@ public class YTutils implements AppInterface {
                 .create();
 
         alertDialog.show();
+    }
+
+    public static void showAd(Context con) {
+
+        try {
+            InterstitialAd mInterstitialAd = new InterstitialAd(con);
+            mInterstitialAd.setAdUnitId("ca-app-pub-1164424526503510/4801416648");
+            mInterstitialAd.loadAd(new AdRequest.Builder().addTestDevice("07153BA64BB64F7C3F726B71C4AE30B9").build());
+            mInterstitialAd.setAdListener(new AdListener() {
+                @Override
+                public void onAdFailedToLoad(int i) {
+                    super.onAdFailedToLoad(i);
+                    Log.e(TAG, "onAdFailedToLoad: Ad failed to load: " + i);
+                }
+
+                @Override
+                public void onAdLoaded() {
+                    super.onAdLoaded();
+                    mInterstitialAd.show();
+                }
+            });
+        } catch (Exception ignored){}
     }
 
     public static String getTargetName(YTConfig config) {

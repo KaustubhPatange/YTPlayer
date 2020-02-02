@@ -27,6 +27,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PlayerActivity2;
 import com.kpstv.youtube.R;
+import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.SoundCloud;
 import com.kpstv.youtube.utils.YTutils;
 
@@ -69,8 +70,8 @@ public class PlayerAdapter extends PagerAdapter {
         ImageView imageView = itemView.findViewById(R.id.mainImage);
         ImageView imageView1 = itemView.findViewById(R.id.mainImage1);
 
-        if (MainActivity.localPlayBack) {
-            File f = new File(MainActivity.yturls.get(position));
+        if (MusicService.localPlayBack) {
+            File f = new File(MusicService.yturls.get(position));
             try {
                 MediaMetadataRetriever mmr = new MediaMetadataRetriever();
                 mmr.setDataSource(context, Uri.fromFile(f));
@@ -103,11 +104,11 @@ public class PlayerAdapter extends PagerAdapter {
                                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                                         Palette.generateAsync(resource, palette -> {
                                             imageView.setImageBitmap(resource);
-                                           /* MainActivity.imgUrl = soundCloud.getModel().getImageUrl();
-                                            MainActivity.bitmapIcon = resource;
-                                            MainActivity.nColor = palette.getVibrantColor(context.getResources()
+                                           /* MusicService.imgUrl = soundCloud.getModel().getImageUrl();
+                                            MusicService.bitmapIcon = resource;
+                                            MusicService.nColor = palette.getVibrantColor(context.getResources()
                                                     .getColor(R.color.light_white));
-                                            MainActivity.rebuildNotification();*/
+                                            MusicService.rebuildNotification();*/
                                         });
                                     }
 

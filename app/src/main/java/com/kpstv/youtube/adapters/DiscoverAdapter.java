@@ -1,53 +1,39 @@
 package com.kpstv.youtube.adapters;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.MainActivity;
-import com.kpstv.youtube.PlayerActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.models.DiscoverModel;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
-import com.kpstv.youtube.models.SearchModel;
-import com.kpstv.youtube.utils.HttpHandler;
-import com.kpstv.youtube.utils.OnLoadMoreListener;
+import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.YTLength;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
-import com.mikhaellopez.circularprogressbar.CircularProgressBar;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -197,7 +183,7 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
 
                 // A quick smart hack... to set Playlist models directly during loading...
 
-                MainActivity.nPlayModels.clear();
+                MusicService.nPlayModels.clear();
                 String[] yturls = new String[discoverModels.size()];
                 for (int i=0;i<yturls.length;i++) {
                     MetaModel metaModel = new MetaModel(
@@ -209,7 +195,7 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
                     NPlayModel nPlayModel = new NPlayModel(
                             discoverModels.get(i).getYtUrl(),
                             new YTMeta(metaModel),false);
-                    MainActivity.nPlayModels.add(nPlayModel);
+                    MusicService.nPlayModels.add(nPlayModel);
                     yturls[i] = discoverModels.get(i).getYtUrl();
                 }
                 MainActivity.PlayVideo(yturls,position);

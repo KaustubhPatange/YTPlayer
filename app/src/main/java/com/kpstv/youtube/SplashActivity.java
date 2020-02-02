@@ -33,13 +33,6 @@ public class SplashActivity extends AppCompatActivity {
         File f = YTutils.getFile("YTPlayer");
         f.mkdirs();
 
-        SharedPreferences pref = getSharedPreferences("appSettings",MODE_PRIVATE);
-        if (!pref.getBoolean("pref_audioChange",true))
-            AppSettings.listenAudioChange = false;
-
-        if (pref.getBoolean("pref_purchase",false))
-            BillingUtils.publishPremium();
-
         SharedPreferences preferences = getSharedPreferences("settings",MODE_PRIVATE);
         if (!preferences.getBoolean("intro",false)) {
             startActivity(new Intent(this,IntroActivity.class));

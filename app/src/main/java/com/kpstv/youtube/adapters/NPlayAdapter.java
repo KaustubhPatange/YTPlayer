@@ -2,18 +2,11 @@ package com.kpstv.youtube.adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MotionEventCompat;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -21,28 +14,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.kpstv.youtube.MainActivity;
-import com.kpstv.youtube.NPlaylistActivity;
-import com.kpstv.youtube.PlayerActivity;
-import com.kpstv.youtube.PlayerActivity2;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.helper.ItemTouchHelperAdapter;
 import com.kpstv.youtube.helper.ItemTouchHelperViewHolder;
 import com.kpstv.youtube.helper.OnStartDragListener;
-import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
-import com.kpstv.youtube.models.SearchModel;
+import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.EqualizerView;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
-
-import org.mozilla.javascript.tools.jsc.Main;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -74,12 +57,12 @@ public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder
     @Override
     public boolean onItemMoved(int fromPosition, int toPosition) {
         Log.e("onItemMoved","true");
-        MainActivity.nPlayModels = new ArrayList<>(models);
-        MainActivity.yturls.clear();
+        MusicService.nPlayModels = new ArrayList<>(models);
+        MusicService.yturls.clear();
         for (int i=0;i<models.size();i++){
-            MainActivity.yturls.add(models.get(i).getUrl());
+            MusicService.yturls.add(models.get(i).getUrl());
             if (models.get(i).is_playing()) {
-                MainActivity.ytIndex = i;
+                MusicService.ytIndex = i;
                 Log.e(TAG, "onItemMoved: Current Index: "+i);
             }
             models.get(i).set_selected(false);
@@ -175,7 +158,7 @@ public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder
             holder.titleText.setText(YTutils.getVideoTitle(meta.getVideMeta().getTitle()));
 
             /** For local playback stuff */
-            if (!MainActivity.localPlayBack)
+            if (!MusicService.localPlayBack)
                 holder.authorText.setText(YTutils.getChannelTitle(meta.getVideMeta().getTitle(),meta.getVideMeta().getAuthor()));
             else holder.authorText.setText(meta.getVideMeta().getAuthor());
 
@@ -188,8 +171,8 @@ public class NPlayAdapter extends RecyclerView.Adapter<NPlayAdapter.MyViewHolder
             });
         }
 
-        if (listPosition+1==MainActivity.yturls.size()) {
-            MainActivity.nPlayModels = new ArrayList<>(models);
+        if (listPosition+1==MusicService.yturls.size()) {
+            MusicService.nPlayModels = new ArrayList<>(models);
         }
     }
 
