@@ -142,11 +142,14 @@ public class YTutils implements AppInterface {
     }
 
     public static String getImageUrl(String YtUrl) {
-        String imageUrl = "https://i.ytimg.com/vi/"+getVideoID(YtUrl)+"/mqdefault.jpg";
+        String quality = MainActivity.activity.getSharedPreferences("appSettings",MODE_PRIVATE)
+                .getString("pref_image_quality","mq");
+        return "https://i.ytimg.com/vi/"+getVideoID(YtUrl)+"/"+quality+"default.jpg";
+       /* String imageUrl = "https://i.ytimg.com/vi/"+getVideoID(YtUrl)+"/mqdefault.jpg";
         if (MainActivity.activity.getSharedPreferences("appSettings",MODE_PRIVATE)
                 .getString("pref_image_quality","mq").equals("hq"))
             imageUrl = "https://i.ytimg.com/vi/"+getVideoID(YtUrl)+"/hqdefault.jpg";
-        return imageUrl;
+        return imageUrl;*/
     }
 
 
@@ -154,19 +157,26 @@ public class YTutils implements AppInterface {
         return "https://i.ytimg.com/vi/"+videoID+"/hqdefault.jpg";
     }
 
+    public static String getImageUrlID_MAX(String videoID) {
+        return "https://i.ytimg.com/vi/"+videoID+"/maxresdefault.jpg";
+    }
+
     public static String getImageUrlID_MQ(String videoID) {
         return "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg";
     }
 
     public static String getImageUrlID(String videoID) {
-        String imageUrl = "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg";
+        String quality = MainActivity.activity.getSharedPreferences("appSettings",MODE_PRIVATE)
+                .getString("pref_image_quality","mq");
+        return "https://i.ytimg.com/vi/"+videoID+"/"+quality+"default.jpg";
+       /* String imageUrl = "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg";
         try {
             if (MainActivity.activity.getSharedPreferences("appSettings",MODE_PRIVATE)
                     .getString("pref_image_quality","mq").equals("hq"))
                 imageUrl = "https://i.ytimg.com/vi/"+videoID+"/hqdefault.jpg";
         }catch (Exception e){e.printStackTrace();}
 
-        return imageUrl;
+        return imageUrl;*/
     }
     /*public static String getImageUrlID(Context context,String videoID) {
         String imageUrl = "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg";
@@ -1102,7 +1112,7 @@ public class YTutils implements AppInterface {
         @SuppressLint("StaticFieldLeak")
         Activity context;
         String updateName;
-        long downloadID; AsyncTask<Void,Integer,Void> updateTask;
+        long downloadID; AsyncTask<Void,Long,Void> updateTask;
 
 
         public CheckForUpdates(Activity context, boolean isAutomatic) {
@@ -1198,7 +1208,7 @@ public class YTutils implements AppInterface {
         }
 
         @SuppressLint("StaticFieldLeak")
-        ProgressBar progressBar; AlertDialog alertDialog;
+        ProgressBar progressBar; AlertDialog alertDialog; TextView progressText;
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
@@ -1226,6 +1236,7 @@ public class YTutils implements AppInterface {
                     showTxt.setText(getHtml(changelogHtml));
 
                     progressBar= v.findViewById(R.id.progressBar);
+                    progressText = v.findViewById(R.id.progressText);
 
                     alertDialog = new AlertDialog.Builder(context)
                             .setView(v)
@@ -1242,6 +1253,7 @@ public class YTutils implements AppInterface {
 
                             alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
                                 progressBar.setVisibility(View.VISIBLE);
+                                progressText.setVisibility(View.VISIBLE);
                                 alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setVisibility(View.GONE);
                                 updateTask = new downloadTask(downloadUri);
                                 updateTask.executeOnExecutor(THREAD_POOL_EXECUTOR);
@@ -1255,7 +1267,7 @@ public class YTutils implements AppInterface {
 
         }
 
-        class downloadTask extends AsyncTask<Void,Integer,Void> {
+        class downloadTask extends AsyncTask<Void,Long,Void> {
             String download_Uri;
 
             public downloadTask(String download_Uri) {
@@ -1269,6 +1281,7 @@ public class YTutils implements AppInterface {
                // alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setVisibility(View.GONE);
                 if (getFile(Environment.DIRECTORY_DOWNLOADS+"/"+updateName).exists())
                 {
+                    progressText.setVisibility(View.GONE);
                     Toast.makeText(context, "Download complete, Click Install!", Toast.LENGTH_SHORT).show();
                     alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setVisibility(View.VISIBLE);
                     alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setText("Install");
@@ -1284,19 +1297,23 @@ public class YTutils implements AppInterface {
             }
 
             @Override
-            protected void onProgressUpdate(Integer... values) {
-                if (values[0]<=100)
-                    progressBar.setProgress(values[0]);
+            protected void onProgressUpdate(Long... values) {
+                int val = values[0].intValue();
+                if (val<=100)
+                    progressBar.setProgress(val);
+                progressText.setText((values[1]/1000)+"/"+(values[2]/1000));
                 super.onProgressUpdate(values);
             }
 
             @Override
             protected Void doInBackground(Void... voids) {
+                File f = new File(YTutils.getFile(Environment.DIRECTORY_DOWNLOADS).getPath(), updateName);
+                if (f.exists()) return null;
                 PRDownloader.download(download_Uri,
                         YTutils.getFile(Environment.DIRECTORY_DOWNLOADS).getPath(), updateName)
                         .build()
                         .setOnProgressListener(progress1 -> {
-                           publishProgress((int)(progress1.currentBytes*100/progress1.totalBytes));
+                           publishProgress((progress1.currentBytes*100/progress1.totalBytes),progress1.currentBytes,progress1.totalBytes);
                         })
                         .start(new OnDownloadListener() {
                             @Override

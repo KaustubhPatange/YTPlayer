@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -34,7 +35,7 @@ public class SilentDownloadActivity extends AppCompatActivity {
     private RadioButton mRadio1080p;
     private RadioButton mRadio720p;
     private RadioButton mRadio480p;
-    private MetaModel meta;
+    private MetaModel meta; private AlertDialog alertDialog;
     private String url; private boolean adComplete=false,interstitialLoad=false;
     private LinearLayout mLoadlayout;
     private LinearLayout mMainlayout;
@@ -109,6 +110,18 @@ public class SilentDownloadActivity extends AppCompatActivity {
 
     @SuppressLint("StaticFieldLeak")
     private void commonIntentLaunch() {
+        if (url.contains("/playlist/")||url.contains("/album/")||url.contains("/playlist?")) {
+            View v = getLayoutInflater().inflate(R.layout.alert_not_playlist,null);
+
+            alertDialog = new AlertDialog.Builder(this)
+                    .setView(v)
+                    .setCancelable(false)
+                    .setPositiveButton("OK",(dialogInterface, i) -> finish())
+                    .create();
+
+            alertDialog.show();
+            return;
+        }
         url = parseLinkfromText(url);
         Log.e(TAG, "onCreate: Action: " + getIntent().getAction() + ", Url: " + url);
 

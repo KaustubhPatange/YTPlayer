@@ -225,10 +225,7 @@ public class HistoryFragment extends Fragment {
                 ));
             }
         }
-        /*if (!items.isEmpty()) {
-            String[] urlarray = items.split(",");
-            urls.addAll(Arrays.asList(urlarray));
-        }*/
+
         if (urls.size() > 0) {
             swipeRefreshLayout.setRefreshing(true);
             adapter = new HistoryAdapter(urls, getActivity(), recyclerItemLongListener);

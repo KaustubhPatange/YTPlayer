@@ -476,7 +476,7 @@ public class IntentDownloadService extends IntentService {
             String imageUri;
             if (currentModel.getVideoID().contains("soundcloud.com"))
                 imageUri = currentModel.getImageUrl();
-            else imageUri = YTutils.getImageUrlID_HQ(currentModel.getVideoID());
+            else imageUri = YTutils.getImageUrlID_MAX(currentModel.getVideoID());
 
             Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
                 @Override
@@ -804,7 +804,7 @@ public class IntentDownloadService extends IntentService {
             String imageUri;
             if (currentModel.getVideoID().contains("soundcloud.com"))
                 imageUri = currentModel.getImageUrl();
-            else imageUri = YTutils.getImageUrlID_HQ(currentModel.getVideoID());
+            else imageUri = YTutils.getImageUrlID_MAX(currentModel.getVideoID());
 
             Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
                 @Override

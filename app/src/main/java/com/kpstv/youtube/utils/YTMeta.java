@@ -59,7 +59,7 @@ public class YTMeta {
                         videoID,
                         object.getString("title"),
                         object.getString("author_name"),
-                        YTutils.getImageUrlID_MQ(videoID)
+                        YTutils.getImageUrlID(videoID)
                 );
                 model.setVideoID(videoID);
             } catch (JSONException e) {

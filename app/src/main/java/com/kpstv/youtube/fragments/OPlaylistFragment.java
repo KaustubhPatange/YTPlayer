@@ -42,9 +42,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,15 +76,21 @@ import com.kpstv.youtube.utils.SortOrder;
 import com.kpstv.youtube.utils.SortType;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
+import com.spyhunter99.supertooltips.ToolTip;
+import com.spyhunter99.supertooltips.ToolTipManager;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.net.URLDecoder;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
+import static com.kpstv.youtube.MainActivity.bottom_player;
+import static com.kpstv.youtube.MainActivity.toolTipManager;
 import static com.kpstv.youtube.utils.AppBarStateChangeListener.State.COLLAPSED;
 import static com.kpstv.youtube.utils.AppBarStateChangeListener.State.EXPANDED;
 import static com.kpstv.youtube.utils.AppBarStateChangeListener.State.IDLE;
@@ -116,7 +124,9 @@ public class OPlaylistFragment extends Fragment {
     GridLayoutManager gridLayoutManager;
     private static final String TAG = "OPlayListFragment";
     boolean loadComplete = false;
+    ToolTipManager toolTipManager;
     ProgressBar circularProgressBar;
+    AsyncTask<Void,String,Void> RescanTask;
 
     public OPlaylistFragment() {
     }
@@ -129,7 +139,13 @@ public class OPlaylistFragment extends Fragment {
             v = inflater.inflate(R.layout.fragment_oplaylist, container, false);
             activity = getActivity();
 
+            try {
+                ((InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE))
+                        .hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(),0);
+            }catch (Exception ignored){}
+
             toolbar = v.findViewById(R.id.toolbar);
+            toolTipManager = new ToolTipManager(activity);
 
             models = new ArrayList<>();
             albumModels = new ArrayList<>();
@@ -177,25 +193,6 @@ public class OPlaylistFragment extends Fragment {
                     });
                 }
             });
-            /*appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-                boolean isShow = true;
-                int scrollRange = -1;
-
-                @Override
-                public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                    if (scrollRange == -1) {
-                        scrollRange = appBarLayout.getTotalScrollRange();
-                    }
-                    if (scrollRange + verticalOffset == 0 && !isShow) {
-                        toolbarTextView.setText(title);
-                        isShow = true;
-                    } else if(isShow) {
-                        toolbarTextView.setText("");
-                        isShow = false;
-                    }
-                }
-            });
-*/
             Log.e(TAG, "onCreateView: Above Bundles");
 
             Bundle args = getArguments();
@@ -295,10 +292,19 @@ public class OPlaylistFragment extends Fragment {
                 toolbar.getMenu().getItem(0).getSubMenu()
                         .getItem(4 + AppSettings.sortOrder.ordinal()).setChecked(true);
 
+                if (searchMusic)
+                    toolbar.getMenu().getItem(1).setVisible(false);
+
                 Log.e(TAG, "onCreateView: Sort Order: " + AppSettings.sortType.ordinal() + toolbar.getMenu().getItem(0).getSubMenu()
                         .getItem(4 + AppSettings.sortOrder.ordinal()).getTitle());
                 MenuCompat.setGroupDividerEnabled(toolbar.getMenu(), true);
                 toolbar.setOnMenuItemClickListener(menuItem -> {
+                    if (menuItem.getItemId() == R.id.action_rescan) {
+                        //TODO: Add rescan method
+                        RescanTask = new rescanTask();
+                        RescanTask.execute();
+                        return true;
+                    }
                     if (menuItem.getItemId() == R.id.action_sort) return true;
                     menuItem.setChecked(true);
                     switch (menuItem.getItemId()) {
@@ -349,10 +355,112 @@ public class OPlaylistFragment extends Fragment {
                 });
             }
 
-            //   collapsingToolbarLayout.setTitle(title);
             isnetworkCreated = true;
         }
         return v;
+    }
+
+    private void setToolTip() {
+        SharedPreferences settingPref = activity.getSharedPreferences("settings",Context.MODE_PRIVATE);
+        if (!settingPref.getBoolean("showFabTip",false)) {
+            ToolTip toolTip = new ToolTip()
+                    .withText("Long press to shuffle and play music.")
+                    .withTextColor(activity.getResources().getColor(R.color.black))
+                    .withColor(activity.getResources().getColor(R.color.colorAccent))
+                    .withAnimationType(ToolTip.AnimationType.FROM_MASTER_VIEW)
+                    .withShadow();
+            toolTipManager.showToolTip(toolTip,playFab);
+            SharedPreferences.Editor editor = settingPref.edit();
+            editor.putBoolean("showFabTip",true);
+            editor.apply();
+        }
+    }
+
+    class rescanTask extends AsyncTask<Void,String,Void> {
+        TextView dtxtView,tTxtView;
+        AlertDialog alertdialog;
+        StringBuilder builder = new StringBuilder();
+        @Override
+        protected void onPreExecute() {
+            LayoutInflater inflater = getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.alert_scan_dialog, null);
+            dtxtView = dialogView.findViewById(R.id.textView);
+            tTxtView = dialogView.findViewById(R.id.title_textView);
+            AlertDialog.Builder alert = new AlertDialog.Builder(activity);
+            alert.setCancelable(false);
+            alert.setView(dialogView);
+            alert.setNegativeButton("Cancel", (dialogInterface, i) -> {
+                alertdialog.dismiss();
+                RescanTask.cancel(true);
+               /* try {
+                    temp.delete();
+                }catch (Exception ignored){}*/
+                Toast.makeText(activity, "Scanning interrupted!", Toast.LENGTH_SHORT).show();
+            });
+            alertdialog = alert.create();
+            alertdialog.show();
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            dtxtView.setText(values[0]);
+            tTxtView.setText("Scanning Folder: "+values[1]);
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if (alertdialog!=null) {
+                alertdialog.dismiss();
+                Toast.makeText(activity, "Scanning completed!", Toast.LENGTH_SHORT).show();
+                new getData_Offline(mainFile.getPath()).execute();
+            }
+            super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            publishProgress("Working...","(0/0)");
+            File[] files = new File(ofModel.getPath()).listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File file)
+                {
+                    return (file.getPath().endsWith(".mp3")||file.getPath().endsWith(".m4a")
+                            ||file.getPath().endsWith(".wav")||file.getPath().endsWith(".aac")
+                            ||file.getPath().endsWith(".ogg")||file.getPath().endsWith(".flac"));
+                }
+            });
+            int i=1;
+            for (File f : files) {
+                Uri uri = Uri.fromFile(f);
+                publishProgress(f.getPath(),"("+i+"/"+files.length+")");
+                try {
+                    MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                    mmr.setDataSource(activity,uri);
+                    String durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                    String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                    String album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+
+                    if (artist==null) artist ="Unknown artist";
+                    if (album==null) album = "Unknown album";
+
+                    int s = Integer.parseInt(durationStr)/1000;
+                    if (artist.contains("|"))
+                        artist = artist.replace("|","");
+                    if (album.contains("|")) album = album.replace("|","");
+                    builder.append("\n").append(f.getPath().trim()).append("|").append(artist.trim()).append("|")
+                            .append(album.trim()).append("|").append(s).append("|").append(YTutils.getDate(new Date(f.lastModified())));
+                }catch (Exception e) {
+                    Log.e(TAG, "searchRecursive: "+uri.toString());
+                }
+                i++;
+            }
+          //  File f = new File(activity.getFilesDir(),mainFile.getPath().replace("/","_")+".csv");
+            Log.e(TAG, "FileToSave: "+mainFile.getPath());
+            YTutils.writeContent(activity,mainFile.getPath(),builder.toString());
+            return null;
+        }
     }
 
     class searchTask extends AsyncTask<Void, Void, Void> {
@@ -418,6 +526,11 @@ public class OPlaylistFragment extends Fragment {
             }
 
             playFab.setOnClickListener(v -> PlayMusic_Offline(0));
+            playFab.setOnLongClickListener(view -> {
+                PlayShuffle_Offline();
+                return true;
+            });
+            setToolTip();
 
             /** Set Adapter Clicks */
 
@@ -684,6 +797,12 @@ public class OPlaylistFragment extends Fragment {
     }
 
     @Override
+    public void onPause() {
+        toolTipManager.closeActiveTooltip();
+        super.onPause();
+    }
+
+    @Override
     public void onResume() {
         Log.e(TAG, "onResume: Triggered onResume");
         super.onResume();
@@ -694,19 +813,35 @@ public class OPlaylistFragment extends Fragment {
         PlayMusic(position);
     };*/
 
-    void PlayMusic(int position) {
+    void PlayShuffle() {
+        if (yturls.size() == 0) return;
+        ArrayList<String> urls = new ArrayList<>(yturls);
+        Collections.shuffle(urls);
+        String[] videos = YTutils.ConvertToStringArray(urls);
+        MainActivity.PlayVideo(videos, 0);
+        Toast.makeText(activity, "Shuffle playing music", Toast.LENGTH_SHORT).show();
+    }
+
+    void PlayShuffle_Offline() {
+        if (yturls.size() == 0) return;
+        ArrayList<String> files = new ArrayList<>(yturls);
+        Collections.shuffle(files);
+        String[] videos = YTutils.ConvertToStringArray(files);
+        MainActivity.PlayVideo_Local(videos, 0);
+        Toast.makeText(activity, "Shuffle playing music", Toast.LENGTH_SHORT).show();
+    }
+
+   void PlayMusic(int position) {
         if (yturls.size() == 0) return;
         String[] videos = YTutils.ConvertToStringArray(yturls);
         MainActivity.PlayVideo(videos, position);
-    }
+   }
 
-    void PlayMusic_Offline(int position) {
+   void PlayMusic_Offline(int position) {
         if (yturls.size() == 0) return;
         String[] files = YTutils.ConvertToStringArray(yturls);
         MainActivity.PlayVideo_Local(files, position);
-    }
-
-
+   }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -759,6 +894,11 @@ public class OPlaylistFragment extends Fragment {
                 recyclerView.setVisibility(View.VISIBLE);
 
                 playFab.setOnClickListener(v -> PlayMusic_Offline(0));
+                playFab.setOnLongClickListener(view -> {
+                    PlayShuffle_Offline();
+                    return true;
+                });
+                setToolTip();
 
                 ofadapter.setSingleClickListener((v1, model, position) -> {
                     PlayMusic_Offline(position);
@@ -1137,6 +1277,11 @@ public class OPlaylistFragment extends Fragment {
             recyclerView.setVisibility(View.VISIBLE);
 
             playFab.setOnClickListener(v -> PlayMusic(0));
+            playFab.setOnLongClickListener(view -> {
+                PlayShuffle();
+                return true;
+            });
+            setToolTip();
 
             super.onPostExecute(aVoid);
         }

@@ -30,4 +30,6 @@
 
         </menu>
     </item>
+    <item android:id="@+id/action_rescan" android:title="Rescan folder"
+        app:showAsAction="never"/>
 </menu>

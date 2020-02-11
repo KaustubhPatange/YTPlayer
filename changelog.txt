@@ -1,9 +1,8 @@
-Version 1.8
+Version 1.9
 
-[*] Add: G-Pay mode of payment
-[*] Add: Batch download playlist with one click
-[*] Add: Direct download using share button
-[*] Update: New and better download dialog
-[*] Fix: Background playback stops automatically
-[*] Fix: Download stops at 50 percent bug
-[*] Fix: Reported bugs & other fixes
+[*] Add: Shuffle playing music
+[*] Add: Single song repeat in player
+[*] Add: Rescan option in sub local dirs
+[*] Updated: Image tag quality
+[*] Fix: Equalizer crashes
+[*] Fix: Errors while downloading

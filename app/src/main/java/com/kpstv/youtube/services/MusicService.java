@@ -324,7 +324,8 @@ public class MusicService extends Service implements AppInterface {
     public static String selectedItemText=""; public static int sleepSeconds;
     private static MediaSessionCompat mediaSession;
     PowerManager.WakeLock wakeLock;
-    static SharedPreferences preferences,settingPref;
+    static SharedPreferences preferences;
+    public static SharedPreferences settingPref;
     public static Context activity;
 
     public static void functionInMainActivity(Context activity) {
@@ -447,7 +448,7 @@ public class MusicService extends Service implements AppInterface {
     public static Bitmap bitmapIcon; public static ArrayList<YTConfig> ytConfigs = new ArrayList<>();
     static NotificationCompat.Builder builder;
     public static boolean isplaying, sleepEndTrack=false,localPlayBack=false, soundCloudPlayBack,isFavourite=false,isEqualizerEnabled=false;
-    public static boolean isLoop=false,isEqualizerSet=false,loadedFromData=false;
+    public static boolean isEqualizerSet=false,loadedFromData=false; // isLoop=false,
     public static Spanned lyricText;static boolean isFirstLaunch=true;
     public static long total_duration = 0; public static PresetReverb presetReverb;
     public static BassBoost bassBoost; public static Virtualizer virtualizer;
@@ -456,6 +457,7 @@ public class MusicService extends Service implements AppInterface {
     public static ArrayList<String> yturls; static boolean dontAllowToPlay=false;
     public static int ytIndex = 0; public static Visualizer visualizer;
     public static Equalizer mEqualizer;static int command=0;
+    public static int repeatMode = 0; /** 0 - No repeat, 1 - Repeat playlist, 2 - Repeat current song */
 
 
     static class loadVideo_Local extends AsyncTask<Void,Void,Void> {
@@ -912,14 +914,16 @@ public class MusicService extends Service implements AppInterface {
                         }catch (Exception ignored){}
                         break;
                     case ExoPlayer.STATE_ENDED:
-                        makePlay();
-                        isplaying = false;
-                        playNext();
-                        if (sleepEndTrack) {
-                            Log.e(TAG, "onPlayerStateChanged: tiggered" );
-                            sleepEndTrack=false;
-                            dontAllowToPlay=true;
-                        }
+                        if (repeatMode!=2) {
+                            makePlay();
+                            isplaying = false;
+                            playNext();
+                            if (sleepEndTrack) {
+                                Log.e(TAG, "onPlayerStateChanged: tiggered");
+                                sleepEndTrack = false;
+                                dontAllowToPlay = true;
+                            }
+                        }else playNext();
                         break;
                     case ExoPlayer.STATE_READY:
 
@@ -1251,16 +1255,34 @@ public class MusicService extends Service implements AppInterface {
         }
     }
 
+    public static void playSame() {
+        player.seekTo(0);
+    }
+
     public static void playNext() {
-        if ((ytIndex + 1) == yturls.size()) {
-            if (isLoop) {
+        switch (repeatMode) {
+            case 0:
+                if ((ytIndex + 1) == yturls.size()) {
+                    Toast.makeText(activity, "No new song in playlist", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            case 1:
+                if ((ytIndex + 1) == yturls.size()) {
+                    ytIndex=-1;
+                }
+                break;
+            case 2:
+                playSame();
+                return;
+        }
+           /* if (isLoop) {
                 ytIndex=-1;
             }else {
                 Toast.makeText(activity, "No new song in playlist", Toast.LENGTH_SHORT).show();
                 //     bottom_player.setVisibility(View.GONE);
                 return;
-            }
-        }
+            }*/
+
         command=1;
         onClear();
         videoID = YTutils.getVideoID(yturls.get(ytIndex+1));

@@ -106,8 +106,9 @@ public class SongBroadCast extends BroadcastReceiver implements AppInterface {
                 break;
             case "com.kpstv.youtube.OPEN_SHARE_SONG":
                 try {
-                    Uri uri = Uri.parse(intent.getStringExtra("filePath"));
-                    Log.e(TAG, "onReceive: Uri: "+uri.toString() );
+                  //  Uri uri = Uri.parse(intent.getStringExtra("filePath"));
+                    Uri uri = intent.getData();
+                    Log.e(TAG, "onReceive: Uri: "+uri.toString());
                     File f = new File(uri.getPath());
                     ShareCompat.IntentBuilder.from(MainActivity.activity)
                             .setStream(uri)

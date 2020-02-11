@@ -39,6 +39,16 @@
             style="@style/Widget.AppCompat.ProgressBar.Horizontal"
             android:id="@+id/progressBar"/>
 
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/progressText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:text="0/0"
+            android:fontFamily="@font/dmsans_font"
+            android:textSize="12sp"/>
+
     </LinearLayout>
 
 

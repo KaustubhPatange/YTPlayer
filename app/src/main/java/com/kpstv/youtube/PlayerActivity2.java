@@ -460,8 +460,22 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         });
 
         repeatButton.setOnClickListener(v1->{
-            MusicService.isLoop = !MusicService.isLoop;
-            makeRepeat(MusicService.isLoop);
+            switch (MusicService.repeatMode) {
+                case 0:
+                    MusicService.repeatMode=1;
+                    Toast.makeText(activity, "Playlist will be repeated!", Toast.LENGTH_SHORT).show();
+                    break;
+                case 1:
+                    MusicService.repeatMode = 2;
+                    Toast.makeText(activity, "Current song will be repeated!", Toast.LENGTH_SHORT).show();
+                    break;
+                case 2:
+                    MusicService.repeatMode = 0;
+                    break;
+            }
+           // MusicService.isLoop = !MusicService.isLoop;
+          //  makeRepeat(MusicService.isLoop);
+            makeRepeat(MusicService.repeatMode);
         });
 
         navigationDown.setOnClickListener(view -> {
@@ -619,7 +633,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         }
         backImage.setTag(colorTo);
 
-        makeRepeat(MusicService.isLoop);
+        makeRepeat(MusicService.repeatMode);
 
         setLyricData(MusicService.lyricText);
 
@@ -933,11 +947,22 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
         playFab.setImageDrawable(activity.getResources().getDrawable(R.drawable.pause));
     }
 
-    public static void makeRepeat(boolean value) {
-        if (value)
+    public static void makeRepeat(int value) {
+        switch (value) {
+            case 0:
+                repeatButton.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_repeat));
+                break;
+            case 1:
+                repeatButton.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_repeat_true));
+                break;
+            case 2:
+                repeatButton.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_repeat_one));
+                break;
+        }
+       /* if (value)
             repeatButton.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_repeat_true));
         else
-            repeatButton.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_repeat));
+            repeatButton.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_repeat));*/
     }
 
     private void getAllViews() {

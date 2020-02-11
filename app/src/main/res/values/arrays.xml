@@ -100,11 +100,13 @@
     <string-array name="pref_image_entries">
         <item>Medium quality</item>
         <item>High quality</item>
+        <item>Max quality</item>
     </string-array>
 
     <string-array name="pref_image_values">
         <item>mq</item>
         <item>hq</item>
+        <item>maxres</item>
     </string-array>
 
     <string-array name="pref_region_entries">

@@ -191,12 +191,17 @@ public class SFragment extends Fragment implements AppInterface {
                 }
             });
 
+            searchEdit.setOnFocusChangeListener((view, b) -> {
+                if (b)
+                    ((InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE))
+                            .toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+            });
+
             task = new getVirals();
             task.execute();
         }
         searchEdit.requestFocus();
-        ((InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE))
-                .toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+
        /* InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(searchEdit.getWindowToken(), 0);*/
         return v;
@@ -206,6 +211,8 @@ public class SFragment extends Fragment implements AppInterface {
     public void onPause() {
         if (task.getStatus()== AsyncTask.Status.RUNNING)
             task.cancel(true);
+        if (suggestionTask!=null && suggestionTask.getStatus() == AsyncTask.Status.RUNNING)
+            suggestionTask.cancel(true);
         super.onPause();
     }
 

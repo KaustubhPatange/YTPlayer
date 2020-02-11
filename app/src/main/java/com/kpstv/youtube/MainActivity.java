@@ -190,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static Fragment PlaylistFrag, libraryFrag, FavouriteFrag,localMusicFrag, localSearchFrag,popularFrag;
     Fragment NCFrag; String ytLink;
     public static List<String> playListItems;
-    static SharedPreferences preferences,settingPref;
+    static SharedPreferences preferences;
     public static LinearLayout bottom_player, adViewLayout;
     public static ImageButton actionUp;
     public static ImageButton actionPlay;

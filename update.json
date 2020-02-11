@@ -1,8 +1,8 @@
 {
 	"version":"1.0",
-	"demopay":"1.5",
-	"new":"1.8",
-	"changelog":"<h3>V1.8 February 2020</h3><hr>*Add: G-Pay mode of payment<br>*Add: Batch download playlist with one click<br>*Add: Direct download using share button<br>*Update: New and better download dialog<br>*Fix: Background playback stops automatically<br>*Fix: Download stops at 50 percent bug<br>*Fix: Reported bugs & other fixes<br><br><i>Size: 47.1 MB</i>",
-	"download":"https://www.dropbox.com/s/tnsml2mr5mo1foe/YTPlayer_v18.apk?dl=1",
+	"demopay":"1.6",
+	"new":"1.9",
+	"changelog":"<h3>V1.9 February 2020</h3><hr>*Add: Shuffle playing music<br>*Add: Single song repeat in player<br>*Add: Rescan option in sub local dirs<br>*Updated: Image tag quality<br>*Fix: Equalizer crashes<br>*Fix: Errors while downloading<br><br><i>Size: 47.1 MB</i>",
+	"download":"https://www.dropbox.com/s/q4po0r4xi26dpid/YTPlayer_v19.apk?dl=1",
 	"msg":""
 }

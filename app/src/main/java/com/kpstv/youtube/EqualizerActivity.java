@@ -26,11 +26,11 @@ import com.warkiz.widget.IndicatorSeekBar;
 import com.warkiz.widget.OnSeekChangeListener;
 import com.warkiz.widget.SeekParams;
 
-import static com.kpstv.youtube.MainActivity.settingPref;
 import static com.kpstv.youtube.services.MusicService.bassBoost;
 import static com.kpstv.youtube.services.MusicService.loudnessEnhancer;
 import static com.kpstv.youtube.services.MusicService.mEqualizer;
 import static com.kpstv.youtube.services.MusicService.presetReverb;
+import static com.kpstv.youtube.services.MusicService.settingPref;
 import static com.kpstv.youtube.services.MusicService.virtualizer;
 
 public class EqualizerActivity extends AppCompatActivity {
