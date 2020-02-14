@@ -477,8 +477,19 @@ public class IntentDownloadService extends IntentService {
             if (currentModel.getVideoID().contains("soundcloud.com"))
                 imageUri = currentModel.getImageUrl();
             else imageUri = YTutils.getImageUrlID_MAX(currentModel.getVideoID());
+            setProgress(0, true);
+            icon = YTutils.getBitmapFromURL(imageUri);
+            if (icon==null && !currentModel.getVideoID().contains("soundcloud.com")) {
+                String refreshedUri = YTutils.getImageUrlID_MQ(YTutils.getVideoID_ImageUri(imageUri));
+                Log.e(TAG, "mp3Task: Error Image, Refreshing... "+refreshedUri );
+                icon = YTutils.getBitmapFromURL(refreshedUri);
+                if (icon!=null) {
+                    imageUri = refreshedUri;
+                }
+            }
+            setProgress(0, false);
 
-            Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
+            /*Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
                 @Override
                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                     icon = resource;
@@ -489,7 +500,7 @@ public class IntentDownloadService extends IntentService {
                 public void onLoadCleared(@Nullable Drawable placeholder) {
 
                 }
-            });
+            });*/
 
             /** Set Prefix for path... */
             String prefixName = (currentModel.getTitle().trim() + "_" + currentModel.getChannelTitle().trim())

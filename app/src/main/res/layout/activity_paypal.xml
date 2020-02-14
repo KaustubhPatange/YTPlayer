@@ -11,6 +11,7 @@
         android:background="@android:color/darker_gray"
         android:textColor="@android:color/black"
         android:gravity="center"
+        android:onClick="demoClick"
         android:text="Do not press back until the payment is completed"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>

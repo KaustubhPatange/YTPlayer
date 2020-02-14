@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +41,7 @@ public class PlayerAdapter extends PagerAdapter {
     Context context;
     ArrayList<String> yturls;
     LayoutInflater mLayoutInflater;
+    private static final String TAG = "PlayerAdapter";
 
     public PlayerAdapter(Context context, ArrayList<String> yturls) {
         this.context = context;
@@ -71,24 +73,25 @@ public class PlayerAdapter extends PagerAdapter {
         ImageView imageView1 = itemView.findViewById(R.id.mainImage1);
 
         if (MusicService.localPlayBack) {
-            File f = new File(MusicService.yturls.get(position));
-            try {
-                MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-                mmr.setDataSource(context, Uri.fromFile(f));
+            if (MusicService.yturls.get(position)!=null) {
+                File f = new File(MusicService.yturls.get(position));
+                try {
+                    MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                    mmr.setDataSource(context, Uri.fromFile(f));
 
-                byte [] data = mmr.getEmbeddedPicture();
+                    byte[] data = mmr.getEmbeddedPicture();
 
-                if(data != null) {
-                    imageView1.setVisibility(View.GONE);
-                    Bitmap bitmapIcon = BitmapFactory.decodeByteArray(data, 0, data.length);
-                    imageView.setImageBitmap(bitmapIcon);
+                    if (data != null) {
+                        imageView1.setVisibility(View.GONE);
+                        Bitmap bitmapIcon = BitmapFactory.decodeByteArray(data, 0, data.length);
+                        imageView.setImageBitmap(bitmapIcon);
+                    } else {
+                        imageView1.setVisibility(View.VISIBLE);
+                    }
+
+                } catch (Exception e) {
+                    // TODO: Do something when cannot played...
                 }
-                else {
-                    imageView1.setVisibility(View.VISIBLE);
-                }
-
-            }catch (Exception e) {
-                // TODO: Do something when cannot played...
             }
         }else {
             if (yturls.get(position).contains("soundcloud.com")) {
@@ -128,9 +131,12 @@ public class PlayerAdapter extends PagerAdapter {
                 }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }else {
                 imageView1.setVisibility(View.GONE);
+                String imageUrl = YTutils.getImageUrl(yturls.get(position));
+                Log.e(TAG, "Imageurl: "+imageUrl);
+
                 Glide.with(context)
                         .asBitmap()
-                        .load(YTutils.getImageUrl(yturls.get(position)))
+                        .load(imageUrl)
                         .into(new CustomTarget<Bitmap>() {
                             @Override
                             public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {

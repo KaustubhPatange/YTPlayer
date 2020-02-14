@@ -315,12 +315,14 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
 
         loadAgain();
 
-        Palette.generateAsync(MusicService.bitmapIcon, palette -> {
-            MusicService.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
-            Log.e(TAG, "onCreate: Changing nColor: "+MusicService.nColor );
-            backImage.setColorFilter(MusicService.nColor);
-            backImage1.setColorFilter(MusicService.nColor);
-        });
+        if (MusicService.bitmapIcon!=null) {
+            Palette.generateAsync(MusicService.bitmapIcon, palette -> {
+                MusicService.nColor = palette.getVibrantColor(activity.getResources().getColor(R.color.light_white));
+                Log.e(TAG, "onCreate: Changing nColor: " + MusicService.nColor);
+                backImage.setColorFilter(MusicService.nColor);
+                backImage1.setColorFilter(MusicService.nColor);
+            });
+        }
 
         addToPlaylist.setOnTouchListener((v, motionEvent) -> {
             switch (motionEvent.getAction()) {

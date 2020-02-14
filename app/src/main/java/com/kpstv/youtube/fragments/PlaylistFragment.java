@@ -87,16 +87,13 @@ public class PlaylistFragment extends Fragment {
                 activity.startActivity(intent);
             });
 
-            nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
-                @Override
-                public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+            nestedScrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
 
-                    if (scrollY > oldScrollY) {
-                        fabCreate.hide();
-                    }
-                    if (scrollY < oldScrollY) {
-                       fabCreate.show();
-                    }
+                if (scrollY > oldScrollY) {
+                    fabCreate.hide();
+                }
+                if (scrollY < oldScrollY) {
+                   fabCreate.show();
                 }
             });
 
@@ -169,23 +166,37 @@ public class PlaylistFragment extends Fragment {
                         break;
                     case R.id.action_delete:
                         if (playlist_csv!=null&&!playlist_csv.isEmpty()) {
-                            ArrayList<String> lines = new ArrayList<>(Arrays.asList(playlist_csv.split("\r|\n")));
-                            for(int i=0;i<lines.size();i++) {
-                                if (lines.get(i).contains(","+model.getTitle())) {
-                                    data.remove(data.size()-1-i);
-                                    lines.remove(i);
-                                    YTutils.writeContent(activity,"playlist.csv",
-                                            YTutils.convertListToStringMethod(lines));
-                                    adapter.notifyDataSetChanged();
-                                    break;
-                                }
-                            }
+                            if (model.getTimeseconds()>0) {
+                                new AlertDialog.Builder(getContext())
+                                        .setTitle("Delete")
+                                        .setMessage("Are you sure? This cannot be undone.")
+                                        .setNegativeButton("Cancel",null)
+                                        .setPositiveButton("Yes",(dialogInterface, i) -> {
+                                            deleteFunc(playlist_csv,model);
+                                        })
+                                        .show();
+                            }else
+                                deleteFunc(playlist_csv,model);
                         }
                         break;
                 }
                 return false;
             });
         });
+    }
+
+    private void deleteFunc(String playlist_csv, PlaylistModel model) {
+        ArrayList<String> lines = new ArrayList<>(Arrays.asList(playlist_csv.split("\r|\n")));
+        for(int i=0;i<lines.size();i++) {
+            if (lines.get(i).contains(","+model.getTitle())) {
+                data.remove(data.size()-1-i);
+                lines.remove(i);
+                YTutils.writeContent(activity,"playlist.csv",
+                        YTutils.convertListToStringMethod(lines));
+                adapter.notifyDataSetChanged();
+                break;
+            }
+        }
     }
 
     class getData extends AsyncTask<Void,Void,Void> {

@@ -272,7 +272,7 @@ public class MusicService extends Service implements AppInterface {
             notificationManager.deleteNotificationChannel("channel_01");
             notificationManager.deleteNotificationChannel("channel_02");
         }
-
+        isEqualizerSet = false;
         if (PlayerActivity2.activity!=null) {
             PlayerActivity2.activity.finish();
         }
@@ -706,9 +706,19 @@ public class MusicService extends Service implements AppInterface {
                     ytConfigs = dataModel.getConfigs();
                 }
             }
-            if (imgUrl!=null) {
+            if (MusicService.imgUrl!=null) {
                 Log.e(TAG, "doInBackground: Downloading Image..." );
-                bitmapIcon = YTutils.getBitmapFromURL(imgUrl);
+                try {
+                    bitmapIcon = YTutils.getBitmapFromURL(MusicService.imgUrl);
+                }catch (Exception ignored){
+                }
+                if (bitmapIcon==null) {
+                    Log.e(TAG, "doInBackground: Error: occurred, Refreshing" );
+                    String modifiedImageUrl = YTutils.getImageUrlID_MQ(YTutils.getVideoID_ImageUri(MusicService.imgUrl));
+                    bitmapIcon = YTutils.getBitmapFromURL(modifiedImageUrl);
+                    if (bitmapIcon != null) MusicService.imgUrl = modifiedImageUrl;
+                    Log.e(TAG, "doInBackground: New Image Url: "+MusicService.imgUrl);
+                }
             }
             return null;
         }
