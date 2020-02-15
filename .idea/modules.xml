@@ -4,8 +4,11 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/MyID3_for_Android/AndroidStudioProjects-YTPlayer-MyID3_for_Android.iml" filepath="$PROJECT_DIR$/MyID3_for_Android/AndroidStudioProjects-YTPlayer-MyID3_for_Android.iml" />
       <module fileurl="file://$PROJECT_DIR$/MyID3_for_Android/MyID3_for_Android.iml" filepath="$PROJECT_DIR$/MyID3_for_Android/MyID3_for_Android.iml" />
-      <module fileurl="file://$PROJECT_DIR$/YTPlayer.iml" filepath="$PROJECT_DIR$/YTPlayer.iml" />
       <module fileurl="file://$PROJECT_DIR$/MyID3_for_Android/YTPlayer-MyID3_for_Android.iml" filepath="$PROJECT_DIR$/MyID3_for_Android/YTPlayer-MyID3_for_Android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/YTPlayer-master.iml" filepath="$PROJECT_DIR$/YTPlayer-master.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MyID3_for_Android/YTPlayer-master-MyID3_for_Android.iml" filepath="$PROJECT_DIR$/MyID3_for_Android/YTPlayer-master-MyID3_for_Android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mobile-ffmpeg-audio-3.1/YTPlayer-master-mobile-ffmpeg-audio-3.1.iml" filepath="$PROJECT_DIR$/mobile-ffmpeg-audio-3.1/YTPlayer-master-mobile-ffmpeg-audio-3.1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spotify-auth-release/YTPlayer-master-spotify-auth-release.iml" filepath="$PROJECT_DIR$/spotify-auth-release/YTPlayer-master-spotify-auth-release.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/isoparser-1.9.39/isoparser-1.9.39.iml" filepath="$PROJECT_DIR$/isoparser-1.9.39/isoparser-1.9.39.iml" />
       <module fileurl="file://$PROJECT_DIR$/mobile-ffmpeg-audio-3.1/mobile-ffmpeg-audio-3.1.iml" filepath="$PROJECT_DIR$/mobile-ffmpeg-audio-3.1/mobile-ffmpeg-audio-3.1.iml" />
