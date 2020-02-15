@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -39,6 +40,7 @@ import com.kpstv.youtube.adapters.PlaylistAdapter;
 import com.kpstv.youtube.models.PlaylistModel;
 import com.kpstv.youtube.utils.YTutils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -179,11 +181,41 @@ public class PlaylistFragment extends Fragment {
                                 deleteFunc(playlist_csv,model);
                         }
                         break;
+                    case R.id.action_export:
+                        if (playlist_csv!=null&&!playlist_csv.isEmpty()) {
+                            PSBottomSheet bottomSheet = new PSBottomSheet();
+                            bottomSheet.setListener(id -> {
+                                if (id==0) {
+                                    String[] items = playlist_csv.split("\n|\r");
+                                    if (items.length>0 && model.getData().size()>0) {
+                                        for (String line : items) {
+                                            if (line.contains(","+model.getTitle()+",")) {
+                                                File playlist_dir = YTutils.getFile("Playlist");
+                                                if (!playlist_dir.exists())
+                                                    playlist_dir.mkdirs();
+                                                String fileName = YTutils.getFile("Playlist/"+model.getTitle()+".ytp").getPath();
+                                                YTutils.writeContent(activity,
+                                                        fileName,
+                                                        line);
+                                                Toast.makeText(activity, "Exported to "+fileName, Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    }else
+                                        Toast.makeText(activity, "Warning: Playlist is empty!", Toast.LENGTH_SHORT).show();
+                                }else if (id==1) {
+
+                                }
+                                bottomSheet.dismiss();
+                            });
+                            bottomSheet.show(activity.getSupportFragmentManager(),"tag");
+                        }
+                        break;
                 }
                 return false;
             });
         });
     }
+
 
     private void deleteFunc(String playlist_csv, PlaylistModel model) {
         ArrayList<String> lines = new ArrayList<>(Arrays.asList(playlist_csv.split("\r|\n")));

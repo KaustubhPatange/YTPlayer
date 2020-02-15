@@ -135,6 +135,7 @@
     <orderEntry type="library" name="Gradle: net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.3.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.exoplayer:exoplayer:2.9.6@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.gms:play-services-ads:17.1.2@aar" level="project" />
+    <orderEntry type="library" name="Gradle: com.rm:longpresspopup:1.0.1@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.google.firebase:firebase-auth:16.1.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.gms:play-services-auth:16.0.1@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.razorpay:checkout:1.5.12@aar" level="project" />

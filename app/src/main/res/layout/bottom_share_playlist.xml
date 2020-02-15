@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorScreen"
+    android:orientation="vertical">
+
+    <TextView
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="7dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/dmsans_font"
+        android:text="Choose"
+        android:textColor="@color/white"
+        android:textSize="21sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:gravity="center_vertical"
+        android:drawableTint="@color/light_white"
+        android:textColor="@color/light_white"
+        android:id="@+id/txt_saveToLocal"
+        android:background="@drawable/history_background"
+        android:clickable="true"
+        android:focusable="true"
+        android:fontFamily="@font/dmsans_font"
+        android:textSize="16sp"
+        android:padding="15dp"
+        android:drawablePadding="15dp"
+        android:drawableStart="@drawable/ic_sd_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save to Local storage"/>
+
+    <TextView
+        android:gravity="center_vertical"
+        android:drawableTint="@color/light_white"
+        android:textColor="@color/light_white"
+        android:id="@+id/txt_shareTo"
+        android:background="@drawable/history_background"
+        android:clickable="true"
+        android:focusable="true"
+        android:fontFamily="@font/dmsans_font"
+        android:textSize="16sp"
+        android:padding="15dp"
+        android:drawablePadding="15dp"
+        android:drawableStart="@drawable/ic_share"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Share with people"/>
+
+    <LinearLayout
+        android:layout_marginTop="3dp"
+        android:padding="3dp"
+        android:background="@color/colorScreen1"
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CANCEL"
+            android:textColor="@color/colorAccent"
+            android:background="@android:color/transparent"
+            android:layout_marginEnd="10dp"/>
+    </LinearLayout>
+</LinearLayout>

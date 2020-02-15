@@ -18,7 +18,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:id="@+id/aCheckBox"
-        android:scaleType="fitXY"
         android:layout_width="wrap_content"
         android:layout_height="45dp" />
 

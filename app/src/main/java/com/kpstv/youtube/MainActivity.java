@@ -47,11 +47,14 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -94,6 +97,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.kpstv.youtube.adapters.ImportAdapter;
+import com.kpstv.youtube.adapters.ImportShowAdapter;
 import com.kpstv.youtube.fragments.DiscoverFragment;
 import com.kpstv.youtube.fragments.HistoryBottomSheet;
 import com.kpstv.youtube.fragments.HistoryFragment;
@@ -107,6 +112,8 @@ import com.kpstv.youtube.fragments.SFragment;
 import com.kpstv.youtube.fragments.SearchFragment;
 import com.kpstv.youtube.fragments.SleepBottomSheet;
 import com.kpstv.youtube.fragments.basedOnApi.PopularFragment;
+import com.kpstv.youtube.models.ImportModel;
+import com.kpstv.youtube.models.ImportShowModel;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
 import com.kpstv.youtube.models.YTConfig;
@@ -134,6 +141,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -149,8 +157,11 @@ import java.util.Objects;
 import javax.security.auth.login.LoginException;
 
 import cat.ereza.customactivityoncrash.config.CaocConfig;
+import rm.com.longpresspopup.LongPressPopup;
+import rm.com.longpresspopup.LongPressPopupBuilder;
 
 import static android.view.View.VISIBLE;
+import static android.view.View.inflate;
 import static com.kpstv.youtube.services.MusicService.changePlayBack;
 import static com.kpstv.youtube.services.MusicService.functionInMainActivity;
 import static com.kpstv.youtube.services.MusicService.isplaying;
@@ -164,6 +175,7 @@ import static com.kpstv.youtube.services.MusicService.playNext;
 import static com.kpstv.youtube.services.MusicService.playPrevious;
 import static com.kpstv.youtube.services.MusicService.player;
 import static com.kpstv.youtube.services.MusicService.selectedItemText;
+import static com.kpstv.youtube.services.MusicService.settingPref;
 import static com.kpstv.youtube.services.MusicService.updateMediaSessionPlaybackState;
 import static com.kpstv.youtube.services.MusicService.ytIndex;
 
@@ -630,6 +642,34 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     AlertDialog alertDialog;
     @SuppressLint("StaticFieldLeak")
     void commonIntentCheck(String yt) {
+        if (yt.startsWith("file://")||yt.startsWith("content://")) {
+            String path = YTutils.getPath(this, Uri.parse(yt));
+            if (path.endsWith(".ytp")) {
+                Log.e(TAG, "commonIntentCheck: Path: "+path);
+                parseDataForPlaylist(path);
+                return;
+            }
+            if (path==null) {
+                YTutils.showAlert(MainActivity.this,"Callback Error",
+                        "Couldn't parse the path from uri", true);
+                return;
+            }
+            File folder_path = new File(path).getParentFile();
+
+            File[] files = folder_path.listFiles(file -> (file.getPath().endsWith(".mp3")||file.getPath().endsWith(".m4a")
+                    ||file.getPath().endsWith(".wav")||file.getPath().endsWith(".aac")
+                    ||file.getPath().endsWith(".ogg")||file.getPath().endsWith(".flac")));
+
+            int position=0;
+            String[] urls = new String[files.length];
+            for (int i=0;i<files.length;i++) {
+                urls[i] = files[i].getPath();
+                if (files[i].getPath().equals(path))
+                    position = i;
+            }
+            PlayVideo_Local(this,urls,position);
+            return;
+        }
         if (yt.contains("/playlist/")||yt.contains("/album/")||yt.contains("/playlist?")) {
             View v = getLayoutInflater().inflate(R.layout.alert_not_playlist,null);
 
@@ -742,7 +782,95 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         }
     }
 
+    private void parseDataForPlaylist(String path) {
+        if (path!=null) {
 
+            String[] items = Objects.requireNonNull(YTutils.readContent(this, path)).split("\n|\r");
+            if (items.length>0) {
+                ArrayList<ImportModel> models = new ArrayList<>();
+
+                for (String line: items) {
+                    String[] childs = line.split(",");
+                    int seconds=0;
+                    for (int i=2;i<childs.length;i++) {
+                        String playlist_item = childs[i];
+                        seconds += Integer.parseInt(playlist_item.split("\\|")[1]);
+                    }
+                    models.add(new ImportModel(
+                            childs[1],+childs.length-2,seconds
+                    ));
+                }
+
+                View view = getLayoutInflater().inflate(R.layout.alert_import_playlist,null);
+                RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
+
+                ImportAdapter adapter = new ImportAdapter(this,models,items);
+                adapter.setListener((model, position) -> {
+                    model.setChecked(!model.isChecked());
+                    adapter.notifyItemChanged(position);
+                });
+
+
+
+                recyclerView.setLayoutManager(new LinearLayoutManager(this));
+                recyclerView.setAdapter(adapter);
+
+                alertDialog = new AlertDialog.Builder(this)
+                        .setView(view)
+                        .setNegativeButton("Cancel",null)
+                        .setPositiveButton("Import", (dialogInterface, i) -> {
+
+                        })
+                        .create();
+                alertDialog.show();
+                alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view2 -> {
+                    boolean atleast_one_check=false;
+                    int added=0,replaced=0;
+                    String playlist_csv = YTutils.readContent(this, "playlist.csv");
+                    if (playlist_csv==null) playlist_csv="";
+                    StringBuilder playlistBuilder = new StringBuilder(playlist_csv);
+                    for (int c=0;c<models.size();c++) {
+                        if (models.get(c).isChecked()) {
+                            atleast_one_check=true;
+                            if (!playlist_csv.contains(","+models.get(c).getTitle()+",")) {
+                                playlistBuilder.append(items[c]).append("\n");
+                                added++;
+                            }else {
+                                String[] playlist_items = playlistBuilder.toString().split("\n|\r");
+                                for (int k=0;k<playlist_items.length;k++) {
+                                    if (playlist_items[k].contains(","+models.get(c).getTitle()+",")) {
+                                        playlist_items[k] = items[c];
+                                    }
+                                }
+                                playlistBuilder = new StringBuilder(YTutils.join(playlist_items,'\n'));
+                                replaced++;
+                            }
+                        }
+                    }
+                    if (atleast_one_check) {
+                        YTutils.writeContent(this,"playlist.csv",playlistBuilder.toString());
+                        Toast.makeText(activity, added+ " new playlist added, "+replaced+" replaced!", Toast.LENGTH_SHORT).show();
+                        alertDialog.dismiss();
+                    }else
+                        Toast.makeText(activity, "Kindly Make a selection", Toast.LENGTH_SHORT).show();
+                });
+
+                /*if (!settingPref.getBoolean("showLongTip",false)) {
+                    ToolTip toolTip = new ToolTip()
+                            .withText("Long press and hold to preview songs.")
+                            .withTextColor(activity.getResources().getColor(R.color.black))
+                            .withColor(activity.getResources().getColor(R.color.colorAccent))
+                            .withAnimationType(ToolTip.AnimationType.FROM_MASTER_VIEW)
+                            .withShadow();
+                    toolTipManager.showToolTip(toolTip,recyclerView);
+                   *//* SharedPreferences.Editor editor = settingPref.edit();
+                    editor.putBoolean("showLongTip",true);
+                    editor.apply();*//*
+                }*/
+            }
+        }else
+            Toast.makeText(activity, "Error: Failed to parse playlist!", Toast.LENGTH_SHORT).show();
+    }
 
     /**
     * Implementing a new player within main activity itself...

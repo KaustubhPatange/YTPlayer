@@ -1651,6 +1651,16 @@ public class YTutils implements AppInterface {
         return storageDirectories;
     }
 
+    public static String getTimeString(Long time) {
+        if (time>60)
+            return (time/60) +" mins";
+        else if (time==60)
+            return "1 min";
+        else {
+            return time +" secs";
+        }
+    }
+
     /**
      * Get a file path from a Uri. This will get the the path for Storage Access
      * Framework Documents, as well as the _data field for the MediaStore and
