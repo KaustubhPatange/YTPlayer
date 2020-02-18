@@ -123,7 +123,7 @@ public class OPlaylistFragment extends Fragment {
     LocalAdapter albumAdaper;
     GridLayoutManager gridLayoutManager;
     private static final String TAG = "OPlayListFragment";
-    boolean loadComplete = false;
+    boolean loadComplete = false; boolean isNormalLoad;
     ToolTipManager toolTipManager;
     ProgressBar circularProgressBar;
     AsyncTask<Void,String,Void> RescanTask;
@@ -261,7 +261,7 @@ public class OPlaylistFragment extends Fragment {
 
 
                 if (playlistModel.getData().size() > 0) {
-                    new getData().execute();
+                    isNormalLoad=true;
                 } else {
                     circularProgressBar.setVisibility(View.GONE);
                     songText.setText("NO SONG DATA");
@@ -359,6 +359,8 @@ public class OPlaylistFragment extends Fragment {
         }
         return v;
     }
+
+
 
     private void setToolTip() {
         SharedPreferences settingPref = activity.getSharedPreferences("settings",Context.MODE_PRIVATE);
@@ -781,6 +783,10 @@ public class OPlaylistFragment extends Fragment {
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
+                    if (isNormalLoad) {
+                        new getData().execute();
+                        return;
+                    }
                     Log.d(TAG, "Animation ended.");
                     if (loadComplete) return;
                     if (localMusic && !searchMusic)

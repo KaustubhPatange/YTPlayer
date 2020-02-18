@@ -99,4 +99,5 @@
     <string name="htg">How to guide, <a href="">here!</a></string>
     <string name="rescan_lib">Rescaning library?</string>
     <string name="rescan_text">Whenever you are adding new songs to storage, make sure to Rescan library by clicking 3 dots on top right corner.</string>
+    <string name="header_playlist">#!/ytplayer-playlist</string>
 </resources>

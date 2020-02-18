@@ -1,6 +1,7 @@
 package com.kpstv.youtube;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,6 +33,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.jakewharton.processphoenix.ProcessPhoenix;
@@ -122,9 +124,8 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
             if (resultCode==1) {
                 boolean isPaid = data.getBooleanExtra("payment",false);
                 if (isPaid) {
-                    BillingUtils.setSuccess(data.getStringExtra("client"),
+                    setSuccess(data.getStringExtra("client"),
                             FirebaseDatabase.getInstance().getReference("orders"));
-                    doOnSuccess();
                 }
             }
         }
@@ -132,6 +133,27 @@ public class PurchaseActivity extends AppCompatActivity implements PaymentResult
     }
 
 
+    private void setSuccess(String uid, DatabaseReference ref) {
+        ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setMessage("Processing...");
+        dialog.setCancelable(false);
+        dialog.show();
+        ref.child(uid).setValue("paypal").addOnSuccessListener(runnable -> {
+            dialog.dismiss();
+            doOnSuccess();
+        }).addOnFailureListener(runnable -> {
+            dialog.dismiss();
+            new AlertDialog.Builder(this)
+                    .setTitle("Error")
+                    .setMessage("Payment has completed successfully, but the app could not process it. Click on LEARN MORE to solve this error!")
+                    .setCancelable(false)
+                    .setPositiveButton("Learn More",(dialogInterface, i) -> {
+                        helpClick(null);
+                    })
+                    .setNegativeButton("Cancel",null)
+                    .show();
+        });
+    }
 
     private void firebaseAuthWithGoogle(final GoogleSignInAccount acct) {
         Log.d("firebaseAuth", "firebaseAuthWithGoogle:" + acct.getId());

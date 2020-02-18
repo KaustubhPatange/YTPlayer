@@ -45,7 +45,7 @@ public class DataUtils {
                 Date date = Calendar.getInstance().getTime();
                 Calendar c = Calendar.getInstance();
                 c.setTime(date);
-                c.add(Calendar.HOUR, -5);
+                c.add(Calendar.HOUR, -4);
 
                 @SuppressLint("SimpleDateFormat")
                 SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");

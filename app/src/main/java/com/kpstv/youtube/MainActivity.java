@@ -50,11 +50,13 @@ import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.text.Layout;
 import android.text.Spanned;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.GestureDetector;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -643,10 +645,19 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     @SuppressLint("StaticFieldLeak")
     void commonIntentCheck(String yt) {
         if (yt.startsWith("file://")||yt.startsWith("content://")) {
-            String path = YTutils.getPath(this, Uri.parse(yt));
-            if (path.endsWith(".ytp")) {
+            String path;
+            try {
+                path = YTutils.getPath(this, Uri.parse(yt));
+            }catch (Exception ex){
+                Uri uri =  Uri.parse(yt);
+                path = YTutils.ContentProvider.getFilePathFromURI(this,uri);
+                Log.e(TAG, "commonIntentCheck: Content-Provider: "+path);
+                YTutils.parseDataForPlaylist(activity,path);
+                return;
+            }
+            if (path.endsWith(".txt")) {
                 Log.e(TAG, "commonIntentCheck: Path: "+path);
-                parseDataForPlaylist(path);
+                YTutils.parseDataForPlaylist(activity,path);
                 return;
             }
             if (path==null) {
@@ -667,6 +678,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 if (files[i].getPath().equals(path))
                     position = i;
             }
+            if (files.length>0)
             PlayVideo_Local(this,urls,position);
             return;
         }
@@ -782,95 +794,6 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         }
     }
 
-    private void parseDataForPlaylist(String path) {
-        if (path!=null) {
-
-            String[] items = Objects.requireNonNull(YTutils.readContent(this, path)).split("\n|\r");
-            if (items.length>0) {
-                ArrayList<ImportModel> models = new ArrayList<>();
-
-                for (String line: items) {
-                    String[] childs = line.split(",");
-                    int seconds=0;
-                    for (int i=2;i<childs.length;i++) {
-                        String playlist_item = childs[i];
-                        seconds += Integer.parseInt(playlist_item.split("\\|")[1]);
-                    }
-                    models.add(new ImportModel(
-                            childs[1],+childs.length-2,seconds
-                    ));
-                }
-
-                View view = getLayoutInflater().inflate(R.layout.alert_import_playlist,null);
-                RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
-
-                ImportAdapter adapter = new ImportAdapter(this,models,items);
-                adapter.setListener((model, position) -> {
-                    model.setChecked(!model.isChecked());
-                    adapter.notifyItemChanged(position);
-                });
-
-
-
-                recyclerView.setLayoutManager(new LinearLayoutManager(this));
-                recyclerView.setAdapter(adapter);
-
-                alertDialog = new AlertDialog.Builder(this)
-                        .setView(view)
-                        .setNegativeButton("Cancel",null)
-                        .setPositiveButton("Import", (dialogInterface, i) -> {
-
-                        })
-                        .create();
-                alertDialog.show();
-                alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view2 -> {
-                    boolean atleast_one_check=false;
-                    int added=0,replaced=0;
-                    String playlist_csv = YTutils.readContent(this, "playlist.csv");
-                    if (playlist_csv==null) playlist_csv="";
-                    StringBuilder playlistBuilder = new StringBuilder(playlist_csv);
-                    for (int c=0;c<models.size();c++) {
-                        if (models.get(c).isChecked()) {
-                            atleast_one_check=true;
-                            if (!playlist_csv.contains(","+models.get(c).getTitle()+",")) {
-                                playlistBuilder.append(items[c]).append("\n");
-                                added++;
-                            }else {
-                                String[] playlist_items = playlistBuilder.toString().split("\n|\r");
-                                for (int k=0;k<playlist_items.length;k++) {
-                                    if (playlist_items[k].contains(","+models.get(c).getTitle()+",")) {
-                                        playlist_items[k] = items[c];
-                                    }
-                                }
-                                playlistBuilder = new StringBuilder(YTutils.join(playlist_items,'\n'));
-                                replaced++;
-                            }
-                        }
-                    }
-                    if (atleast_one_check) {
-                        YTutils.writeContent(this,"playlist.csv",playlistBuilder.toString());
-                        Toast.makeText(activity, added+ " new playlist added, "+replaced+" replaced!", Toast.LENGTH_SHORT).show();
-                        alertDialog.dismiss();
-                    }else
-                        Toast.makeText(activity, "Kindly Make a selection", Toast.LENGTH_SHORT).show();
-                });
-
-                /*if (!settingPref.getBoolean("showLongTip",false)) {
-                    ToolTip toolTip = new ToolTip()
-                            .withText("Long press and hold to preview songs.")
-                            .withTextColor(activity.getResources().getColor(R.color.black))
-                            .withColor(activity.getResources().getColor(R.color.colorAccent))
-                            .withAnimationType(ToolTip.AnimationType.FROM_MASTER_VIEW)
-                            .withShadow();
-                    toolTipManager.showToolTip(toolTip,recyclerView);
-                   *//* SharedPreferences.Editor editor = settingPref.edit();
-                    editor.putBoolean("showLongTip",true);
-                    editor.apply();*//*
-                }*/
-            }
-        }else
-            Toast.makeText(activity, "Error: Failed to parse playlist!", Toast.LENGTH_SHORT).show();
-    }
 
     /**
     * Implementing a new player within main activity itself...

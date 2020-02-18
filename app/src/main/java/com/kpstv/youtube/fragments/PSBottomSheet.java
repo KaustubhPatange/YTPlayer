@@ -34,7 +34,7 @@ public class PSBottomSheet extends BottomSheetDialogFragment {
         listener.onClick(0);
     }
 
-    @OnClick(R.id.txt_saveToLocal) void shareTo(View v) {
+    @OnClick(R.id.txt_shareTo) void shareTo(View v) {
         listener.onClick(1);
     }
 
