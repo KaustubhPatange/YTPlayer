@@ -1,8 +1,8 @@
 {
-	"version":"1.0",
-	"demopay":"1.7",
-	"new":"1.9",
-	"changelog":"<h3>V1.9 February 2020</h3><hr>*Add: Shuffle playing music<br>*Add: Single song repeat in player<br>*Add: Rescan option in sub local dirs<br>*Updated: Image tag quality<br>*Fix: Equalizer crashes<br>*Fix: Errors while downloading<br><br><i>Size: 47.1 MB</i>",
-	"download":"https://www.dropbox.com/s/q4po0r4xi26dpid/YTPlayer_v19.apk?dl=1",
-	"msg":""
+  "version": "1.0",
+  "demopay": "1.7",
+  "new": "2.0",
+  "changelog": "<h3>V2.0 February 2020</h3><hr>*Add: Widgets and shorcuts<br>*Updated: Changes I don't remember :P<br>*Fix: Payment not complete issues<br>*Fix: Random and reported bugs<br><br><i>Size: 49.6 MB</i>",
+  "download": "https://www.dropbox.com/s/c0iuiapbwgk6xh5/YTPlayer_v20.apk?dl=1",
+  "msg": ""
 }

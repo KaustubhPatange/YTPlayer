@@ -1,62 +1,25 @@
 package com.kpstv.youtube;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.Application;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.ProgressDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.media.AudioFocusRequest;
-import android.media.AudioManager;
-import android.media.MediaMetadataRetriever;
-import android.media.audiofx.BassBoost;
-import android.media.audiofx.Equalizer;
-import android.media.audiofx.LoudnessEnhancer;
-import android.media.audiofx.PresetReverb;
-import android.media.audiofx.Virtualizer;
-import android.media.audiofx.Visualizer;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Handler;
-import android.os.PowerManager;
-import android.os.Process;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.graphics.Palette;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.text.Html;
-import android.text.Layout;
-import android.text.Spanned;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.SparseArray;
-import android.view.GestureDetector;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -67,40 +30,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
-import com.facebook.network.connectionclass.ConnectionClassManager;
-import com.facebook.network.connectionclass.ConnectionQuality;
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.audio.AudioAttributes;
-import com.google.android.exoplayer2.audio.AudioFocusManager;
-import com.google.android.exoplayer2.audio.AudioListener;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.util.Util;
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
-import com.kpstv.youtube.adapters.ImportAdapter;
-import com.kpstv.youtube.adapters.ImportShowAdapter;
 import com.kpstv.youtube.fragments.DiscoverFragment;
 import com.kpstv.youtube.fragments.HistoryBottomSheet;
 import com.kpstv.youtube.fragments.HistoryFragment;
@@ -114,70 +45,35 @@ import com.kpstv.youtube.fragments.SFragment;
 import com.kpstv.youtube.fragments.SearchFragment;
 import com.kpstv.youtube.fragments.SleepBottomSheet;
 import com.kpstv.youtube.fragments.basedOnApi.PopularFragment;
-import com.kpstv.youtube.models.ImportModel;
-import com.kpstv.youtube.models.ImportShowModel;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
-import com.kpstv.youtube.models.YTConfig;
-import com.kpstv.youtube.receivers.SongBroadCast;
 import com.kpstv.youtube.services.MusicService;
-import com.kpstv.youtube.utils.APIResponse;
-import com.kpstv.youtube.utils.DataUtils;
-import com.kpstv.youtube.utils.HttpHandler;
-import com.kpstv.youtube.utils.LyricsApi;
 import com.kpstv.youtube.utils.OnSwipeTouchListener;
 import com.kpstv.youtube.utils.SoundCloud;
 import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTMeta;
-import com.kpstv.youtube.utils.YTStatistics;
 import com.kpstv.youtube.utils.YTutils;
-import com.naveed.ytextractor.ExtractorException;
-import com.naveed.ytextractor.YoutubeStreamExtractor;
 import com.naveed.ytextractor.model.YTMedia;
-import com.naveed.ytextractor.model.YoutubeMeta;
-import com.spyhunter99.supertooltips.ToolTip;
 import com.spyhunter99.supertooltips.ToolTipManager;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-
-import javax.security.auth.login.LoginException;
 
 import cat.ereza.customactivityoncrash.config.CaocConfig;
-import rm.com.longpresspopup.LongPressPopup;
-import rm.com.longpresspopup.LongPressPopupBuilder;
 
 import static android.view.View.VISIBLE;
-import static android.view.View.inflate;
 import static com.kpstv.youtube.services.MusicService.changePlayBack;
 import static com.kpstv.youtube.services.MusicService.functionInMainActivity;
 import static com.kpstv.youtube.services.MusicService.isplaying;
 import static com.kpstv.youtube.services.MusicService.loadedFavFrag;
 import static com.kpstv.youtube.services.MusicService.localPlayBack;
 import static com.kpstv.youtube.services.MusicService.nPlayModels;
-import static com.kpstv.youtube.services.MusicService.notificationManagerCompat;
 import static com.kpstv.youtube.services.MusicService.onClear;
 import static com.kpstv.youtube.services.MusicService.onMake;
 import static com.kpstv.youtube.services.MusicService.playNext;
 import static com.kpstv.youtube.services.MusicService.playPrevious;
-import static com.kpstv.youtube.services.MusicService.player;
 import static com.kpstv.youtube.services.MusicService.selectedItemText;
-import static com.kpstv.youtube.services.MusicService.settingPref;
 import static com.kpstv.youtube.services.MusicService.updateMediaSessionPlaybackState;
 import static com.kpstv.youtube.services.MusicService.ytIndex;
 
@@ -203,7 +99,6 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static FragmentManager fragmentManager;
     public static Fragment PlaylistFrag, libraryFrag, FavouriteFrag,localMusicFrag, localSearchFrag,popularFrag;
     Fragment NCFrag; String ytLink;
-    public static List<String> playListItems;
     static SharedPreferences preferences;
     public static LinearLayout bottom_player, adViewLayout;
     public static ImageButton actionUp;
@@ -212,8 +107,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static ProgressBar songProgress;
     public static TextView actionTitle;
     public static TextView actionChannelTitle; public static AdView adView;
-     public static FragmentActivity activity;
+    public static FragmentActivity activity;
 
+    static boolean shortCut_loadLocal =false, shortCut_loadSearch =false;
 
     LinearLayout swipeLayout;public static ToolTipManager toolTipManager;
     @SuppressLint("ClickableViewAccessibility")
@@ -329,8 +225,16 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
         if (YTutils.isInternetAvailable())
         {
-            if (getYTUrls("blank").length>1)
-                loadFragment(HistoryFrag);
+            if (getYTUrls("blank").length>1) {
+                if (shortCut_loadLocal) {
+                    navigation.setSelectedItemId(R.id.navigation_playlist);
+                    loadLocalMusicFrag();
+                    bottom_player.setVisibility(View.GONE);
+                }else if (shortCut_loadSearch) {
+                    bottom_player.setVisibility(View.GONE);
+                    navigation.setSelectedItemId(R.id.navigation_search);
+                } else loadFragment(HistoryFrag);
+            }
             else navigation.setSelectedItemId(R.id.navigation_search);
         }
         else {
@@ -617,10 +521,20 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     }
 
 
-    @SuppressLint("StaticFieldLeak")
     boolean CheckIntent(Intent incoming) {
+        shortCut_loadSearch=shortCut_loadLocal=false;
         Log.e(TAG, "CheckIntent: Intent Gotcha...");
         String action = incoming.getAction();
+
+        String data  = incoming.getData()!=null ? incoming.getData().toString() : null;
+        if (data!=null && data.equals("localmusic")) {
+            shortCut_loadLocal=true;
+            return true;
+        }else if (data !=null && data.equals("searchmusic")) {
+            shortCut_loadSearch=true;
+            return true;
+        }
+
         if (action!=null && action.equals("com.kpstv.youtube.OPEN_SONG")) {
             Log.e(TAG, "CheckIntent: Running in MainActivity...");
             YTutils.openSong(this,incoming);

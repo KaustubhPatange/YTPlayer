@@ -100,4 +100,11 @@
     <string name="rescan_lib">Rescaning library?</string>
     <string name="rescan_text">Whenever you are adding new songs to storage, make sure to Rescan library by clicking 3 dots on top right corner.</string>
     <string name="header_playlist">#!/ytplayer-playlist</string>
+
+
+    <string name="local_slabel">Local Music</string>
+    <string name="local_dlabel">Local Music (Disabled)</string>
+
+    <string name="search_slabel">Search</string>
+    <string name="search_dlabel">Search (Disabled)</string>
 </resources>

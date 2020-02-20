@@ -92,8 +92,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="file"/>
                 <data android:scheme="content"/>
-                <data android:mimeType="text/*" />
-                <data android:pathPattern=".*\\.txt" />
+                <data android:mimeType="text/plain" />
                 <data android:host="*" />
             </intent-filter>
             <intent-filter>
@@ -168,6 +167,8 @@
             android:name=".SplashActivity"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme">
+            <meta-data android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

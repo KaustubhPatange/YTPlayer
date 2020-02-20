@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="localmusic"
+        android:enabled="true"
+        android:icon="@mipmap/local_music_icon"
+        android:shortcutShortLabel="@string/local_slabel"
+        android:shortcutLongLabel="@string/local_slabel"
+        android:shortcutDisabledMessage="@string/local_dlabel">
+
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="localmusic"
+            android:targetPackage="com.kpstv.youtube"
+            android:targetClass="com.kpstv.youtube.SplashActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="searchmusic"
+        android:enabled="true"
+        android:icon="@mipmap/search_music_icon"
+        android:shortcutShortLabel="@string/search_slabel"
+        android:shortcutLongLabel="@string/search_slabel"
+        android:shortcutDisabledMessage="@string/search_dlabel">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="searchmusic"
+            android:targetPackage="com.kpstv.youtube"
+            android:targetClass="com.kpstv.youtube.SplashActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+</shortcuts>

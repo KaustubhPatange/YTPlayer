@@ -1,8 +1,6 @@
-Version 1.9
+Version 2.0
 
-[*] Add: Shuffle playing music
-[*] Add: Single song repeat in player
-[*] Add: Rescan option in sub local dirs
-[*] Updated: Image tag quality
-[*] Fix: Equalizer crashes
-[*] Fix: Errors while downloading
+[*] Add: Widgets and shorcuts
+[*] Updated: Changes I don't remember :P
+[*] Fix: Payment not complete issues
+[*] Fix: Random and reported bugs

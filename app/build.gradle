@@ -7,8 +7,8 @@ android {
         applicationId "com.kpstv.youtube"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 13
-        versionName "1.9"
+        versionCode 14
+        versionName "2.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     lintOptions {
@@ -21,11 +21,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    /*sourceSets.main {
-        assets.srcDirs = ['assets']
-        jni.srcDirs = [] //disable automatic ndk-build
-        jniLibs.srcDirs = ['libs']
-    }*/
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8

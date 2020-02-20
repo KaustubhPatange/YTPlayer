@@ -613,15 +613,16 @@ public class MusicService extends Service implements AppInterface {
             }
 
             videoID = arg0[0];
-            MainActivity.playListItems = new ArrayList<>();
+            MusicService.playListItems = new ArrayList<>();
 
             if (!localPlayBack) {
                 String data = YTutils.readContent(activity,"removedList.csv");
                 if (data!=null && !data.isEmpty()) {
                     if (data.contains(","))
-                        MainActivity.playListItems = new ArrayList<>(Arrays.asList(data.split(",")));
-                    else  MainActivity.playListItems.add(data.trim());
+                        MusicService.playListItems = new ArrayList<>(Arrays.asList(data.split(",")));
+                    else MusicService.playListItems.add(data.trim());
                 }
+
                 if (playListItems.contains("ytID:"+videoID)||playListItems.contains("sd:"+videoID)) {
                     skipSong =true;
                     return null;
@@ -630,10 +631,8 @@ public class MusicService extends Service implements AppInterface {
 
             if (videoID.contains("soundcloud.com")) {
                 soundCloud = new SoundCloud(videoID);
-                Log.e(TAG, "doInBackground: Likely here..." );
                 videoTitle = soundCloud.getModel().getTitle();
                 if (soundCloud.getModel()==null || soundCloud.getModel().getStreamUrl()==null) {
-                    Log.e(TAG, "doInBackground: Skipping soundcloud" );
                     skipSong=true; souncloudFailed=true;
                     command=1;
                     return null;
@@ -658,7 +657,7 @@ public class MusicService extends Service implements AppInterface {
                 /*int i = 0;
                 int apiLength = API_KEYS.length;
                 String json;
-                do {
+
                     json = jsonResponse(videoID, i);
                     i++;
                 } while (json.contains("\"error\":") && i < apiLength);*/
