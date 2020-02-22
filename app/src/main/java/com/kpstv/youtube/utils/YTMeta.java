@@ -11,9 +11,12 @@
 
 package com.kpstv.youtube.utils;
 
+import android.content.Context;
 import android.os.AsyncTask;
+import android.support.constraint.ConstraintLayout;
 import android.util.Log;
 
+import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.models.MetaModel;
 
 import org.json.JSONException;
@@ -30,6 +33,14 @@ public class YTMeta {
     }
 
     public YTMeta(String videoID) {
+        load(MainActivity.activity,videoID);
+    }
+
+    public YTMeta(Context context, String videoID) {
+       load(context, videoID);
+    }
+
+    public void load(Context context, String videoID) {
         if (videoID==null) return;
         if (videoID.contains("soundcloud.com")) {
             SoundCloud soundCloud = new SoundCloud(videoID);
@@ -59,7 +70,7 @@ public class YTMeta {
                         videoID,
                         object.getString("title"),
                         object.getString("author_name"),
-                        YTutils.getImageUrlID(videoID)
+                        YTutils.getImageUrlID(context,videoID)
                 );
                 model.setVideoID(videoID);
             } catch (JSONException e) {

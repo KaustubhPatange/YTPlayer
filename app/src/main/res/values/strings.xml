@@ -107,4 +107,7 @@
 
     <string name="search_slabel">Search</string>
     <string name="search_dlabel">Search (Disabled)</string>
+    <string name="adk_string">Create mods for Android app using <b>ADK</b>, a best reverse engineering tool.</string>
+    <string name="kling_string"><b>Kling</b> is a PC app which allows you to visually display any key pressed on keyboard.</string>
+    <string name="iso2usb_string"><b>Iso2Usb</b> allows you to create bootable usb media of Windows, Linux iso file.</string>
 </resources>

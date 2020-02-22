@@ -557,7 +557,7 @@ public class IntentDownloadService extends IntentService {
 
             LOG("Download Completed");
 
-            YTMeta ytMeta = new YTMeta(currentModel.getVideoID());
+            YTMeta ytMeta = new YTMeta(context, currentModel.getVideoID());
 
             Log.e(TAG, "mp3Task: Extension="+currentModel.getExt());
 

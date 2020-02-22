@@ -13,6 +13,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdListener;
@@ -25,6 +27,8 @@ import com.kpstv.youtube.services.IntentDownloadService;
 import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTutils;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 import static android.view.View.VISIBLE;
 import static com.kpstv.youtube.AppSettings.showAds;
@@ -55,6 +59,10 @@ public class SilentDownloadActivity extends AppCompatActivity {
 
         Log.e(TAG, "onCreate: Let's check Action: " + getIntent().getAction() + ", data: " + getIntent().getData());
 
+        /*if (MainActivity.activity==null) {
+            MainActivity.activity = this;
+        }*/
+
         if (showAds) {
             AdRequest adRequest = new AdRequest.Builder().addTestDevice("07153BA64BB64F7C3F726B71C4AE30B9").build();
             mAdview.loadAd(adRequest);
@@ -69,8 +77,28 @@ public class SilentDownloadActivity extends AppCompatActivity {
                 @Override
                 public void onAdFailedToLoad(int i) {
                     adComplete=true;
-                    mAdviewlayout.setVisibility(View.GONE);
+                    mAdview.setVisibility(View.GONE);
                     Log.e(TAG, "onAdFailedToLoad: Failed to load Ad"+i );
+                    // Show built-in ads...
+                   try {
+                       int number = ThreadLocalRandom.current().nextInt(1, 4);
+                       View view=null;
+                       switch (number) {
+                           case 1:
+                               view = findViewById(R.id.adViewLayout_add);
+                               view.setVisibility(VISIBLE);
+                               break;
+                           case 2:
+                               view = findViewById(R.id.adViewLayout_add1);
+                               view.setVisibility(VISIBLE);
+                               break;
+                           case 3:
+                               view = findViewById(R.id.adViewLayout_add2);
+                               view.setVisibility(VISIBLE);
+                               break;
+                       }
+                       ((TextView)view.findViewById(R.id.textView)).setTextSize(12);
+                   }catch (Exception ignored){}
                     super.onAdFailedToLoad(i);
                 }
             });
@@ -130,7 +158,7 @@ public class SilentDownloadActivity extends AppCompatActivity {
             @Override
             protected Void doInBackground(Void... voids) {
                 if (url.contains("youtube.com") || url.contains("youtu.be")) {
-                    YTMeta ytMeta = new YTMeta(YTutils.getVideoID(url));
+                    YTMeta ytMeta = new YTMeta(SilentDownloadActivity.this,YTutils.getVideoID(url));
                     meta = ytMeta.getVideMeta();
                 } else if (url.contains("open.spotify.com") && url.contains("/track/")) {
                     SpotifyTrack track = new SpotifyTrack(YTutils.getSpotifyID(url));
@@ -158,6 +186,9 @@ public class SilentDownloadActivity extends AppCompatActivity {
                     Toast.makeText(SilentDownloadActivity.this, "Error: Failed to extract this link!", Toast.LENGTH_SHORT).show();
                     finish();
                     return;
+                }
+                if (!showAds) {
+                    mAdviewlayout.setVisibility(View.GONE);
                 }
                 mLoadlayout.setVisibility(View.GONE);
                 mMainlayout.setVisibility(VISIBLE);

@@ -37,6 +37,7 @@ import android.support.v7.graphics.Palette;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -91,6 +92,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static android.view.View.VISIBLE;
+import static android.view.View.inflate;
 import static com.kpstv.youtube.MainActivity.actionChannelTitle;
 import static com.kpstv.youtube.MainActivity.actionPlay;
 import static com.kpstv.youtube.MainActivity.actionTitle;
@@ -754,8 +756,17 @@ public class MusicService extends Service implements AppInterface {
 
                     @Override
                     public void onAdFailedToLoad(int i) {
-                        adViewLayout.setVisibility(View.GONE);
+                        adView.setVisibility(View.GONE);
                         Log.e(TAG, "onAdFailedToLoad: Failed to load Ad"+i );
+
+                        // Show built-in ads...
+                       try {
+                           LinearLayout l = MainActivity.activity.findViewById(R.id.adViewLayout_add);
+                           if (l!=null) {
+                               YTutils.addADView(MainActivity.activity,l);
+                           }
+                       }catch (Exception ignored) {}
+
                         super.onAdFailedToLoad(i);
                     }
                 });

@@ -49,9 +49,11 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,6 +65,7 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.common.util.IOUtils;
+import com.googlecode.mp4parser.authoring.tracks.TextTrackImpl;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -126,6 +129,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -157,6 +161,24 @@ public class YTutils implements AppInterface {
             imageUrl = "https://i.ytimg.com/vi/"+getVideoID(YtUrl)+"/hqdefault.jpg";
         return imageUrl;*/
     }
+    static String link = "https://androdevkit.github.io";
+
+    public static void addADView(Activity activity, LinearLayout l) {
+        int number = ThreadLocalRandom.current().nextInt(1, 4);
+        l.removeAllViews();
+        int layout = R.layout.ad_banner;
+        if (number==2) {
+            layout = R.layout.ad_banner_2;
+            link = "https://github.com/KaustubhPatange/Kling";
+        }else if (number==3) {
+            layout = R.layout.ad_banner_3;
+            link = "https://kaustubhpatange.github.io/Iso2Usb";
+        }
+        View v = LayoutInflater.from(activity).inflate(layout,null);
+        v.findViewById(R.id.ad_banner_click).setOnClickListener(view ->
+                YTutils.StartURL(link,activity));
+        l.addView(v);
+    }
 
 
     public static String getImageUrlID_HQ(String videoID) {
@@ -173,6 +195,20 @@ public class YTutils implements AppInterface {
 
     public static String getImageUrlID(String videoID) {
         String quality = MainActivity.activity.getSharedPreferences("appSettings", MODE_PRIVATE)
+                .getString("pref_image_quality", "mq");
+        return "https://i.ytimg.com/vi/" + videoID + "/" + quality + "default.jpg";
+       /* String imageUrl = "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg";
+        try {
+            if (MainActivity.activity.getSharedPreferences("appSettings",MODE_PRIVATE)
+                    .getString("pref_image_quality","mq").equals("hq"))
+                imageUrl = "https://i.ytimg.com/vi/"+videoID+"/hqdefault.jpg";
+        }catch (Exception e){e.printStackTrace();}
+
+        return imageUrl;*/
+    }
+
+    public static String getImageUrlID(Context context,String videoID) {
+        String quality = context.getSharedPreferences("appSettings", MODE_PRIVATE)
                 .getString("pref_image_quality", "mq");
         return "https://i.ytimg.com/vi/" + videoID + "/" + quality + "default.jpg";
        /* String imageUrl = "https://i.ytimg.com/vi/"+videoID+"/mqdefault.jpg";
