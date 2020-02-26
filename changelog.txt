@@ -1,5 +1,6 @@
-Version 2.1
+Version 2.2
 
 [*] Add: Promotional based ads
+[*] Updated: Performance fixes & more
 [*] Fix: Bug in YTDownload (direct)
 [*] Fix: Reported bugs

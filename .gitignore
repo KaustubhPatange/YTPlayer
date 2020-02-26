@@ -15,3 +15,5 @@
 /captures
 .externalNativeBuild
 /release.properties
+*.lock
+*.lock

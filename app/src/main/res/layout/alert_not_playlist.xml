@@ -10,23 +10,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-        <ImageView
-            android:layout_width="70dp"
-            android:layout_height="70dp"
-            android:src="@drawable/ic_warning_default"
-            android:layout_gravity="center"/>
         <TextView
-            android:layout_marginTop="3dp"
-            android:gravity="center"
             android:fontFamily="@font/dmsans_font"
             android:textSize="21sp"
             android:textStyle="bold"
             android:textColor="@color/white"
-            android:text="Deprecated Error"
+            android:text="Playlist support"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-       <!-- <TextView
+        <TextView
             android:id="@+id/headerTxt"
             android:textSize="17sp"
             android:layout_marginTop="25dp"
@@ -35,16 +28,15 @@
             android:textColor="@color/white"
             android:text="How to parse playlist url?"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>-->
+            android:layout_height="wrap_content"/>
 
         <TextView
             android:id="@+id/textTxt"
-            android:gravity="center"
             android:textSize="16sp"
             android:layout_marginBottom="10dp"
             android:textColor="@color/light_white"
-            android:layout_marginTop="10dp"
-            android:text="This version of app has stop receiving updates. You need to manually update it to latest version from official website."
+            android:layout_marginTop="5dp"
+            android:text="In order to add songs from playlist url go to Library > Playlist > Create/Modify > Add playlist."
             android:fontFamily="@font/dmsans_font"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>

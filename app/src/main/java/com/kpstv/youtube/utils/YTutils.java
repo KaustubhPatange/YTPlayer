@@ -164,6 +164,7 @@ public class YTutils implements AppInterface {
     static String link;
 
     public static void addADView(Activity activity, LinearLayout l) {
+        l.setVisibility(View.VISIBLE);
         int number = ThreadLocalRandom.current().nextInt(1, 4);
         l.removeAllViews();
         int layout;// = R.layout.ad_banner;
@@ -182,7 +183,6 @@ public class YTutils implements AppInterface {
                 YTutils.StartURL(link,activity));
         l.addView(v);
     }
-
 
     public static String getImageUrlID_HQ(String videoID) {
         return "https://i.ytimg.com/vi/" + videoID + "/hqdefault.jpg";
