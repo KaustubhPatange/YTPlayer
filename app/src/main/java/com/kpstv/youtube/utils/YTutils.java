@@ -161,16 +161,19 @@ public class YTutils implements AppInterface {
             imageUrl = "https://i.ytimg.com/vi/"+getVideoID(YtUrl)+"/hqdefault.jpg";
         return imageUrl;*/
     }
-    static String link = "https://androdevkit.github.io";
+    static String link;
 
     public static void addADView(Activity activity, LinearLayout l) {
         int number = ThreadLocalRandom.current().nextInt(1, 4);
         l.removeAllViews();
-        int layout = R.layout.ad_banner;
-        if (number==2) {
+        int layout;// = R.layout.ad_banner;
+        if (number==1) {
+            layout = R.layout.ad_banner;
+            link = "https://androdevkit.github.io";
+        }else if (number==2) {
             layout = R.layout.ad_banner_2;
             link = "https://github.com/KaustubhPatange/Kling";
-        }else if (number==3) {
+        }else {
             layout = R.layout.ad_banner_3;
             link = "https://kaustubhpatange.github.io/Iso2Usb";
         }
@@ -1227,10 +1230,10 @@ public class YTutils implements AppInterface {
             // recommended.
             boolean useFileProvider = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N;
 
-            String tempFilename = "tmp.apk";
-            byte[] buffer = new byte[16384];
+           // String tempFilename = "tmp.apk";
+         //   byte[] buffer = new byte[16384];
             int fileMode = useFileProvider ? Context.MODE_PRIVATE : Context.MODE_WORLD_READABLE;
-            try (InputStream is = new FileInputStream(new File(path));
+          /*  try (InputStream is = new FileInputStream(new File(path));
                  FileOutputStream fout = context.openFileOutput(tempFilename, fileMode)) {
 
                 int n;
@@ -1240,19 +1243,15 @@ public class YTutils implements AppInterface {
 
             } catch (IOException e) {
                 Log.i(TAG + ":getApkUri", "Failed to write temporary APK file", e);
-            }
+            }*/
 
             if (useFileProvider) {
-
-                File toInstall = new File(context.getFilesDir(), tempFilename);
-                return FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID, toInstall);
-
+             //   File toInstall = new File(context.getFilesDir(), tempFilename);
+                File toInstall = new File(path);
+                return FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID+".provider", toInstall);
             } else {
-
-                return Uri.fromFile(context.getFileStreamPath(tempFilename));
-
+                return Uri.fromFile(new File(path));
             }
-
         }
 
         @SuppressLint("StaticFieldLeak")
@@ -1272,15 +1271,31 @@ public class YTutils implements AppInterface {
                 String changelogHtml = object.getString("changelog");
                 String downloadUri = object.getString("download");
 
-                int newVer = Integer.parseInt(object.getString("new")
+                int newVer = Integer.parseInt(object.getString("newVersion")
+                        .replace(".", ""));
+                int deprecatedVersion = Integer.parseInt(object.getString("deprecated")
                         .replace(".", ""));
                 updateName = "YTPlayer_v" + newVer + ".apk";
                 PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
                 int curVer = Integer.parseInt(pInfo.versionName.replace(".", ""));
                 Log.e("VersionLOG", "NewVersion: " + newVer + ", currVersion: " + curVer);
+                LayoutInflater inflater = LayoutInflater.from(context);
+                if (deprecatedVersion>=curVer) {
+                    View v = inflater.inflate(R.layout.alert_deprecated_error,null);
+
+                    alertDialog = new AlertDialog.Builder(context)
+                            .setView(v)
+                            .setCancelable(false)
+                            .setPositiveButton("OK",null)
+                            .setNeutralButton("Visit Website",(dialogInterface, i) -> {
+                                StartURL(context.getResources().getString(R.string.weburl),context);
+                            })
+                            .create();
+                    alertDialog.show();
+                    return;
+                }
                 if (newVer > curVer) {
-                    //  if (true) {
-                    LayoutInflater inflater = LayoutInflater.from(context);
+               //       if (true) {
                     View v = inflater.inflate(R.layout.alert_download, null);
 
                     TextView showTxt = v.findViewById(R.id.textTxt);

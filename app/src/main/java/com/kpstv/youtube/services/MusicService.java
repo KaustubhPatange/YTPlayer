@@ -283,7 +283,9 @@ public class MusicService extends Service implements AppInterface {
             bottom_player.setVisibility(View.GONE);
             adView.setVisibility(View.GONE);
             onClear();
-        }catch (Exception ignored){}
+            MainActivity.activity.findViewById(R.id.adViewLayout_add)
+                    .setVisibility(View.GONE);
+        }catch (Exception ignored){ }
 
         notificationManagerCompat.cancel(1);
         try {
@@ -1095,13 +1097,14 @@ public class MusicService extends Service implements AppInterface {
             }
             else {
                 ext = "mp4";
+                Log.e(TAG, "addVideoToList: "+media.getHeight());
                 ytText = (media.getFps() == 60) ?  media.getHeight() + "p60" : media.getHeight() + "p";
                 for(YTConfig config: ytConfigs) {
                     if (config.getText().equals(ytText))
                         return;
                 }
             }
-            Log.e(TAG, "addVideoToList: Title: "+ytText);
+        //    Log.e(TAG, "addVideoToList: Title: "+ytText);
         }catch (Exception e){e.printStackTrace();}
         String audioSet=null;
         if (isaudio) {

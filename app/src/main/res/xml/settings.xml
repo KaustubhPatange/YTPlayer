@@ -14,7 +14,13 @@
             android:defaultValue="true"
             android:title="Listen to audio focus change"
             android:summary="When ON app will pause the player when it detects any other app using audio service."/>
+        <SwitchPreference
+            android:key="pref_muxer"
+            android:defaultValue="true"
+            android:title="Use FFMPEG for muxing video streams"
+            android:summary="Switch between standard muxer and ffmpeg. If video playing fails turn this OFF."/>
     </PreferenceCategory>
+
     <PreferenceCategory android:title="Look &#38; Feel">
         <SwitchPreference
             android:key="pref_squarePager"
@@ -30,6 +36,7 @@
             android:summary="Quality of image which will be used in player as well as in media tag."
             android:title="Image quality" />
     </PreferenceCategory>
+
     <PreferenceCategory android:title="Update">
         <SwitchPreference
             android:key="pref_update_check"
@@ -55,6 +62,7 @@
             android:title="Clear backups"
             android:summary="Clear all of your saved sessions."/>
     </PreferenceCategory>
+
     <PreferenceCategory android:title="Other">
         <Preference
             android:key="pref_account"

@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -322,6 +323,9 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                     yturls.add(dModel.getYtUrl());
                 }
                 MainActivity.PlayVideo(YTutils.convertListToArrayMethod(yturls),listPosition);
+
+                ((InputMethodManager) con.getSystemService(Context.INPUT_METHOD_SERVICE))
+                        .hideSoftInputFromWindow(holder.mainLayout.getWindowToken(), 0);
             });
 
             if (listPosition % 15 == 0 && listPosition !=0 && AppSettings.showAds) {

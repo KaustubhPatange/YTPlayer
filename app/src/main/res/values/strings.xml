@@ -1,6 +1,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">YTPlayer</string>
     <string name="tandt">Terms and conditions? <a href="https://kaustubhpatange.github.io/YTPlayer">Read more</a></string>
+    <string name="weburl">https://kaustubhpatange.github.io/YTPlayer</string>
     <string name="title_home">History</string>
     <string name="title_dashboard">Search</string>
     <string name="title_notifications">Library</string>

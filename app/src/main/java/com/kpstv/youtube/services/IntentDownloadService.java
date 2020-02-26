@@ -8,6 +8,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -95,7 +96,7 @@ public class IntentDownloadService extends IntentService {
     private final int FOREGROUND_ID = 109;
     Notification notification;
     PendingIntent contentIntent, cancelIntent;
-    private long oldbytes;
+    private long oldbytes; boolean useFFMPEGmuxer=true;
     private Handler handler;
 
     /**
@@ -111,7 +112,6 @@ public class IntentDownloadService extends IntentService {
 
     public IntentDownloadService() {
         super("IntentDownloadService");
-        ;
         setIntentRedelivery(true);
     }
 
@@ -119,6 +119,9 @@ public class IntentDownloadService extends IntentService {
     public void onCreate() {
         context = getApplicationContext();
         pendingJobs = new ArrayList<>();
+
+        SharedPreferences preferences = getSharedPreferences("appSettings",MODE_PRIVATE);
+        useFFMPEGmuxer = preferences.getBoolean("pref_muxer",true);
 
         PRDownloader.initialize(context);
 
@@ -454,10 +457,14 @@ public class IntentDownloadService extends IntentService {
     }
 
     private String getVideoStream(List<YTMedia> adativeStream,int quality) {
-        String backupUri=null;
+        String backupUri=null; boolean setBackupUri=false;
+
         for (YTMedia media : adativeStream) {
             if (media.getAudioSampleRate() == 0) {
-                backupUri = media.getUrl();
+                if (!setBackupUri) {
+                    backupUri = media.getUrl();
+                    setBackupUri=true;
+                }
                 if (media.getHeight()==quality) {
                     return media.getUrl();
                 }
@@ -806,7 +813,7 @@ public class IntentDownloadService extends IntentService {
 
         File audio = YTutils.getFile("/YTPlayer/audio.m4a");
         if (audio.exists()) audio.delete();
-        File video = YTutils.getFile("/YTPlayer/video.download");
+        File video = YTutils.getFile("/YTPlayer/video.mp4");
         if (video.exists()) video.delete();
         try {
 
@@ -905,9 +912,15 @@ public class IntentDownloadService extends IntentService {
             File save = YTutils.getFile(Environment.DIRECTORY_DOWNLOADS + "/" + currentModel.getTargetName() + "." + currentModel.getExt());
             if (save.exists()) save.delete();
 
-            mux(YTutils.getFile("YTPlayer/video.mp4").getPath(),
-                    YTutils.getFile("YTPlayer/audio.m4a").getPath(),
-                    save.getPath());
+            if (useFFMPEGmuxer) {
+                mux_ffmpeg(YTutils.getFile("YTPlayer/video.mp4").getPath(),
+                        YTutils.getFile("YTPlayer/audio.m4a").getPath(),
+                        save.getPath());
+            }else {
+                mux(YTutils.getFile("YTPlayer/video.mp4").getPath(),
+                        YTutils.getFile("YTPlayer/audio.m4a").getPath(),
+                        save.getPath());
+            }
 
             setFinalNotification(save);
 
@@ -1025,6 +1038,35 @@ public class IntentDownloadService extends IntentService {
         } catch (Exception e) {
             Log.d(TAG, "Mixer Error 2 " + e.getMessage());
         }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public boolean mux_ffmpeg(String videoFile, String audioFile, String outputFile) {
+        isDownloaded = false;
+        File video = new File(videoFile);
+        File audio = new File(audioFile);
+        File outFile = new File(outputFile);
+        new AsyncTask<File,Void,Void>() {
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                isDownloaded=true;
+                super.onPostExecute(aVoid);
+            }
+
+            @Override
+            protected Void doInBackground(File... files) {
+                // ffmpeg -i audio.acc -i video.h264  -c:v copy -c:a copy -f mp4 -y out.mp4
+                String[] cmd = new String[]{"-i", files[0].getPath(),"-i" ,files[1].getPath(),"-c:v","copy","-c:a","copy","-f","mp4","-y",files[2].getPath()};
+                int rc = FFmpeg.execute(cmd);
+                processRC(rc);
+                return null;
+            }
+        }.execute(video,audio,outFile);
+        do {
+            Log.e(TAG, "isDownloaded="+isDownloaded );
+        } while (!isDownloaded);
+        return outFile.exists();
     }
 
     public boolean mux(String videoFile, String audioFile, String outputFile) {
