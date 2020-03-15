@@ -53,7 +53,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,7 +64,6 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.common.util.IOUtils;
-import com.googlecode.mp4parser.authoring.tracks.TextTrackImpl;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -1641,13 +1639,14 @@ public class YTutils implements AppInterface {
 
 
     public static void parseDataForPlaylist(Context context, String path) {
-        parseDataForPlaylist(context, path, false);
+        parseDataForPlaylist(context, path, false,false);
     }
 
     public static void parseDataForPlaylist(Context context, String path, boolean playlist_export) {
         parseDataForPlaylist(context, path, playlist_export,true);
     }
 
+    static AlertDialog alertDialog1;
     public static void parseDataForPlaylist(Context context, String path, boolean playlist_export,boolean export) {
         if (path != null) {
 
@@ -1689,6 +1688,7 @@ public class YTutils implements AppInterface {
                 LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
 
                 View view = inflater.inflate(R.layout.alert_import_playlist, null);
+
                 RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
 
                 ImportAdapter adapter = new ImportAdapter(context, models, items);
@@ -1703,6 +1703,8 @@ public class YTutils implements AppInterface {
 
                 String text = "Import";
                 if (export) text = "Export";
+
+                ((TextView) view.findViewById(R.id.titleTxt)).setText(text);
 
                 alertDialog = new AlertDialog.Builder(context)
                         .setView(view)
@@ -1731,7 +1733,7 @@ public class YTutils implements AppInterface {
                         View view1 = inflater.inflate(R.layout.alert_export_name,null);
                         EditText editText = view1.findViewById(R.id.editText);
 
-                        alertDialog = new AlertDialog.Builder(context)
+                        alertDialog1 = new AlertDialog.Builder(context)
                                 .setView(view1)
                                 .setPositiveButton("Export",(dialogInterface, i) -> {
 
@@ -1739,8 +1741,8 @@ public class YTutils implements AppInterface {
                                 .setNegativeButton("Cancel",null)
                                 .create();
 
-                        alertDialog.show();
-                        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view3 -> {
+                        alertDialog1.show();
+                        alertDialog1.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view3 -> {
                             if (editText.getText().toString().isEmpty()) {
                                 Toast.makeText(context, "Playlist name cannot be empty", Toast.LENGTH_SHORT).show();
                                 return;
@@ -1756,6 +1758,8 @@ public class YTutils implements AppInterface {
                             String path1 = getFile("Playlists/"+editText.getText().toString()+".txt").getPath();
                             YTutils.writeContent(context,path1,builder.toString());
                             Toast.makeText(context, "Saved to "+path1, Toast.LENGTH_SHORT).show();
+                            alertDialog1.dismiss();
+                            alertDialog.dismiss();
                         });
 
                     } else {
