@@ -85,7 +85,7 @@ public class DiscoverAdapter2 extends RecyclerView.Adapter {
             viewHolder.titleText.setText(model.getTitle());
             viewHolder.rate_percent.setText("#"+(position+1));
 
-            Glide.with(con).load(model.getImgUrl()).addListener(new RequestListener<Drawable>() {
+            Glide.with(con.getApplicationContext()).load(model.getImgUrl()).addListener(new RequestListener<Drawable>() {
                 @Override
                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                     return false;

@@ -143,7 +143,7 @@ public class DiscoverAdapter extends RecyclerView.Adapter {
             viewHolder.titleText.setText(model.getTitle());
             viewHolder.rate_percent.setText("#"+(position+1));
 
-            Glide.with(con).asBitmap().load(model.getImgUrl()).into(new CustomTarget<Bitmap>() {
+            Glide.with(con.getApplicationContext()).asBitmap().load(model.getImgUrl()).into(new CustomTarget<Bitmap>() {
                 @Override
                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                     viewHolder.imageView.setImageBitmap(resource);

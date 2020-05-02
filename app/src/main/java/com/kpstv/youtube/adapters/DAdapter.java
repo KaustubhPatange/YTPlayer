@@ -65,7 +65,7 @@ public class DAdapter extends RecyclerView.Adapter<DAdapter.DHolder> {
         }else
             holder.subtitle.setText(dModel.getSubtitle());
 
-        Glide.with(context).asBitmap().load(dModel.getImageUrl()).into(new CustomTarget<Bitmap>(){
+        Glide.with(context.getApplicationContext()).asBitmap().load(dModel.getImageUrl()).into(new CustomTarget<Bitmap>(){
             @Override
             public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                 holder.imageView.setImageBitmap(resource);

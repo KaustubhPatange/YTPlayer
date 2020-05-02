@@ -99,7 +99,7 @@ public class PlayerAdapter extends PagerAdapter {
                     SoundCloud soundCloud;
                     @Override
                     protected void onPostExecute(Void aVoid) {
-                        Glide.with(context)
+                        Glide.with(context.getApplicationContext())
                                 .asBitmap()
                                 .load(soundCloud.getModel().getImageUrl())
                                 .into(new CustomTarget<Bitmap>() {
@@ -134,7 +134,7 @@ public class PlayerAdapter extends PagerAdapter {
                 String imageUrl = YTutils.getImageUrl(yturls.get(position));
                 Log.e(TAG, "Imageurl: "+imageUrl);
 
-                Glide.with(context)
+                Glide.with(context.getApplicationContext())
                         .asBitmap()
                         .load(imageUrl)
                         .into(new CustomTarget<Bitmap>() {

@@ -824,7 +824,7 @@ public class IntentDownloadService extends IntentService {
                 imageUri = currentModel.getImageUrl();
             else imageUri = YTutils.getImageUrlID_MAX(currentModel.getVideoID());
 
-            Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
+            Glide.with(context.getApplicationContext()).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
                 @Override
                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                     icon = resource;

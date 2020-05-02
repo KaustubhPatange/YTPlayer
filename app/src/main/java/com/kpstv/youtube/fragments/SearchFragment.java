@@ -2,7 +2,6 @@ package com.kpstv.youtube.fragments;
 
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -39,7 +38,6 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
-import com.kpstv.youtube.SearchActivity;
 import com.kpstv.youtube.SettingsActivity;
 import com.kpstv.youtube.adapters.SearchAdapter;
 import com.kpstv.youtube.fragments.basedOnApi.PopularFragment;
@@ -59,23 +57,35 @@ import java.util.Calendar;
 public class SearchFragment extends Fragment {
 
     View v;
-    RecyclerView recyclerView; static Fragment discoverFrag, SearchFrag;
+    RecyclerView recyclerView;
+    static Fragment discoverFrag, SearchFrag;
     static RecyclerView.LayoutManager layoutManager;
-    SearchAdapter adapter; boolean networkCreated; ArrayList<String> images;
-    ArrayList<SearchModel> models; RelativeLayout progresslayout;
+    SearchAdapter adapter;
+    boolean networkCreated;
+    ArrayList<String> images;
+    ArrayList<SearchModel> models;
+    RelativeLayout progresslayout;
     CircularProgressBar progressBar;
-    ArrayList<Drawable> drawables; FragmentActivity activity; TextView moreTrend;
-    CardView discoverViral, searchCard; boolean istrendloaded,isdiscoverloaded;
-    ImageView githubView,pulseView,myWebView; LinearLayout settingsLayout;
+    ArrayList<Drawable> drawables;
+    FragmentActivity activity;
+    TextView moreTrend;
+    CardView discoverViral, searchCard;
+    boolean istrendloaded, isdiscoverloaded;
+    ImageView githubView, pulseView, myWebView;
+    LinearLayout settingsLayout;
     NestedScrollView nestedScrollView;
-    AsyncTask<Void,Float,Void> trendTask;
-    AsyncTask<Void,Void,Void> discoverTask; boolean alertShown=false;
-    LinearLayout SOW,SOF;  ConstraintLayout tipLayout; LinearLayout searchButton;
+    AsyncTask<Void, Float, Void> trendTask;
+    AsyncTask<Void, Void, Void> discoverTask;
+    boolean alertShown = false;
+    LinearLayout SOW, SOF;
+    ConstraintLayout tipLayout;
+    LinearLayout searchButton;
     ProgressBar progressBar1;
-    SharedPreferences preferences,settingpref; String region="global";
+    SharedPreferences preferences, settingpref;
+    String region = "global";
 
     private static String SpotifyTrendsCSV, SpotifyViralCSV;
-    CardView top100Card,viral100Card,mostViewedCard,mostPopularCard,weeklyPopularCard,top20songsCard;
+    CardView top100Card, viral100Card, mostViewedCard, mostPopularCard, weeklyPopularCard, top20songsCard;
     ToolTipManager toolTipManager;
 
     ImageView imageView1;
@@ -83,7 +93,8 @@ public class SearchFragment extends Fragment {
     ImageView imageView3;
     ImageView imageView4;
 
-    public SearchFragment() {}
+    public SearchFragment() {
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -96,13 +107,13 @@ public class SearchFragment extends Fragment {
             v = inflater.inflate(R.layout.fragment_search, container, false);
 
             activity = getActivity();
-            settingpref = activity.getSharedPreferences("settings",Context.MODE_PRIVATE);
-            preferences = activity.getSharedPreferences("appSettings",Context.MODE_PRIVATE);
-            if (preferences!=null) {
-                region = preferences.getString("pref_select_region","global");
+            settingpref = activity.getSharedPreferences("settings", Context.MODE_PRIVATE);
+            preferences = activity.getSharedPreferences("appSettings", Context.MODE_PRIVATE);
+            if (preferences != null) {
+                region = preferences.getString("pref_select_region", "global");
             }
 
-            Log.e("RegionSelected",region+"");
+            Log.e("RegionSelected", region + "");
 
             toolTipManager = new ToolTipManager(activity);
             ToolTip toolTip = new ToolTip()
@@ -144,17 +155,17 @@ public class SearchFragment extends Fragment {
             discoverViral = v.findViewById(R.id.discoverViral);
             progresslayout = v.findViewById(R.id.progressLayout);
             layoutManager = new LinearLayoutManager(getContext(),
-                    LinearLayoutManager.HORIZONTAL,true);
+                    LinearLayoutManager.HORIZONTAL, true);
             recyclerView.setLayoutManager(layoutManager);
 
             githubView.setOnClickListener(v1 -> {
-                YTutils.StartURL("https://github.com/KaustubhPatange/YTPlayer",activity);
+                YTutils.StartURL("https://github.com/KaustubhPatange/YTPlayer", activity);
             });
             pulseView.setOnClickListener(v1 -> {
-                YTutils.StartURL("https://kaustubhpatange.github.io/YTPlayer",activity);
+                YTutils.StartURL("https://kaustubhpatange.github.io/YTPlayer", activity);
             });
             myWebView.setOnClickListener(v1 -> {
-                YTutils.StartURL("https://kaustubhpatange.github.io",activity);
+                YTutils.StartURL("https://kaustubhpatange.github.io", activity);
             });
             SOW.setOnClickListener(v1 -> {
                 String shareText = "If you are a music lover and wants to download Spotify, YouTube music for free try this app https://kaustubhpatange.github.io/YTPlayer";
@@ -192,7 +203,7 @@ public class SearchFragment extends Fragment {
                 activity.overridePendingTransition(R.anim.right_enter,R.anim.left_exit);*/
 
                 FrameLayout layout = activity.findViewById(R.id.fragment_container);
-                if (layout!=null) {
+                if (layout != null) {
                     loadSearchViewFrag();
                 }
             });
@@ -203,11 +214,11 @@ public class SearchFragment extends Fragment {
                     return;
                 }
                 FrameLayout layout = activity.findViewById(R.id.fragment_container);
-                if (layout!=null) {
+                if (layout != null) {
                     discoverFrag = new DiscoverFragment();
                     Bundle args = new Bundle();
-                    args.putString("data_csv",SpotifyTrendsCSV);
-                    args.putString("title","Discover Trends");
+                    args.putString("data_csv", SpotifyTrendsCSV);
+                    args.putString("title", "Discover Trends");
                     discoverFrag.setArguments(args);
                     FragmentManager manager = getActivity().getSupportFragmentManager();
                     FragmentTransaction ft = manager.beginTransaction();
@@ -224,11 +235,11 @@ public class SearchFragment extends Fragment {
                     return;
                 }
                 FrameLayout layout = activity.findViewById(R.id.fragment_container);
-                if (layout!=null) {
+                if (layout != null) {
                     discoverFrag = new DiscoverFragment();
                     Bundle args = new Bundle();
-                    args.putString("data_csv",SpotifyViralCSV);
-                    args.putString("title","Discover Viral");
+                    args.putString("data_csv", SpotifyViralCSV);
+                    args.putString("title", "Discover Viral");
                     discoverFrag.setArguments(args);
                     FragmentManager manager = getActivity().getSupportFragmentManager();
                     FragmentTransaction ft = manager.beginTransaction();
@@ -248,11 +259,12 @@ public class SearchFragment extends Fragment {
                 }
                 try {
                     MainActivity.popularFrag.onDestroy();
-                }catch (Exception e){}
+                } catch (Exception e) {
+                }
                 MainActivity.popularFrag = new PopularFragment();
                 FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
                 ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-                ft.replace(R.id.fragment_container, MainActivity.popularFrag,"normalTag");
+                ft.replace(R.id.fragment_container, MainActivity.popularFrag, "normalTag");
                 ft.commit();
             });
             top20songsCard.setOnClickListener(view -> {
@@ -262,11 +274,12 @@ public class SearchFragment extends Fragment {
                 }
                 try {
                     MainActivity.popularFrag.onDestroy();
-                }catch (Exception e){}
+                } catch (Exception e) {
+                }
                 MainActivity.popularFrag = new PopularFragment();
                 FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
                 ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-                ft.replace(R.id.fragment_container, MainActivity.popularFrag,"sound20");
+                ft.replace(R.id.fragment_container, MainActivity.popularFrag, "sound20");
                 ft.commit();
             });
             viral100Card.setOnClickListener(view -> {
@@ -276,11 +289,12 @@ public class SearchFragment extends Fragment {
                 }
                 try {
                     MainActivity.popularFrag.onDestroy();
-                }catch (Exception e){}
+                } catch (Exception e) {
+                }
                 MainActivity.popularFrag = new PopularFragment();
                 FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
                 ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-                ft.replace(R.id.fragment_container,  MainActivity.popularFrag,"viral");
+                ft.replace(R.id.fragment_container, MainActivity.popularFrag, "viral");
                 ft.commit();
             });
             mostViewedCard.setOnClickListener(view -> {
@@ -290,11 +304,12 @@ public class SearchFragment extends Fragment {
                 }
                 try {
                     MainActivity.popularFrag.onDestroy();
-                }catch (Exception e){}
+                } catch (Exception e) {
+                }
                 MainActivity.popularFrag = new PopularFragment();
                 FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
                 ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-                ft.replace(R.id.fragment_container,  MainActivity.popularFrag,"most_viewed");
+                ft.replace(R.id.fragment_container, MainActivity.popularFrag, "most_viewed");
                 ft.commit();
             });
             mostPopularCard.setOnClickListener(view -> {
@@ -304,11 +319,12 @@ public class SearchFragment extends Fragment {
                 }
                 try {
                     MainActivity.popularFrag.onDestroy();
-                }catch (Exception e){}
+                } catch (Exception e) {
+                }
                 MainActivity.popularFrag = new PopularFragment();
                 FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
                 ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-                ft.replace(R.id.fragment_container,  MainActivity.popularFrag,"most_popular");
+                ft.replace(R.id.fragment_container, MainActivity.popularFrag, "most_popular");
                 ft.commit();
             });
             weeklyPopularCard.setOnClickListener(view -> {
@@ -318,16 +334,17 @@ public class SearchFragment extends Fragment {
                 }
                 try {
                     MainActivity.popularFrag.onDestroy();
-                }catch (Exception e){}
+                } catch (Exception e) {
+                }
                 MainActivity.popularFrag = new PopularFragment();
                 FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
                 ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-                ft.replace(R.id.fragment_container,  MainActivity.popularFrag,"weekly_popular");
+                ft.replace(R.id.fragment_container, MainActivity.popularFrag, "weekly_popular");
                 ft.commit();
             });
 
-            settingsLayout.setOnClickListener(v->
-                    startActivity(new Intent(activity,SettingsActivity.class)));
+            settingsLayout.setOnClickListener(v ->
+                    startActivity(new Intent(activity, SettingsActivity.class)));
 
             if (YTutils.isInternetAvailable())
                 networkCreated = true;
@@ -338,10 +355,10 @@ public class SearchFragment extends Fragment {
             discoverTask = new loadDiscoverImages();
             discoverTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-            if (!settingpref.getBoolean("searchTip",false)) {
-                toolTipManager.showToolTip(toolTip,searchCard);
+            if (!settingpref.getBoolean("searchTip", false)) {
+                toolTipManager.showToolTip(toolTip, searchCard);
                 SharedPreferences.Editor editor = settingpref.edit();
-                editor.putBoolean("searchTip",true);
+                editor.putBoolean("searchTip", true);
                 editor.apply();
             }
             changeYear();
@@ -350,6 +367,7 @@ public class SearchFragment extends Fragment {
     }
 
     private static final String TAG = "SearchFragment";
+
     void changeYear() {
         @SuppressLint("SimpleDateFormat")
         SimpleDateFormat df = new SimpleDateFormat("yyyy");
@@ -363,13 +381,15 @@ public class SearchFragment extends Fragment {
         TextView txt2 = item2.findViewById(R.id.year);
         TextView txt3 = item3.findViewById(R.id.year);
 
-        txt1.setText(year); txt2.setText(year); txt3.setText(year);
+        txt1.setText(year);
+        txt2.setText(year);
+        txt3.setText(year);
     }
 
     public void loadSearchViewFrag() {
         SearchFrag = new SFragment();
         Bundle args = new Bundle();
-        args.putString("data_csv",SpotifyViralCSV);
+        args.putString("data_csv", SpotifyViralCSV);
         SearchFrag.setArguments(args);
         FragmentManager manager = activity.getSupportFragmentManager();
         FragmentTransaction ft = manager.beginTransaction();
@@ -382,7 +402,7 @@ public class SearchFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode==100) {
+        if (requestCode == 100) {
             loadSearchViewFrag();
         }
     }
@@ -391,21 +411,21 @@ public class SearchFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        String newregion = preferences.getString("pref_select_region","global");
-        Log.e("onResume","region: "+region+", newregion: "+newregion);
+        String newregion = preferences.getString("pref_select_region", "global");
+        Log.e("onResume", "region: " + region + ", newregion: " + newregion);
         if (!newregion.contains(region)) {
 
             nestedScrollView.scrollTo(0, 0);
             Toast.makeText(activity, "Reloading data from new region!", Toast.LENGTH_SHORT).show();
-           
+
             models.clear();
             adapter.notifyDataSetChanged();
             drawables.clear();
             images.clear();
             progresslayout.setVisibility(View.VISIBLE);
             region = newregion;
-            SpotifyTrendsCSV=null;
-            SpotifyViralCSV=null;
+            SpotifyTrendsCSV = null;
+            SpotifyViralCSV = null;
 
             imageView1.setImageDrawable(null);
             imageView2.setImageDrawable(null);
@@ -418,7 +438,7 @@ public class SearchFragment extends Fragment {
             discoverTask = new loadDiscoverImages();
             discoverTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
-        if (drawables.size()>3) {
+        if (drawables.size() > 3) {
             imageView1.setImageDrawable(drawables.get(0));
             imageView2.setImageDrawable(drawables.get(1));
             imageView3.setImageDrawable(drawables.get(2));
@@ -432,7 +452,7 @@ public class SearchFragment extends Fragment {
         super.onPause();
     }
 
-    class getTrending extends AsyncTask<Void,Float,Void> {
+    class getTrending extends AsyncTask<Void, Float, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -447,20 +467,20 @@ public class SearchFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
 
             recyclerView.setItemAnimator(new DefaultItemAnimator());
-            adapter = new SearchAdapter(models,activity,false);
+            adapter = new SearchAdapter(models, activity, false);
             recyclerView.setAdapter(adapter);
-            recyclerView.getLayoutManager().scrollToPosition(models.size()-1);
+            recyclerView.getLayoutManager().scrollToPosition(models.size() - 1);
             progresslayout.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
 
             istrendloaded = true;
 
-            if (!settingpref.getBoolean("showSTip",false)) {
+            if (!settingpref.getBoolean("showSTip", false)) {
                 tipLayout.setVisibility(View.VISIBLE);
                 searchButton.setOnClickListener(view -> {
                     tipLayout.setVisibility(View.GONE);
                     SharedPreferences.Editor editor = settingpref.edit();
-                    editor.putBoolean("showSTip",true);
+                    editor.putBoolean("showSTip", true);
                     editor.apply();
                 });
             }
@@ -477,23 +497,23 @@ public class SearchFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (SpotifyTrendsCSV==null) {
+            if (SpotifyTrendsCSV == null) {
                 HttpHandler handler = new HttpHandler();
                 SpotifyTrendsCSV = handler.makeServiceCall(
-                        "https://spotifycharts.com/regional/"+region+"/daily/latest/download");
+                        "https://spotifycharts.com/regional/" + region + "/daily/latest/download");
             }
 
-            String trendRead = YTutils.readContent(activity,"trend_"+region+".csv");
-            Log.e(TAG, "doInBackground: is File null" );
-            if (trendRead!=null && !trendRead.isEmpty()) {
+            String trendRead = YTutils.readContent(activity, "trend_" + region + ".csv");
+            Log.e(TAG, "doInBackground: is File null");
+            if (trendRead != null && !trendRead.isEmpty()) {
                 String[] lines = trendRead.split("\n|\r");
-                Log.e(TAG, "doInBackground: Not file null: "+lines[0]+ ", lines Length: "+lines.length);
-                if (lines[0].contains(YTutils.getTodayDate())&&lines.length==11) {
+                Log.e(TAG, "doInBackground: Not file null: " + lines[0] + ", lines Length: " + lines.length);
+                if (lines[0].contains(YTutils.getTodayDate()) && lines.length == 11) {
                     Log.e(TAG, "doInBackground: Trend In here...");
-                    for (int i=1;i<11;i++) {
+                    for (int i = 1; i < 11; i++) {
                         String id = lines[i].split(",")[1];
 
-                        publishProgress((float)(i-1)*10);
+                        publishProgress((float) (i - 1) * 10);
 
                         models.add(new SearchModel(
                                 lines[i].split(",")[0],
@@ -506,33 +526,33 @@ public class SearchFragment extends Fragment {
                 }
             }
 
-            if (models.size()<10) {
+            if (models.size() < 10) {
                 models.clear();
-                if (SpotifyTrendsCSV==null) return null;
+                if (SpotifyTrendsCSV == null) return null;
                 String[] csvlines = SpotifyTrendsCSV.split("\n|\r");
-                for (int i=2;i<12;i++) {
-                   try {
-                       String line = csvlines[i];
-                       String title = line.split(",")[1].replace("\"","");
-                       String author = line.split(",")[2].replace("\"","");
+                for (int i = 2; i < 12; i++) {
+                    try {
+                        String line = csvlines[i];
+                        String title = line.split(",")[1].replace("\"", "");
+                        String author = line.split(",")[2].replace("\"", "");
 
-                       String search_text = title.replace(" ","+")
-                               + "+by+" + author.replace(" ","+");
+                        String search_text = title.replace(" ", "+")
+                                + "+by+" + author.replace(" ", "+");
 
-                       Log.e("TrendingLines",line.split(",")[1].replace("\"",""));
+                        Log.e("TrendingLines", line.split(",")[1].replace("\"", ""));
 
-                       YTSearch ytSearch = new YTSearch(search_text);
+                        YTSearch ytSearch = new YTSearch(search_text);
 
-                       final String videoId = ytSearch.getVideoIDs().get(0);
-                       String imgurl =YTutils.getImageUrlID(videoId);
+                        final String videoId = ytSearch.getVideoIDs().get(0);
+                        String imgurl = YTutils.getImageUrlID(videoId);
 
-                       publishProgress((float)(i-2)*10);
-                       models.add(0,new SearchModel(
-                               title, imgurl, "https://www.youtube.com/watch?v="+videoId
-                       ));
-                   }catch (Exception e){
-                       e.printStackTrace();
-                   }
+                        publishProgress((float) (i - 2) * 10);
+                        models.add(0, new SearchModel(
+                                title, imgurl, "https://www.youtube.com/watch?v=" + videoId
+                        ));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             // Save data to internal storage
@@ -542,29 +562,29 @@ public class SearchFragment extends Fragment {
     }
 
     void saveTrendToInternal() {
-        String FILE_NAME = "trend_"+region+".csv";
+        String FILE_NAME = "trend_" + region + ".csv";
         StringBuilder builder = new StringBuilder();
         builder.append(YTutils.getTodayDate()).append("\n");
 
-        for(SearchModel model : models) {
+        for (SearchModel model : models) {
             builder.append(model.getTitle()).append(",").append(YTutils.getVideoID(model.getYturl())).append("\n");
         }
 
-        YTutils.writeContent(activity,FILE_NAME,builder.toString());
+        YTutils.writeContent(activity, FILE_NAME, builder.toString());
     }
 
     void saveDiscoverToInternal() {
-        String FILE_NAME = "discover_"+region+".csv";
+        String FILE_NAME = "discover_" + region + ".csv";
         StringBuilder builder = new StringBuilder();
-        builder.append(YTutils.getTodayDate()+"\n");
+        builder.append(YTutils.getTodayDate() + "\n");
         for (String image : images) {
-            builder.append(image+"\n");
+            builder.append(image + "\n");
         }
 
-        YTutils.writeContent(activity,FILE_NAME,builder.toString());
+        YTutils.writeContent(activity, FILE_NAME, builder.toString());
     }
 
-    class loadDiscoverImages extends AsyncTask<Void,Void,Void> {
+    class loadDiscoverImages extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -576,57 +596,60 @@ public class SearchFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-           try {
-               loadImageGlide(images.get(0),imageView1);
-               loadImageGlide(images.get(1),imageView2);
-               loadImageGlide(images.get(2),imageView3);
-               loadImageGlide(images.get(3),imageView4);
-           }catch (Exception ignored){ }
+            try {
+                loadImageGlide(images.get(0), imageView1);
+                loadImageGlide(images.get(1), imageView2);
+                loadImageGlide(images.get(2), imageView3);
+                loadImageGlide(images.get(3), imageView4);
+            } catch (Exception ignored) {
+            }
 
-            isdiscoverloaded=true;
+            isdiscoverloaded = true;
             super.onPostExecute(aVoid);
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (SpotifyViralCSV==null) {
+            if (SpotifyViralCSV == null) {
                 HttpHandler handler = new HttpHandler();
                 SpotifyViralCSV = handler.makeServiceCall(
-                        "https://spotifycharts.com/viral/"+region+"/daily/latest/download"
+                        "https://spotifycharts.com/viral/" + region + "/daily/latest/download"
                 );
             }
 
-            String discoverRead = YTutils.readContent(activity,"discover_"+region+".csv");
-            if (discoverRead!=null && !discoverRead.isEmpty()) {
+            String discoverRead = YTutils.readContent(activity, "discover_" + region + ".csv");
+            if (discoverRead != null && !discoverRead.isEmpty()) {
                 String[] lines = discoverRead.split("\n|\r");
-                if (lines[0].contains(YTutils.getTodayDate())&&lines.length==5) {
-                    for (int i=1;i<5;i++) {
+                if (lines[0].contains(YTutils.getTodayDate()) && lines.length == 5) {
+                    for (int i = 1; i < 5; i++) {
                         images.add(lines[i]);
                     }
                     return null;
                 }
             }
 
-            if (images.size()<4) {
+            if (images.size() < 4) {
                 images.clear();
-                int length=5;
-                String[] csvlines = SpotifyViralCSV.split("\n|\r");
-                for (int i=1;i<length;i++) {
-                    String line = csvlines[i];
-                    String title = line.split(",")[1].replace("\"","");
-                    String author = line.split(",")[2].replace("\"","");
+                int length = 5;
+                if (SpotifyViralCSV != null) {
+                    String[] csvlines = SpotifyViralCSV.split("\n|\r");
+                    for (int i = 1; i < length; i++) {
+                        String line = csvlines[i];
+                        String title = line.split(",")[1].replace("\"", "");
+                        String author = line.split(",")[2].replace("\"", "");
 
-                    String search_text = title.replace(" ","+")
-                            + "+by+" + author.replace(" ","+");
+                        String search_text = title.replace(" ", "+")
+                                + "+by+" + author.replace(" ", "+");
 
-                    YTSearch ytSearch = new YTSearch(search_text);
+                        YTSearch ytSearch = new YTSearch(search_text);
 
-                    if (ytSearch.getVideoIDs().size()>0) {
-                        final String videoId = ytSearch.getVideoIDs().get(0);
-                        String imgurl = YTutils.getImageUrlID(videoId);
-                        images.add(imgurl);
-                    }else {
-                        length++;
+                        if (ytSearch.getVideoIDs().size() > 0) {
+                            final String videoId = ytSearch.getVideoIDs().get(0);
+                            String imgurl = YTutils.getImageUrlID(videoId);
+                            images.add(imgurl);
+                        } else {
+                            length++;
+                        }
                     }
                 }
             }
@@ -635,8 +658,8 @@ public class SearchFragment extends Fragment {
         }
     }
 
-    void loadImageGlide(String url,final ImageView imageView) {
-        Glide.with(activity).load(url).addListener(new RequestListener<Drawable>() {
+    void loadImageGlide(String url, final ImageView imageView) {
+        Glide.with(activity.getApplicationContext()).load(url).addListener(new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                 return false;

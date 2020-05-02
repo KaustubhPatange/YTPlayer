@@ -113,7 +113,7 @@ public class LocalAdapter extends RecyclerView.Adapter<LocalAdapter.LocalHolder>
 
                     }
                 }else if (imageUri!=null) {
-                    Glide.with(context).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
+                    Glide.with(context.getApplicationContext()).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                             localHolder.aImage.setImageBitmap(resource);

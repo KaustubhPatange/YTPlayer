@@ -743,7 +743,7 @@ public class PlayerActivity2 extends AppCompatActivity implements AppInterface {
             String imageUri = YTutils.getImageUrl(MusicService.yturls.get(MusicService.ytIndex));
             if (MusicService.videoID.contains("soundcloud.com"))
                 imageUri = soundCloud.getModel().getImageUrl();
-            Glide.with(activity)
+            Glide.with(activity.getApplicationContext())
                     .asBitmap()
                     .load(imageUri)
                     .into(new CustomTarget<Bitmap>() {

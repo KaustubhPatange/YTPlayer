@@ -548,7 +548,7 @@ public class NPlaylistActivity extends AppCompatActivity  implements OnStartDrag
             if (meta.getVideMeta()!=null && !MusicService.localPlayBack) {
                 cTitle.setText(YTutils.getVideoTitle(meta.getVideMeta().getTitle()));
                 cAuthor.setText(YTutils.getChannelTitle(meta.getVideMeta().getTitle(),meta.getVideMeta().getAuthor()));
-                Glide.with(NPlaylistActivity.this)
+                Glide.with(NPlaylistActivity.this.getApplicationContext())
                         .asBitmap()
                         .load(meta.getVideMeta().getImgUrl())
                         .into(new CustomTarget<Bitmap>() {

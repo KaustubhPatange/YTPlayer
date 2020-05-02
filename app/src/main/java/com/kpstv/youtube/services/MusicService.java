@@ -336,7 +336,7 @@ public class MusicService extends Service implements AppInterface {
 
        // Toast.makeText(activity, "Function in MainActivity...!", Toast.LENGTH_SHORT).show();
 
-        MusicService.activity = activity;
+        MusicService.activity = activity.getApplicationContext();
 
         settingPref = activity.getSharedPreferences("settings",MODE_PRIVATE);
         isEqualizerEnabled = settingPref.getBoolean("equalizer_enabled",false);

@@ -385,13 +385,16 @@ public class YTutils implements AppInterface {
     }
 
     public static void writeContent(Context activity, String FILE_NAME, String content) {
+        if (applicationContext==null)
+            applicationContext = activity.getApplicationContext();
+
         FileOutputStream fos = null;
 
         try {
             if (FILE_NAME.contains("/")) {
                 fos = new FileOutputStream(new File(FILE_NAME));
             } else {
-                fos = activity.openFileOutput(FILE_NAME, MODE_PRIVATE);
+                fos = applicationContext.openFileOutput(FILE_NAME, MODE_PRIVATE);
             }
             fos.write(content.getBytes());
         } catch (IOException e) {
@@ -616,7 +619,12 @@ public class YTutils implements AppInterface {
         return l;
     }
 
+    public static Context applicationContext;
+
     public static String readContent(Context activity, String FILE_NAME) {
+        if (applicationContext==null)
+            applicationContext = activity.getApplicationContext();
+
         FileInputStream fis = null;
         StringBuilder sb = new StringBuilder();
         try {
@@ -625,9 +633,9 @@ public class YTutils implements AppInterface {
                 if (!f.exists()) return null;
                 fis = new FileInputStream(f);
             } else {
-                File f = new File(activity.getFilesDir(), FILE_NAME);
+                File f = new File(applicationContext.getFilesDir(), FILE_NAME);
                 if (!f.exists()) return null;
-                fis = activity.openFileInput(FILE_NAME);
+                fis = applicationContext.openFileInput(FILE_NAME);
             }
             if (fis == null) return null;
             InputStreamReader isr = new InputStreamReader(fis);

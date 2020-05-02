@@ -29,6 +29,8 @@ public class SplashActivity extends AppCompatActivity {
             setContentView(R.layout.splash_lollipop);
         }
 
+        YTutils.applicationContext = this.getApplicationContext();
+
         File app = new File(getFilesDir(),"tmp.apk");
         if (app.exists())
             app.delete();

@@ -11,7 +11,9 @@
 
 package com.kpstv.youtube.utils;
 
+import android.graphics.PathEffect;
 import android.os.AsyncTask;
+import android.os.PatternMatcher;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -26,15 +28,18 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class YTSearch {
 
-    ArrayList<String> videoIDs,channelImages; String TAG = "YTSearchThread";
+    ArrayList<String> videoIDs,channelImages,videoNewIDs; String TAG = "YTSearchThread";
 
     public YTSearch(String query) {
 
         videoIDs = new ArrayList<>();
         channelImages = new ArrayList<>();
+        videoNewIDs = new ArrayList<>();
         try {
             String url = "https://www.youtube.com/results?search_query="+ URLEncoder.encode(query);
             URLConnection connection = (new URL(url)).openConnection();
@@ -59,8 +64,16 @@ public class YTSearch {
                             .replace("\">","");
                     channelImages.add(link);
                 }
+                if (line.contains("//i.ytimg.com/vi")) {
+                    Pattern compile = Pattern.compile("//i.ytimg.com/vi/.*?/", Pattern.DOTALL);
+                    Matcher matcher = compile.matcher(line);
+                    if (matcher.find()) {
+                        String videoId = matcher.group().split("/")[4];
+                        Log.e(TAG, "YTSearch: VideoId: "+ videoId );
+                        videoNewIDs.add(videoId);
+                    }
+                }
             }
-          //  YTutils.Write(builder.toString(),YTutils.getFile("Documents/search.txt"));
             in.close();
 
         } catch (MalformedURLException e) {
@@ -75,6 +88,12 @@ public class YTSearch {
     }
 
     public ArrayList<String> getVideoIDs() {
+        if (videoIDs.size() > 0)
         return videoIDs;
+        else if (videoNewIDs.size() > 0)
+            return videoNewIDs;
+        else if (channelImages.size() > 0)
+            return channelImages;
+        else return new ArrayList<>();
     }
 }

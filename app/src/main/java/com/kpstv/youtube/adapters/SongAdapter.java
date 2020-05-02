@@ -142,7 +142,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             holder.AuthorText.setText(YTutils.getChannelTitle(discoverModel.getTitle(),discoverModel.getAuthor()));
         }
 
-        Glide.with(con).load(discoverModel.getImgUrl()).addListener(new RequestListener<Drawable>() {
+        Glide.with(con.getApplicationContext()).load(discoverModel.getImgUrl()).addListener(new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                 return false;

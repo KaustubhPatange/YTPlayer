@@ -1,8 +1,11 @@
 package com.kpstv.youtube;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +46,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 
@@ -124,17 +128,24 @@ public class CPlaylistActivity extends AppCompatActivity {
             }
             String[] lines = pline.split(",");
             for(int i=2;i<lines.length;i++) {
-                String[] childs = lines[i].split("\\|");
-                String videoID = childs[0];
-                int seconds = Integer.parseInt(childs[1]);
-                DiscoverModel model = new DiscoverModel(
-                        childs[2],
-                        childs[3],
-                        childs[4],
-                        YTutils.getYtUrl(videoID)
-                );
-                model.setSeconds(seconds);
-                models.add(model);
+                try {
+                    String[] childs = lines[i].split("\\|");
+                    String videoID = childs[0];
+                    int seconds = Integer.parseInt(childs[1]);
+                    DiscoverModel model = new DiscoverModel(
+                            childs[2],
+                            childs[3],
+                            childs[4],
+                            YTutils.getYtUrl(videoID)
+                    );
+                    model.setSeconds(seconds);
+                    models.add(model);
+                }catch (Exception e) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                            checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)== PackageManager.PERMISSION_GRANTED) {
+                        YTutils.writeContent(CPlaylistActivity.this, YTutils.getFile("debug-playlist.txt").getPath(),playlist_csv);
+                    }
+                }
             }
             beforeItems = models.size();
             return null;

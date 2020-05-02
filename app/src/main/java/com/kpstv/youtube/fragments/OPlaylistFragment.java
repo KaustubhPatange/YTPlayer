@@ -503,7 +503,7 @@ public class OPlaylistFragment extends Fragment {
 
                 if (imageUri != null) {
                     Log.e(TAG, "onPostExecute: Loading data locally: " + imageUri);
-                    Glide.with(activity).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
+                    Glide.with(activity.getApplicationContext()).asBitmap().load(imageUri).into(new CustomTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                             oImageView.setImageBitmap(resource);

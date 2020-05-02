@@ -48,7 +48,7 @@ public class ImportShowAdapter extends RecyclerView.Adapter<ImportShowAdapter.Im
         holder.title.setText(model.getTitle());
         holder.author.setText(model.getAuthor());
 
-        Glide.with(context).asBitmap().load(model.getImageUrl()).into(new CustomTarget<Bitmap>() {
+        Glide.with(context.getApplicationContext()).asBitmap().load(model.getImageUrl()).into(new CustomTarget<Bitmap>() {
             @Override
             public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                 holder.image.setImageBitmap(resource);

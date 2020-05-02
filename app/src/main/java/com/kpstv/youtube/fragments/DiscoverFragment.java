@@ -294,7 +294,10 @@ public class DiscoverFragment extends Fragment {
 
                 YTSearch ytSearch = new YTSearch(search_text);
 
-                final String videoId = ytSearch.getVideoIDs().get(0);
+                String videoId;
+                if (ytSearch.getVideoIDs().size()==0)
+                    videoId = "nEt1bKGlCpM"; // a hack for swapping video with my favourite song
+                videoId = ytSearch.getVideoIDs().get(0);
                 String imgurl = YTutils.getImageUrlID(videoId);
                 if (!main.startsWith(title + "|")) {
                     builder.append("\n").append(title).append("|").append(author).append("|")

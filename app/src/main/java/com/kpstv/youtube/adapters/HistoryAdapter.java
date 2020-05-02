@@ -124,7 +124,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.MyViewHo
         @SuppressLint("SimpleDateFormat") String yearOnly = new SimpleDateFormat("yyyy").format(c);
 
 
-        Glide.with(con).load(model.getImageUrl()).addListener(new RequestListener<Drawable>() {
+        Glide.with(con.getApplicationContext()).load(model.getImageUrl()).addListener(new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                 return false;

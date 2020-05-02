@@ -81,7 +81,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
 
         holder.titleText.setText(searchModel.getTitle());
 
-        Glide.with(con)
+        Glide.with(con.getApplicationContext())
                 .asBitmap()
                 .load(searchModel.getImageUrl())
                 .into(new CustomTarget<Bitmap>() {
