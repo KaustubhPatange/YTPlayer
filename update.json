@@ -2,7 +2,7 @@
   "version": "1.0",
   "demopay": "1.7",
   "new": "2.0",
-  "deprecated": "2.0",
+  "deprecated": "2.2",
   "newVersion": "2.3",
   "changelog": "<h3>V2.3 May 2020</h3><hr>*Fix: Major bug in YTSearch api<br>*Fix: Reported bugs<br><br><i>Size: 49.6 MB</i>",
   "download": "https://www.dropbox.com/s/fbfuw3ymku8rlli/YTPlayer_v23.apk?dl=1",
