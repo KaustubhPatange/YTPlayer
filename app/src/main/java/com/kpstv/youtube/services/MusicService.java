@@ -676,7 +676,7 @@ public class MusicService extends Service implements AppInterface {
 
                 if (json.contains("\"error\"")) {
                     YTStatistics ytStatistics = new YTStatistics(videoID);
-                    MusicService.viewCounts = ytStatistics.getViewCount();
+                    MusicService.viewCounts = YTutils.getViewCount(Long.parseLong(ytStatistics.getViewCount()));
                     MusicService.likeCounts = Integer.parseInt(ytStatistics.getLikeCount());
                     MusicService.dislikeCounts = Integer.parseInt(ytStatistics.getDislikeCount());
                     json = null;

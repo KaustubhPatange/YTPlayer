@@ -1,12 +1,11 @@
 /**
  * The api is created by KP for YTPlayer app.
  * https://github.com/KaustubhPatange/YTPlayer/
- *
+ * <p>
  * If you want to use it in your project use it without changing the name
  * or this header info.
- *
+ * <p>
  * Support the work!
- *
  **/
 
 package com.kpstv.youtube.utils;
@@ -27,37 +26,38 @@ import java.util.regex.Pattern;
 public class YTStatistics {
 
     private static String TAG = "YTStatistics";
-    private String viewCount,likeCount,dislikeCount;
+    private String viewCount, likeCount, dislikeCount;
 
     public String getViewCount() {
-        return viewCount;
+        if (viewCount != null) return viewCount;
+        else return "0";
     }
 
     public String getLikeCount() {
-        return likeCount;
+        if (likeCount != null) return likeCount;
+        else return "0";
     }
 
     public String getDislikeCount() {
-        return dislikeCount;
+        if (dislikeCount != null) return dislikeCount;
+        else return "0";
     }
 
     public YTStatistics(String videoID) {
         try {
-            String url = "https://www.youtube.com/watch?v="+videoID;
+            String url = "https://www.youtube.com/watch?v=" + videoID;
             URLConnection connection = (new URL(url)).openConnection();
             connection.connect();
             InputStream in = connection.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             String line = null;
-            while((line = reader.readLine()) != null)
-            {
+            while ((line = reader.readLine()) != null) {
                 // View count...
 
                 Pattern mPattern = Pattern.compile(",\"viewCount\":\"\\d+\",");
                 Matcher matcher = mPattern.matcher(line);
 
-                if(matcher.find())
-                {
+                if (matcher.find()) {
                     Matcher matcher1 = Pattern.compile("\\d+").matcher(matcher.group());
                     if (matcher1.find())
                         viewCount = matcher1.group();
@@ -69,9 +69,9 @@ public class YTStatistics {
                         "\\{\"label\":\"(.*?)likes").matcher(line);
                 if (matcher3.find()) {
                     String[] strs = matcher3.group().split("\"");
-                    String torep = strs[strs.length-1];
-                    torep = torep.replace(",","").
-                            replace("likes","").trim();
+                    String torep = strs[strs.length - 1];
+                    torep = torep.replace(",", "").
+                            replace("likes", "").trim();
                     likeCount = torep;
                 }
 
@@ -81,12 +81,20 @@ public class YTStatistics {
                         "\\{\"label\":\"(.*?)dislikes").matcher(line);
                 if (matcher2.find()) {
                     String[] strs = matcher2.group().split("\"");
-                    String torep = strs[strs.length-1];
-                    torep = torep.replace(",","").
-                            replace("dislikes","").trim();
+                    String torep = strs[strs.length - 1];
+                    torep = torep.replace(",", "").
+                            replace("dislikes", "").trim();
                     dislikeCount = torep;
                 }
+
+
+                Log.e(TAG, "ViewCount: " + viewCount + ", likeCount: " + likeCount + ", dislikeCount: " + dislikeCount);
             }
+
+            if (viewCount != null && viewCount.contains("No")) viewCount = "0";
+            if (likeCount != null && likeCount.contains("No")) likeCount = "0";
+            if (dislikeCount != null && dislikeCount.contains("No")) dislikeCount = "0";
+
             in.close();
 
         } catch (MalformedURLException e) {

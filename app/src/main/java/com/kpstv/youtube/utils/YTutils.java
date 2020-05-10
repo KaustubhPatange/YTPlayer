@@ -735,7 +735,7 @@ public class YTutils implements AppInterface {
         else if (size < sizeTerra)
             return df.format(size / sizeGb);
 
-        return "";
+        return "0";
     }
 
     public static String getViewCount(long number) {
@@ -746,7 +746,7 @@ public class YTutils implements AppInterface {
         } else if (number > 1000) {
             return number / 1000 + "K";
         }
-        return number + "";
+        return number + "0";
     }
 
     public static int progressToTimer(int progress, long totalDuration) {
