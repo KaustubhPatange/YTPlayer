@@ -1223,7 +1223,7 @@ public class YTutils implements AppInterface {
 
                     Activity act = (Activity) context;
                     act.startActivityForResult(intent, 100);
-
+                    ((Activity) context).finish();
                 }
             } else
                 Toast.makeText(context, "Update file does not exist!", Toast.LENGTH_SHORT).show();

@@ -1,4 +1,4 @@
-Version 2.4
+Version 2.5
 
-[*] Fix: Parsing in youtube statistics
-[*] Fix: Reported bugs
+[*] Fix: Extraction of songs
+[*] Fix: Fuzzy updater logic issue

@@ -3,6 +3,8 @@ package com.naveed.ytextractor.utils;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.util.Log;
+
 import com.naveed.ytextractor.model.YTMedia;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +36,7 @@ public class Utils {
 
 	public static boolean isListContain(List<String> arraylist, String statement) {
 		for (String str : arraylist) {
-			if (statement.toLowerCase().contains(str)) {
+			if (statement != null && statement.toLowerCase().contains(str)) {
 				return true;
 			}
 		}
