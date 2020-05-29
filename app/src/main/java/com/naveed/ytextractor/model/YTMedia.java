@@ -16,7 +16,7 @@ public class YTMedia
 	double approxDurationMs;
 	int audioChannels;
 	int audioSampleRate;
-	String cipher;
+	String signatureCipher;
 	String audioQuality;
 	String url;
 	int fps;
@@ -169,14 +169,14 @@ public class YTMedia
 		return audioSampleRate;
 	}
 
-	public void setCipher(String cipher)
+	public void setSignatureCipher(String signatureCipher)
 	{
-		this.cipher = cipher;
+		this.signatureCipher = signatureCipher;
 	}
 
-	public String getCipher()
+	public String getSignatureCipher()
 	{
-		return cipher;
+		return signatureCipher;
 	}
 
 	public void setAudioQuality(String audioQuality)
@@ -201,7 +201,7 @@ public class YTMedia
 
 	public boolean useCipher(){
 
-		return (cipher!=null && cipher.contains("s="));
+		return (signatureCipher !=null && signatureCipher.contains("s="));
 
 	}
 

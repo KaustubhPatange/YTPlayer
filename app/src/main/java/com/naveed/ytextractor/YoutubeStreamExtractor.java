@@ -2,9 +2,10 @@ package com.naveed.ytextractor;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
+
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
-import com.naveed.ytextractor.CipherManager;
 import com.naveed.ytextractor.model.PlayerResponse;
 import com.naveed.ytextractor.model.Response;
 import com.naveed.ytextractor.model.StreamingData;
@@ -105,6 +106,7 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 			jsonBody = parsePlayerConfig(body);
 
 			PlayerResponse playerResponse=parseJson(jsonBody);
+
 			ytmeta = playerResponse.getVideoDetails();
 			//Utils.copyToBoard(jsonBody);
 			if (playerResponse.getVideoDetails().getisLive()) {
@@ -168,12 +170,13 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 		try {
 			for (int x=0;x < rawMedia.length;x++) {
 				YTMedia media=rawMedia[x];
-				LogUtils.log(media.getCipher() != null ? media.getCipher(): "null cip");
+				Log.d(TAG, "Cipher: "+media.getSignatureCipher());
+				LogUtils.log(media.getSignatureCipher() != null ? media.getSignatureCipher(): "null cip");
 
 				if (media.useCipher()) {
 					String tempUrl = "";
 					String decodedSig = "";
-					for (String partCipher:media.getCipher().split("&")) {
+					for (String partCipher:media.getSignatureCipher().split("&")) {
 
 						if (partCipher.startsWith("s=")) {
 							decodedSig = CipherManager.dechiperSig(URLDecoder.decode(partCipher.replace("s=", "")), response.getAssets().getJs());
@@ -191,6 +194,8 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 					}
 
 					String	FinalUrl= tempUrl + "&sig=" + decodedSig;
+
+					Log.d(TAG, "parseUrls: " + FinalUrl);
 					
 					media.setUrl(FinalUrl);
 					links.add(media);
@@ -209,7 +214,7 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 		return links;
 	}
 
-
+	private static final String TAG = "YoutubeStreamExtractor";
 
 
 

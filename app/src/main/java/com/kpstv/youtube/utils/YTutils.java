@@ -74,6 +74,7 @@ import com.kpstv.youtube.AppInterface;
 import com.kpstv.youtube.AppSettings;
 import com.kpstv.youtube.BuildConfig;
 import com.kpstv.youtube.CPlaylistActivity;
+import com.kpstv.youtube.ErrorActivity;
 import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.PurchaseActivity;
 import com.kpstv.youtube.R;
@@ -1287,6 +1288,7 @@ public class YTutils implements AppInterface {
                 Log.e("VersionLOG", "NewVersion: " + newVer + ", currVersion: " + curVer);
                 LayoutInflater inflater = LayoutInflater.from(context);
                 if (deprecatedVersion>=curVer) {
+                    ErrorActivity.IsUpdateAvailable = true;
                     View v = inflater.inflate(R.layout.alert_deprecated_error,null);
 
                     alertDialog = new AlertDialog.Builder(context)
@@ -1301,8 +1303,10 @@ public class YTutils implements AppInterface {
                     return;
                 }
                 if (newVer > curVer) {
+                    ErrorActivity.IsUpdateAvailable = true;
                //       if (true) {
                     View v = inflater.inflate(R.layout.alert_download, null);
+
 
                     TextView showTxt = v.findViewById(R.id.textTxt);
                     showTxt.setText(getHtml(changelogHtml));

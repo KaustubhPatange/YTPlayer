@@ -29,6 +29,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3483fe51-8e2d-4c34-ba3d-859156321e00" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/Constants.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileContent/fileContent.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileContent/fileContent.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.lock" afterDir="false" />
@@ -41,12 +42,14 @@
       <change beforePath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/release/YTPlayer_v24.apk" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/release/app-release.apk" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/release/output.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/release/output.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ErrorActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ErrorActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/services/MusicService.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/services/MusicService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/utils/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/utils/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/YoutubeStreamExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/YoutubeStreamExtractor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/model/YTMedia.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/model/YTMedia.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/changelog.txt" beforeDir="false" afterPath="$PROJECT_DIR$/changelog.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/update.json" beforeDir="false" afterPath="$PROJECT_DIR$/update.json" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -106,8 +109,8 @@
       <list>
         <option value="valueResourceFile" />
         <option value="resourceFile" />
-        <option value="Class" />
         <option value="layoutResourceFile" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -135,7 +138,7 @@
     <property name="android.sdk.path" value="$USER_HOME$/AppData/Local/Android/Sdk" />
     <property name="ignore.virus.scanning.warn.message" value="true" />
     <property name="last_directory_selection" value="$PROJECT_DIR$/app/src/main/res/drawable" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../YouTubeExtractor/YoutubeExtractor" />
     <property name="not.eligible.for.single.variant.sync" value="true" />
     <property name="project.structure.last.edited" value="Dependencies" />
     <property name="project.structure.proportion" value="0.17" />
@@ -239,7 +242,7 @@
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="YTPlayer:app [signingReport]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="YTPlayer:app [signingReport]" type="GradleRunConfiguration" factoryName="Gradle">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/app" />
@@ -258,11 +261,6 @@
       <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
       <method v="2" />
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Gradle.YTPlayer:app [signingReport]" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -276,15 +274,6 @@
       <updated>1574512305752</updated>
     </task>
     <servers />
-  </component>
-  <component name="TodoView">
-    <todo-panel id="selected-file">
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
-    <todo-panel id="all">
-      <are-packages-shown value="true" />
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
   </component>
   <component name="Vcs.Log.History.Properties">
     <option name="COLUMN_ORDER">
@@ -322,5 +311,31 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java</url>
+          <line>1290</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java</url>
+          <line>1305</line>
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ErrorActivity.java</url>
+          <line>87</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ErrorActivity.java</url>
+          <line>84</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

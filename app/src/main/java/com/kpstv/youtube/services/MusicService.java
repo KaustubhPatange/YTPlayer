@@ -1087,6 +1087,7 @@ public class MusicService extends Service implements AppInterface {
 
     private static void addVideoToList(final YTMedia media, final String videoTitle, final String channelTitle) {
 
+        YTMedia newMedia = media;
         String ytText=""; boolean isaudio=false;
         String ext = "m4a";
         try {

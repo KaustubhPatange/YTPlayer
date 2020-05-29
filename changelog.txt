@@ -1,4 +1,4 @@
-Version 2.5
+Version 2.6
 
 [*] Fix: Extraction of songs
-[*] Fix: Fuzzy updater logic issue
+[*] Fix: Some reported bugs

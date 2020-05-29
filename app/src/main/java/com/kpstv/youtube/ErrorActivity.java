@@ -23,6 +23,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kpstv.youtube.utils.Constants;
 import com.kpstv.youtube.utils.YTutils;
 
 import cat.ereza.customactivityoncrash.CustomActivityOnCrash;
@@ -33,6 +34,8 @@ public class ErrorActivity extends AppCompatActivity {
     RelativeLayout crashLayout;
     EditText editText;
     String crashDetails;
+
+    public static boolean IsUpdateAvailable = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +85,20 @@ public class ErrorActivity extends AppCompatActivity {
         int itemID = item.getItemId();
         switch (itemID) {
             case R.id.action_send:
+              /*  if (IsUpdateAvailable) {
+
+                    new AlertDialog.Builder(this)
+                            .setTitle("Update Available")
+                            .setMessage("We've found an updated version of this app which may have fixed your issue. Kindly download it first & check the if issue occurs again or not.\n\nBy clicking \"OK\" button app will check for updates & will download it.")
+                            .setCancelable(false)
+                            .setPositiveButton("OK", (dialogInterface, i) -> {
+                                new YTutils.CheckForUpdates(this,false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                            })
+                            .setNegativeButton("Cancel", (dialogInterface, i) -> finish())
+                            .show();
+
+                    return true;
+                }*/
                 String message="";
                 if (!editText.getText().toString().isEmpty()) {
                     message = editText.getText().toString()+"\n\n";

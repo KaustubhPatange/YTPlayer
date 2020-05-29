@@ -2,9 +2,9 @@
   "version": "1.0",
   "demopay": "1.7",
   "new": "2.0",
-  "deprecated": "2.4",
-  "newVersion": "2.5",
-  "changelog": "<h3>V2.5 May 2020</h3><hr>*Fix: Extraction of songs<br>*Fix: Fuzzy updater logic issue<br><br><i>Size: 49.6 MB</i>",
-  "download": "https://www.dropbox.com/s/f76z2y34ekg0x1x/YTPlayer_v25.apk?dl=1",
+  "deprecated": "2.5",
+  "newVersion": "2.6",
+  "changelog": "<h3>V2.6 May 2020</h3><hr>*Fix: Extraction of songs<br>*Fix: Some reported issues<br><br><i>Size: 49.6 MB</i>",
+  "download": "https://www.dropbox.com/s/ii7xyeerbhkmzv3/YTPlayer_v26.apk?dl=1",
   "msg": ""
 }
