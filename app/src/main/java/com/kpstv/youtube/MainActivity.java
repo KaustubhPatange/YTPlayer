@@ -6,9 +6,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -17,7 +19,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
@@ -28,7 +29,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
@@ -47,14 +47,19 @@ import com.kpstv.youtube.fragments.SleepBottomSheet;
 import com.kpstv.youtube.fragments.basedOnApi.PopularFragment;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.NPlayModel;
+import com.kpstv.youtube.models.spotify.Track;
+import com.kpstv.youtube.models.spotify.Tracks;
 import com.kpstv.youtube.services.MusicService;
 import com.kpstv.youtube.utils.OnSwipeTouchListener;
 import com.kpstv.youtube.utils.SoundCloud;
-import com.kpstv.youtube.utils.SpotifyTrack;
+import com.kpstv.youtube.utils.SpotifyApi;
 import com.kpstv.youtube.utils.YTMeta;
+import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
 import com.naveed.ytextractor.model.YTMedia;
 import com.spyhunter99.supertooltips.ToolTipManager;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -77,7 +82,7 @@ import static com.kpstv.youtube.services.MusicService.selectedItemText;
 import static com.kpstv.youtube.services.MusicService.updateMediaSessionPlaybackState;
 import static com.kpstv.youtube.services.MusicService.ytIndex;
 
-public class MainActivity extends AppCompatActivity implements AppInterface, SleepBottomSheet.ItemClickListener, HistoryBottomSheet.BottomSheetListener, NCFragment.NoConnectionListener{
+public class MainActivity extends AppCompatActivity implements AppInterface, SleepBottomSheet.ItemClickListener, HistoryBottomSheet.BottomSheetListener, NCFragment.NoConnectionListener {
 
     // https://www.googleapis.com/youtube/v3/videos?id=BDocp-VpCwY&key=AIzaSyBYunDr6xBmBAgyQx7IW2qc770aoYBidLw&part=snippet,statistics
 
@@ -97,8 +102,9 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     Fragment HistoryFrag;
     static Fragment SearchFrag;
     public static FragmentManager fragmentManager;
-    public static Fragment PlaylistFrag, libraryFrag, FavouriteFrag,localMusicFrag, localSearchFrag,popularFrag;
-    Fragment NCFrag; String ytLink;
+    public static Fragment PlaylistFrag, libraryFrag, FavouriteFrag, localMusicFrag, localSearchFrag, popularFrag;
+    Fragment NCFrag;
+    String ytLink;
     static SharedPreferences preferences;
     public static LinearLayout bottom_player, adViewLayout;
     public static ImageButton actionUp;
@@ -106,12 +112,17 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public static ProgressBar loadProgress;
     public static ProgressBar songProgress;
     public static TextView actionTitle;
-    public static TextView actionChannelTitle; public static AdView adView;
+    public static TextView actionChannelTitle;
+    public static AdView adView;
     public static FragmentActivity activity;
 
-    static boolean shortCut_loadLocal =false, shortCut_loadSearch =false;
+    public SpotifyApi spotifyApi;
 
-    LinearLayout swipeLayout;public static ToolTipManager toolTipManager;
+    static boolean shortCut_loadLocal = false, shortCut_loadSearch = false;
+
+    LinearLayout swipeLayout;
+    public static ToolTipManager toolTipManager;
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;
-        Log.e("HeightMatrix",height+"");
+        Log.e("HeightMatrix", height + "");
 
         // Set CrashActivity...
         CaocConfig.Builder.create()
@@ -158,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
         toolTipManager = new ToolTipManager(activity);
 
-        if (MusicService.activity==null)
+        if (MusicService.activity == null)
             functionInMainActivity(activity);
         else {
             /** MainActivity was destroyed so we will reinstate it.*/
@@ -168,22 +179,22 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         // Check onComing links from YouTube or Spotify...
         CheckIntent(getIntent());
 
-        String history = YTutils.readContent(this,"History");
-        if (history !=null && !history.isEmpty()) {
-            Log.e("historyContents",history+"");
+        String history = YTutils.readContent(this, "History");
+        if (history != null && !history.isEmpty()) {
+            Log.e("historyContents", history + "");
 
-            SharedPreferences preferences = getSharedPreferences("history",Context.MODE_PRIVATE);
+            SharedPreferences preferences = getSharedPreferences("history", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putString("urls",history.replace("&#10;","").trim());
+            editor.putString("urls", history.replace("&#10;", "").trim());
             editor.apply();
-            new File(getFilesDir().toString()+"/History").delete();
+            new File(getFilesDir().toString() + "/History").delete();
         }
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
                 .permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-        swipeLayout.setOnTouchListener(new OnSwipeTouchListener(this){
+        swipeLayout.setOnTouchListener(new OnSwipeTouchListener(this) {
             @Override
             public void onSwipeRight() {
                 super.onSwipeRight();
@@ -201,14 +212,15 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 super.onSwipeLeft();
                 playNext();
             }
+
             public boolean onTouch(View v, MotionEvent event) {
                 return gestureDetector.onTouchEvent(event);
             }
         });
 
         actionPlay.setOnClickListener(v -> changePlayBack(!isplaying));
-       // bottom_player.setOnClickListener(v-> openPlayer());
-        actionUp.setOnClickListener(v->openPlayer());
+        // bottom_player.setOnClickListener(v-> openPlayer());
+        actionUp.setOnClickListener(v -> openPlayer());
 
         fragmentManager = getSupportFragmentManager();
         localMusicFrag = new LocalMusicFragment();
@@ -223,92 +235,91 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        if (YTutils.isInternetAvailable())
-        {
-            if (getYTUrls("blank").length>1) {
+        if (YTutils.isInternetAvailable()) {
+            if (getYTUrls("blank").length > 1) {
                 if (shortCut_loadLocal) {
                     navigation.setSelectedItemId(R.id.navigation_playlist);
                     loadLocalMusicFrag();
                     bottom_player.setVisibility(View.GONE);
-                }else if (shortCut_loadSearch) {
+                } else if (shortCut_loadSearch) {
                     bottom_player.setVisibility(View.GONE);
                     navigation.setSelectedItemId(R.id.navigation_search);
                 } else loadFragment(HistoryFrag);
-            }
-            else navigation.setSelectedItemId(R.id.navigation_search);
-        }
-        else {
+            } else navigation.setSelectedItemId(R.id.navigation_search);
+        } else {
             loadFragment(NCFrag);
         }
     }
 
-    /** YTUrls here will work as path to music file...
-     *
-     *  Background task will load all the details about music
-     *  and will set it to player and respective fields.
+    /**
+     * YTUrls here will work as path to music file...
+     * <p>
+     * Background task will load all the details about music
+     * and will set it to player and respective fields.
      */
     public static void PlayVideo_Local(String[] urls) {
 
-        Intent intent = new Intent(activity,MusicService.class);
+        Intent intent = new Intent(activity, MusicService.class);
         intent.setAction("PlayVideo_Local");
-        intent.putExtra("urls",urls);
-        ContextCompat.startForegroundService(activity,intent);
+        intent.putExtra("urls", urls);
+        ContextCompat.startForegroundService(activity, intent);
     }
 
-    public static void PlayVideo_Local(String[] urls,int position) {
-        PlayVideo_Local(activity,urls,position);
+    public static void PlayVideo_Local(String[] urls, int position) {
+        PlayVideo_Local(activity, urls, position);
     }
 
-    public static void PlayVideo_Local(Context context, String[] urls,int position) {
+    public static void PlayVideo_Local(Context context, String[] urls, int position) {
         /** YTUrls here will work as path to music file...
          *
          *  Background task will load all the details about music
          *  and will set it to player and respective fields.
          */
 
-        Intent intent = new Intent(context,MusicService.class);
+        Intent intent = new Intent(context, MusicService.class);
         intent.setAction("PlayVideo_Local_pos");
-        intent.putExtra("urls",urls);
-        intent.putExtra("pos",position);
-        ContextCompat.startForegroundService(context,intent);
+        intent.putExtra("urls", urls);
+        intent.putExtra("pos", position);
+        ContextCompat.startForegroundService(context, intent);
     }
 
     public static void ChangeVideoOffline(int position) {
-        Intent intent = new Intent(activity,MusicService.class);
+        Intent intent = new Intent(activity, MusicService.class);
         intent.setAction("ChangeVideoOffline");
-        intent.putExtra("pos",position);
-        ContextCompat.startForegroundService(activity,intent);
+        intent.putExtra("pos", position);
+        ContextCompat.startForegroundService(activity, intent);
     }
 
     public static void PlayVideo(String[] ytUrls) {
 
-        Intent intent = new Intent(activity,MusicService.class);
+        Intent intent = new Intent(activity, MusicService.class);
         intent.setAction("PlayVideo");
-        intent.putExtra("urls",ytUrls);
-        ContextCompat.startForegroundService(activity,intent);
+        intent.putExtra("urls", ytUrls);
+        ContextCompat.startForegroundService(activity, intent);
     }
 
     public static void PlayVideo(String[] ytUrls, int position) {
-        Intent intent = new Intent(activity,MusicService.class);
+        Intent intent = new Intent(activity, MusicService.class);
         intent.setAction("PlayVideo_pos");
-        intent.putExtra("urls",ytUrls);
-        intent.putExtra("pos",position);
-        ContextCompat.startForegroundService(activity,intent);
+        intent.putExtra("urls", ytUrls);
+        intent.putExtra("pos", position);
+        ContextCompat.startForegroundService(activity, intent);
     }
 
     public static void ChangeVideo(int position) {
-        Intent intent = new Intent(activity,MusicService.class);
+        Intent intent = new Intent(activity, MusicService.class);
         intent.setAction("ChangeVideo");
-        intent.putExtra("pos",position);
-        ContextCompat.startForegroundService(activity,intent);
+        intent.putExtra("pos", position);
+        ContextCompat.startForegroundService(activity, intent);
     }
 
     boolean doubleBackToExitPressedOnce = false;
+
     @Override
     public void onBackPressed() {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
 
-        if (getSupportFragmentManager().getBackStackEntryCount()>0) {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             getSupportFragmentManager().popBackStack();
             return;
         }
@@ -332,13 +343,13 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
             return;
         }
 
-        if (fragment instanceof OPlaylistFragment && fragment.getTag()!=null && fragment.getTag().equals("localMusic")) {
+        if (fragment instanceof OPlaylistFragment && fragment.getTag() != null && fragment.getTag().equals("localMusic")) {
             loadFragment(localMusicFrag);
             return;
         }
 
         if (fragment instanceof OPlaylistFragment && loadedFavFrag) {
-            loadedFavFrag=false;
+            loadedFavFrag = false;
             loadFragment(libraryFrag);
             return;
         }
@@ -370,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                doubleBackToExitPressedOnce=false;
+                doubleBackToExitPressedOnce = false;
             }
         }, 2000);
     }
@@ -384,17 +395,17 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 case R.id.navigation_history:
                     if (YTutils.isInternetAvailable()) {
                         loadFragment(HistoryFrag);
-                    }else loadFragment(NCFrag);
+                    } else loadFragment(NCFrag);
                     return true;
                 case R.id.navigation_search:
                     if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) instanceof SearchFragment)
-                        SearchFrag.onActivityResult(100,1,null);
+                        SearchFrag.onActivityResult(100, 1, null);
                     else
                         loadFragment(SearchFrag);
                     return true;
                 case R.id.navigation_playlist:
                     loadFragment(libraryFrag);
-   //                 loadFragment(PlaylistFrag);
+                    //                 loadFragment(PlaylistFrag);
                     return true;
             }
 
@@ -404,11 +415,11 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
     public static boolean loadFragment(Fragment fragment) {
         if (fragment != null) {
-            Log.e("LoadingFragment","");
+            Log.e("LoadingFragment", "");
 
             FragmentTransaction ft = fragmentManager.beginTransaction();
-            ft.setCustomAnimations(R.anim.fade_in,R.anim.fade_out);
-            ft.replace(R.id.fragment_container,fragment)
+            ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+            ft.replace(R.id.fragment_container, fragment)
                     .commit();
             return true;
         }
@@ -439,16 +450,16 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     }
 
     public static void loadSearchFrag() {
-       fragmentManager.beginTransaction()
-               .replace(R.id.fragment_container, SearchFrag)
-               .commit();
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, SearchFrag)
+                .commit();
     }
 
     @Override
     protected void onDestroy() {
         mHandler.removeCallbacks(mUpdateTimeTask);
-        stopService(new Intent(this,MusicService.class));
-    //    notificationManagerCompat.cancel(1);
+        stopService(new Intent(this, MusicService.class));
+        //    notificationManagerCompat.cancel(1);
         super.onDestroy();
     }
 
@@ -456,15 +467,20 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     public void onRemoveFromHistory(int position) {
         if (getSupportFragmentManager().findFragmentById(R.id.fragment_container)
                 instanceof HistoryFragment)
-        HistoryFragment.removeFromHistory(position);
-        if (MusicService.yturls.size()>0) {
+            HistoryFragment.removeFromHistory(position);
+        if (MusicService.yturls.size() > 0) {
             try {
                 MusicService.yturls.remove(position);
-            }catch (Exception e) {e.printStackTrace();}
-        }if (nPlayModels.size()>0) {
-           try {
-               nPlayModels.remove(position);
-           }catch (Exception e){ e.printStackTrace(); }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (nPlayModels.size() > 0) {
+            try {
+                nPlayModels.remove(position);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -481,63 +497,63 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         selectedItemText = view.getText().toString();
         switch (selectedItemText) {
             case "5 minutes":
-                MusicService.sleepSeconds = 5*60;
+                MusicService.sleepSeconds = 5 * 60;
                 break;
             case "10 minutes":
-                MusicService.sleepSeconds = 10*60;
+                MusicService.sleepSeconds = 10 * 60;
                 break;
             case "15 minutes":
-                MusicService.sleepSeconds = 15*60;
+                MusicService.sleepSeconds = 15 * 60;
                 break;
             case "30 minutes":
-                MusicService.sleepSeconds = 30*60;
+                MusicService.sleepSeconds = 30 * 60;
                 break;
             case "45 minutes":
-                MusicService.sleepSeconds = 45*60;
+                MusicService.sleepSeconds = 45 * 60;
                 break;
             case "60 minutes":
-                MusicService.sleepSeconds = 60*60;
+                MusicService.sleepSeconds = 60 * 60;
                 break;
             case "End of track":
                 MusicService.sleepSeconds = -2;
                 break;
             case "None":
-                selectedItemText="";
-                MusicService.sleepSeconds=0;
+                selectedItemText = "";
+                MusicService.sleepSeconds = 0;
                 break;
         }
-        libraryFrag.onActivityResult(100,0,null);
+        libraryFrag.onActivityResult(100, 0, null);
     }
 
     void openPlayer() {
-        Intent i=new Intent(MainActivity.this,PlayerActivity2.class);
+        Intent i = new Intent(MainActivity.this, PlayerActivity2.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
        /* i.putExtra("youtubelink",new String[]{ytLink});
         i.putExtra("isNewIntent","true");
         if (enablePlayback)
         i.putExtra("changePlayback",changePlayBack);*/
         startActivity(i);
-        overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+        overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
     }
 
 
     boolean CheckIntent(Intent incoming) {
-        shortCut_loadSearch=shortCut_loadLocal=false;
+        shortCut_loadSearch = shortCut_loadLocal = false;
         Log.e(TAG, "CheckIntent: Intent Gotcha...");
         String action = incoming.getAction();
 
-        String data  = incoming.getData()!=null ? incoming.getData().toString() : null;
-        if (data!=null && data.equals("localmusic")) {
-            shortCut_loadLocal=true;
+        String data = incoming.getData() != null ? incoming.getData().toString() : null;
+        if (data != null && data.equals("localmusic")) {
+            shortCut_loadLocal = true;
             return true;
-        }else if (data !=null && data.equals("searchmusic")) {
-            shortCut_loadSearch=true;
+        } else if (data != null && data.equals("searchmusic")) {
+            shortCut_loadSearch = true;
             return true;
         }
 
-        if (action!=null && action.equals("com.kpstv.youtube.OPEN_SONG")) {
+        if (action != null && action.equals("com.kpstv.youtube.OPEN_SONG")) {
             Log.e(TAG, "CheckIntent: Running in MainActivity...");
-            YTutils.openSong(this,incoming);
+            YTutils.openSong(this, incoming);
             return false;
         }
 
@@ -545,7 +561,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 && incoming.getType() != null && "text/plain".equals(incoming.getType())) {
             String ytLink = incoming.getStringExtra(Intent.EXTRA_TEXT);
             commonIntentCheck(ytLink);
-        }else if (incoming.getData()!=null) {
+        } else if (incoming.getData() != null) {
             String url = incoming.getData().toString();
             commonIntentCheck(url);
         }
@@ -556,52 +572,53 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     private static final String TAG = "MainActivity";
 
     AlertDialog alertDialog;
+
     @SuppressLint("StaticFieldLeak")
     void commonIntentCheck(String yt) {
-        if (yt.startsWith("file://")||yt.startsWith("content://")) {
+        if (yt.startsWith("file://") || yt.startsWith("content://")) {
             String path;
             try {
                 path = YTutils.getPath(this, Uri.parse(yt));
-            }catch (Exception ex){
-                Uri uri =  Uri.parse(yt);
-                path = YTutils.ContentProvider.getFilePathFromURI(this,uri);
-                Log.e(TAG, "commonIntentCheck: Content-Provider: "+path);
-                YTutils.parseDataForPlaylist(activity,path);
+            } catch (Exception ex) {
+                Uri uri = Uri.parse(yt);
+                path = YTutils.ContentProvider.getFilePathFromURI(this, uri);
+                Log.e(TAG, "commonIntentCheck: Content-Provider: " + path);
+                YTutils.parseDataForPlaylist(activity, path);
                 return;
             }
             if (path.endsWith(".txt")) {
-                Log.e(TAG, "commonIntentCheck: Path: "+path);
-                YTutils.parseDataForPlaylist(activity,path);
+                Log.e(TAG, "commonIntentCheck: Path: " + path);
+                YTutils.parseDataForPlaylist(activity, path);
                 return;
             }
-            if (path==null) {
-                YTutils.showAlert(MainActivity.this,"Callback Error",
+            if (path == null) {
+                YTutils.showAlert(MainActivity.this, "Callback Error",
                         "Couldn't parse the path from uri", true);
                 return;
             }
             File folder_path = new File(path).getParentFile();
 
-            File[] files = folder_path.listFiles(file -> (file.getPath().endsWith(".mp3")||file.getPath().endsWith(".m4a")
-                    ||file.getPath().endsWith(".wav")||file.getPath().endsWith(".aac")
-                    ||file.getPath().endsWith(".ogg")||file.getPath().endsWith(".flac")));
+            File[] files = folder_path.listFiles(file -> (file.getPath().endsWith(".mp3") || file.getPath().endsWith(".m4a")
+                    || file.getPath().endsWith(".wav") || file.getPath().endsWith(".aac")
+                    || file.getPath().endsWith(".ogg") || file.getPath().endsWith(".flac")));
 
-            int position=0;
+            int position = 0;
             String[] urls = new String[files.length];
-            for (int i=0;i<files.length;i++) {
+            for (int i = 0; i < files.length; i++) {
                 urls[i] = files[i].getPath();
                 if (files[i].getPath().equals(path))
                     position = i;
             }
-            if (files.length>0)
-            PlayVideo_Local(this,urls,position);
+            if (files.length > 0)
+                PlayVideo_Local(this, urls, position);
             return;
         }
-        if (yt.contains("/playlist/")||yt.contains("/album/")||yt.contains("/playlist?")) {
-            View v = getLayoutInflater().inflate(R.layout.alert_not_playlist,null);
+        if (yt.contains("/playlist/") || yt.contains("/album/") || yt.contains("/playlist?")) {
+            View v = getLayoutInflater().inflate(R.layout.alert_not_playlist, null);
 
             alertDialog = new AlertDialog.Builder(this)
                     .setView(v)
-                    .setPositiveButton("OK",null)
+                    .setPositiveButton("OK", null)
                     .create();
 
             alertDialog.show();
@@ -618,17 +635,17 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                     }
                 }
             } else ytLink = yt;
-            if (MusicService.yturls.size()<=0) {
-                PlayVideo(getYTUrls(ytLink),0);
-            }else {
+            if (MusicService.yturls.size() <= 0) {
+                PlayVideo(getYTUrls(ytLink), 0);
+            } else {
                 int insert_pos = ytIndex;
                 if (localPlayBack) {
-                    Log.e(TAG, "CheckIntent: Running this one" );
-                    localPlayBack=false;
-                    PlayVideo(getYTUrls(ytLink),0);
+                    Log.e(TAG, "CheckIntent: Running this one");
+                    localPlayBack = false;
+                    PlayVideo(getYTUrls(ytLink), 0);
                     return;
                 }
-                if (nPlayModels.size()>0 && nPlayModels.size()==MusicService.yturls.size()) {
+                if (nPlayModels.size() > 0 && nPlayModels.size() == MusicService.yturls.size()) {
                     if (YTutils.isValidID(ytLink)) {
                         new AsyncTask<Void, Void, Void>() {
                             YTMeta ytMeta;
@@ -655,17 +672,17 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                                 return null;
                             }
                         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                    }else if (ytLink.contains("soundcloud.com")) {
-                        new AsyncTask<Void,Void,Void>() {
+                    } else if (ytLink.contains("soundcloud.com")) {
+                        new AsyncTask<Void, Void, Void>() {
                             SoundCloud.SoundCloudModel model;
 
                             @Override
                             protected void onPostExecute(Void aVoid) {
-                                if (model!=null) {
-                                    MetaModel metaModel = new MetaModel(model.getNormalUrl(),model.getTitle(),model.getAuthorName(),
+                                if (model != null) {
+                                    MetaModel metaModel = new MetaModel(model.getNormalUrl(), model.getTitle(), model.getAuthorName(),
                                             model.getImageUrl());
-                                    NPlayModel nPlayModel = new NPlayModel(ytLink,new YTMeta(metaModel),false);
-                                    for (NPlayModel model1: nPlayModels) {
+                                    NPlayModel nPlayModel = new NPlayModel(ytLink, new YTMeta(metaModel), false);
+                                    for (NPlayModel model1 : nPlayModels) {
                                         if (model1.getUrl().equals(nPlayModel.getUrl())) {
                                             nPlayModels.remove(model1);
                                             break;
@@ -680,7 +697,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                             @Override
                             protected Void doInBackground(Void... voids) {
                                 SoundCloud soundCloud = new SoundCloud(ytLink);
-                                if (soundCloud.getModel()!=null)
+                                if (soundCloud.getModel() != null)
                                     model = soundCloud.getModel();
                                 return null;
                             }
@@ -688,30 +705,75 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                     }
                 }
                 String ytID = YTutils.getVideoID(ytLink);
-                for (String yturl: MusicService.yturls) {
+                for (String yturl : MusicService.yturls) {
                     if (YTutils.getVideoID(yturl).equals(ytID)) {
                         MusicService.yturls.remove(yturl);
                         break;
                     }
                 }
-                MusicService.yturls.add(insert_pos,ytLink);
+                MusicService.yturls.add(insert_pos, ytLink);
                 ChangeVideo(insert_pos);
             }
-        }else if (ytLink.contains("open.spotify.com")&&ytLink.contains("/track/")) {
-            new makeSpotifyData(ytLink).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else if (ytLink.contains("open.spotify.com") && ytLink.contains("/track/")) {
+            String SpotifyId = YTutils.getSpotifyID(ytLink);
+
+            if (SpotifyId == null) {
+                YTutils.showAlert(MainActivity.this, "Spotify Error",
+                        "The requested url is not a supported url", true);
+                return;
+            }
+
+            spotifyApi = new SpotifyApi(this);
+
+            spotifyApi.getTrackDetail(SpotifyId, new SpotifyApi.ResponseAction<Track>() {
+                @Override
+                public void onComplete(Track track) {
+                    Tracks tracks = track.getTracks().get(0);
+                    if (tracks.getArtists() != null) {
+                        String ArtistName = tracks.getArtists().get(0)
+                                .getName();
+                        String TrackName = tracks.getName();
+                        new makeSpotifyData(tracks).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    } else
+                        Toast.makeText(MainActivity.this, "Error: Track is invalid", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onError(@NotNull Exception e) {
+                    Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+
         } /*else if (ytLink.contains("soundcloud.com")) {
             Log.e(TAG, "commonIntentCheck: Working here..." );
           //  new soundCloudData(ytLink).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }*/else {
-            YTutils.showAlert(MainActivity.this,"Callback Error",
+        }*/ else {
+            YTutils.showAlert(MainActivity.this, "Callback Error",
                     "The requested url is not a valid YouTube url", true);
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        spotifyApi.processResponse(requestCode, resultCode, data,
+                new SpotifyApi.ResponseAction<SpotifyApi.AuthResponse>() {
+                    @Override
+                    public void onComplete(SpotifyApi.AuthResponse authResponse) {
+                        Toast.makeText(MainActivity.this, "Response Successful", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(@NotNull Exception e) {
+                        Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
     /**
-    * Implementing a new player within main activity itself...
-    */
+     * Implementing a new player within main activity itself...
+     */
 
     static Handler mHandler = new Handler();
 
@@ -734,38 +796,39 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
     };
 
     static String[] getYTUrls(String to_inject_yturl) {
-        preferences = activity.getSharedPreferences("history",MODE_PRIVATE);
-        String data = YTutils.readContent(activity,"history.csv");
+        preferences = activity.getSharedPreferences("history", MODE_PRIVATE);
+        String data = YTutils.readContent(activity, "history.csv");
         // String line = preferences.getString("urls","");
-        if (data!=null && !data.isEmpty()) {
+        if (data != null && !data.isEmpty()) {
             String[] lines = data.split("\n|\r");
 
             ArrayList<String> arrayList = new ArrayList<>();
 
-             Log.e(TAG, "getYTUrls: Injected uri 0: "+to_inject_yturl );
+            Log.e(TAG, "getYTUrls: Injected uri 0: " + to_inject_yturl);
             arrayList.add(to_inject_yturl);
-            int i=1;
-            for(String l: lines) {
+            int i = 1;
+            for (String l : lines) {
                 l = l.split("\\|")[0];
                 if (l.isEmpty()) continue;
                 if (YTutils.getVideoID(l).equals(YTutils.getVideoID(to_inject_yturl))) continue;
                 arrayList.add(l);
-                Log.e(TAG, "getYTUrls: Injected uri "+i+": "+l);
+                Log.e(TAG, "getYTUrls: Injected uri " + i + ": " + l);
 //                i++;
             }
             nPlayModels.clear();
 
             return YTutils.convertListToArrayMethod(arrayList);
-        }else {
+        } else {
             String[] yt_urls = new String[1];
             yt_urls[0] = to_inject_yturl;
             return yt_urls;
         }
     }
 
-    static class soundCloudData extends AsyncTask<Void,Void,Void> {
-        String link,ytLink;
+    static class soundCloudData extends AsyncTask<Void, Void, Void> {
+        String link, ytLink;
         SoundCloud.SoundCloudModel model;
+
         public soundCloudData(String link) {
             this.link = link;
         }
@@ -773,7 +836,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Log.e(TAG, "onPostExecute: Comming now..." );
+            Log.e(TAG, "onPostExecute: Comming now...");
            /* if (ytLink!=null) {
                 if (yturls.size()<=0) {
                     PlayVideo(getYTUrls(ytLink),0);
@@ -807,31 +870,43 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         }
     }
 
-    static class makeSpotifyData extends AsyncTask<Void,Void,Void> {
-        SpotifyTrack track;
-        String spotifyUrl,ytLink;
-        public makeSpotifyData(String yturl) {
-            this.spotifyUrl = yturl;
+    static class makeSpotifyData extends AsyncTask<Void, Void, Void> {
+        // SpotifyTrack track;
+        YTSearch search;
+        Tracks tracks;
+        String ytLink, author = "unknown";
+
+        public makeSpotifyData(Tracks tracks) {
+            this.tracks = tracks;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if (ytLink!=null) {
-                if (MusicService.yturls.size()<=0) {
-                    PlayVideo(getYTUrls(ytLink),0);
+            if (ytLink != null) {
+                if (MusicService.yturls.size() <= 0) {
+                    PlayVideo(getYTUrls(ytLink), 0);
                 } else {
+
+                    if (tracks.getArtists() != null && tracks.getArtists().size() > 0)
+                        author = tracks.getArtists().get(0).getName();
+
                     int insert_index = ytIndex;
-                    if (nPlayModels.size()>0 && nPlayModels.size()==MusicService.yturls.size()) {
-                        MetaModel metaModel = new MetaModel(YTutils.getVideoID(track.getYtUrl()),track.getTitle(),track.getAuthor(),track.getImageUrl());
-                        NPlayModel model = new NPlayModel(ytLink,new YTMeta(metaModel),true);
-                        nPlayModels.add(insert_index,model);
+                    if (nPlayModels.size() > 0 && nPlayModels.size() == MusicService.yturls.size()) {
+                        MetaModel metaModel = new MetaModel(YTutils.getVideoID(
+                                ytLink),
+                                tracks.getName(),
+                                author,
+                                YTutils.getImageUrl(ytLink)
+                        );
+                        NPlayModel model = new NPlayModel(ytLink, new YTMeta(metaModel), true);
+                        nPlayModels.add(insert_index, model);
                     }
                     if (MusicService.yturls.contains(ytLink))
                         MusicService.yturls.remove(ytLink);
-                    MusicService.yturls.add(insert_index,ytLink);
+                    MusicService.yturls.add(insert_index, ytLink);
                     ChangeVideo(insert_index);
                 }
-            }else {
+            } else {
                 Toast.makeText(activity, "Couldn't parse this Spotify url", Toast.LENGTH_SHORT).show();
             }
             super.onPostExecute(aVoid);
@@ -846,21 +921,22 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
         @Override
         protected Void doInBackground(Void... voids) {
-            track = new SpotifyTrack(YTutils.getSpotifyID(spotifyUrl));
-            ytLink = track.getYtUrl();
+            search = new YTSearch(tracks.getName());
+            if (search.getVideoIDs() != null && search.getVideoIDs().size() > 0)
+                ytLink = YTutils.getYtUrl(search.getVideoIDs().get(0));
             return null;
         }
     }
-    static int command=0;
 
+    static int command = 0;
 
 
     static void makePlay() {
         actionPlay.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_play_circle));
         try {
             PlayerActivity2.makePlay();
-        }catch (Exception ignored) {
-            Log.e("PlayerActivity","isnull");
+        } catch (Exception ignored) {
+            Log.e("PlayerActivity", "isnull");
         }
     }
 
@@ -868,36 +944,35 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         actionPlay.setImageDrawable(activity.getResources().getDrawable(R.drawable.ic_pause_circle));
         try {
             PlayerActivity2.makePause();
-        }catch (Exception ignored) {
-            Log.e("PlayerActivity","isnull");
+        } catch (Exception ignored) {
+            Log.e("PlayerActivity", "isnull");
         }
     }
 
     private static List<YTMedia> getBestStream(List<YTMedia> streams) {
         List<YTMedia> medias = new ArrayList<>();
-        for(int i=0; i<streams.size();i++) {
+        for (int i = 0; i < streams.size(); i++) {
             YTMedia media = streams.get(i);
-             if (media.getHeight()!=-1) {
-                int j=0;
-                while (j<streams.size()) {
+            if (media.getHeight() != -1) {
+                int j = 0;
+                while (j < streams.size()) {
                     YTMedia media1 = streams.get(j);
                     if (media.getQuality().equals(media1.getQuality())) {
                         int m1 = media.getBitrate();
                         int m2 = media1.getBitrate();
-                        if (m2>m1) {
-                            media=media1;
+                        if (m2 > m1) {
+                            media = media1;
                         }
                     }
                     j++;
                 }
                 if (!medias.contains(media)) medias.add(media);
-            }else {
+            } else {
                 medias.add(media);
             }
         }
         return medias;
     }
-
 
 
     static void showAlert(String title, String message, boolean isalert) {

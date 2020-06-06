@@ -29,27 +29,43 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3483fe51-8e2d-4c34-ba3d-859156321e00" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/Constants.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/spotify/Album.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/spotify/Artist.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/spotify/Artist_.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/spotify/ExternalIds.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/spotify/ExternalUrls.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/spotify/ExternalUrls_.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/spotify/ExternalUrls__.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/spotify/ExternalUrls___.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/spotify/Image.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/spotify/Track.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/spotify/Tracks.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/Extensions.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/SpotifyApi.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileContent/fileContent.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileContent/fileContent.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileHashes/resourceHashesCache.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/javaCompile/classAnalysis.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/javaCompile/classAnalysis.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/4.6/javaCompile/jarAnalysis.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/javaCompile/jarAnalysis.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/javaCompile/javaCompile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/javaCompile/javaCompile.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/javaCompile/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/javaCompile/taskHistory.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/4.6/javaCompile/taskJars.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/javaCompile/taskJars.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/release/app-release.apk" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/release/YTPlayer_v26.apk" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/release/output.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/release/output.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ErrorActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ErrorActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/SilentDownloadActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/SilentDownloadActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/SFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/SFragment.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/services/MusicService.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/services/MusicService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/utils/YTutils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/YoutubeStreamExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/YoutubeStreamExtractor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/model/YTMedia.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/model/YTMedia.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/changelog.txt" beforeDir="false" afterPath="$PROJECT_DIR$/changelog.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -57,7 +73,7 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="Nexus_5X_API_21" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="192.168.1.102:5555" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -111,6 +127,7 @@
         <option value="resourceFile" />
         <option value="layoutResourceFile" />
         <option value="Class" />
+        <option value="Kotlin File" />
       </list>
     </option>
   </component>
@@ -138,7 +155,7 @@
     <property name="android.sdk.path" value="$USER_HOME$/AppData/Local/Android/Sdk" />
     <property name="ignore.virus.scanning.warn.message" value="true" />
     <property name="last_directory_selection" value="$PROJECT_DIR$/app/src/main/res/drawable" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../YouTubeExtractor/YoutubeExtractor" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/models/spotify" />
     <property name="not.eligible.for.single.variant.sync" value="true" />
     <property name="project.structure.last.edited" value="Dependencies" />
     <property name="project.structure.proportion" value="0.17" />
@@ -159,11 +176,11 @@
       <recent name="com.kpstv.youtube.fragments" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\AndroidStudioProjects\MyProj\YTPlayer-master\app\src\main\java\com\kpstv\youtube\models\spotify" />
       <recent name="D:\AndroidStudioProjects\YTPlayer-master\app\src\main\res\drawable" />
       <recent name="D:\AndroidStudioProjects\YTPlayer\app\src\main\res\drawable" />
       <recent name="D:\AndroidStudioProjects\YTPlayer\app\src\main\assets" />
       <recent name="D:\AndroidStudioProjects\YTPlayer\app\src\main\java\com\kpstv\youtube" />
-      <recent name="D:\AndroidStudioProjects\YTPlayer\app\src\main\java\com\kpstv\youtube\utils" />
     </key>
   </component>
   <component name="RunAnythingCache">
@@ -334,6 +351,16 @@
           <url>file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/ErrorActivity.java</url>
           <line>84</line>
           <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java</url>
+          <line>735</line>
+          <option name="timeStamp" value="44" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java</url>
+          <line>730</line>
+          <option name="timeStamp" value="45" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

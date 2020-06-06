@@ -3,8 +3,8 @@
   "demopay": "1.7",
   "new": "2.0",
   "deprecated": "2.5",
-  "newVersion": "2.6",
-  "changelog": "<h3>V2.6 May 2020</h3><hr>*Fix: Extraction of songs<br>*Fix: Some reported issues<br><br><i>Size: 49.6 MB</i>",
-  "download": "https://www.dropbox.com/s/ii7xyeerbhkmzv3/YTPlayer_v26.apk?dl=1",
+  "newVersion": "2.7",
+  "changelog": "<h3>V2.7 June 2020</h3><hr>*Fix: Spotify API<br>*Fix: Some reported bugs<br><br><i>Size: 49.8 MB</i>",
+  "download": "https://www.dropbox.com/s/lyi965pru9p7mdw/YTPlayer_v27.apk?dl=1",
   "msg": ""
 }

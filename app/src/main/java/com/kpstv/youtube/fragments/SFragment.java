@@ -36,26 +36,30 @@ import com.kpstv.youtube.MainActivity;
 import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.SongAdapter;
 import com.kpstv.youtube.models.DiscoverModel;
+import com.kpstv.youtube.models.spotify.Track;
 import com.kpstv.youtube.utils.APIResponse;
 import com.kpstv.youtube.utils.HttpHandler;
+import com.kpstv.youtube.utils.SpotifyApi;
 import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTMeta;
 import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
+import com.naveed.ytextractor.model.YTMedia;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
-import static android.content.Context.MODE_PRIVATE;
-
 public class SFragment extends Fragment implements AppInterface {
 
-    public SFragment() {}
+    public SFragment() {
+    }
 
-    View v; boolean networkCreated;
+    View v;
+    boolean networkCreated;
     RecyclerView recyclerView;
     private LinearLayoutManager mLayoutManager;
     CardView recyclerCard;
@@ -65,15 +69,20 @@ public class SFragment extends Fragment implements AppInterface {
     static String SongList;
     private SongAdapter adapter;
     private ArrayList<DiscoverModel> discoverModels;
-    private Activity activity; boolean showTrend;
+    private Activity activity;
+    boolean showTrend;
     private AsyncTask<Void, Void, Void> task;
     ImageView removeText;
-    AsyncTask<Void,Void,String[]> suggestionTask;
-    SharedPreferences preferences; String region="global";
-    private static final String TAG = "SFragment"; boolean suppressAction=false;
+    AsyncTask<Void, Void, String[]> suggestionTask;
+    SharedPreferences preferences;
+    String region = "global";
+    private static final String TAG = "SFragment";
+    boolean suppressAction = false;
+
+    private SpotifyApi spotifyApi;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (!networkCreated) {
             v = inflater.inflate(R.layout.activity_search, container, false);
             activity = getActivity();
@@ -90,8 +99,8 @@ public class SFragment extends Fragment implements AppInterface {
             SongList = args.getString("data_csv");
 
             preferences = activity.getSharedPreferences("appSettings", Context.MODE_PRIVATE);
-            if (preferences!=null) {
-                region = preferences.getString("pref_select_region","global");
+            if (preferences != null) {
+                region = preferences.getString("pref_select_region", "global");
             }
 
             suggestionTask = new getAdapter();
@@ -125,12 +134,12 @@ public class SFragment extends Fragment implements AppInterface {
                     if (editable.toString().isEmpty())
                         removeText.setVisibility(View.GONE);
                     else removeText.setVisibility(View.VISIBLE);
-                    Log.e(TAG, "afterTextChanged: Working" );
+                    Log.e(TAG, "afterTextChanged: Working");
                     if (suppressAction) {
                         suppressAction = false;
                         return;
                     }
-                    if (suggestionTask.getStatus()==AsyncTask.Status.RUNNING)
+                    if (suggestionTask.getStatus() == AsyncTask.Status.RUNNING)
                         suggestionTask.cancel(true);
                     suggestionTask = new getAdapter();
                     suggestionTask.execute();
@@ -144,8 +153,8 @@ public class SFragment extends Fragment implements AppInterface {
             searchEdit.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    Log.e(TAG, "onItemClick: true" );
-                    suppressAction=true;
+                    Log.e(TAG, "onItemClick: true");
+                    suppressAction = true;
                 }
             });
 
@@ -161,27 +170,40 @@ public class SFragment extends Fragment implements AppInterface {
                         if (textToSearch.isEmpty())
                             return false;
                         searchEdit.setEnabled(false);
-                        if (task.getStatus()== AsyncTask.Status.RUNNING)
+                        if (task.getStatus() == AsyncTask.Status.RUNNING)
                             task.cancel(true);
                         trendingText.setText("SEARCHING...");
                         trendingText.setVisibility(View.VISIBLE);
                         discoverModels.clear();
                         if (textToSearch.contains("open.spotify.com")) {
                             // Spotify url here
-                            if (textToSearch.contains("/track/"))
-                            {
+                            if (textToSearch.contains("/track/")) {
+
+                                spotifyApi = new SpotifyApi(activity);
+
                                 String id = YTutils.getSpotifyID(textToSearch);
-                                if (id!=null)
-                                    new spotifySearch(textToSearch).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                                else Toast.makeText(activity, "Could not extract track ID!", Toast.LENGTH_SHORT).show();
-                            }
-                            else if (textToSearch.contains("/playlist/")) {
-                                showAlert("Note","Current spotify link seems to be a playlist.\n\n" +
-                                        "It is recommend to go to the playlist menu from the app where you can manage this url!",true);
-                            }else {
+
+                                if (id != null) {
+                                    spotifyApi.getTrackDetail(id, new SpotifyApi.ResponseAction<Track>() {
+                                        @Override
+                                        public void onComplete(Track track) {
+                                            new spotifySearch(track.getTracks().get(0).getName()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                        }
+
+                                        @Override
+                                        public void onError(@NotNull Exception e) {
+                                            Toast.makeText(activity, "Could not extract track ID!", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                } else
+                                    Toast.makeText(activity, "Could not extract track ID!", Toast.LENGTH_SHORT).show();
+                            } else if (textToSearch.contains("/playlist/")) {
+                                showAlert("Note", "Current spotify link seems to be a playlist.\n\n" +
+                                        "It is recommend to go to the playlist menu from the app where you can manage this url!", true);
+                            } else {
                                 Toast.makeText(activity, "Seems to invalid spotify url", Toast.LENGTH_SHORT).show();
                             }
-                        }else {
+                        } else {
                             // Normal searching goes here
                             new normalSearch(textToSearch).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                         }
@@ -209,14 +231,14 @@ public class SFragment extends Fragment implements AppInterface {
 
     @Override
     public void onPause() {
-        if (task.getStatus()== AsyncTask.Status.RUNNING)
+        if (task.getStatus() == AsyncTask.Status.RUNNING)
             task.cancel(true);
-        if (suggestionTask!=null && suggestionTask.getStatus() == AsyncTask.Status.RUNNING)
+        if (suggestionTask != null && suggestionTask.getStatus() == AsyncTask.Status.RUNNING)
             suggestionTask.cancel(true);
         super.onPause();
     }
 
-    class getAdapter extends AsyncTask<Void,Void,String[]> {
+    class getAdapter extends AsyncTask<Void, Void, String[]> {
 
         @Override
         protected void onPostExecute(String[] strings) {
@@ -224,7 +246,7 @@ public class SFragment extends Fragment implements AppInterface {
                 suppressAction = false;
                 return;
             }
-            Log.e(TAG, "onPostExecute: Strings Size "+strings.length);
+            Log.e(TAG, "onPostExecute: Strings Size " + strings.length);
 
             ArrayAdapter<String> adapter = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, strings);
             searchEdit.setAdapter(adapter);
@@ -239,21 +261,21 @@ public class SFragment extends Fragment implements AppInterface {
                 return new String[0];
             }
             HttpHandler handler = new HttpHandler();
-            String json = handler.makeServiceCall("https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&client=firefox&q="+
+            String json = handler.makeServiceCall("https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&client=firefox&q=" +
                     URLEncoder.encode(searchEdit.getText().toString()));
-            if (json==null || json.isEmpty())
+            if (json == null || json.isEmpty())
                 return new String[0];
-            Log.e(TAG, "doInBackground: "+json);
+            Log.e(TAG, "doInBackground: " + json);
             try {
                 JSONArray array = new JSONArray(json);
                 JSONArray jsonArray = array.getJSONArray(1);
                 String[] elements = new String[jsonArray.length()];
-                for (int i=0; i<jsonArray.length();i++) {
+                for (int i = 0; i < jsonArray.length(); i++) {
                     elements[i] = jsonArray.getString(i);
                 }
                 return elements;
-            }catch (Exception e){
-                Log.e(TAG, "doInBackground: Error retrieving suggestion json" );
+            } catch (Exception e) {
+                Log.e(TAG, "doInBackground: Error retrieving suggestion json");
                 e.printStackTrace();
             }
             return new String[0];
@@ -261,10 +283,11 @@ public class SFragment extends Fragment implements AppInterface {
     }
 
 
-    class spotifySearch extends AsyncTask<Void,Void,Void> {
+    class spotifySearch extends AsyncTask<Void, Void, Void> {
 
-        SpotifyTrack track;
+        YTSearch track;
         String textToSearch;
+        String title;
         public spotifySearch(String textToSearch) {
             this.textToSearch = textToSearch;
         }
@@ -272,10 +295,10 @@ public class SFragment extends Fragment implements AppInterface {
         @Override
         protected void onPostExecute(Void aVoid) {
             trendingText.setText("SEARCH RESULTS");
-            if (track.getTitle()==null)
+            if (title == null)
                 trendingText.setText("NO RESULTS FOUND");
             recyclerView.setItemAnimator(new DefaultItemAnimator());
-            adapter = new SongAdapter(true,discoverModels,activity);
+            adapter = new SongAdapter(true, discoverModels, activity);
             recyclerView.setAdapter(adapter);
             progressBar.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
@@ -285,10 +308,24 @@ public class SFragment extends Fragment implements AppInterface {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            String id = YTutils.getSpotifyID(textToSearch);
-            if (id!=null) {
+            track = new YTSearch(textToSearch);
+            String videoId = track.getVideoIDs().get(0);
+
+            YTMeta meta = new YTMeta(videoId);
+            if (meta.getVideMeta()!= null && meta.getVideMeta().getTitle()!=null) {
+                title = meta.getVideMeta().getTitle();
+                discoverModels.add(new DiscoverModel(
+                        meta.getVideMeta().getTitle(),
+                        meta.getVideMeta().getAuthor(),
+                        meta.getVideMeta().getImgUrl(),
+                        YTutils.getYtUrl( meta.getVideMeta().getVideoID())
+                ));
+            }
+           /* String id = YTutils.getSpotifyID(textToSearch);
+            if (id != null) {
+
                 track = new SpotifyTrack(id);
-                if (track.getTitle()!=null) {
+                if (track.getTitle() != null) {
                     discoverModels.add(new DiscoverModel(
                             track.getTitle(),
                             track.getAuthor(),
@@ -296,7 +333,7 @@ public class SFragment extends Fragment implements AppInterface {
                             track.getYtUrl()
                     ));
                 }
-            }
+            }*/
             return null;
         }
 
@@ -308,9 +345,10 @@ public class SFragment extends Fragment implements AppInterface {
         }
     }
 
-    class normalSearch extends AsyncTask<Void,Void,Void> {
+    class normalSearch extends AsyncTask<Void, Void, Void> {
         String textToSearch;
         YTSearch ytSearch;
+
         public normalSearch(String textToSearch) {
             this.textToSearch = textToSearch;
         }
@@ -318,10 +356,10 @@ public class SFragment extends Fragment implements AppInterface {
         @Override
         protected void onPostExecute(Void aVoid) {
             trendingText.setText("SEARCH RESULTS");
-            if (ytSearch!=null && ytSearch.getVideoIDs().size()<=0)
+            if (ytSearch != null && ytSearch.getVideoIDs().size() <= 0)
                 trendingText.setText("NO RESULTS FOUND");
             recyclerView.setItemAnimator(new DefaultItemAnimator());
-            adapter = new SongAdapter(true,discoverModels,activity);
+            adapter = new SongAdapter(true, discoverModels, activity);
             recyclerView.setAdapter(adapter);
             progressBar.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
@@ -340,7 +378,7 @@ public class SFragment extends Fragment implements AppInterface {
 
             //https://www.googleapis.com/youtube/v3/search?part=id%2Csnippet&maxResults=20&q=trap&key=[YOUR_API_KEY]'
 
-            String link ="https://www.googleapis.com/youtube/v3/search?part=id%2Csnippet&type=video&maxResults=20&q=+"+URLEncoder.encode(textToSearch);
+            String link = "https://www.googleapis.com/youtube/v3/search?part=id%2Csnippet&type=video&maxResults=20&q=+" + URLEncoder.encode(textToSearch);
             APIResponse response = new APIResponse(link);
             String json = response.getJson();
            /* int i=0;
@@ -353,24 +391,24 @@ public class SFragment extends Fragment implements AppInterface {
 
             if (json.contains("\"error\"")) {
                 ytSearch = new YTSearch(textToSearch);
-                if (ytSearch.getVideoIDs().size()<=0) return null;
-                for (String videoID: ytSearch.getVideoIDs()) {
+                if (ytSearch.getVideoIDs().size() <= 0) return null;
+                for (String videoID : ytSearch.getVideoIDs()) {
                     YTMeta ytMeta = new YTMeta(videoID);
-                    if (ytMeta.getVideMeta()!=null) {
+                    if (ytMeta.getVideMeta() != null) {
                         discoverModels.add(new DiscoverModel(
                                 ytMeta.getVideMeta().getTitle(),
                                 ytMeta.getVideMeta().getAuthor(),
                                 ytMeta.getVideMeta().getImgUrl(),
-                                "https://www.youtube.com/watch?v="+videoID
+                                "https://www.youtube.com/watch?v=" + videoID
                         ));
                     }
                 }
-            }else {
+            } else {
                 /** Using YouTube Data Api... */
                 try {
                     JSONObject obj = new JSONObject(json);
                     JSONArray array = obj.getJSONArray("items");
-                    for (int i=0;i<array.length();i++) {
+                    for (int i = 0; i < array.length(); i++) {
                         JSONObject object = array.getJSONObject(i);
 
                         String videoID = object.getJSONObject("id").getString("videoId");
@@ -383,8 +421,8 @@ public class SFragment extends Fragment implements AppInterface {
                                 YTutils.getYtUrl(videoID)
                         ));
                     }
-                }catch (Exception e){
-                    Log.e(TAG, "doInBackground: JSON Object error" );
+                } catch (Exception e) {
+                    Log.e(TAG, "doInBackground: JSON Object error");
                     e.printStackTrace();
                 }
             }
@@ -400,7 +438,7 @@ public class SFragment extends Fragment implements AppInterface {
         }
     }
 
-    class getVirals extends AsyncTask<Void,Void,Void> {
+    class getVirals extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -415,7 +453,7 @@ public class SFragment extends Fragment implements AppInterface {
             if (showTrend)
                 trendingText.setText("TOP HIT ON SPOTIFY");
             recyclerView.setItemAnimator(new DefaultItemAnimator());
-            adapter = new SongAdapter(true,discoverModels,activity);
+            adapter = new SongAdapter(true, discoverModels, activity);
             recyclerView.setAdapter(adapter);
             progressBar.setVisibility(View.GONE);
             trendingText.setVisibility(View.VISIBLE);
@@ -425,21 +463,21 @@ public class SFragment extends Fragment implements AppInterface {
         @Override
         protected Void doInBackground(Void... voids) {
 
-            String list = YTutils.readContent(activity,"history.csv");
-            if (list!=null) {
+            String list = YTutils.readContent(activity, "history.csv");
+            if (list != null) {
                 if (list.isEmpty()) {
                     MakeSpotifyList();
-                    showTrend=true;
+                    showTrend = true;
                     return null;
                 }
                 String[] songList = list.split("\n|\r");
-                if (songList.length>5) {
-                    MakeList(songList,5);
-                }else if (songList.length<=0) {
+                if (songList.length > 5) {
+                    MakeList(songList, 5);
+                } else if (songList.length <= 0) {
                     MakeSpotifyList();
-                }else MakeList(songList,songList.length);
+                } else MakeList(songList, songList.length);
                 return null;
-            }else showTrend=true;
+            } else showTrend = true;
 
             MakeSpotifyList();
             return null;
@@ -447,14 +485,14 @@ public class SFragment extends Fragment implements AppInterface {
     }
 
     void MakeSpotifyList() {
-        if (SongList ==null) {
-            String discoverViral = YTutils.readContent(activity,"discover_"+region+".csv");
-            if (discoverViral!=null && !discoverViral.isEmpty()) {
+        if (SongList == null) {
+            String discoverViral = YTutils.readContent(activity, "discover_" + region + ".csv");
+            if (discoverViral != null && !discoverViral.isEmpty()) {
                 String[] csvlines = discoverViral.split("\r|\n");
-                for(int i=1;i<csvlines.length;i++) {
+                for (int i = 1; i < csvlines.length; i++) {
                     String videoID = csvlines[i].split("/")[4];
                     YTMeta ytMeta = new YTMeta(videoID);
-                    if (ytMeta.getVideMeta()!=null) {
+                    if (ytMeta.getVideMeta() != null) {
                         discoverModels.add(new DiscoverModel(
                                 ytMeta.getVideMeta().getTitle(),
                                 ytMeta.getVideMeta().getAuthor(),
@@ -466,30 +504,30 @@ public class SFragment extends Fragment implements AppInterface {
                 }
             }
             HttpHandler handler = new HttpHandler();
-            SongList = handler.makeServiceCall("https://spotifycharts.com/viral/"+region+"/daily/latest/download");
+            SongList = handler.makeServiceCall("https://spotifycharts.com/viral/" + region + "/daily/latest/download");
         }
 
         String[] csvlines = SongList.split("\r|\n");
-        for(int i=1;i<5;i++) {
+        for (int i = 1; i < 5; i++) {
             String line = csvlines[i];
-            String title = line.split(",")[1].replace("\"","");
-            String author = line.split(",")[2].replace("\"","");
+            String title = line.split(",")[1].replace("\"", "");
+            String author = line.split(",")[2].replace("\"", "");
 
-            SpotifyTrack track = new SpotifyTrack(title,author);
+            SpotifyTrack track = new SpotifyTrack(title, author);
             discoverModels.add(new DiscoverModel(
-                    title,author,track.getImageUrl(),track.getYtUrl()
+                    title, author, track.getImageUrl(), track.getYtUrl()
             ));
         }
     }
 
     void MakeList(String[] songList, int length) {
-        for (int i=0;i<length;i++) {
+        for (int i = 0; i < length; i++) {
             String[] childs = songList[i].split("\\|");
             discoverModels.add(new DiscoverModel(
                     childs[2],
                     childs[3],
                     childs[4],
-                    YTutils.getYtUrl( childs[0])
+                    YTutils.getYtUrl(childs[0])
             ));
         }
     }

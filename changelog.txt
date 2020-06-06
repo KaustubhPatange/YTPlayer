@@ -1,4 +1,4 @@
-Version 2.6
+Version 2.7
 
-[*] Fix: Extraction of songs
+[*] Fix: Spotify API
 [*] Fix: Some reported bugs

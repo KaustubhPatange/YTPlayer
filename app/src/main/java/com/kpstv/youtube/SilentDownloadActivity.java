@@ -3,7 +3,6 @@ package com.kpstv.youtube;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -15,10 +14,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,10 +25,16 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.YTConfig;
+import com.kpstv.youtube.models.spotify.Track;
 import com.kpstv.youtube.services.IntentDownloadService;
+import com.kpstv.youtube.utils.SpotifyApi;
 import com.kpstv.youtube.utils.SpotifyTrack;
 import com.kpstv.youtube.utils.YTMeta;
+import com.kpstv.youtube.utils.YTSearch;
 import com.kpstv.youtube.utils.YTutils;
+import com.naveed.ytextractor.model.YTMedia;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -44,14 +47,20 @@ public class SilentDownloadActivity extends AppCompatActivity {
     private RadioButton mRadio1080p;
     private RadioButton mRadio720p;
     private RadioButton mRadio480p;
-    private MetaModel meta; private AlertDialog alertDialog;
-    private String url; private boolean adComplete=false,interstitialLoad=false;
+    private MetaModel meta;
+    private AlertDialog alertDialog;
+    private String url;
+    private boolean adComplete = false, interstitialLoad = false;
     private LinearLayout mLoadlayout;
-    private LinearLayout mMainlayout;private String link;
+    private LinearLayout mMainlayout;
+    private String link;
     private static final String TAG = "SilentDownloadActivity";
-    private AdView mAdview; InterstitialAd ad;
-    private LinearLayout mAdviewlayout; private int REQUEST_CODE = 100;
-
+    private AdView mAdview;
+    InterstitialAd ad;
+    private LinearLayout mAdviewlayout;
+    private int REQUEST_CODE = 100;
+    private SpotifyApi spotifyApi;
+    private String queryString;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,52 +73,49 @@ public class SilentDownloadActivity extends AppCompatActivity {
 
         Log.e(TAG, "onCreate: Let's check Action: " + getIntent().getAction() + ", data: " + getIntent().getData());
 
-        /*if (MainActivity.activity==null) {
-            MainActivity.activity = this;
-        }*/
-
         if (showAds) {
             AdRequest adRequest = new AdRequest.Builder().addTestDevice("07153BA64BB64F7C3F726B71C4AE30B9").build();
             mAdview.loadAd(adRequest);
-            mAdview.setAdListener(new AdListener(){
+            mAdview.setAdListener(new AdListener() {
                 @Override
                 public void onAdLoaded() {
-                    adComplete=true;
+                    adComplete = true;
                     mAdview.setVisibility(VISIBLE);
                     super.onAdLoaded();
                 }
 
                 @Override
                 public void onAdFailedToLoad(int i) {
-                    adComplete=true;
+                    adComplete = true;
                     mAdview.setVisibility(View.GONE);
-                    Log.e(TAG, "onAdFailedToLoad: Failed to load Ad"+i );
+                    Log.e(TAG, "onAdFailedToLoad: Failed to load Ad" + i);
                     // Show built-in ads...
-                   try {
-                       int number = ThreadLocalRandom.current().nextInt(1, 4);
-                       View view=null;
-                       switch (number) {
-                           case 1:
-                               view = findViewById(R.id.adViewLayout_add);
-                               view.setVisibility(VISIBLE);
-                               link = "https://androdevkit.github.io";
-                               break;
-                           case 2:
-                               view = findViewById(R.id.adViewLayout_add1);
-                               view.setVisibility(VISIBLE);
-                               link = "https://github.com/KaustubhPatange/Kling";
-                               break;
-                           case 3:
-                               view = findViewById(R.id.adViewLayout_add2);
-                               view.setVisibility(VISIBLE);
-                               link = "https://kaustubhpatange.github.io/Iso2Usb";
-                               break;
-                       }
-                       ((TextView)view.findViewById(R.id.textView)).setTextSize(12);
-                       view.findViewById(R.id.ad_banner_click).setOnClickListener(view1 -> {
-                           YTutils.StartURL(link,SilentDownloadActivity.this);
-                       });
-                   }catch (Exception ignored){}
+                    try {
+                        int number = ThreadLocalRandom.current().nextInt(1, 4);
+                        View view = null;
+                        switch (number) {
+                            case 1:
+                                view = findViewById(R.id.adViewLayout_add);
+                                view.setVisibility(VISIBLE);
+                                link = "https://androdevkit.github.io";
+                                break;
+                            case 2:
+                                view = findViewById(R.id.adViewLayout_add1);
+                                view.setVisibility(VISIBLE);
+                                link = "https://github.com/KaustubhPatange/Kling";
+                                break;
+                            case 3:
+                                view = findViewById(R.id.adViewLayout_add2);
+                                view.setVisibility(VISIBLE);
+                                link = "https://kaustubhpatange.github.io/Iso2Usb";
+                                break;
+                        }
+                        ((TextView) view.findViewById(R.id.textView)).setTextSize(12);
+                        view.findViewById(R.id.ad_banner_click).setOnClickListener(view1 -> {
+                            YTutils.StartURL(link, SilentDownloadActivity.this);
+                        });
+                    } catch (Exception ignored) {
+                    }
                     super.onAdFailedToLoad(i);
                 }
             });
@@ -121,7 +127,7 @@ public class SilentDownloadActivity extends AppCompatActivity {
                 @Override
                 public void onAdFailedToLoad(int i) {
                     super.onAdFailedToLoad(i);
-                    interstitialLoad=true;
+                    interstitialLoad = true;
                 }
 
                 @Override
@@ -131,17 +137,17 @@ public class SilentDownloadActivity extends AppCompatActivity {
                 }
             });
 
-        }else {
-            interstitialLoad=true;
+        } else {
+            interstitialLoad = true;
             mAdview.setVisibility(View.GONE);
-            adComplete=true;
+            adComplete = true;
         }
 
-        if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_CODE);
-            }else executeSequential();
-        }else executeSequential();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
+            } else executeSequential();
+        } else executeSequential();
 
     }
 
@@ -158,13 +164,13 @@ public class SilentDownloadActivity extends AppCompatActivity {
 
     @SuppressLint("StaticFieldLeak")
     private void commonIntentLaunch() {
-        if (url.contains("/playlist/")||url.contains("/album/")||url.contains("/playlist?")) {
-            View v = getLayoutInflater().inflate(R.layout.alert_not_playlist,null);
+        if (url.contains("/playlist/") || url.contains("/album/") || url.contains("/playlist?")) {
+            View v = getLayoutInflater().inflate(R.layout.alert_not_playlist, null);
 
             alertDialog = new AlertDialog.Builder(this)
                     .setView(v)
                     .setCancelable(false)
-                    .setPositiveButton("OK",(dialogInterface, i) -> finish())
+                    .setPositiveButton("OK", (dialogInterface, i) -> finish())
                     .create();
 
             alertDialog.show();
@@ -173,48 +179,88 @@ public class SilentDownloadActivity extends AppCompatActivity {
         url = parseLinkfromText(url);
         Log.e(TAG, "onCreate: Action: " + getIntent().getAction() + ", Url: " + url);
 
-        new AsyncTask<Void, Void, Void>() {
+        if (url.contains("open.spotify.com") && url.contains("/track/")) {
+            spotifyApi = new SpotifyApi(SilentDownloadActivity.this);
 
+            String SpotifyId = YTutils.getSpotifyID(url);
+            if (SpotifyId != null) {
+                spotifyApi.getTrackDetail(SpotifyId, new SpotifyApi.ResponseAction<Track>() {
+                    @Override
+                    public void onComplete(Track track) {
+                        queryString = track.getTracks().get(0).getName();
+                        new WorkTask().execute();
+                    }
+
+                    @Override
+                    public void onError(@NotNull Exception e) {
+                        Toast.makeText(SilentDownloadActivity.this, "Error: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else
+                Toast.makeText(SilentDownloadActivity.this, "Error: Couldn't parse this spotify url", Toast.LENGTH_SHORT).show();
+        }else
+            new WorkTask().execute();
+
+        // Execute
+    }
+
+    private class WorkTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (url.contains("youtube.com") || url.contains("youtu.be")) {
+                YTMeta ytMeta = new YTMeta(SilentDownloadActivity.this, YTutils.getVideoID(url));
+                meta = ytMeta.getVideMeta();
+            } else if (url.contains("open.spotify.com") && url.contains("/track/")) {
+                YTSearch ytSearch = new YTSearch(queryString);
+                YTMeta ytMeta = new YTMeta(SilentDownloadActivity.this, ytSearch.getVideoIDs().get(0));
+                meta = ytMeta.getVideMeta();
+            } else if (url.contains("soundcloud.com")) {
+                meta = new MetaModel(url, "auto-generate", "auto-generate", "auto-generate");
+                mRadio480p.setEnabled(false);
+                mRadio720p.setEnabled(false);
+                mRadio1080p.setEnabled(false);
+                mRadioM4a.setEnabled(false);
+            }
+            do {
+                Log.e(TAG, "doInBackground: Waiting for ADComplete: " + adComplete);
+            } while (!adComplete);
+            do {
+                Log.e(TAG, "doInBackground: Waiting for InterstitialAd: " + interstitialLoad);
+            } while (!interstitialLoad);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if (meta == null) {
+                Toast.makeText(SilentDownloadActivity.this, "Error: Failed to extract this link!", Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+            if (!showAds) {
+                mAdviewlayout.setVisibility(View.GONE);
+            }
+            mLoadlayout.setVisibility(View.GONE);
+            mMainlayout.setVisibility(VISIBLE);
+            super.onPostExecute(aVoid);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        spotifyApi.processResponse(requestCode, resultCode, data, new SpotifyApi.ResponseAction<SpotifyApi.AuthResponse>() {
             @Override
-            protected Void doInBackground(Void... voids) {
-                if (url.contains("youtube.com") || url.contains("youtu.be")) {
-                    YTMeta ytMeta = new YTMeta(SilentDownloadActivity.this,YTutils.getVideoID(url));
-                    meta = ytMeta.getVideMeta();
-                } else if (url.contains("open.spotify.com") && url.contains("/track/")) {
-                    SpotifyTrack track = new SpotifyTrack(YTutils.getSpotifyID(url));
-                    if (track.getYtUrl() == null) return null;
-                    meta = new MetaModel(YTutils.getVideoID(track.getYtUrl()), track.getTitle(), track.getAuthor(), track.getImageUrl());
-                } else if (url.contains("soundcloud.com")) {
-                    meta = new MetaModel(url, "auto-generate", "auto-generate", "auto-generate");
-                    mRadio480p.setEnabled(false);
-                    mRadio720p.setEnabled(false);
-                    mRadio1080p.setEnabled(false);
-                    mRadioM4a.setEnabled(false);
-                }
-                do {
-                    Log.e(TAG, "doInBackground: Waiting for ADComplete: "+adComplete );
-                }while (!adComplete);
-                do {
-                    Log.e(TAG, "doInBackground: Waiting for InterstitialAd: "+interstitialLoad );
-                }while (!interstitialLoad);
-                return null;
+            public void onComplete(SpotifyApi.AuthResponse authResponse) {
+
             }
 
             @Override
-            protected void onPostExecute(Void aVoid) {
-                if (meta == null) {
-                    Toast.makeText(SilentDownloadActivity.this, "Error: Failed to extract this link!", Toast.LENGTH_SHORT).show();
-                    finish();
-                    return;
-                }
-                if (!showAds) {
-                    mAdviewlayout.setVisibility(View.GONE);
-                }
-                mLoadlayout.setVisibility(View.GONE);
-                mMainlayout.setVisibility(VISIBLE);
-                super.onPostExecute(aVoid);
+            public void onError(@NotNull Exception e) {
+                Toast.makeText(SilentDownloadActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
-        }.execute();
+        });
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     public String parseLinkfromText(String text) {
@@ -261,7 +307,7 @@ public class SilentDownloadActivity extends AppCompatActivity {
         config.setTargetName(YTutils.getTargetName(config));
         config.setTaskExtra("autoTask");
 
-        if (showAds&&ad.isLoaded())
+        if (showAds && ad.isLoaded())
             ad.show();
 
         Intent serviceIntent = new Intent(this, IntentDownloadService.class);
@@ -272,10 +318,10 @@ public class SilentDownloadActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode==REQUEST_CODE) {
-            if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == REQUEST_CODE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 executeSequential();
-            }else {
+            } else {
                 Toast.makeText(this, "You need to accept WRITE_STORAGE Permission", Toast.LENGTH_SHORT).show();
                 finish();
             }
