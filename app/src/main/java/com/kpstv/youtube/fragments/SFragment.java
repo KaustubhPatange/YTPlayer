@@ -37,6 +37,7 @@ import com.kpstv.youtube.R;
 import com.kpstv.youtube.adapters.SongAdapter;
 import com.kpstv.youtube.models.DiscoverModel;
 import com.kpstv.youtube.models.spotify.Track;
+import com.kpstv.youtube.models.spotify.Tracks;
 import com.kpstv.youtube.utils.APIResponse;
 import com.kpstv.youtube.utils.HttpHandler;
 import com.kpstv.youtube.utils.SpotifyApi;
@@ -187,7 +188,11 @@ public class SFragment extends Fragment implements AppInterface {
                                     spotifyApi.getTrackDetail(id, new SpotifyApi.ResponseAction<Track>() {
                                         @Override
                                         public void onComplete(Track track) {
-                                            new spotifySearch(track.getTracks().get(0).getName()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                            Tracks tracks = track.getTracks().get(0);
+                                            String query = tracks.getName();
+                                            if (tracks.getArtists() != null && tracks.getArtists().size() > 0)
+                                                query = tracks.getName() +" by " + tracks.getArtists().get(0).getName();
+                                            new spotifySearch(query).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                                         }
 
                                         @Override

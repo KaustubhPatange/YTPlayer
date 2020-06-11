@@ -81,6 +81,7 @@ import static com.kpstv.youtube.services.MusicService.playPrevious;
 import static com.kpstv.youtube.services.MusicService.selectedItemText;
 import static com.kpstv.youtube.services.MusicService.updateMediaSessionPlaybackState;
 import static com.kpstv.youtube.services.MusicService.ytIndex;
+import static com.kpstv.youtube.utils.SpotifyApi.AUTHORIZATION_REQUEST_CODE;
 
 public class MainActivity extends AppCompatActivity implements AppInterface, SleepBottomSheet.ItemClickListener, HistoryBottomSheet.BottomSheetListener, NCFragment.NoConnectionListener {
 
@@ -730,9 +731,6 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 public void onComplete(Track track) {
                     Tracks tracks = track.getTracks().get(0);
                     if (tracks.getArtists() != null) {
-                        String ArtistName = tracks.getArtists().get(0)
-                                .getName();
-                        String TrackName = tracks.getName();
                         new makeSpotifyData(tracks).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     } else
                         Toast.makeText(MainActivity.this, "Error: Track is invalid", Toast.LENGTH_SHORT).show();
@@ -756,18 +754,19 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        spotifyApi.processResponse(requestCode, resultCode, data,
-                new SpotifyApi.ResponseAction<SpotifyApi.AuthResponse>() {
-                    @Override
-                    public void onComplete(SpotifyApi.AuthResponse authResponse) {
-                        Toast.makeText(MainActivity.this, "Response Successful", Toast.LENGTH_SHORT).show();
-                    }
+        if (requestCode == AUTHORIZATION_REQUEST_CODE)
+            spotifyApi.processResponse(requestCode, resultCode, data,
+                    new SpotifyApi.ResponseAction<SpotifyApi.AuthResponse>() {
+                        @Override
+                        public void onComplete(SpotifyApi.AuthResponse authResponse) {
+                            Toast.makeText(MainActivity.this, "Response Successful", Toast.LENGTH_SHORT).show();
+                        }
 
-                    @Override
-                    public void onError(@NotNull Exception e) {
-                        Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+                        @Override
+                        public void onError(@NotNull Exception e) {
+                            Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -921,7 +920,10 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
         @Override
         protected Void doInBackground(Void... voids) {
-            search = new YTSearch(tracks.getName());
+            String query = tracks.getName();
+            if (tracks.getArtists() != null && tracks.getArtists().size() > 0)
+                query = tracks.getName() +" by " + tracks.getArtists().get(0).getName();
+            search = new YTSearch(query);
             if (search.getVideoIDs() != null && search.getVideoIDs().size() > 0)
                 ytLink = YTutils.getYtUrl(search.getVideoIDs().get(0));
             return null;

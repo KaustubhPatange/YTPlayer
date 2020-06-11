@@ -26,6 +26,7 @@ import com.google.android.gms.ads.InterstitialAd;
 import com.kpstv.youtube.models.MetaModel;
 import com.kpstv.youtube.models.YTConfig;
 import com.kpstv.youtube.models.spotify.Track;
+import com.kpstv.youtube.models.spotify.Tracks;
 import com.kpstv.youtube.services.IntentDownloadService;
 import com.kpstv.youtube.utils.SpotifyApi;
 import com.kpstv.youtube.utils.SpotifyTrack;
@@ -187,7 +188,11 @@ public class SilentDownloadActivity extends AppCompatActivity {
                 spotifyApi.getTrackDetail(SpotifyId, new SpotifyApi.ResponseAction<Track>() {
                     @Override
                     public void onComplete(Track track) {
-                        queryString = track.getTracks().get(0).getName();
+                        Tracks tracks = track.getTracks().get(0);
+                        String query = tracks.getName();
+                        if (tracks.getArtists() != null && tracks.getArtists().size() > 0)
+                            query = tracks.getName() +" by " + tracks.getArtists().get(0).getName();
+                        queryString = query;
                         new WorkTask().execute();
                     }
 
