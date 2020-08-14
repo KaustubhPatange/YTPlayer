@@ -1,4 +1,4 @@
-Version 2.8
+Version 2.9
 
-[*] Fix: Spotify API
-[*] Fix: Audio Cutter not working
+[*] Fix: Spotify API when searching
+[*] This will be final update to this app, but soon I'm going to rewrite this project to make it even more amazing!

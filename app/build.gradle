@@ -9,8 +9,8 @@ android {
         applicationId "com.kpstv.youtube"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 21
-        versionName "2.8"
+        versionCode 22
+        versionName "2.9"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     lintOptions {

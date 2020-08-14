@@ -3,8 +3,8 @@
   "demopay": "1.7",
   "new": "2.0",
   "deprecated": "2.5",
-  "newVersion": "2.8",
-  "changelog": "<h3>V2.8 June 2020</h3><hr>*Fix: Spotify API<br>*Fix: Audio Cutter not working<br><br><i>Size: 49.8 MB</i>",
-  "download": "https://www.dropbox.com/s/s7y9kw146z8d12z/YTPlayer_v28.apk?dl=1",
+  "newVersion": "2.9",
+  "changelog": "<h3>V2.9 August 2020</h3><hr>*Fix: Spotify API<br>*Rewrite of this app is coming soon.<br><br><i>Size: 49.8 MB</i>",
+  "download": "https://www.dropbox.com/s/doxlxvzt78eo16e/YTPlayer_v29.apk?dl=1",
   "msg": ""
 }

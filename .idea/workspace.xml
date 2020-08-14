@@ -29,6 +29,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3483fe51-8e2d-4c34-ba3d-859156321e00" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileContent/fileContent.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileContent/fileContent.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.lock" afterDir="false" />
@@ -40,25 +41,22 @@
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/release/YTPlayer_v27.apk" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/release/app-release.apk" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/release/output.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/release/output.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/MainActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/SilentDownloadActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/SilentDownloadActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/SFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/kpstv/youtube/fragments/SFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/CipherManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/CipherManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/YoutubeStreamExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/YoutubeStreamExtractor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/changelog.txt" beforeDir="false" afterPath="$PROJECT_DIR$/changelog.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/update.json" beforeDir="false" afterPath="$PROJECT_DIR$/update.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/isoparser-1.9.39/isoparser-1.9.39.iml" beforeDir="false" afterPath="$PROJECT_DIR$/isoparser-1.9.39/isoparser-1.9.39.iml" afterDir="false" />
     </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="Nexus_5X_API_21" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="192.168.1.102:5555" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -129,14 +127,22 @@
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
+  <component name="ProjectViewState">
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
   <component name="PropertiesComponent">
     <property name="ApkExportedModule" value="app" />
+    <property name="DEBUGGABLE_DEVICE" value="xiaomi-poco_f1-c8947c29" />
+    <property name="DEBUGGABLE_PROCESS" value="com.kpstv.youtube" />
+    <property name="DEBUGGER_ID" value="Auto" />
     <property name="DeviceAndSnapshotComboBoxAction.selectedDevice" value="Nexus_5X_API_21" />
     <property name="DeviceAndSnapshotComboBoxAction.selectionTime" value="2020-05-15T10:04:48.917Z" />
     <property name="ExportApk.ApkPath" value="D:\AndroidStudioProjects\MyProj\YTPlayer-master\app" />
     <property name="ExportApk.BuildVariants" value="release" />
     <property name="ExportApk.SignV1" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="SHOW_ALL_PROCESSES" value="false" />
     <property name="android.sdk.path" value="$USER_HOME$/AppData/Local/Android/Sdk" />
     <property name="ignore.virus.scanning.warn.message" value="true" />
     <property name="last_directory_selection" value="$PROJECT_DIR$/app/src/main/res/drawable" />
@@ -173,18 +179,6 @@
       <command value="{" />
     </option>
   </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
-  </component>
   <component name="RunManager" selected="Android App.app">
     <configuration default="true" type="AndroidJUnit" factoryName="Android JUnit">
       <option name="TEST_OBJECT" value="class" />
@@ -218,6 +212,20 @@
         <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
         <option name="SHOW_OPTIMIZED_WARNING" value="true" />
       </Auto>
+      <Bazel>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Bazel>
+      <BazelNative>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </BazelNative>
       <Hybrid>
         <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
         <option name="SHOW_STATIC_VARS" value="true" />
@@ -313,5 +321,103 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="496" y="58" key="#app" timestamp="1593425217761">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="496" y="58" key="#app/0.0.1536.824@0.0.1536.824" timestamp="1593425217761" />
+    <state x="625" y="179" key="AndroidProcessChooserDialog" timestamp="1593425148489">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="625" y="179" key="AndroidProcessChooserDialog/0.0.1536.824@0.0.1536.824" timestamp="1593425148489" />
+    <state x="124" y="120" width="1288" height="584" key="DiffContextDialog" timestamp="1593425664418">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="124" y="120" width="1288" height="584" key="DiffContextDialog/0.0.1536.824@0.0.1536.824" timestamp="1593425664418" />
+    <state width="1404" height="261" key="GridCell.Tab.0.bottom" timestamp="1597421032695">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1404" height="261" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1597421032695" />
+    <state width="1404" height="261" key="GridCell.Tab.0.center" timestamp="1597421032694">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1404" height="261" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1597421032694" />
+    <state width="1404" height="261" key="GridCell.Tab.0.left" timestamp="1597421032694">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1404" height="261" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1597421032694" />
+    <state width="1404" height="261" key="GridCell.Tab.0.right" timestamp="1597421032695">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1404" height="261" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1597421032695" />
+    <state width="1428" height="242" key="GridCell.Tab.1.bottom" timestamp="1593438961736">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1428" height="242" key="GridCell.Tab.1.bottom/0.0.1536.824@0.0.1536.824" timestamp="1593438961736" />
+    <state width="1428" height="242" key="GridCell.Tab.1.center" timestamp="1593438961735">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1428" height="242" key="GridCell.Tab.1.center/0.0.1536.824@0.0.1536.824" timestamp="1593438961735" />
+    <state width="1428" height="242" key="GridCell.Tab.1.left" timestamp="1593438961735">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1428" height="242" key="GridCell.Tab.1.left/0.0.1536.824@0.0.1536.824" timestamp="1593438961735" />
+    <state width="1428" height="242" key="GridCell.Tab.1.right" timestamp="1593438961735">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1428" height="242" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1593438961735" />
+    <state x="465" y="236" key="com.intellij.ide.util.TipDialog" timestamp="1593495569297">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="465" y="236" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1593495569297" />
+    <state x="345" y="148" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1593425169391">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="345" y="148" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.1536.824@0.0.1536.824" timestamp="1593425169391" />
+    <state x="481" y="170" width="609" height="536" key="find.popup" timestamp="1597420815774">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="481" y="170" width="609" height="536" key="find.popup/0.0.1536.824@0.0.1536.824" timestamp="1597420815774" />
+    <state x="439" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1597420693840">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="439" y="145" width="672" height="678" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1597420693840" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/CipherManager.java</url>
+          <line>68</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/CipherManager.java</url>
+          <line>32</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/CipherManager.java</url>
+          <line>22</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/CipherManager.java</url>
+          <line>42</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/CipherManager.java</url>
+          <line>55</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/naveed/ytextractor/CipherManager.java</url>
+          <line>27</line>
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

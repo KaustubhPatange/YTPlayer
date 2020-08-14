@@ -172,11 +172,10 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 				YTMedia media=rawMedia[x];
 				Log.d(TAG, "Cipher: "+media.getSignatureCipher());
 				LogUtils.log(media.getSignatureCipher() != null ? media.getSignatureCipher(): "null cip");
-
 				if (media.useCipher()) {
 					String tempUrl = "";
 					String decodedSig = "";
-					for (String partCipher:media.getSignatureCipher().split("&")) {
+					for (String partCipher : media.getSignatureCipher().split("&")) {
 
 						if (partCipher.startsWith("s=")) {
 							decodedSig = CipherManager.dechiperSig(URLDecoder.decode(partCipher.replace("s=", "")), response.getAssets().getJs());
@@ -185,7 +184,7 @@ public class YoutubeStreamExtractor extends AsyncTask<String,Void,Void> {
 						if (partCipher.startsWith("url=")) {
 							tempUrl = URLDecoder.decode(partCipher.replace("url=", ""));
 							
-							for (String url_part:tempUrl.split("&")) {
+								for (String url_part:tempUrl.split("&")) {
 								if (url_part.startsWith("s=")) {
 									decodedSig = CipherManager.dechiperSig(URLDecoder.decode(url_part.replace("s=", "")), response.getAssets().getJs());
 								}

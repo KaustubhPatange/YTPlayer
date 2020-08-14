@@ -1,4 +1,6 @@
 package com.naveed.ytextractor;
+import android.util.Log;
+
 import com.naveed.ytextractor.utils.HTTPUtility;
 import com.naveed.ytextractor.utils.LogUtils;
 import com.naveed.ytextractor.utils.RegexUtils;
@@ -17,7 +19,8 @@ public class CipherManager {
 	
 
 	
-	public  static String getDecipherCode(String Basejs) {
+	public static String getDecipherCode(String Basejs) {
+		Log.e(TAG, "getDecipherCode: BaseJS: " + Basejs );
 		String DechipherCode;
 		String DecipherFun="decipher=function(a)" + RegexUtils.matchGroup(RegexDesipherFunctionCode, Basejs);
 		//Utils.copyToBoard(Basejs);
@@ -32,10 +35,12 @@ public class CipherManager {
 		return DechipherCode;
 	}
 
+	private static final String TAG = "CipherManager";
 	/*this function checks if the deciphered findings is already present if not gets the funtion*/
 	public  static String dechiperSig(String sig,String playerUrl) throws IOException{
 		if(cachedDechiperFunction==null){
 			cachedDechiperFunction=getDecipherCode(getPlayerCode(playerUrl));
+			Log.e(TAG, "dechiperSig: " + cachedDechiperFunction);
 		}
 		return RhinoEngine(sig);
 	}
@@ -48,6 +53,7 @@ public class CipherManager {
 
 	
 	private static String RhinoEngine(String s) {
+		String val = s;
 		Context rhino = Context.enter();
 		rhino.setOptimizationLevel(-1);
 		try {
@@ -59,6 +65,7 @@ public class CipherManager {
 				Function jsFunction = (Function) obj;
 				Object jsResult = jsFunction.call(rhino, scope, scope, new Object[]{s});
 				String result = Context.toString(jsResult);
+				Log.e(TAG, "RhinoEngine: Data: "+result );
 				return result ;
 			}
 		}

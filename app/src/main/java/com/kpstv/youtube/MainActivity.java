@@ -250,6 +250,8 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
         } else {
             loadFragment(NCFrag);
         }
+
+        spotifyApi = new SpotifyApi(this);
     }
 
     /**
@@ -724,8 +726,6 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                 return;
             }
 
-            spotifyApi = new SpotifyApi(this);
-
             spotifyApi.getTrackDetail(SpotifyId, new SpotifyApi.ResponseAction<Track>() {
                 @Override
                 public void onComplete(Track track) {
@@ -754,12 +754,12 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == AUTHORIZATION_REQUEST_CODE)
+        if (requestCode == AUTHORIZATION_REQUEST_CODE) {
             spotifyApi.processResponse(requestCode, resultCode, data,
                     new SpotifyApi.ResponseAction<SpotifyApi.AuthResponse>() {
                         @Override
                         public void onComplete(SpotifyApi.AuthResponse authResponse) {
-                            Toast.makeText(MainActivity.this, "Response Successful", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "Sign-in complete. If result not found, search it again", Toast.LENGTH_LONG).show();
                         }
 
                         @Override
@@ -767,6 +767,7 @@ public class MainActivity extends AppCompatActivity implements AppInterface, Sle
                             Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
