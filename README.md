@@ -1,3 +1,5 @@
+## DEPRECATED, Whole code is spaghetti, I'll rewrite the project if possible.
+
 # YTPlayer
 
 ![GitHub issues](https://img.shields.io/github/issues/KaustubhPatange/YTPlayer.svg)
@@ -7,8 +9,6 @@
 [![Logo](https://github.com/KaustubhPatange/YTPlayer/raw/master/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png)](https://kaustubhpatange.github.io/YTPlayer/)
 
 _Click on logo to download latest release_
-
-> _Whole code is spaghetti, I'll rewrite the project soon if possible._
 
 ## Features
 
